@@ -1,0 +1,17 @@
+---
+layout: post
+title: Resizing a vmdk disk image using Oracle VM VirtualBox 4
+date: '2012-03-02T19:00:00.000+01:00'
+author: Cees Timmerman
+tags:
+- VirtualBox
+- vmdk
+- vm
+- resize
+- vdi
+modified_time: '2012-03-02T19:00:26.642+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-2322233590092583658
+blogger_orig_url: https://ceestimmerman.blogspot.com/2012/03/resizing-vmdk-disk-image-using-oracle.html
+---
+
+My work PC has a small disk, thus i made a 4 GB virtual machine. After getting an external harddrive, it turned out to be hard to resize. I spent too much time to find a solution <a href="http://www.sysprobs.com/vmdk-vdi-windows/comment-page-1#comment-12361">there</a>, so i'm noting all steps here:<br /><br />First power off the VMs that use the vmdk.<br /><br />>"C:\Program Files\Oracle\VirtualBox\vboxmanage.exe" clonehd -format vdi "I:\VMs\X_dev\X-disk1.vmdk" "I:\VMs\X_dev\X-disk1.vdi"<br />0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%<br />Clone hard disk created in format 'vdi'. UUID: [...]<br /><br />>"C:\Program Files\Oracle\VirtualBox\vboxmanage.exe" modifyhd --resize 16000 "I:\VMs\X_dev\X-disk1.vdi"<br />0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%

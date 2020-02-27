@@ -1,0 +1,19 @@
+---
+layout: post
+title: How to freeze a Google Chrome tab
+date: '2014-09-10T15:31:00.000+02:00'
+author: Cees Timmerman
+tags:
+- Chrome
+- bugs
+- JS
+- DOS
+- Google Chrome
+- code
+- bug
+modified_time: '2014-09-10T15:40:18.765+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-5616262565944588817
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/09/how-to-freeze-google-chrome-tab.html
+---
+
+Chrome cares more about speed than user interaction. This simple bug just hung my tab while hogging one CPU core:  <pre><code>function isOverflowed(element){<br />    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;<br />}<br /><br />function resize_to_fit(el){<br /> var size = parseFloat(el.style.fontSize) || 55<br /> log("resizing from " + size)<br /> while(isOverflowed(el) && size > 8){<br />  el.style.fontSize = size - 1<br /> }<br />}<br /></code></pre> Press Shift+Escape, sort by CPU descending, and end the offending process to recover. Still better than Firefox. <br><br>This is what i meant to write, to resize text content to fit an HTML element like a div:  <pre><code>function isOverflowed(element){<br /> return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth<br />}<br /><br />function resizeToFit(el){<br /> var size = parseFloat(el.style.fontSize) || 55<br /> while(isOverflowed(el) && size > 8){<br />  size -= 1<br />  el.style.fontSize = size + "px"<br /> }<br />}<br /></code></pre>

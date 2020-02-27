@@ -1,0 +1,21 @@
+---
+layout: post
+title: Genderswap any webpage!
+date: '2014-03-01T19:02:00.000+01:00'
+author: Cees Timmerman
+tags:
+- bookmarklet
+- JS
+- gender roles
+- gender
+- code
+- gender study
+- javascript
+- genderswap
+- favelet
+modified_time: '2014-03-01T19:29:46.584+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-5794695466216580390
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/03/genderswap-any-webpage.html
+---
+
+After trying to read the dismal <a href="https://www.goodreads.com/book/show/26582.The_Claiming_of_Sleeping_Beauty" target="_blank"><i>The Claiming of Sleeping Beauty</i></a> again, i thought it might be interesting to see whether it'd be more palatable with reversed genders. A difficult experience. Here's the code, which you can set as a bookmark location, then click the bookmark to transform the current page:<br /><br />javascript:(function(){function swap(txt, a, b){return txt.split(a).join("SWPTMP").split(b).join(a).split("SWPTMP").join(b)};var subs=[[' he ',' she '],[' he\'',' she\''],['He ','She '],[' man ',' woman '],[' men',' women'],['boy','girl'],['King','Queen'],['Lord','Lady'],[' daughter',' son'],['father','mother'],['uncle','aunt'],['Prince','Princess'],[' herself',' himself'],[' her.',' him.'],[' her,',' him,'],[' her a ',' him a '],[' her an ',' him an '],[' her and ',' him and '],[' him to',' her to'],[' him up',' her up'],[' him down',' her down'],[' him again',' her again'],[' him until',' her until'],[' him w',' her w'],[' him by',' her by'],[' her ',' his '],['His ', 'Her ']];t=document.body.innerHTML;for(var i=0;i&lt;subs.length;++i)t=swap(t, subs[i][0], subs[i][1]);document.body.innerHTML=t.replace('Princessss','Prince')})()

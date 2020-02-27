@@ -1,0 +1,18 @@
+---
+layout: post
+title: 
+date: '2012-06-28T16:54:00.000+02:00'
+author: Cees Timmerman
+tags:
+- Python
+- PyMySQL
+- Python 2
+- software
+- Excel
+- Python 3
+modified_time: '2012-06-28T17:29:27.402+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-402119152188188089
+blogger_orig_url: https://ceestimmerman.blogspot.com/2012/06/fixing-python-2.html
+---
+
+Fixing Python 2.6+ to run Python 3 code:  <pre><code><br /># -*- coding: utf-8 -*-<br />from __future__ import print_function<br />__doc__ = """XLS2DB by Cees Timmerman"""<br />changelog = """<br />2012-06-28 v1.0<br />"""<br />import glob, locale, os, re, sys, time<br />#from pyXLSX.xlsx import workbook  # no MergedCells support and fails at Unicode.<br />from win32com.client import Dispatch  # PyWin32 or ActivePython required. Excel, too.<br />#from win32com.client.gencache import EnsureDispatch as Dispatch  # Also makes constants available.<br />#import Image  # PIL to resize images.<br />import pymysql   # Note: Python 3 doesn't support old db protocol.<br /><br />print(__doc__)<br />print(changelog.split("\n")[-2])<br />print()<br /><br />if sys.version[:2] == '2.':<br /> #print("Python 2 sucks at Unicode; use Python 3 to run this.")<br /> #sys.exit(2)<br /><br /> # Fix Python 2. We should be running in Python 3, though.<br /> original_print = print<br /> def print(*args, **kwargs):<br />  #original_print("args: " + str(args))<br />  #original_print("kwargs: " + str(kwargs))<br />  new_args = []<br />  for arg in args:<br />   try:<br />    new_args.append(arg.encode('ascii', errors='xmlcharrefreplace'))<br />   except:<br />    new_args.append(arg)<br />  original_print(*new_args, **kwargs)<br /> <br /> try:<br />  input = raw_input<br />  str = unicode<br /> except: pass<br /></pre></code>

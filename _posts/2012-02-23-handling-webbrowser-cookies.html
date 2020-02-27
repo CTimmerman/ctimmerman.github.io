@@ -1,0 +1,24 @@
+---
+layout: post
+title: Setting & getting web browser cookies
+date: '2012-02-23T11:53:00.014+01:00'
+author: Cees Timmerman
+tags:
+- Liferay
+- decoding
+- encoding
+- javascript
+- browser
+- jsp
+- escape
+- escaping
+- cookie
+- cookies
+- ECMAScript
+- java
+modified_time: '2012-02-24T16:44:26.822+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-3165157925017072664
+blogger_orig_url: https://ceestimmerman.blogspot.com/2012/02/handling-webbrowser-cookies.html
+---
+
+Details <a href="http://xkr.us/articles/javascript/encode-compare/">here</a>.<br /><br />Client-side JavaScript/ ECMAScript:<br /><br /><pre>function createCookie(name, value, days){<br />  if (days){<br />    var date = new Date()<br />    date.setTime(date.getTime()+(days*24*60*60*1000))<br />    var expires = "; expires="+date.toGMTString()<br />  }<br />  else var expires = ""<br />  document.cookie = name+"="+encodeURIComponent(value)+expires+"; path=/"<br />}<br />createCookie("best_location", "/this folder; it's short + great!", 3650)<br /></pre><br />Server-side Java in JSP using Liferay:<br /><br /><pre><%@page import="com.liferay.portal.kernel.util.HtmlUtil" %><br /><%@page import="java.net.URLDecoder" %><br /><%<br />Cookie cookies[] = request.getCookies();<br />if (cookies != null){<br />  for (Cookie cookie : cookies){<br />    if (cookie.getName().equals("best_location")) out.print("Best location: " + HtmlUtil.escape(URLDecoder.decode(cookie.getValue())));<br />  }<br />}<br />%><br /></pre>

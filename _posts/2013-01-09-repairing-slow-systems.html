@@ -1,0 +1,22 @@
+---
+layout: post
+title: Repairing slow systems
+date: '2013-01-09T12:10:00.001+01:00'
+author: Cees Timmerman
+tags:
+- efficiency
+- hardware
+- pc
+- slow
+- software
+- speed
+- hdd
+- repair
+- ssd
+- os
+modified_time: '2013-01-09T17:04:48.533+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-2594129546998112417
+blogger_orig_url: https://ceestimmerman.blogspot.com/2013/01/repairing-slow-systems.html
+---
+
+Recently my old PC became very slow at everything. I looked at the problem areas: <br><br>#1. CPU usage <br><br>Single-core machines being hogged by rude/buggy software is why i switched to a quadcore i5 for my main machine. CPU usage can be viewed and managed via your Task Manager, accessible on Windows via Ctrl+Alt+Del, Start Task Manager. If you don't want to end a rude process, you can try to lower its priority via the context menu. <br><br>If the CPU is automatically underclocked, perhaps dust is blocking airflow that's needed to run at full speed. When cleaning the inside of your PC, always shut off its power and stay grounded by touching the bare metal case to avoid static discharge frying your bits. <br><br>#2. RAM usage <br><br>When the temporary memory of a PC fills up, operating systems tend to use virtual memory on the hard drive, but the hard drive is orders of magnitude slower than RAM, even an SSD. Besides, writing to an SSD still shortens its lifespan more than writing to magnetic disk. Increase RAM (note the type and size your motherboard supports, and that it will match the slowest chips installed) or decrease program consumption. Note that 32-bit Windows only supports up to 4 GB of RAM and will leave the rest unused. <br><br>#3. Storage space <br><br>Many programs cache slow data to the hard disk, but when space runs out (Windows warns about this), that becomes impossible, also affecting the virtual memory. Use <a href="http://www.piriform.com/ccleaner">CCleaner</a> and <a href="http://www.uderzo.it/main_products/space_sniffer/">SpaceSniffer</a> to free up space and consider external drives for archiving. If you're ambitious, perhaps you want to try moving the entire OS to a bigger/faster disk using a boot media with disk imaging/cloning tool. <br><br>#4. Storage integrity <br><br>Environmental effects like temperature, moisture, and cosmic rays, can corrupt stored data. Modern systems can correct for this, but i've found that can produce terrible lag. Schedule regular (monthly should do) surface sector relocation scans. Ubuntu does this out of the box on startup, but Windows needs a scheduled task that runs a batch file containing <pre><code>@echo off<br />echo y|chkdsk c: /r<br />shutdown -r<br /></code></pre> as admin. The reboot is required because C: is probably in use. <br><br>I solved my old Windows XP system's lag by manually scheduling a sector repair via the C: partition's properties' extra's scan tool in Explorer. <br><br>S.M.A.R.T. monitoring tools like <a href="http://www.almico.com/speedfan.php">SpeedFan</a> and <a href="http://www.hdtune.com/">HD Tune</a> can indicate problems with your hard drive. <br><br>On a side note: Unlike many tutorials showing only easy Dell installs, i noticed that the Medion MD8818's hard disk drive is fastened by two short screws through the bottom of the tower. <br><br>#5. Storage order <br><br>Modern (file)systems are less affected by heavy read/write activity, but defragmentation every once in a while can help, except on an SSD (see also #2) as those have neglible seek/read times. <br><br>#6. Software updates <br><br>Newer software can have bugfixes and improved efficiency. Use your component manufacturer's website (like <a href="http://support.amd.com/us/gpudownload/Pages/index.aspx">AMD</a> or <a href="http://www.nvidia.com/Download/index.aspx">NVIDIA</a> for drivers) and/or reputable tool such as <a href="http://www.filehippo.com/updatechecker/">FileHippo.com Update Checker</a> (might not check drivers) and <a href="http://update.microsoft.com/">Microsoft Update</a> (doesn't check 3rd party software). <br><br>#7. Software alternatives <br><br><a href="http://alternativeto.net/">AlternativeTo</a> lists alternatives to many bloated/slow software packages. <br><br>

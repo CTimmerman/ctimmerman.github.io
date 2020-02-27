@@ -1,0 +1,17 @@
+---
+layout: post
+title: Installing Firefox and Flash player on Debian 6 (Squeeze)
+date: '2012-05-15T09:35:00.000+02:00'
+author: Cees Timmerman
+tags:
+- flash
+- firefox
+- gnome
+- software
+- debian
+modified_time: '2012-05-16T10:40:47.279+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-7133027973129081229
+blogger_orig_url: https://ceestimmerman.blogspot.com/2012/05/installing-flash-player-on-debian-6.html
+---
+
+Here's what i did after installing the 180 MB CD image in a virtual machine:  <pre><code>#apt-get update<br />#apt-get upgrade<br />[ If you don't have a graphical desktop yet, try Gnome's (1.6 GB, though!): ]<br /># apt-get install gdm gnome-core gnome-terminal<br /><i># nano /etc/apt/sources.list</i><br />[ Add these two for Firefox and Flash plugin: ]<br />deb http://packages.linuxmint.com debian import<br /><i>deb http://ftp.uk.debian.org/debian/ squeeze main contrib non-free</i><br /># apt-get update<br /># apt-get remove iceweasel  [ This will install the dumbed-down Epiphany browser for some reason. ]<br /># apt-get install firefox<br /><i># apt-get install flashplugin-nonfree</i></code></pre> Maybe i should try Iceweasel (3.6.15) again as apt-get somehow installed a South African locale of Firefox (12.0). :( I fixed that by installing <a href="ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases/12.0/linux-i686/xpi/en-US.xpi">this</a> and setting general.useragent.locale to "en-US" in about:config and perhaps installing <a href="https://addons.mozilla.org/en-US/firefox/addon/quick-locale-switcher/">this</a> and/or changing the desktop shortcut to use only "firefox" instead of the opt path and %u. <br><br>Install and use gconf-editor to change the Nautilus desktop visible icon settings.

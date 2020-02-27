@@ -1,0 +1,16 @@
+---
+layout: post
+title: Digits to Excel column letters
+date: '2013-03-05T11:28:00.001+01:00'
+author: Cees Timmerman
+tags:
+- Python
+- software
+- Excel
+- note
+modified_time: '2013-03-05T11:28:43.178+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-8669880537251381977
+blogger_orig_url: https://ceestimmerman.blogspot.com/2013/03/digits-to-excel-column-letters.html
+---
+
+A little tricky, so i'll note it here:  <pre><code><br />>>> def getLetters(n):<br />...     o = ""<br />...     while 1:<br />...             n, m = divmod(n-1, 26)<br />...             o = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[m] + o<br />...             if n < 1: break<br />...     return o<br />...<br />>>> getLetters(1)<br />'A'<br />>>> getLetters(25)<br />'Y'<br />>>> getLetters(26)<br />'Z'<br />>>> getLetters(27)<br />'AA'<br /><br />And i might as well include my old getCol function:<br /><br />def getCol(s):<br /> z = 0<br /> for i in range(1, len(s) + 1):<br />  c = s[-i]<br />  z += ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".find(c) + 1) * 26**(i - 1)<br /> return z<br /></code></pre>

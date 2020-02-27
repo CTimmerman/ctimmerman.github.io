@@ -1,0 +1,14 @@
+---
+layout: post
+title: 'T-SQL: Work Days per Month'
+date: '2014-02-28T14:33:00.001+01:00'
+author: Cees Timmerman
+tags:
+- code
+- T-SQL
+modified_time: '2014-02-28T14:40:30.118+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-4059884136463750535
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/02/t-sql-work-days-per-month.html
+---
+
+Based on <a href="http://stackoverflow.com/a/252532/819417">http://stackoverflow.com/a/252532/819417</a><br /><br />ALTER FUNCTION dbo.fn_WorkDays(@StartDate DATETIME) RETURNS INT<br />AS<br />BEGIN<br />&nbsp;&nbsp;&nbsp; IF @StartDate IS NULL<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RETURN NULL<br /><br />&nbsp;&nbsp;&nbsp; --Strip the time element from both dates (just to be safe) by converting to whole days and back to a date.<br />&nbsp;&nbsp;&nbsp; --Usually faster than CONVERT.<br />&nbsp;&nbsp;&nbsp; --0 is a date (01/01/1900 00:00:00.000)<br />&nbsp;&nbsp;&nbsp; SELECT @StartDate = DATEADD(dd, DATEDIFF(dd, 0, @StartDate), 0)<br />&nbsp;&nbsp;&nbsp; <br />&nbsp;&nbsp;&nbsp; DECLARE @EndDate DATETIME<br />&nbsp;&nbsp;&nbsp; SELECT @EndDate = dateadd(day, -1, dateadd(month, 1, @StartDate))<br /><br />&nbsp;&nbsp;&nbsp; RETURN (SELECT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --Start with total number of days including weekends<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (DATEDIFF(dd, @StartDate, @EndDate)+1)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --Subtract 2 days for each full weekend<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -(DATEDIFF(wk, @StartDate, @EndDate)*2)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -(CASE WHEN DATEPART(dw, @StartDate) = 1 THEN 1 ELSE 0 END)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -(CASE WHEN DATEPART(dw, @EndDate) = 7 THEN 1 ELSE 0 END))<br />END

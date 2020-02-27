@@ -1,0 +1,26 @@
+---
+layout: post
+title: Patching bugs with SVN
+date: '2014-03-21T10:06:00.002+01:00'
+author: Cees Timmerman
+tags:
+- Python
+- management
+- Suds
+- Git
+- free speech
+- FOSS
+- SVN
+- open source
+- progress
+- code
+- freedom of speech
+- software
+- development
+- patching
+modified_time: '2015-03-12T19:46:17.052+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-9128901006317817078
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/03/patching-bugs-with-svn.html
+---
+
+I'm using <a href="https://pypi.python.org/pypi/suds" target="_blank">Suds</a> to work with <a href="http://office.microsoft.com/en-us/sharepoint/" target="_blank">SharePoint</a>, but it was terribly slow due to <a href="http://stackoverflow.com/questions/6038226/suds-is-not-reusing-cached-wsdls-and-xsds-although-i-expect-it-to" target="_blank">broken caching</a>, so i patched it:<pre><br />I:\&gt;cd temp<br /><br />I:\temp&gt;mkdir sudssvn<br /><br />I:\temp&gt;cd sudssvn<br /><br />I:\temp\sudssvn&gt;svn co http://svn.fedorahosted.org/svn/suds/trunk<br />A    trunk\LICENSE<br />A    trunk\tests<br />A    trunk\tests\rhq.py<br />A    trunk\tests\public.py<br />...<br /><br />I:\temp\sudssvn&gt;"C:\Program Files (x86)\<a href="http://notepad-plus-plus.org/" target="_blank">Notepad++</a>\notepad++.exe" trunk\suds\cache.py<br /><br />I:\temp\sudssvn&gt;svn di trunk<br />Index: trunk/suds/cache.py<br />===================================================================<br />--- trunk/suds/cache.py (revision 712)<br />+++ trunk/suds/cache.py (working copy)<br />@@ -190,7 +190,7 @@<br />     def put(self, id, bfr):<br />         try:<br />             fn = self.__fn(id)<br />-            f = self.open(fn, 'w')<br />+            f = self.open(fn, 'wb')<br />             f.write(bfr)<br />             f.close()<br />             return bfr<br />@@ -223,7 +223,7 @@<br />         try:<br />             fn = self.__fn(id)<br />             self.validate(fn)<br />-            return self.open(fn)<br />+            return self.open(fn, 'rb')<br />         except:<br />             pass<br /><br />I:\temp\sudssvn&gt;svn ci trunk<br />svn: E205007: Commit failed (details follow):<br />svn: E205007: Could not use external editor to fetch log message; consider setting the $SVN_EDITOR environment variable or using the --message (-m) or --file (-F) options<br />svn: E205007: None of the environment variables SVN_EDITOR, VISUAL or EDITOR are set, and no 'editor-cmd' run-time configuration option was found<br /><br />I:\temp\sudssvn&gt; ...<a href="http://tortoisesvn.net/" target="_blank">TortoiseSVN</a> GUI:<br /><br />Commit<br />Commit failed (details follow):<br />Can't create directory '/svn/suds/db/transactions/712-1.txn': Permission denied<br /></pre>Alas, a lack of project time/leadership stifles progress, but at least open source and free speech allows one to fork unmaintained projects. Torvalds' <a href="http://git-scm.com/" target="_blank">Git</a> (<a href="http://rogerdudler.github.io/git-guide/">simple guide</a>) was made for decentralized development like that.<br /><br />A <a href="http://www.google.nl/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=4&amp;url=http%3A%2F%2Fwww.wandisco.com%2Fsvnforum%2Fthreads%2F40491-using-svn-client-command-line-in-xp" target="_blank">Google result</a> (and on closer inspection, previous error) tells me that instead of the GUI, i could've used the -m switch of svn:<pre><br />I:\temp\sudssvn&gt;svn ci trunk -m "fix caching on Windows"<br />svn: E000013: Commit failed (details follow):<br />svn: E000013: Can't create directory '/svn/suds/db/transactions/712-1.txn': Permission denied<br /></pre>The system environment variable PATH gives me easy access to "C:\Program Files\TortoiseSVN\bin\svn.exe".

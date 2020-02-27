@@ -1,0 +1,21 @@
+---
+layout: post
+title: Using SharePoint 2010's REST API
+date: '2014-04-17T17:27:00.000+02:00'
+author: Cees Timmerman
+tags:
+- example
+- REST
+- Python
+- code
+- software
+- snippet
+- documentation
+- easy
+- SharePoint
+modified_time: '2014-06-25T12:49:27.286+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-321163737208277766
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/04/using-sharepoint-2010s-rest-api.html
+---
+
+Get 100 items after the first 100 items from the items of this year and month:<br /><br />http://site.company.tld/_vti_bin/ListData.svc/YourList?$skip=100&amp;$top=100&amp;$select=Year,Month,ID&amp;$filter=Year%20eq%20%272014%27%20and%20Month%20eq%20%27Mar%27<br /><br /><br /> Here's a complete example in Python, TestSharePoint2010REST.py:  <pre><code><br />"""<br />SharePoint2010 REST test app by Cees Timmerman, 24jun14.<br />"""<br /># Fix Python 2.<br />from __future__ import print_function<br />try: input = raw_input<br />except: pass<br />try: import urllib.request as urllib2<br />except: import urllib2<br />try: from ntlm3 import HTTPNtlmAuthHandler<br />except: from ntlm import HTTPNtlmAuthHandler<br /><br />import json, re, time<br /><br />web_domain = "http://subdomain.company.tld/"<br />user = "company\\user"<br />password = "secret"<br />passman = urllib2.HTTPPasswordMgrWithDefaultRealm()<br />passman.add_password(None, web_domain, user, password)<br />auth_NTLM = HTTPNtlmAuthHandler.HTTPNtlmAuthHandler(passman)<br />opener = urllib2.build_opener(auth_NTLM)<br />urllib2.install_opener(opener)<br /><br />url = web_domain + "_vti_bin/ListData.svc/TimeRegistration?$filter=Modified%20gt%20datetime\'2014-04-30T00:00:00.000Z\'&$orderby=Modified%20asc&$select=Id,Year,Month,Hours,Project,Resource&$top=2050"<br /><br />months = "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec".split(",")<br />count = 0<br />while 1:<br />  print(url)<br />  request = urllib2.Request(url)<br />  request.add_header("accept", "application/json;odata=verbose")  # The default format is application/atom+xml. Example: "accept":"application/json;odata=verbose"<br />  response = urllib2.urlopen(request)<br />  headers = response.info()<br />  body = response.read().decode("utf-8")<br />  body = re.sub(r"(?&lt;!\\)\\'", "'", body)  # Fix MicrosoftSharePointTeamServices 14.0.0.6029's incorrect JSON output. http://stackoverflow.com/questions/24390258/json-module-bug-in-python-3-4-1/24390987#comment37724338_24390290<br />  print("Headers: {}".format(headers))<br />  print("Body start: " + body[:800])<br />  print("==========================\nBody end: " + body[-800:])<br />  #err_loc=314020; print(">>>>>>Parse Error: {}<<<<<<".format(body[err_loc-40:err_loc+40])) # Debug output using value from thrown error.<br />  j = json.loads(body)<br />  results = j['d']['results'] if 'results' in j['d'] else j['d']<br />  print("Len: %r" % len(results))<br />  for item in results:<br />    count += 1<br />    print(item['Resource'].replace("company\\", ""), item['Project'], float(item['Hours']), "{}-{:02}-01".format(item['Year'], 1+months.index(item['Month'])), item['Id'])<br />  print("Count: %s" % count)<br />  <br />  # End loop or process next batch of 1000.<br />  url = None<br />  try: url = j['d']['__next']<br />  except: pass<br />  if not url: break<br /><br /></code></pre>

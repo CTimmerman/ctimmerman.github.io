@@ -1,0 +1,21 @@
+---
+layout: post
+title: Quick & easy navigation.
+date: '2012-03-27T15:42:00.004+02:00'
+author: Cees Timmerman
+tags:
+- location
+- long
+- sort
+- order
+- nearest
+- closest
+- sql
+- java
+- lat
+modified_time: '2015-03-23T16:16:23.345+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-8071650437572662811
+blogger_orig_url: https://ceestimmerman.blogspot.com/2012/03/quick-easy-navigation.html
+---
+
+<pre><code>String sql = "select name, address, zip, city, country, phone, url"<br />+ " from retailer"<br />+ " where latitude is not null and longitude is not null"<br />+ " order by pow(lat-lat2, 2) + pow(2 * min(abs(lon-lon2), 360-abs(lon-lon2)), 2) asc limit 10";<br />stmt = con.prepareStatement(sql);<br />stmt.setDouble(1, Double.parseDouble(request.getParameter("lat")));<br />stmt.setDouble(2, Double.parseDouble(request.getParameter("lng")));<br /></code></pre> Honolulu to Los Angeles and San Fransisco in <a href="http://python.org">Python</a>: <pre><code>>>> lat, long = (21.3069444, -157.8583333)<br />>>> lat2, lon2 = (34.0522342, -118.2436849)<br />>>> pow(lat-lat2, 2) + pow(2 * min(abs(lon-lon2), 360-abs(lon-lon2)), 2)<br />33839.327855007934<br />>>> lat2, lon2 = (37.7749295, -122.4194155)<br />>>> pow(lat-lat2, 2) + pow(2 * min(abs(lon-lon2), 360-abs(lon-lon2)), 2)<br />30952.629658700374<br /></code></pre> 2 * lon is ok for latitude 45 or -45, but <a href="http://stackoverflow.com/a/6549095/819417">1/cos(radians(lat))</a> is better.

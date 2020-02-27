@@ -1,0 +1,18 @@
+---
+layout: post
+title: Useful comments
+date: '2014-10-03T16:33:00.000+02:00'
+author: Cees Timmerman
+tags:
+- example
+- code
+- javascript
+- commenting
+- best practice
+- comments
+modified_time: '2014-10-03T17:32:22.950+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-8437596039335491914
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/10/useful-comments.html
+---
+
+While the comments in <a href="http://ceestimmerman.blogspot.nl/2014/06/learn-how-to-program-in-assembly-code.html">my Assembly post</a> were useful to beginners, experts who can read the code might find them annoying.  Here's an example of helpful comments for experienced programmers:  <pre><code><br />function delete_month(id, index){<br /> load_branch(id)<br /> $(".row[id^="+id+"] .cell:nth-child("+(index+1)+")").each(function(i,e){<br />  if(i==0 && e.className.indexOf("draggable")<0) return  <span style="color:green">// only change sandbox budget.</span><br />  $(this).nextAll().each(function(i,e){<br />   this.style.left = (parseInt(this.style.left)-mw)+"px"<br />   cellBlur(this)  <span style="color:green">// update availability</span><br />  }).addClass("changed")<br />  $(this).prevAll().addClass("changed")  <span style="color:green">// needed in case there is no next cell.</span><br />  $(this).remove()<br /> })<br /> //updateTotals()  <span style="color:green">// too slow here</span><br /> btnSave.value = "Save*"<br /> setBusy(0)<br />}<br /></code></pre> Note that i'm describing <b><i>WHY</i></b> the code is there, <b>not HOW</b> it works (which should be obvious to any decent JavaScript coder, who also should have an editor capable of wrapping lines to their preferred width).

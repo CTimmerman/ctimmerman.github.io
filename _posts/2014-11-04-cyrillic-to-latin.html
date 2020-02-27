@@ -1,0 +1,19 @@
+---
+layout: post
+title: Cyrillic to Latin
+date: '2014-11-04T19:51:00.000+01:00'
+author: Cees Timmerman
+tags:
+- semantics
+- glyphs
+- Latin
+- code
+- javascript
+- Russian
+- Cyrillic
+modified_time: '2014-11-06T19:07:52.699+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-1988494673214276072
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/11/cyrillic-to-latin.html
+---
+
+Tired of unreadable <a href="http://en.wikipedia.org/wiki/Russian_alphabet">Russian characters</a>? Try this JavaScript:  <pre>var Cyrillic_Latin = {<br /> "А":"A", "а":"a",<br /> "Б":"B", "б":"b",<br /> "В":"V", "в":"v",<br /> "Г":"G", "г":"ɡ",<br /> "Д":"D", "д":"d",<br /> "Е":"Je", "е":"e",<br /> "Ё":"Jo", "ё":"jo",<br /> "Ж":"S", "ж":"s",<br /> "З":"Z", "з":"z",<br /> "И":"I", "и":"i",<br /> "Й":"J", "й":"j",<br /> "К":"K", "к":"k",<br /> "Л":"L", "л":"l",<br /> "М":"M", "м":"m",<br /> "Н":"N", "н":"n",<br /> "О":"O", "о":"o",<br /> "П":"P", "п":"p",<br /> "Р":"R", "р":"r",<br /> "С":"S", "с":"s",<br /> "Т":"T", "т":"t",<br /> "У":"U", "у":"u",<br /> "Ф":"F", "ф":"f",<br /> "Х":"X", "х":"x",<br /> "Ц":"Ts", "ц":"ts",<br /> "Ч":"Tj", "ч":"tj",<br /> "Ш":"Sh", "ш":"sh",<br /> "Щ":"Sh", "щ":"sh",<br /> "Ъ":"", "ъ":"",<br /> "Ы":"E", "ы":"e",<br /> "Ь":"ʲ", "ь":"ʲ",<br /> "Э":"E", "э":"e",<br /> "Ю":"Ju", "ю":"ju",<br /> "Я":"Ja", "я":"ja",<br /> "І":"I", "і":"i",<br /> "Ѳ":"F", "ѳ":"f",<br /> "Ѣ":"E", "ѣ":"e",<br /> "Ѵ":"I", "ѵ":"i",<br /> "Ѕ":"Z", "ѕ":"z",<br /> "Ѯ":"Ks", "ѯ":"ks",<br /> "Ѱ":"Ps", "ѱ":"ps",<br /> "Ѡ":"O", "ѡ":"o",<br /> "Ѫ":"Ju", "ѫ":"ju",<br /> "Ѧ":"Ja", "ѧ":"ja",<br /> "Ѭ":"Ju", "ѭ":"ju",<br /> "Ѩ":"Ja", "ѩ":"ja"<br />}<br /><br />function Cyr2Lat(text){<br /> var out = ""<br /> for(i in text) out += Cyrillic_Latin[text[i]] || text[i]<br /> return out<br />}<br /></pre> <b>Example:</b><pre>Cyr2Lat("чем")<br />"tjem"<br />Cyr2Lat("форма")<br />"forma"<br /></pre> <p>Here it is as a bookmarklet that converts the current page (thanks to <a href="http://stackoverflow.com/a/4399718/819417">this snippet</a>):</p><div class="code">javascript:(function(){function t(t){var n="";for(var i in t)n+=e[t[i]]||t[i];return n}function n(e){if(e.nodeType==3&&e.nodeValue.trim()!=""){e.nodeValue=t(e.nodeValue)}else{for(var i=e.childNodes.length-1;i>=0;--i){n(e.childNodes[i])}}}var e={"А":"A","а":"a","Б":"B","б":"b","В":"V","в":"v","Г":"G","г":"ɡ","Д":"D","д":"d","Е":"Je","е":"e","Ё":"Jo","ё":"jo","Ж":"S","ж":"s","З":"Z","з":"z","И":"I","и":"i","Й":"J","й":"j","К":"K","к":"k","Л":"L","л":"l","М":"M","м":"m","Н":"N","н":"n","О":"O","о":"o","П":"P","п":"p","Р":"R","р":"r","С":"S","с":"s","Т":"T","т":"t","У":"U","у":"u","Ф":"F","ф":"f","Х":"X","х":"x","Ц":"Ts","ц":"ts","Ч":"Tj","ч":"tj","Ш":"Sh","ш":"sh","Щ":"Sh","щ":"sh","Ъ":"","ъ":"","Ы":"E","ы":"e","Ь":"ʲ","ь":"ʲ","Э":"E","э":"e","Ю":"Ju","ю":"ju","Я":"Ja","я":"ja","І":"I","і":"i","Ѳ":"F","ѳ":"f","Ѣ":"E","ѣ":"e","Ѵ":"I","ѵ":"i","Ѕ":"Z","ѕ":"z","Ѯ":"Ks","ѯ":"ks","Ѱ":"Ps","ѱ":"ps","Ѡ":"O","ѡ":"o","Ѫ":"Ju","ѫ":"ju","Ѧ":"Ja","ѧ":"ja","Ѭ":"Ju","ѭ":"ju","Ѩ":"Ja","ѩ":"ja"};n(document)})() </div>

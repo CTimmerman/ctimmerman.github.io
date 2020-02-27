@@ -1,0 +1,17 @@
+---
+layout: post
+title: Hunting bugs
+date: '2012-03-19T13:45:00.002+01:00'
+author: Cees Timmerman
+tags:
+- howto
+- debug
+- stacktrace
+- debugging
+- stack
+modified_time: '2014-08-01T18:21:04.573+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-3478868580769899946
+blogger_orig_url: https://ceestimmerman.blogspot.com/2012/03/hunting-bugs.html
+---
+
+1. Get <a href="http://technet.microsoft.com/en-us/sysinternals/bb842062">Sysinternals Suite</a>.<br />2. Start Process Explorer and/or Process Monitor.<br />3. Go to Options, Configure Symbols...<br /><br />DbgHelp.dll path (version 6.0 or later, <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms679294(v=vs.85).aspx"><i>not in system32; the version of DbgHelp that ships in Windows has reduced functionality from the other releases-- specifically, it lacks support for Symbol Server and Source Server.</i></a>):<br /><s>C:\Windows\system32\dbghelp.dll</s><br/>C:\Program Files\Debugging Tools for Windows (x64)\dbghelp.dll<br /><br />Symbols path(s):<br />SRV*I:\symbols*http://msdl.microsoft.com/download/symbols;SRV*I:\symbols*http://symbols.mozilla.org/firefox<br /><br />"I:\symbols" is the location of my symbols cache; yours may differ.

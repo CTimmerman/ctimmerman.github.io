@@ -1,0 +1,19 @@
+---
+layout: post
+title: How to manually mount a USB storage device in GNU/Linux
+date: '2014-08-26T18:20:00.000+02:00'
+author: Cees Timmerman
+tags:
+- GNU/Linux
+- terminal
+- USB
+- code
+- mount
+- bash
+- shell
+modified_time: '2014-10-16T10:03:17.635+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-1972453823561103095
+blogger_orig_url: https://ceestimmerman.blogspot.com/2014/08/how-to-manually-mount-usb-storage.html
+---
+
+After creating a bootable (possibly smaller than 16 GB for BIOS compatibility) USB stick, using <a href="http://www.pendrivelinux.com/universal-usb-installer-easy-as-1-2-3/">Universal USB Installer</a> or <a href="http://alternativeto.net/software/universal-usb-installer/">equivalent</a>, you may find that some distros, like <a href="http://http://www.sysresccd.org/">System Rescue CD</a> do not automount your other/larger USB storage devices. <br><br>To solve that, run these commands from your terminal: <pre><br />mkdir stick<br />fdisk -l<br />mount <font color=red>/dev/sdc1</font> stick<br /></pre>That will: <br><br>1. create a mountpoint<br>2. allow you to find the device that matches your storage size, <font color=red>e.g. /dev/sdc</font><br>3. mount the <font color=red>1</font>st partition of that device on your mountpoint <br><br>Before removing the device you may want to unmount it, lest OSs like Windows complain on insert:  <pre>umount stick</pre> You can possibly <a href="http://www.linfo.org/umount.html">save keystrokes</a> by pressing the up arrow key a few times so you only have to prepend a "u" to the mount command in your command history:  <pre>umount /dev/sdc1 stick</pre>

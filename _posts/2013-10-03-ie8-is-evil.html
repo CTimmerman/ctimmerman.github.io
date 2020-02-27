@@ -1,0 +1,24 @@
+---
+layout: post
+title: IE8 is Evil.
+date: '2013-10-03T15:06:00.001+02:00'
+author: Cees Timmerman
+tags:
+- money
+- Microsoft
+- compatibility
+- evil
+- time
+- bugs
+- software
+- development
+- IE8
+- vendor lock-in
+- delay
+- bug hunt
+modified_time: '2015-03-23T16:15:03.832+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-6261396203071531661
+blogger_orig_url: https://ceestimmerman.blogspot.com/2013/10/ie8-is-evil.html
+---
+
+<pre><code>>>var d = {1:"one", 2:"two",}<br />  "Expected identifier, string or number"<br /></code></pre>But that works in IE9's IE8 mode! <br><br>Fortunately IE10 does reproduce this bug; too bad IE9 won't upgrade on this Windows 7 machine due to DLL hell. Good thing i have remote desktops: <br><pre><code>>>var d = {1:"one", 2:"two"}<br />undefined<br />>>d<br />{...}<br /></code></pre>That also works in IE8. Bug solved! <br><br>But wait, there's more! IE10's IE8 mode happily skips over <br><pre><code>var approved_headcount = {<br /> "ICT": {201301: 1, 201302: 2, 2013.03: 3, 201304: 1, 201305: 2, 201306: 3},<br /> "Finance": {201301: 1, 201302: 2, 201303: 3, 201304: 1, 201305: 2, 201306: 3},<br />}<br /></code></pre>and is thus buggy at being buggy. <br><br>I guess they incinerated the IE8 parser as it also returns incorrect line numbers while parsing that code block. 

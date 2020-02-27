@@ -1,0 +1,18 @@
+---
+layout: post
+title: My Firefox won't paste text! A workaround using AutoHotkey.
+date: '2015-10-14T21:20:00.000+02:00'
+author: Cees Timmerman
+tags:
+- workaround
+- firefox
+- code
+- AutoHotkey
+- script
+- bug
+modified_time: '2015-10-15T01:50:01.086+02:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-6132790996509895951
+blogger_orig_url: https://ceestimmerman.blogspot.com/2015/10/my-firefox-wont-paste-text-workaround.html
+---
+
+In Firefox I often find myself unable to paste into Facebook or YouTube comment boxes. I've been a Mozilla fan since 3.0, but bugs like these make Firefox a pain. Here's a workaround that works in my 64-bit Windows 7:<br /><ol><li>Install <a href="http://www.autohotkey.com/">AutoHotkey</a>.</li><li>Save this script as "type_clipboard.ahk": <pre>; http://www.autohotkey.com/board/topic/76296-type-out-text-in-clipboard/<br />; ctrl+win+v<br />^#v::<br />    sendraw %clipboard%<br />return</pre></li><li>Run the script and press Ctrl+Win+V to have AutoHotkey type your clipboard text into Firefox.</li></ol>

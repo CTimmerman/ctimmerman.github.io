@@ -1,0 +1,18 @@
+---
+layout: post
+title: Making Redmine suck less
+date: '2012-03-08T17:20:00.005+01:00'
+author: Cees Timmerman
+tags:
+- planning
+- Gantt
+- Redmine
+- theme
+- restart
+- Ruby
+modified_time: '2012-03-08T17:29:21.712+01:00'
+blogger_id: tag:blogger.com,1999:blog-6265571233418601933.post-5018078036378122153
+blogger_orig_url: https://ceestimmerman.blogspot.com/2012/03/making-redmine-suck-less.html
+---
+
+Problem: Issue importance and status are hard to see.<br /><br />Solution: Install <a href="http://www.redmine.org/projects/redmine/wiki/ThemeRedjourn">this theme</a> and add a custom CSS rule to strike-through resolved issues. I might have a Facebook entry with more details, but can't find it.<br /><br /><br />Problem: Gantt charts should be sorted by start date instead of issue id.<br /><br />Culprit: C:\Program Files\BitNami Redmine Stack\apps\redmine\lib\redmine\helpers\gantt.rb<br /><br />Solution:<br /><pre><code><br />      # TODO: top level issues should be sorted by start date<br />      def gantt_issue_compare(x, y, issues)<br />        # Edit by Cees on 8mar12 by http://www.redmine.org/issues/7335<br />        [(x.root.start_date or x.start_date or Date.new()), x.root_id, (x.start_date or Date.new()), x.lft] <=> [(y.root.start_date or y.start_date or Date.new()), y.root_id, (y.start_date or Date.new()), y.lft]<br />        #if x.root_id == y.root_id<br />        #  x.lft <=> y.lft<br />        #else<br />        #  x.root_id <=> y.root_id<br />        #end<br />      end<br /></code></pre><br /><br />Problem: I don't know how to restart Redmine.<br /><br />Solution: Choose the applicable one <a href="http://www.redmine.org/boards/2/topics/6719">here</a>. If you use Windows and Bitnami with Redmine 1.1.2, save this text as "restart Redmine.bat" and run as Administrator:<br /><pre><code><br />net stop redmineMongrel1<br />net start redmineMongrel1<br />net stop redmineMongrel2<br />net start redmineMongrel2<br />pause<br /></pre></code>
