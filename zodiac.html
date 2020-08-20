@@ -138,7 +138,7 @@ function zodiac(date){
 		}
 	]
 	var html = ''
-	var mm_dd = date.slice(5)
+	var mm_dd = date.slice(5, 10)
 	for(let sign of signs){
 		if(sign.old_start <= mm_dd && sign.old_end >= mm_dd) html += "<br>Old sign: " + sign.name
 		if(sign.cetus_start <= mm_dd && sign.cetus_end >= mm_dd) html += "<br>Cetus sign: " + sign.name
