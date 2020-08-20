@@ -25,7 +25,8 @@ function zodiac(date){
 			"element": "Earth",
 			"symbol": "Sea-Goat",
 			"ruling planet": "Saturn",
-			"traits": "Ambitious, organized, practical, goal-oriented"
+			"traits": "Ambitious, organized, practical",
+			"matches": "Taurus, Cancer"
 		},
 		{
 			"name": "Aquarius",
@@ -38,7 +39,8 @@ function zodiac(date){
 			"element": "Air",
 			"symbol": "Water-Bearer",
 			"ruling planet": "Uranus",
-			"traits": "Nonconformist"
+			"traits": "Nonconformist",
+			"matches": "Leo, Sagittarius"
 		},
 		{
 			"name": "Pisces",
@@ -51,7 +53,8 @@ function zodiac(date){
 			"element": "Water",
 			"symbol": "Fish",
 			"ruling planet": "Neptune",
-			"traits": "Artistic, intuitive, gentle"
+			"traits": "Artistic, intuitive, gentle",
+			"matches": "Virgo, Taurus"
 		},
 		{
 			"name": "Cetus",
@@ -73,6 +76,7 @@ function zodiac(date){
 			"symbol": "Ram",
 			"ruling planet": "Mars",
 			"traits": "Courageous, determined, confident",
+			"matches": "Libra, Leo",
 			"birthstones": "Topaz, Heliotrope, Aquamarine, Jasper, Diamond"
 		},
 		{
@@ -87,6 +91,7 @@ function zodiac(date){
 			"symbol": "Bull",
 			"ruling planet": "Venus",
 			"traits": "Reliable, patient, practical",
+			"matches": "Scorpio, Cancer",
 			"birthstones": "Emerald, Sapphire, Diamond, Garnet, Rose quartz"
 		},
 		{
@@ -100,7 +105,8 @@ function zodiac(date){
 			"element": "Air",
 			"symbol": "Twin",
 			"ruling planet": "Mercury",
-			"traits": "Gentle, affectionate, curious"
+			"traits": "Gentle, affectionate, curious",
+			"matches": "Sagittarius, Aquarius",
 		},
 		{
 			"name": "Cancer",
@@ -114,6 +120,7 @@ function zodiac(date){
 			"symbol": "Crab",
 			"ruling planet": "Moon",
 			"traits": "Emotional, nurturing, and highly intuitive",
+			"matches": "Capricorn, Taurus",
 			"birthstones": "Moonstone, Emerald, Ruby, Pearl"
 		},
 		{
@@ -127,7 +134,8 @@ function zodiac(date){
 			"element": "Fire",
 			"symbol": "Lion",
 			"ruling planet": "Sun",
-			"traits": "Dramatic, creative, self-confident"
+			"traits": "Dramatic, creative, self-confident",
+			"matches": "Aquarius, Gemini"
 		},
 		{
 			"name": "Virgo",
@@ -140,7 +148,8 @@ function zodiac(date){
 			"element": "Earth",
 			"symbol": "Maiden",
 			"ruling planet": "Mercury",
-			"traits": "Kind, gentle, and supportive"
+			"traits": "Kind, gentle, and supportive",
+			"matches": "Pisces, Cancer"
 		},
 		{
 			"name": "Libra",
@@ -153,7 +162,8 @@ function zodiac(date){
 			"element": "Air",
 			"symbol": "Scales",
 			"ruling planet": "Venus",
-			"traits": "Cooperative, diplomatic, gracious"
+			"traits": "Cooperative, diplomatic, gracious",
+			"matches": "Aries, Sagittarius"
 		},
 		{
 			"name": "Scorpio",
@@ -166,7 +176,8 @@ function zodiac(date){
 			"element": "Water",
 			"symbol": "Scorpion",
 			"ruling planet": "Pluto, Mars",
-			"traits": "Resourceful, brave, passionate"
+			"traits": "Resourceful, brave, passionate",
+			"matches": "Taurus, Cancer"
 		},
 		{
 			"name": "Ophiuchus",
@@ -191,11 +202,12 @@ function zodiac(date){
 			"symbol": "Archer",
 			"ruling planet": "Jupiter",
 			"birthstones": "Topaz, Turquoise, Tanzanite, Citrine, Zircon",
-			"traits": "Independent, strong-willed"
+			"traits": "Independent, strong-willed",
+			"matches": "Gemini, Aries"
 		}
 	]
 	function blurb(sign){
-		return sign.name + ". <i>" + sign.traits + "</i>."
+		return sign.name + ". <i>" + sign.traits + "</i>. Best matches: " + sign.matches
 	}
 	var html = ''
 	var mm_dd = date.slice(5, 10)
@@ -294,7 +306,7 @@ function zodiac(date){
 	let year = parseInt(date.slice(0, 4))
 	let hour = parseInt(date.slice(11, 13))
 	for(let sign of chinese_signs){
-		if(sign.years.includes(year)) html += "<br>Chinese solar sign: " + blurb(sign) + " Best matches: " + sign.matches
+		if(sign.years.includes(year)) html += "<br>Chinese solar sign: " + blurb(sign)
 		if(sign.hours.includes(hour)) html += "<br>Chinese hour sign: " + blurb(sign)
 	}
 	document.getElementById('zodiac').innerHTML = html
