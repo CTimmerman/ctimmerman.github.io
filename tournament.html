@@ -113,7 +113,18 @@
 		})
 		names = ranking.map(a => a[6])
 		html = "<table><th>Rank</th><th>Player</th><th>Score</th><th>Resistance</th><th>Wins</th><th>Draws</th><th>Losses</th></tr>"
-		getel("names").innerHTML = html + ranking.map((a, i) => a[6] == '!bye!' ? '' : `<tr><td>${1+i}</td><td>${a[6]}</td><td>${-a[0]}</td><td>${-a[1]}</td><td>${-a[2]}</td><td>${-a[3]}</td><td>${a[4]}</td></tr>`).join('') + "</table>"
+		var rank = 0
+		var prev = []
+		console.log(ranking)
+		for(var i in ranking){
+			var a = ranking[i]
+			if(a[6] == '!bye!') continue
+			if(a.slice(0, 5) !=''+ prev.slice(0, 5)) ++rank
+			html += `<tr><td>${rank}</td><td>${a[6]}</td><td>${-a[0]}</td><td>${-a[1]}</td><td>${-a[2]}</td><td>${-a[3]}</td><td>${a[4]}</td></tr>`
+			prev = a
+		}
+		html += "</table>"
+		getel("names").innerHTML = html
 	}
 
 	function start_match(){
@@ -149,7 +160,7 @@
 		var end_date = new Date()
 		var [m, s] = getel("duration").value.split(":").map(e => int(e))
 		end_date.setSeconds(end_date.getSeconds() + s + 60*m)
-		var match_info = `Match ${match} of ${names.length / 2} ends at ${end_date.toTimeString().slice(0, 5)}.`
+		var match_info = `Match ${match} ends at ${end_date.toTimeString().slice(0, 5)}.`
 
 		say(match_info, 0.7)
 		show(`<h3>${match_info} <span class="timer">Time left: <span class="time">${getel("duration").value}</span></h3>`)
