@@ -132,9 +132,8 @@
 		var last_match = g[g.length-1]
 		sel("input").forEach(e => e.disabled = true)
 		getel("announce").disabled = false
-		++match
 		// pair players by order
-		if(match == 1){
+		if(match == 0){
 			names = shuffled(getel("names").innerText.trim().split('\n'))
 			if(names.length % 2) names.push('!bye!')
 		}else{
@@ -151,12 +150,12 @@
 			}
 			names = new_names
 		}
-
 		var opponent_sets = Object.values(opponents)
 		if(opponent_sets.length && opponent_sets[0].size > names.length-2 && !confirm("All pairs have played. Still add a new round?")){
 			show_scores()
 			return
 		}
+		++match
 		var end_date = new Date()
 		var [m, s] = getel("duration").value.split(":").map(e => int(e))
 		end_date.setSeconds(end_date.getSeconds() + s + 60*m)
