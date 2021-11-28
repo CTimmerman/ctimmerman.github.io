@@ -81,6 +81,7 @@
 
 	function show_scores(){
 		var scores = {}
+		var resistance = {}
 		var wins = {}
 		var draws = {}
 		var losses = {}
@@ -90,9 +91,10 @@
 				var name = sel("td", row)[1 + player].innerText
 				var [p1, p2] = [...sel("input:disabled", row)].map(e => int(e.value))
 				if(player == 1) [p1, p2] = [p2, p1]
-				for(var d of [scores, wins, draws, losses]) if(!(name in d)) d[name] = 0  // avoid defaultdict
+				for(var d of [scores, resistance, wins, draws, losses]) if(!(name in d)) d[name] = 0  // avoid defaultdict
 				if(p1 !== undefined && p2 !== undefined){  // skip enabled inputs
 					scores[name] += p1
+					resistance[name] += p2
 					wins[name] += p1 > p2
 					draws[name] += p1 == p2
 					losses[name] += p1 < p2
@@ -100,9 +102,7 @@
 			}
 		}
 		var ranking = names.map((key, index) => {
-				var resistance = 0
-				for(opponent of opponents[key]) resistance += scores[opponent]
-				return [-scores[key], -resistance, -wins[key], -draws[key], losses[key], index, key]  // if tied, index keeps status quo
+				return [-scores[key], -resistance[name], -wins[key], -draws[key], losses[key], index, key]  // if tied, index keeps status quo
 			}
 		)
 		ranking.sort((a, b) => {
