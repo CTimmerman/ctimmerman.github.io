@@ -29,7 +29,7 @@
 	<br>
 	<button type="button" onclick="start_match()">Start match</button>
 	Duration: <input id="duration" title="Match duration (hh:mm)" size="6" maxlength="6" value="45:00">
-	<input id="announce" title="Announce" type="checkbox"><button onmouseup="announce()">Announce pairings</button>
+	<input id="announce" title="Announce" type="checkbox"><button type="button" onmouseup="announce()">Announce pairings</button>
 	<div id="content"></div>
 	<script>
 	var match = 0
@@ -115,7 +115,6 @@
 		html = "<table><th>Rank</th><th>Player</th><th>Score</th><th>Resistance</th><th>Wins</th><th>Draws</th><th>Losses</th></tr>"
 		var rank = 0
 		var prev = []
-		console.log(ranking)
 		for(var i in ranking){
 			var a = ranking[i]
 			if(a[6] == '!bye!') continue
@@ -151,9 +150,13 @@
 			names = new_names
 		}
 		var opponent_sets = Object.values(opponents)
-		if(opponent_sets.length && opponent_sets[0].size > names.length-2 && !confirm("All pairs have played. Still add a new round?")){
-			show_scores()
-			return
+		if(opponent_sets.length && opponent_sets[0].size > names.length-2){
+			if(confirm("All pairs have played. Still add a new round?")){
+				opponents = {}
+			}else{
+				show_scores()
+				return
+			}
 		}
 		++match
 		var end_date = new Date()
