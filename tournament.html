@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Group Tournament Ranking System 2021-12-03, by Cees Timmerman</title>
+	<title>Group Tournament Ranking System 2021-12-08, by Cees Timmerman</title>
 	<style>
 	body { color: black; background-color: yellowgreen; }
 	table {
@@ -29,17 +29,9 @@
 			return div.firstChild
 		}
 	
-		function int(s){
-			return parseInt(s) || 0
-		}
-	
-		function getel(id){
-			return document.getElementById(id)
-		}
-	
-		function sel(q, e=document){
-			return e.querySelectorAll(q)
-		}
+		const getel = (id) => document.getElementById(id)
+		const int = (s) => parseInt(s) || 0
+		const sel = (q, e=document) => e.querySelectorAll(q)
 	
 		function set_colors(){
 			const [bg, fg] = window.location.hash.slice(1).split('&')
@@ -48,7 +40,7 @@
 		}
 	
 		function say(s, rate=1.0, pitch=1.0, lang="en-US"){
-			// lang: [BCP 47 language tag], pitch: [0, 2], rate: [0.1, 10]
+			// rate: [0.1, 10], pitch: [0, 2], lang: BCP 47 language tag
 			if(!getel("announce").checked) return
 			const ss = window.speechSynthesis
 			const u = new SpeechSynthesisUtterance(s)
@@ -68,28 +60,39 @@
 	
 		function show_scores(){
 			const scores = {}
-			const resistance = {}
 			const wins = {}
 			const draws = {}
 			const losses = {}
+			const resistance = {}
+			const neustadtl_scores = {}
 			const rows = [...sel(".match tr")].filter(e => e.querySelector("td"))
 			for(const row of rows){
 				for(let player=0; player < 2; ++player){
 					const name = sel("td", row)[1 + player].innerText
+					const opponent = sel("td", row)[1 + (1-player)].innerText
 					let [p1, p2] = [...sel("input:disabled", row)].map(e => int(e.value))
 					if(player == 1) [p1, p2] = [p2, p1]
-					for(const d of [scores, resistance, wins, draws, losses]) if(!(name in d)) d[name] = 0  // avoid defaultdict
+					for(const d of [scores, resistance]) if(!(name in d)) d[name] = 0
+					for(const d of [wins, draws, losses]) if(!(name in d)) d[name] = []
 					if(p1 !== undefined && p2 !== undefined){  // skip enabled inputs
 						scores[name] += p1
 						resistance[name] += p2
-						wins[name] += p1 > p2
-						draws[name] += p1 == p2
-						losses[name] += p1 < p2
+						if(p1 > p2)
+							wins[name].push(opponent)
+						else if (p1 == p2)
+							draws[name].push(opponent)
+						else
+							losses[name].push(opponent)
 					}
 				}
 			}
+			for(const name of names){
+				neustadtl_scores[name] = 0
+				for(const opponent of wins[name]) neustadtl_scores[name] += scores[opponent]
+				for(const opponent of draws[name]) neustadtl_scores[name] += 0.5 * scores[opponent]
+			}
 			const ranking = names.map((key, index) => {
-					return [-scores[key], -resistance[key], -wins[key], -draws[key], losses[key], index, key]  // if tied, index keeps status quo
+					return [-scores[key], -wins[key].length, -draws[key].length, losses[key].length, -neustadtl_scores[key], -resistance[key], index, key]  // if tied, index keeps status quo
 				}
 			)
 			ranking.sort((a, b) => {
@@ -98,19 +101,43 @@
 					return a[i] - b[i]
 				}
 			})
-			names = ranking.map(a => a[6])
-			let html = "<table><th>Rank</th><th>Player</th><th>Score</th><th>Resistance</th><th>Wins</th><th>Draws</th><th>Losses</th></tr>"
+			names = ranking.map(a => a[a.length-1])
+			let html = "<table><th>Rank</th><th>Player</th><th>Score</th><th>Wins</th><th>Draws</th><th>Losses</th><th>Neustadtl score</th><th>Resistance</th></tr>"
 			let rank = 0
 			let prev = []
 			for(let i in ranking){
 				let a = ranking[i]
-				if(a[6] == '!bye!') continue
-				if(a.slice(0, 5) !=''+ prev.slice(0, 5)) ++rank
-				html += `<tr><td>${rank}</td><td>${a[6]}</td><td>${-a[0]}</td><td>${-a[1]}</td><td>${-a[2]}</td><td>${-a[3]}</td><td>${a[4]}</td></tr>`
+				let name = a[a.length-1]
+				if(name == '!bye!') continue
+				if(a.slice(0, a.length-2) !=''+ prev.slice(0, a.length-2)) ++rank
+				html += `<tr><td>${rank}</td><td>${name}</td><td>${-a[0]}</td><td>${-a[1]}</td><td>${-a[2]}</td><td>${a[3]}</td><td>${-a[4]}</td><td>${-a[5]}</td></tr>`
 				prev = a
 			}
 			html += "</table>"
 			getel("names").innerHTML = html
+
+			// Sortable tables from https://stackoverflow.com/a/49041392/819417
+			const up = '\u2191'
+			const down = '\u2193'
+			const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent || int(tr.children[idx].querySelector('input').value)
+			const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+				v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+				)(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx))
+			// TODO: asc doesn't stick on all tables.
+			document.querySelectorAll('th').forEach(th => th.addEventListener('click', function() {
+				const table = th.closest('table')
+				Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+					.sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+					.forEach(tr => table.appendChild(tr))
+				for(const h of th.parentNode.children){
+					if(h === th){
+						if(!h.innerText.match(new RegExp(` (${up}|${down})$`))) h.innerText += ` ${up}`
+						h.innerText = h.innerText.replace(new RegExp(`(.*?)(${up}|${down})$`), '$1' + (this.asc? up : down))
+					}else{
+						h.innerText = h.innerText.replace(new RegExp(`(.*?)( ${up}|${down})$`), '$1')
+					}
+				}
+			}))
 		}
 	
 		function start_match(){
@@ -211,6 +238,8 @@
 			timer.style.backgroundColor = c
 			if(s) say(s)
 		}, 1000)
+
+		window.onbeforeunload = () => false
 	</script>
 </head>
 <body onhashchange="set_colors()" onload="set_colors()">
