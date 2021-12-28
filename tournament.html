@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Group Tournament Ranking System 2021-12-08, by Cees Timmerman</title>
+	<title>Group Tournament Ranking System 2021-12-28, by Cees Timmerman</title>
 	<style>
 	body { color: black; background-color: yellowgreen; }
 	table {
@@ -227,7 +227,7 @@
 				}
 			}
 			const time = ("0"+m).slice(-2) + ":" + ("0"+s).slice(-2)
-			t.innerText = time
+			t.innerText = document.title = time
 			let c = timer.style.backgroundColor
 			s = ""
 			if(time == "00:00" && c != "red"){
