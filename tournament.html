@@ -116,28 +116,33 @@
 			html += "</table>"
 			getel("names").innerHTML = html
 
-			// Sortable tables from https://stackoverflow.com/a/49041392/819417
-			const up = '\u2191'
-			const down = '\u2193'
-			const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent || int(tr.children[idx].querySelector('input').value)
-			const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
-				v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
-				)(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx))
-			// TODO: asc doesn't stick on all tables.
-			document.querySelectorAll('th').forEach(th => th.addEventListener('click', function() {
+			// Based on https://stackoverflow.com/a/49041392/819417
+			function sort_column(e){
+				const th = e.target
 				const table = th.closest('table')
+				const getCellValue = (tr, idx) => (
+					tr.children[idx].innerText ||
+					tr.children[idx].textContent ||
+					int(tr.children[idx].querySelector('input').value)
+				)
+				const comparer = (idx, asc) => (a, b) => (
+					(v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+				)(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx))
 				Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
-					.sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+					.sort(comparer(Array.from(th.parentNode.children).indexOf(th), th.asc = !th.asc))
 					.forEach(tr => table.appendChild(tr))
+				const up = '\u2191'
+				const down = '\u2193'
 				for(const h of th.parentNode.children){
 					if(h === th){
 						if(!h.innerText.match(new RegExp(` (${up}|${down})$`))) h.innerText += ` ${up}`
-						h.innerText = h.innerText.replace(new RegExp(`(.*?)(${up}|${down})$`), '$1' + (this.asc? up : down))
+						h.innerText = h.innerText.replace(new RegExp(`(.*?)(${up}|${down})$`), '$1' + (th.asc? up : down))
 					}else{
 						h.innerText = h.innerText.replace(new RegExp(`(.*?)( ${up}|${down})$`), '$1')
 					}
 				}
-			}))
+			}
+			document.querySelectorAll('th').forEach(th => th.onclick = sort_column)
 		}
 	
 		function start_match(){
@@ -253,7 +258,7 @@
 	<br>
 	<button type="button" onclick="start_match()">Start match</button>
 	Duration: <input id="duration" title="Match duration (hh:mm)" size="6" maxlength="6" value="45:00">
-	<input id="announce" title="Announce" type="checkbox"><button type="button" onmouseup="announce()">Announce pairings</button>
+	<input id="announce" title="Announce" type="checkbox"><button type="button" onclick="announce()">Announce pairings</button>
 	<div id="content"></div>
 </body>
 </html>
