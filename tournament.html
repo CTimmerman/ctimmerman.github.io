@@ -150,12 +150,16 @@
 				if(names.length % 2) names.push('!bye!')
 			}else{
 				const new_names = []
+				console.log("Shifting", names)
 				while(name = names.shift()){
 					new_names.push(name)
+					console.log("Pushed", name, "played", opponents[name])
 					for(let i = 0; i < names.length; ++i){
+						console.log("vs", names[i], "?")
 						if(!opponents[name].has(names[i])){
 							new_names.push(names[i])
 							names.splice(i, 1)  // remove opponent name
+							console.log("YES!")
 							break
 						}
 					}
@@ -191,6 +195,7 @@
 			show(html)
 			show_scores()
 			tell_pairs()
+			getel("woke").play()
 		}
 	
 		function announce(){
@@ -254,6 +259,10 @@
 	<button type="button" onclick="start_match()">Start match</button>
 	Duration: <input id="duration" title="Match duration (hh:mm)" size="6" maxlength="6" value="45:00">
 	<input id="announce" title="Announce" type="checkbox"><button type="button" onclick="announce()">Announce pairings</button>
+	<audio loop autoplay id="woke">
+		<source src="silent.ogx" type="audio/ogg">
+		Your browser does not support the audio element used to keep the page active.
+	</audio>
 	<div id="content"></div>
 </body>
 </html>
