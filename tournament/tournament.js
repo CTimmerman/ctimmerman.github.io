@@ -172,6 +172,23 @@ function tell_pairs(check){
 	})
 }
 
+var timer = null
+function start_timer(){
+	if(timer === null){
+		timer = setInterval(tick, 1000)
+		getel("woke").play()
+		const end_date = new Date()
+		const [m, s] = getel("duration").value.split(":").map(e => int(e))
+		end_date.setSeconds(end_date.getSeconds() + s + 60*m)
+		const match_info = `Match ${match_nr} ends at ${end_date.toTimeString().slice(0, 5)}.`
+		say(match_info, 0.9)
+		add_node(`<h3>${match_info} <span class="timer">Time left: <span class="time">${getel("duration").value}</span></h3>`)
+	}
+}
+function stop_timer(){
+	clearInterval(timer)
+	timer = null
+}
 function tick(){
 	let timer = sel(".timer")
 	if(timer.length < 1) return
@@ -192,6 +209,7 @@ function tick(){
 	if(time == "00:00" && c != "red"){
 		c = "red"
 		s = "Time. Active player finishes turn and opponent gets one last turn."
+		stop_timer()
 	}else if(time == "05:00"){
 		c = "orange"
 		s = "5 minutes."
@@ -201,22 +219,4 @@ function tick(){
 	}
 	timer.style.backgroundColor = c
 	if(s) say(s)
-}
-
-var timer = null
-function start_timer(){
-	if(timer === null){
-		timer = setInterval(tick, 1000)
-		getel("woke").play()
-		const end_date = new Date()
-		const [m, s] = getel("duration").value.split(":").map(e => int(e))
-		end_date.setSeconds(end_date.getSeconds() + s + 60*m)
-		const match_info = `Match ${match_nr} ends at ${end_date.toTimeString().slice(0, 5)}.`
-		say(match_info, 0.9)
-		add_node(`<h3>${match_info} <span class="timer">Time left: <span class="time">${getel("duration").value}</span></h3>`)
-	}
-}
-function stop_timer(){
-	clearInterval(timer)
-	timer = null
 }
