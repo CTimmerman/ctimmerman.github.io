@@ -53,9 +53,8 @@
 	<div>
 		<input type="button" onclick="pair_players()" value="Pair players">
 		<input type="button" onclick="tell_pairs()" value="Announce pairings">
-		<br><input id="duration" title="Match duration (hh:mm)" size="6" maxlength="6" value="45:00">
-		<input type="button" onclick="start_timer()" value="Start timer">
-		<input type="button" onclick="stop_timer()" value="Stop timer">
+		<input id="duration" title="Match duration (hh:mm)" size="6" maxlength="6" value="45:00">
+		<input type="button" onclick="toggle_timer()" value="Start timer" id="btn_timer">
 	</div>
 	<video loop id="woke" style="height:1px; width:1px">
 		<source src="silent.ogx" type="audio/ogg">

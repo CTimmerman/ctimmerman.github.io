@@ -124,6 +124,7 @@ const shuffled = (arr) => arr.map(e => [Math.random(), e]).sort().map(a => a[1])
 
 function pair_players(){
 	if(match_nr && !confirm("End current match and start a new one?")) return
+	stop_timer()
 	sel("#content input").forEach(e => e.disabled = true)
 
 	if(match_nr == 0){
@@ -193,21 +194,25 @@ function tell_pairs(check){
 }
 
 var timer = null
+function toggle_timer(){
+	if(timer === null) start_timer()
+	else stop_timer()
+}
 function start_timer(){
-	if(timer === null){
-		timer = setInterval(tick, 1000)
-		getel("woke").play()
-		const end_date = new Date()
-		const [m, s] = getel("duration").value.split(":").map(e => int(e))
-		end_date.setSeconds(end_date.getSeconds() + s + 60*m)
-		const match_info = `Match ${match_nr} ends at ${end_date.toTimeString().slice(0, 5)}.`
-		say(match_info, 0.9)
-		add_node(`<h3>${match_info} <span class="timer">Time left: <span class="time">${getel("duration").value}</span></h3>`)
-	}
+	timer = setInterval(tick, 1000)
+	getel("btn_timer").value = "Stop timer"
+	getel("woke").play()
+	const end_date = new Date()
+	const [m, s] = getel("duration").value.split(":").map(e => int(e))
+	end_date.setSeconds(end_date.getSeconds() + s + 60*m)
+	const match_info = `Match ${match_nr} ends at ${end_date.toTimeString().slice(0, 5)}.`
+	say(match_info, 0.9)
+	add_node(`<h3>${match_info} <span class="timer">Time left: <span class="time">${getel("duration").value}</span></h3>`)
 }
 function stop_timer(){
 	clearInterval(timer)
 	timer = null
+	getel("btn_timer").value = "Start timer"
 }
 function tick(){
 	let timer = sel(".timer")
