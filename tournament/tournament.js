@@ -27,10 +27,14 @@ function set_colors(){
 	document.body.style.backgroundColor = bg
 }
 
-function add_node(html){
+function make_node(html){
 	const div = document.createElement('div')
 	div.innerHTML = html.trim()
-	getel('content').appendChild(div.firstChild)  // Adding to innerHTML clears inputs.
+	return div.firstChild
+}
+
+function add_node(html){
+	getel('content').appendChild(make_node(html))  // Adding to innerHTML clears inputs.
 }
 
 function rank_players(){
@@ -52,7 +56,7 @@ function rank_players(){
 		for(let player=0; player < 2; ++player){
 			const name = sel("td", row)[1 + player].innerText
 			const opponent = sel("td", row)[1 + (1-player)].innerText
-			let [p1, p2] = [...sel("input:disabled", row)].map(e => int(e.value))
+			let [p1, p2] = [...sel(".score", row)].map(e => int(e.innerText))
 			if(player == 1) [p1, p2] = [p2, p1]
 			if(p1 !== undefined && p2 !== undefined){
 				scores[name] += p1
@@ -125,7 +129,7 @@ const shuffled = (arr) => arr.map(e => [Math.random(), e]).sort().map(a => a[1])
 function pair_players(){
 	if(match_nr && !confirm("End current match and start a new one?")) return
 	stop_timer()
-	sel("#content input").forEach(e => e.disabled = true)
+	sel("#content input").forEach(e => e.replaceWith(make_node("<span class='score'>" + e.value + "</span>")))
 
 	if(match_nr == 0){
 		names = shuffled(getel("names").innerText.trim().split('\n'))
@@ -142,10 +146,8 @@ function pair_players(){
 			}
 		}
 		rank_players()
-		let old_names = []
 		let boost = 0
 		while(1){
-			//console.log("Pairing", names)
 			var new_names = []
 			for(var i=0; i < names.length; ++i){
 				let player = names[i]
@@ -154,20 +156,13 @@ function pair_players(){
 				let opponent = names.find(name => name != player && !played[player].has(name) && !new_names.includes(name))
 				if(!opponent){
 					++boost
-					//console.log(`Move unmatched player ${player} up ${boost}`)
 					names[i] = names[i-boost]
 					names[i-boost] = player
 					break
 				}
 				new_names.push(opponent)
-				//console.log("Opponent is", opponent)
 			}
 			if(i == names.length) break
-			if(old_names == names){
-				console.log("NO CHANGE!", old_names, names)
-				break
-			}
-			old_names = names.slice()  // By value, not reference.
 		}
 		names = new_names
 	}
