@@ -185,7 +185,7 @@ function pair_players(){
 }
 
 function tell_pairs(check){
-	sel(".match:last-child tr").forEach(e=>{
+	[...sel(".match")].pop().querySelectorAll('tr').forEach(e=>{
 		const td = sel("td", e)
 		if(!td.length) return  // Don't read table header.
 		say("Table" + td[0].innerText + ", " + td[1].innerText + "versus" + td[2].innerText)
