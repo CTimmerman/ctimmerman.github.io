@@ -5,7 +5,7 @@ window.onbeforeunload = () => false
 
 let match_nr = 0
 let names = []
-let opponents = {}
+let played = {}
 
 const getel = (id) => document.getElementById(id)
 const int = (s) => parseInt(s) || 0
@@ -30,16 +30,23 @@ function set_colors(){
 function add_node(html){
 	const div = document.createElement('div')
 	div.innerHTML = html.trim()
-	getel('content').appendChild(div.firstChild)  // adding to innerHTML clears inputs
+	getel('content').appendChild(div.firstChild)  // Adding to innerHTML clears inputs.
 }
 
-function show_scores(){
+function rank_players(){
 	const scores = {}
 	const wins = {}
 	const draws = {}
 	const losses = {}
 	const resistance = {}
 	const neustadtl_scores = {}
+
+	for(const name of names){
+		for(const d of [scores, resistance, neustadtl_scores]) d[name] = 0
+		for(const d of [wins, draws, losses]) d[name] = []
+		if(!(name in played)) played[name] = new Set()
+	}
+
 	const rows = [...sel(".match tr")].filter(e => e.querySelector("td"))
 	for(const row of rows){
 		for(let player=0; player < 2; ++player){
@@ -47,9 +54,7 @@ function show_scores(){
 			const opponent = sel("td", row)[1 + (1-player)].innerText
 			let [p1, p2] = [...sel("input:disabled", row)].map(e => int(e.value))
 			if(player == 1) [p1, p2] = [p2, p1]
-			for(const d of [scores, resistance]) if(!(name in d)) d[name] = 0
-			for(const d of [wins, draws, losses]) if(!(name in d)) d[name] = []
-			if(p1 !== undefined && p2 !== undefined){  // skip enabled inputs
+			if(p1 !== undefined && p2 !== undefined){
 				scores[name] += p1
 				resistance[name] += p2
 				if(p1 > p2)
@@ -61,13 +66,13 @@ function show_scores(){
 			}
 		}
 	}
+
 	for(const name of names){
-		neustadtl_scores[name] = 0
 		for(const opponent of wins[name]) neustadtl_scores[name] += scores[opponent]
 		for(const opponent of draws[name]) neustadtl_scores[name] += 0.5 * scores[opponent]
 	}
 	const ranking = names.map((key, index) => {
-			return [-scores[key], -wins[key].length, -draws[key].length, losses[key].length, -neustadtl_scores[key], -resistance[key], index, key]  // if tied, index keeps status quo
+			return [-scores[key], -wins[key].length, -draws[key].length, losses[key].length, -neustadtl_scores[key], -resistance[key], index, key]  // If tied, index keeps status quo.
 		}
 	)
 	ranking.sort((a, b) => {
@@ -117,51 +122,66 @@ function show_scores(){
 
 const shuffled = (arr) => arr.map(e => [Math.random(), e]).sort().map(a => a[1])
 
-function start_match(){
+function pair_players(){
+	if(match_nr && !confirm("End current match and start a new one?")) return
 	sel("#content input").forEach(e => e.disabled = true)
-	// pair players by order
+
 	if(match_nr == 0){
 		names = shuffled(getel("names").innerText.trim().split('\n'))
 		if(names.length % 2) names.push('!bye!')
+		rank_players()
 	}else{
-		const new_names = []
-		console.log("Shifting", names)
-		while(name = names.shift()){
-			new_names.push(name)
-			console.log("Pushed", name, "played", opponents[name])
-			for(let i = 0; i < names.length; ++i){
-				console.log("vs", names[i], "?")
-				if(!opponents[name].has(names[i])){
-					new_names.push(names[i])
-					names.splice(i, 1)  // remove opponent name
-					console.log("YES!")
+		const opponent_sets = Object.values(played)
+		if(opponent_sets.length && opponent_sets[0].size > names.length-2){
+			if(confirm("All pairs have played. Still add a new round?")){
+				played = {}
+			}else{
+				rank_players()
+				return
+			}
+		}
+		rank_players()
+		let old_names = []
+		let boost = 0
+		while(1){
+			//console.log("Pairing", names)
+			var new_names = []
+			for(var i=0; i < names.length; ++i){
+				let player = names[i]
+				if(new_names.includes(player)) continue
+				new_names.push(player)
+				let opponent = names.find(name => name != player && !played[player].has(name) && !new_names.includes(name))
+				if(!opponent){
+					++boost
+					//console.log(`Move unmatched player ${player} up ${boost}`)
+					names[i] = names[i-boost]
+					names[i-boost] = player
 					break
 				}
+				new_names.push(opponent)
+				//console.log("Opponent is", opponent)
 			}
+			if(i == names.length) break
+			if(old_names == names){
+				console.log("NO CHANGE!", old_names, names)
+				break
+			}
+			old_names = names.slice()  // By value, not reference.
 		}
 		names = new_names
 	}
-	const opponent_sets = Object.values(opponents)
-	if(opponent_sets.length && opponent_sets[0].size > names.length-2){
-		if(confirm("All pairs have played. Still add a new round?")){
-			opponents = {}
-		}else{
-			show_scores()
-			return
-		}
-	}
+
 	++match_nr
 	let html = `<table class="match"><tr><th>Table</th><th>P1</th><th>P2</th><th>P1 score</th><th>P2 score</th></tr>`
-	for(let i=1; i <= names.length / 2; ++i){
-		const p1 = names[(i-1)*2]
-		const p2 = names[(i-1)*2+1]
-		if(p1 in opponents){ opponents[p1].add(p2) }else{ opponents[p1] = new Set([p2]) }
-		if(p2 in opponents){ opponents[p2].add(p1) }else{ opponents[p2] = new Set([p1]) }
-		html += `<tr><td>${i}</td><td>${p1}</td><td>${p2}</td><td><input size="1" maxlength="2"></td><td><input size="1" maxlength="2" ${p2 == "!bye!" ? "disabled" : ""}></td></tr>`
+	for(let i=0; i < names.length / 2; ++i){
+		const p1 = names[i*2]
+		const p2 = names[i*2+1]
+		if(p1 in played){ played[p1].add(p2) }else{ played[p1] = new Set([p2]) }
+		if(p2 in played){ played[p2].add(p1) }else{ played[p2] = new Set([p1]) }
+		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td><input size="1" maxlength="2"></td><td><input size="1" maxlength="2" ${p2 == "!bye!" ? "disabled" : ""}></td></tr>`
 	}
 	html += "</table>"
 	add_node(html)
-	show_scores()
 }
 
 function tell_pairs(check){

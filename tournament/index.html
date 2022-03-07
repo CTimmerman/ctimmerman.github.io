@@ -1,25 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Group Tournament Ranking System 2022-03-01, by Cees Timmerman</title>
+	<title>Group Tournament Ranking System 2022-03-07, by Cees Timmerman</title>
 	<style>
-	body { color: black; background-color: yellowgreen; }
-	input { text-align: center; }
-	table {
-		border: none;
-		border-spacing: 0;
-		text-align: center;
-		width: 100%;
-	}
-	.match table { text-align: left!important; }
-	td, th { border: 1px outset; }
-	th { background-color: rgba(255, 255, 255, 0.4); }
-	tr:nth-child(odd) { background-color: rgba(255, 255, 255, 0.2); }
+		body {
+			color: black;
+			background-color: yellowgreen;
+		}
+
+		input {
+			text-align: center;
+		}
+
+		table {
+			border: none;
+			border-spacing: 0;
+			text-align: center;
+			width: 100%;
+		}
+
+		.match table {
+			text-align: left !important;
+		}
+
+		td,
+		th {
+			border: 1px outset;
+		}
+
+		th {
+			background-color: rgba(255, 255, 255, 0.4);
+		}
+
+		tr:nth-child(odd) {
+			background-color: rgba(255, 255, 255, 0.2);
+		}
 	</style>
 	<script src="tournament.js"></script>
 </head>
+
 <body onhashchange="set_colors()" onload="set_colors()">
 	<div id="names">
 		<ol contentEditable="true">
@@ -29,9 +51,11 @@
 		</ol>
 	</div>
 	<div>
-		<input type="button" onclick="start_match()" value="Pair players"> <input type="button" onclick="tell_pairs()" value="Announce pairings">
+		<input type="button" onclick="pair_players()" value="Pair players">
+		<input type="button" onclick="tell_pairs()" value="Announce pairings">
 		<br><input id="duration" title="Match duration (hh:mm)" size="6" maxlength="6" value="45:00">
-		<input type="button" onclick="start_timer()" value="Start timer"> <input type="button" onclick="stop_timer()" value="Stop timer">
+		<input type="button" onclick="start_timer()" value="Start timer">
+		<input type="button" onclick="stop_timer()" value="Stop timer">
 	</div>
 	<video loop id="woke" style="height:1px; width:1px">
 		<source src="silent.ogx" type="audio/ogg">
@@ -39,4 +63,5 @@
 	</video>
 	<div id="content"></div>
 </body>
+
 </html>
