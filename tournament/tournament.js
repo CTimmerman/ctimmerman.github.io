@@ -126,13 +126,20 @@ function rank_players(){
 
 const shuffled = (arr) => arr.map(e => [Math.random(), e]).sort().map(a => a[1])
 
+function shuffle_players(){
+	const ul = document.querySelector('ol')
+	for(let i = ul.children.length; i >= 0; --i){
+		ul.appendChild(ul.children[Math.random() * i | 0])
+	}
+}
+
 function pair_players(){
 	if(match_nr && !confirm("End current match and start a new one?")) return
 	stop_timer()
 	sel("#content input").forEach(e => e.replaceWith(make_node("<span class='score'>" + (e.value || 0) + "</span>")))
 
 	if(match_nr == 0){
-		names = shuffled(getel("names").innerText.trim().split('\n'))
+		names = [...sel('li')].map(e => e.innerText)
 		if(names.length % 2) names.push('!bye!')
 		rank_players()
 	}else{

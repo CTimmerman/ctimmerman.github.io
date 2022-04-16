@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Group Tournament Ranking System 2022-03-07, by Cees Timmerman</title>
+	<title>Group Tournament Ranking System 2022-04-16, by Cees Timmerman</title>
 	<style>
 		body {
 			color: black;
@@ -44,11 +44,14 @@
 
 <body onhashchange="set_colors()" onload="set_colors()">
 	<div id="names">
+		<h3>Enter Players</h3>
 		<ol contentEditable="true">
 			<li>Player 1</li>
 			<li>Player 2</li>
 			<li>Player 3</li>
 		</ol>
+		<input type="button" onclick="shuffle_players()" value="Shuffle">
+		<hr>
 	</div>
 	<div>
 		<input type="button" onclick="pair_players()" value="Pair players">
