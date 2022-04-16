@@ -247,3 +247,8 @@ function tick(){
 	timer.style.backgroundColor = c
 	if(s) say(s)
 }
+
+function init(){
+	set_colors()
+	getel("date").innerHTML = new Date()
+}
