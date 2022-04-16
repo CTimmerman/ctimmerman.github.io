@@ -4,18 +4,25 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
+	<link rel="icon"
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
 	<title>Group Tournament Ranking System</title>
 	<style>
 		body {
 			color: black;
 			background-color: yellowgreen;
+			margin: 0;
 			text-align: center;
+		}
+
+		div {
+			margin: 0.3rem;
 		}
 
 		input {
 			text-align: center;
 		}
+
 		ol {
 			list-style-position: inside;
 			padding: 0;
@@ -64,7 +71,9 @@
 	<div>
 		<input type="button" onclick="pair_players()" value="Pair players">
 		<input type="button" onclick="tell_pairs()" value="Announce pairings">
-		<input id="duration" title="Match duration (hh:mm)" size="6" maxlength="6" value="45:00">
+	</div>
+	<div>
+		<input type="text" id="duration" title="Match duration (hh:mm)" size="4" maxlength="6" value="45:00">
 		<input type="button" onclick="toggle_timer()" value="Start timer" id="btn_timer">
 	</div>
 	<video loop id="woke" style="height:1px; width:1px">
