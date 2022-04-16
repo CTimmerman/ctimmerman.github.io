@@ -139,7 +139,7 @@ function pair_players(){
 	sel("#content input").forEach(e => e.replaceWith(make_node("<span class='score'>" + (e.value || 0) + "</span>")))
 
 	if(match_nr == 0){
-		names = [...sel('li')].map(e => e.innerText)
+		names = [...sel('li')].map(e => e.innerText).filter(s => s.trim() != '')
 		if(names.length % 2) names.push('!bye!')
 		rank_players()
 	}else{
