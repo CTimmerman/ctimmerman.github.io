@@ -3,11 +3,14 @@
 // Prevent accidental reload on swipe up.
 window.onbeforeunload = () => false
 
-let BYE = '!bye!'
 let match_nr = 0
 let names = []
 let played = {}
+let points_per_win = 3
+let points_per_draw = 1
+let points_per_loss = 0
 
+const BYE = '!bye!'
 const getel = (id) => document.getElementById(id)
 const int = (s) => parseInt(s) || 0
 const sel = (q, e=document) => e.querySelectorAll(q)
@@ -66,18 +69,23 @@ function rank_players(){
 			let [p1, p2] = [...sel(".score", row)].map(e => int(e.innerText))
 			if(player == 1) [p1, p2] = [p2, p1]
 			if(p1 !== undefined && p2 !== undefined){
-				scores[name] += p1
-				resistance[name] += p2
-				if(p1 > p2)
+				if(p1 > p2){
 					wins[name].push(opponent)
-				else if (p1 == p2)
+					scores[name] += points_per_win
+					resistance[name] += points_per_loss
+				}else if (p1 == p2){
 					draws[name].push(opponent)
-				else
+					scores[name] += points_per_draw
+					resistance[name] += points_per_draw
+				}else{
 					losses[name].push(opponent)
+					scores[name] += points_per_loss
+					resistance[name] += points_per_win
+				}
 			}
 		}
 	}
-
+	console.log("wins", wins, "draws", draws, "losses", losses)
 	for(const name of names){
 		for(const opponent of wins[name]) neustadtl_scores[name] += scores[opponent]
 		for(const opponent of draws[name]) neustadtl_scores[name] += 0.5 * scores[opponent]
@@ -95,7 +103,11 @@ function rank_players(){
 		}
 	})
 	names = ranking.map(a => a[a.length-1])
-	let html = "<table><th>Rank</th><th>Player</th><th>Score</th><th>Wins</th><th>Draws</th><th>Losses</th><th>Neustadtl score</th><th>Resistance</th></tr>"
+	let html = `<table><th>Rank</th><th>Player</th><th>Score</th>
+	<th>Wins (<span contentEditable onblur='points_per_win = int(this.innerText); rank_players()'>${points_per_win}</span> pt)</th>
+	<th>Draws (<span contentEditable onblur='points_per_draw = int(this.innerText); rank_players()'>${points_per_draw}</span> pt)</th>
+	<th>Losses (<span contentEditable onblur='points_per_loss = int(this.innerText); rank_players()'>${points_per_loss}</span> pt)</th>
+	<th>Neustadtl score</th><th>Resistance</th></tr>`
 	let rank = 0
 	let prev = []
 	for(let i in ranking){
@@ -112,11 +124,11 @@ function rank_players(){
 	// Based on https://stackoverflow.com/a/49041392/819417
 	function sort_column(e){
 		const th = e.target
+		if(th.tagName !== "TH") return
 		const table = th.closest('table')
 		const getCellValue = (tr, idx) => (
 			tr.children[idx].innerText ||
-			tr.children[idx].textContent ||
-			''
+			tr.children[idx].textContent
 		)
 		const comparer = (idx, asc) => (a, b) => (
 			(v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
@@ -127,7 +139,13 @@ function rank_players(){
 		const up = '\u2191'
 		const down = '\u2193'
 		for(const h of th.parentNode.children){
-			h.innerText = h.innerText.replace(new RegExp(`(.*?) ?(${up}|${down})?$`), '$1 ' + (h !== th? '' : th.asc? up : down))
+			let a = sel('.arrow', h)
+			if(!a.length){
+				const span = document.createElement('span')
+				span.className = 'arrow'
+				h.appendChild(span)
+			}
+			sel('.arrow', h)[0].innerText = (h !== th? '' : th.asc? up : down)
 		}
 	}
 	document.querySelectorAll('th').forEach(th => th.onclick = sort_column)
@@ -144,7 +162,7 @@ function shuffle_players(){
 
 function pair_players(){
 	if(match_nr && [...sel('.match .score')].slice(-names.length).map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
-		alert("Latest match scores incomplete.")
+		alert("Last match results incomplete.")
 		return
 	}
 	stop_timer()
@@ -186,7 +204,7 @@ function pair_players(){
 	}
 
 	++match_nr
-	let html = `<table class='match' onkeyup='rank_players()'><tr><th>Table</th><th>P1</th><th>P2</th><th>P1 score</th><th>P2 score</th></tr>`
+	let html = `<table class='match' onkeyup='rank_players()'><tr><th>Table</th><th>P1</th><th>P2</th><th>P1 result</th><th>P2 result</th></tr>`
 	for(let i=0; i < names.length / 2; ++i){
 		const p1 = names[i*2]
 		const p2 = names[i*2+1]
