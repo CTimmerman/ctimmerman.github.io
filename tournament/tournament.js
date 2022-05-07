@@ -12,6 +12,7 @@ let points_per_loss = 0
 
 const BYE = '!bye!'
 const getel = (id) => document.getElementById(id)
+const float = (s) => parseFloat(s) || 0.0
 const int = (s) => parseInt(s) || 0
 const sel = (q, e=document) => e.querySelectorAll(q)
 
@@ -72,15 +73,12 @@ function rank_players(){
 				if(p1 > p2){
 					wins[name].push(opponent)
 					scores[name] += points_per_win
-					resistance[name] += points_per_loss
 				}else if (p1 == p2){
 					draws[name].push(opponent)
 					scores[name] += points_per_draw
-					resistance[name] += points_per_draw
 				}else{
 					losses[name].push(opponent)
 					scores[name] += points_per_loss
-					resistance[name] += points_per_win
 				}
 			}
 		}
@@ -89,6 +87,7 @@ function rank_players(){
 	for(const name of names){
 		for(const opponent of wins[name]) neustadtl_scores[name] += scores[opponent]
 		for(const opponent of draws[name]) neustadtl_scores[name] += 0.5 * scores[opponent]
+		for(const opponent of played[name]) resistance[name] += scores[opponent]
 	}
 	const ranking = names.map((key, index) => {
 			return [-scores[key], -wins[key].length, -draws[key].length, losses[key].length, -neustadtl_scores[key], -resistance[key], index, key]  // If tied, index keeps status quo.
@@ -104,9 +103,9 @@ function rank_players(){
 	})
 	names = ranking.map(a => a[a.length-1])
 	let html = `<table><th>Rank</th><th>Player</th><th>Score</th>
-	<th>Wins <span contentEditable onblur='points_per_win = int(this.innerText); rank_players()'>${points_per_win}</span>pt</th>
-	<th>Draws <span contentEditable onblur='points_per_draw = int(this.innerText); rank_players()'>${points_per_draw}</span>pt</th>
-	<th>Losses <span contentEditable onblur='points_per_loss = int(this.innerText); rank_players()'>${points_per_loss}</span>pt</th>
+	<th>Wins <span contentEditable onblur='points_per_win = float(this.innerText); rank_players()'>${points_per_win}</span>pt</th>
+	<th>Draws <span contentEditable onblur='points_per_draw = float(this.innerText); rank_players()'>${points_per_draw}</span>pt</th>
+	<th>Losses <span contentEditable onblur='points_per_loss = float(this.innerText); rank_players()'>${points_per_loss}</span>pt</th>
 	<th>Neustadtl score</th><th>Resistance</th></tr>`
 	let rank = 0
 	let prev = []
