@@ -134,9 +134,13 @@ function shuffle_players(){
 }
 
 function pair_players(){
+	if(match_nr && [...sel('.match:last-child .score')].map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes('!bye!')? 1 : 0){
+		alert("Latest match scores incomplete.")
+		return
+	}
+	
 	if(match_nr && !confirm("End current match and start a new one?")) return
 	stop_timer()
-	sel("#content input").forEach(e => e.replaceWith(make_node("<span class='score'>" + (e.value || 0) + "</span>")))
 
 	if(match_nr == 0){
 		names = [...sel('li')].map(e => e.innerText).filter(s => s.trim() != '')
@@ -175,13 +179,13 @@ function pair_players(){
 	}
 
 	++match_nr
-	let html = `<table class="match"><tr><th>Table</th><th>P1</th><th>P2</th><th>P1 score</th><th>P2 score</th></tr>`
+	let html = `<table class='match' onkeyup='rank_players()'><tr><th>Table</th><th>P1</th><th>P2</th><th>P1 score</th><th>P2 score</th></tr>`
 	for(let i=0; i < names.length / 2; ++i){
 		const p1 = names[i*2]
 		const p2 = names[i*2+1]
 		if(p1 in played){ played[p1].add(p2) }else{ played[p1] = new Set([p2]) }
 		if(p2 in played){ played[p2].add(p1) }else{ played[p2] = new Set([p1]) }
-		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td><input size="1" maxlength="2"></td><td><input size="1" maxlength="2" ${p2 == "!bye!" ? "disabled" : ""}></td></tr>`
+		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td class='score' contentEditable></td><td class='score' ${p2 == "!bye!" ? "" : "contentEditable"}></td></tr>`
 	}
 	html += "</table>"
 	add_node(html)
