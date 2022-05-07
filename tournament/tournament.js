@@ -123,7 +123,8 @@ function rank_players(){
 
 	// Based on https://stackoverflow.com/a/49041392/819417
 	function sort_column(e){
-		const th = e.target
+		let th = e.target
+		if(th.className === 'arrow') th = th.parentNode 
 		if(th.tagName !== "TH") return
 		const table = th.closest('table')
 		const getCellValue = (tr, idx) => (
