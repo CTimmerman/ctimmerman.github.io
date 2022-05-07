@@ -104,9 +104,9 @@ function rank_players(){
 	})
 	names = ranking.map(a => a[a.length-1])
 	let html = `<table><th>Rank</th><th>Player</th><th>Score</th>
-	<th>Wins (<span contentEditable onblur='points_per_win = int(this.innerText); rank_players()'>${points_per_win}</span> pt)</th>
-	<th>Draws (<span contentEditable onblur='points_per_draw = int(this.innerText); rank_players()'>${points_per_draw}</span> pt)</th>
-	<th>Losses (<span contentEditable onblur='points_per_loss = int(this.innerText); rank_players()'>${points_per_loss}</span> pt)</th>
+	<th>Wins <span contentEditable onblur='points_per_win = int(this.innerText); rank_players()'>${points_per_win}</span>pt</th>
+	<th>Draws <span contentEditable onblur='points_per_draw = int(this.innerText); rank_players()'>${points_per_draw}</span>pt</th>
+	<th>Losses <span contentEditable onblur='points_per_loss = int(this.innerText); rank_players()'>${points_per_loss}</span>pt</th>
 	<th>Neustadtl score</th><th>Resistance</th></tr>`
 	let rank = 0
 	let prev = []
@@ -204,7 +204,7 @@ function pair_players(){
 	}
 
 	++match_nr
-	let html = `<table class='match' onkeyup='rank_players()'><tr><th>Table</th><th>P1</th><th>P2</th><th>P1 result</th><th>P2 result</th></tr>`
+	let html = `<table class='match' onkeyup='rank_players()'><tr><th>Table</th><th>P1</th><th>P2</th><th>P1 games</th><th>P2 games</th></tr>`
 	for(let i=0; i < names.length / 2; ++i){
 		const p1 = names[i*2]
 		const p2 = names[i*2+1]
