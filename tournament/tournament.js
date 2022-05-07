@@ -3,7 +3,7 @@
 // Prevent accidental reload on swipe up.
 window.onbeforeunload = () => false
 
-let BYE = 'Zzze bye!'
+let BYE = '!bye!'
 let match_nr = 0
 let names = []
 let played = {}
@@ -87,6 +87,8 @@ function rank_players(){
 		}
 	)
 	ranking.sort((a, b) => {
+		if(a.slice(-1) == BYE) return 1
+		if(b.slice(-1) == BYE) return -1
 		for(const i in a){
 			if(a[i] == b[i]) continue
 			return a[i] - b[i]
@@ -141,12 +143,10 @@ function shuffle_players(){
 }
 
 function pair_players(){
-	if(match_nr && [...sel('.match:last-child .score')].map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
+	if(match_nr && [...sel('.match .score')].slice(-names.length).map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
 		alert("Latest match scores incomplete.")
 		return
 	}
-	
-	if(match_nr && !confirm("End current match and start a new one?")) return
 	stop_timer()
 
 	if(match_nr == 0){
