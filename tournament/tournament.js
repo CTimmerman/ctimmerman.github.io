@@ -3,7 +3,7 @@
 // Prevent accidental reload on swipe up.
 window.onbeforeunload = () => false
 
-let BYE = '!bye!'
+let BYE = 'Zzze bye!'
 let match_nr = 0
 let names = []
 let played = {}
