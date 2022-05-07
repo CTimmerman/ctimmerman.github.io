@@ -3,6 +3,7 @@
 // Prevent accidental reload on swipe up.
 window.onbeforeunload = () => false
 
+let BYE = '!bye!'
 let match_nr = 0
 let names = []
 let played = {}
@@ -19,6 +20,12 @@ function say(s, rate=1.0, pitch=1.0, lang="en-US"){
 	u.pitch = pitch
 	u.rate = rate
 	ss.speak(u)
+}
+
+function egg(s){
+	let a = [...Array(13)].map(_ => '0123456789abcdef'[Math.floor(Math.random() * 16)])
+	a[6] = '&#'
+	window.location.hash = s? s : '##' + a.join('')
 }
 
 function set_colors(){
@@ -92,7 +99,7 @@ function rank_players(){
 	for(let i in ranking){
 		let a = ranking[i]
 		let name = a[a.length-1]
-		if(name == '!bye!') continue
+		if(name == BYE) continue
 		if(a.slice(0, a.length-2) !=''+ prev.slice(0, a.length-2)) ++rank
 		html += `<tr><td>${rank}</td><td>${name}</td><td>${-a[0]}</td><td>${-a[1]}</td><td>${-a[2]}</td><td>${a[3]}</td><td>${-a[4]}</td><td>${-a[5]}</td></tr>`
 		prev = a
@@ -107,7 +114,7 @@ function rank_players(){
 		const getCellValue = (tr, idx) => (
 			tr.children[idx].innerText ||
 			tr.children[idx].textContent ||
-			int(tr.children[idx].querySelector('input').value)
+			''
 		)
 		const comparer = (idx, asc) => (a, b) => (
 			(v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
@@ -134,7 +141,7 @@ function shuffle_players(){
 }
 
 function pair_players(){
-	if(match_nr && [...sel('.match:last-child .score')].map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes('!bye!')? 1 : 0){
+	if(match_nr && [...sel('.match:last-child .score')].map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
 		alert("Latest match scores incomplete.")
 		return
 	}
@@ -144,7 +151,7 @@ function pair_players(){
 
 	if(match_nr == 0){
 		names = [...sel('li')].map(e => e.innerText).filter(s => s.trim() != '')
-		if(names.length % 2) names.push('!bye!')
+		if(names.length % 2) names.push(BYE)
 		rank_players()
 	}else{
 		const opponent_sets = Object.values(played)
@@ -185,7 +192,7 @@ function pair_players(){
 		const p2 = names[i*2+1]
 		if(p1 in played){ played[p1].add(p2) }else{ played[p1] = new Set([p2]) }
 		if(p2 in played){ played[p2].add(p1) }else{ played[p2] = new Set([p1]) }
-		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td class='score' contentEditable></td><td class='score' ${p2 == "!bye!" ? "" : "contentEditable"}></td></tr>`
+		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td class='score' contentEditable></td><td class='score' ${p2 == BYE ? "" : "contentEditable"}></td></tr>`
 	}
 	html += "</table>"
 	add_node(html)
