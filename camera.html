@@ -10,7 +10,6 @@
 			color: white;
 		}
 
-		canvas,
 		img,
 		video {
 			border: 1px solid red;
@@ -46,7 +45,7 @@
 					videoSelect.appendChild(option)
 				}
 			})
-		}).catch(err => console.log(err.name + ": " + err.message))
+		}).catch(err => console.log(err))
 
 		function setSource() {
 			const audioSource = audioSelect.value
@@ -55,8 +54,8 @@
 				audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
 				video: { deviceId: videoSource ? { exact: videoSource } : undefined },
 			}
-			videoElement.srcObject = navigator.mediaDevices.getUserMedia(query)
-			.then(stream => document.getElementById('video').srcObject = stream)
+			navigator.mediaDevices.getUserMedia(query)
+			.then(src => videoElement.srcObject = src)
 			.catch(err => console.log(err))
 		}
 
