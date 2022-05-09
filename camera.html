@@ -50,7 +50,7 @@
 		function setSource() {
 			const audioSource = audioSelect.value
 			const videoSource = videoSelect.value
-			const constraints = {
+			const query = {
 				audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
 				video: { deviceId: videoSource ? { exact: videoSource } : undefined },
 			}
