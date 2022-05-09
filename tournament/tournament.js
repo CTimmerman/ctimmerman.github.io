@@ -11,9 +11,9 @@ let points_per_draw = 1
 let points_per_loss = 0
 
 const BYE = '!bye!'
-const getel = (id) => document.getElementById(id)
 const float = (s) => parseFloat(s) || 0.0
 const int = (s) => parseInt(s) || 0
+const el = (id) => document.getElementById(id)
 const sel = (q, e=document) => e.querySelectorAll(q)
 
 function say(s, rate=1.0, pitch=1.0, lang="en-US"){
@@ -27,15 +27,15 @@ function say(s, rate=1.0, pitch=1.0, lang="en-US"){
 }
 
 function egg(s){
-	let a = [...Array(13)].map(_ => '0123456789abcdef'[Math.floor(Math.random() * 16)])
+	const a = [...Array(13)].map(_ => '0123456789abcdef'[Math.floor(Math.random() * 16)])
 	a[6] = '&#'
 	window.location.hash = s? s : '##' + a.join('')
 }
 
 function set_colors(){
 	const [bg, fg] = window.location.hash.slice(1).split('&')
-	document.body.style.color = fg
 	document.body.style.backgroundColor = bg
+	document.body.style.color = fg
 }
 
 function make_node(html){
@@ -45,7 +45,7 @@ function make_node(html){
 }
 
 function add_node(html){
-	getel('content').appendChild(make_node(html))  // Adding to innerHTML clears inputs.
+	el('content').appendChild(make_node(html))  // Adding to innerHTML clears inputs.
 }
 
 function rank_players(){
@@ -83,7 +83,7 @@ function rank_players(){
 			}
 		}
 	}
-	console.log("wins", wins, "draws", draws, "losses", losses)
+
 	for(const name of names){
 		for(const opponent of wins[name]) neustadtl_scores[name] += scores[opponent]
 		for(const opponent of draws[name]) neustadtl_scores[name] += 0.5 * scores[opponent]
@@ -118,7 +118,7 @@ function rank_players(){
 		prev = a
 	}
 	html += "</table>"
-	getel("names").innerHTML = html
+	el("names").innerHTML = html
 
 	// Based on https://stackoverflow.com/a/49041392/819417
 	function sort_column(e){
@@ -231,19 +231,19 @@ function toggle_timer(){
 }
 function start_timer(){
 	timer = setInterval(tick, 1000)
-	getel("btn_timer").value = "Stop timer"
-	getel("woke").play()
+	el("btn_timer").value = "Stop timer"
+	el("woke").play()
 	const end_date = new Date()
-	const [m, s] = getel("duration").value.split(":").map(e => int(e))
+	const [m, s] = el("duration").value.split(":").map(e => int(e))
 	end_date.setSeconds(end_date.getSeconds() + s + 60*m)
 	const match_info = `Match ${match_nr} ends at ${end_date.toTimeString().slice(0, 5)}.`
 	say(match_info, 0.9)
-	add_node(`<h3>${match_info} <span class="timer">Time left: <span class="time">${getel("duration").value}</span></h3>`)
+	add_node(`<h3>${match_info} <span class="timer">Time left: <span class="time">${el("duration").value}</span></h3>`)
 }
 function stop_timer(){
 	clearInterval(timer)
 	timer = null
-	getel("btn_timer").value = "Start timer"
+	el("btn_timer").value = "Start timer"
 }
 function tick(){
 	let timer = sel(".timer")
@@ -279,5 +279,5 @@ function tick(){
 
 function init(){
 	set_colors()
-	getel("date").innerHTML = new Date()
+	el("date").innerHTML = new Date()
 }
