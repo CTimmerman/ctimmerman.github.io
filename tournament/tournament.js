@@ -36,6 +36,7 @@ function set_colors(){
 	const [bg, fg] = window.location.hash.slice(1).split('&')
 	document.body.style.backgroundColor = bg
 	document.body.style.color = fg
+	;[...document.querySelectorAll('hr, input, table')].forEach(e => e.style.borderColor = fg)
 }
 
 function make_node(html){
@@ -119,7 +120,11 @@ function rank_players(){
 	}
 	html += "</table>"
 	el("names").innerHTML = html
+	set_colors()
+	sortable_tables()
+}
 
+function sortable_tables(){
 	// Based on https://stackoverflow.com/a/49041392/819417
 	function sort_column(e){
 		let th = e.target
@@ -214,6 +219,8 @@ function pair_players(){
 	}
 	html += "</table>"
 	add_node(html)
+	set_colors()
+	sortable_tables()
 }
 
 function tell_pairs(check){

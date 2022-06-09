@@ -1,0 +1,57 @@
+body {
+	color: rgb(252, 155, 23);
+	background-color: rgb(89, 19, 25);
+	margin: 0;
+	text-align: center;
+}
+div {
+	margin: 0.3rem;
+}
+
+input {
+	color: inherit;
+	background-color: rgba(255, 255, 255, 0.4);
+	opacity: 0.9;
+	border-width: 2px;
+	border-radius: 4px;
+	cursor: pointer;
+	text-align: center;
+	font-weight: bold;
+}
+input:hover {
+	opacity: 1.0;
+}
+
+ol {
+	list-style-position: inside;
+	padding: 0;
+}
+
+span {
+	cursor: 'pointer'
+}
+
+table {
+	border: none;
+	border-spacing: 0;
+	text-align: center;
+	width: 100%;
+}
+td,
+th {
+	border: 1px outset;
+	border-color: inherit;
+}
+th {
+	background-color: rgba(255, 255, 255, 0.2);
+	cursor: pointer;
+}
+tr:nth-child(odd) {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+video {
+	height: 1px;
+	width: 1px;
+	opacity: 0.01;
+}
