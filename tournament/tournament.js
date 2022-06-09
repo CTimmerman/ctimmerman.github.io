@@ -268,20 +268,25 @@ function tick(){
 	}
 	const time = ("0"+m).slice(-2) + ":" + ("0"+s).slice(-2)
 	t.innerText = document.title = time
-	let c = timer.style.backgroundColor
+	let bc = timer.style.backgroundColor
+	let c = timer.style.color
 	s = ""
 	if(time == "00:00" && c != "red"){
-		c = "red"
+		bc = "red"
+		c = "black"
 		s = "Time. Active player finishes turn and opponent gets one last turn."
 		stop_timer()
 	}else if(time == "05:00"){
-		c = "orange"
+		bc = "orange"
+		c = "black"
 		s = "5 minutes."
 	}else if(time == "10:00"){
-		c = "yellow"
+		bc = "yellow"
+		c = "black"
 		s = "10 minutes."
 	}
-	timer.style.backgroundColor = c
+	timer.style.backgroundColor = bc
+	timer.style.color = c
 	if(s) say(s)
 }
 

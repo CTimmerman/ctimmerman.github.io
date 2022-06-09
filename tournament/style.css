@@ -3,6 +3,7 @@ body {
 	background-color: rgb(89, 19, 25);
 	margin: 0;
 	text-align: center;
+	text-shadow: 1px 1px rgb(0 0 0 / 20%);
 }
 div {
 	margin: 0.3rem;
@@ -16,6 +17,7 @@ input {
 	border-radius: 4px;
 	cursor: pointer;
 	text-align: center;
+	text-shadow: inherit;
 	font-weight: bold;
 }
 input:hover {
