@@ -33,10 +33,11 @@ function egg(s){
 }
 
 function set_colors(){
+	const bs = window.getComputedStyle(document.body)
 	const [bg, fg] = window.location.hash.slice(1).split('&')
-	document.body.style.backgroundColor = bg
-	document.body.style.color = fg
-	;[...document.querySelectorAll('hr, input, table')].forEach(e => e.style.borderColor = fg)
+	document.body.style.backgroundColor = bg || bs.backgroundColor
+	document.body.style.color = fg || bs.color
+	;[...document.querySelectorAll('hr, input, table')].forEach(e => e.style.borderColor = fg || bs.color)
 }
 
 function make_node(html){
