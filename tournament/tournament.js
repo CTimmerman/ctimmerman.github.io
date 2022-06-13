@@ -1,7 +1,7 @@
 "use strict"
 
 // Prevent accidental reload on swipe up.
-window.onbeforeunload = () => false
+onbeforeunload = () => false
 
 let match_nr = 0
 let names = []
@@ -10,31 +10,38 @@ let points_per_win = 3
 let points_per_draw = 1
 let points_per_loss = 0
 
-const BYE = '!bye!'
+const BYE = 'bye'
 const float = (s) => parseFloat(s) || 0.0
 const int = (s) => parseInt(s) || 0
 const el = (id) => document.getElementById(id)
 const sel = (q, e=document) => e.querySelectorAll(q)
 
+const saying = new Set()
 function say(s, rate=1.0, pitch=1.0, lang="en-US"){
 	// rate: [0.1, 10], pitch: [0, 2], lang: BCP 47 language tag
-	const ss = window.speechSynthesis
 	const u = new SpeechSynthesisUtterance(s)
 	u.lang = lang
 	u.pitch = pitch
 	u.rate = rate
-	ss.speak(u)
+	saying.add(u)
+	u.onend = e => {
+		saying.delete(e.utterance)
+		if(saying.size < 1) [...document.getElementsByClassName("say")].forEach(e => e.disabled = false)
+	}
+	speechSynthesis.speak(u)
+	// In case Windows speech server starts leaving out first part again every 10 seconds.
+	//speechSynthesis.speak('uh'); setTimeout(()=>speechSynthesis.speak(u), 900)
 }
 
 function egg(s){
 	const a = [...Array(13)].map(_ => '0123456789abcdef'[Math.floor(Math.random() * 16)])
 	a[6] = '&#'
-	window.location.hash = s? s : '##' + a.join('')
+	location.hash = s? s : '##' + a.join('')
 }
 
 function set_colors(){
-	const bs = window.getComputedStyle(document.body)
-	const [bg, fg] = window.location.hash.slice(1).split('&')
+	const bs = getComputedStyle(document.body)
+	const [bg, fg] = location.hash.slice(1).split('&')
 	document.body.style.backgroundColor = bg || bs.backgroundColor
 	document.body.style.color = fg || bs.color
 	;[...document.querySelectorAll('hr, input, table')].forEach(e => e.style.borderColor = fg || bs.color)
@@ -119,7 +126,7 @@ function rank_players(){
 		html += `<tr><td>${rank}</td><td>${name}</td><td>${-a[0]}</td><td>${-a[1]}</td><td>${-a[2]}</td><td>${a[3]}</td><td>${-a[4]}</td><td>${-a[5]}</td></tr>`
 		prev = a
 	}
-	html += "</table>"
+	html += '</table><br><input type="button" onclick="this.disabled = true; tell_pairs()" class="say" value="Announce pairings">'
 	el("names").innerHTML = html
 	set_colors()
 	sortable_tables()
@@ -228,7 +235,7 @@ function tell_pairs(check){
 	[...sel(".match")].pop().querySelectorAll('tr').forEach(e=>{
 		const td = sel("td", e)
 		if(!td.length) return  // Don't read table header.
-		say("Table" + td[0].innerText + ", " + td[1].innerText + "versus" + td[2].innerText)
+		say("Table " + td[0].innerText + ": " + td[1].innerText + " versus " + td[2].innerText)
 	})
 }
 

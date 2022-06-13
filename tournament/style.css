@@ -6,7 +6,28 @@ body {
 	text-shadow: 1px 1px rgb(0 0 0 / 20%);
 }
 div {
-	margin: 0.3rem;
+	margin: 1rem;
+}
+.rainbow {
+	animation: toright 8s linear infinite;
+	background: linear-gradient(-90deg, purple,red,yellow,rgb(90,255,90),cyan,rgb(100,100,255),purple);
+	background-size: 50vw 20px;
+	-webkit-background-clip: text;
+	background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.fade {
+	animation: fadein 8s linear infinite alternate;
+}
+
+@keyframes fadein {
+	0%, 2% { opacity: 0 }
+	60%, 100% { opacity: 1 }
+}
+
+@keyframes toright {
+	0% { background-position: 0 }
+	100% { background-position: 100vw }
 }
 
 input {
@@ -19,6 +40,9 @@ input {
 	text-align: center;
 	text-shadow: inherit;
 	font-weight: bold;
+}
+input:disabled{
+	opacity: 0.5 !important;
 }
 input:hover {
 	opacity: 1.0;
@@ -47,6 +71,9 @@ th {
 th {
 	background-color: rgba(255, 255, 255, 0.2);
 	cursor: pointer;
+}
+tr:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
 }
 tr:nth-child(odd) {
 	background-color: rgba(255, 255, 255, 0.2);
