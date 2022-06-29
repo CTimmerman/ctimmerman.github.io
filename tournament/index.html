@@ -4,61 +4,17 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Group Tournament Ranking System</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
-	<title>Group Tournament Ranking System</title>
-	<style>
-		body {
-			color: black;
-			background-color: yellowgreen;
-			margin: 0;
-			text-align: center;
-		}
-
-		div {
-			margin: 0.3rem;
-		}
-
-		input {
-			text-align: center;
-		}
-
-		ol {
-			list-style-position: inside;
-			padding: 0;
-		}
-
-		table {
-			border: none;
-			border-spacing: 0;
-			text-align: center;
-			width: 100%;
-		}
-
-		.match table {
-			text-align: left !important;
-		}
-
-		td,
-		th {
-			border: 1px outset;
-		}
-
-		th {
-			background-color: rgba(255, 255, 255, 0.4);
-		}
-
-		tr:nth-child(odd) {
-			background-color: rgba(255, 255, 255, 0.2);
-		}
-	</style>
+	<link rel="stylesheet" href="style.css" type="text/css" media="all">
 	<script src="tournament.js"></script>
 </head>
 
 <body onhashchange="set_colors()" onload="init()">
-	<h1>Group <span ondblclick='egg("yellowgreen&black")'>T</span>ournament <span ondblclick='egg()'>R</span>anking <span ondblclick='egg("black&white")'>S</span>ystem</h1>
-	Version 2022-05-07, by Cees Timmerman
-	<h4 id="date"></h4>
+	<h1><span onclick='egg("##591319&#fc9b17")'>G</span>roup <span onclick='egg("yellowgreen&black")'>T</span>ournament <span onclick='egg()'>R</span>anking <span onclick='egg("black&white")'>S</span>ystem</h1>
+	<div onclick="this.classList.toggle('rainbow')">Version 2022-06-13, by Cees Timmerman</div>
+	<h4 onclick="this.classList.toggle('fade')" id="date"></h4>
 	<div id="names">
 		<h3>Enter players:</h3>
 		<ol contentEditable="true">
@@ -67,19 +23,14 @@
 			<li>Player 3</li>
 		</ol>
 		<input type="button" onclick="shuffle_players()" value="Shuffle">
-		<hr>
+		<hr class="rainbow">
 	</div>
-	<div>
-		<input type="button" onclick="pair_players()" value="Pair players">
-		<input type="button" onclick="tell_pairs()" value="Announce pairings">
-	</div>
-	<div>
-		<input type="text" id="duration" title="Match duration (hh:mm)" size="4" maxlength="6" value="50:00">
-		<input type="button" onclick="toggle_timer()" value="Start timer" id="btn_timer">
-	</div>
-	<video loop id="woke" style="height:1px; width:1px">
+	<input type="button" onclick="pair_players()" value="Pair players for match">
+	<input type="text" id="duration" title="Match duration (hh:mm)" size="4" maxlength="6" value="50:00">
+	<input type="button" onclick="toggle_timer()" value="Start timer" id="btn_timer">
+	<video loop id="woke">
 		<source src="silent.ogx" type="audio/ogg">
-		Your browser does not support the audio element used to keep the page active.
+		Your browser does not support the video element used to keep the page active.
 	</video>
 	<div id="content"></div>
 </body>
