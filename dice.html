@@ -25,8 +25,9 @@
         'use strict'
         let results = document.getElementById('results')
         async function roll() {
-            let what = await prompt('Die count and type:', '1d6').toLowerCase()
-            let [count, sides] = what.split('d')
+            let what = await prompt('Die count and type:', '1d6')
+            if (!what) return
+            let [count, sides] = what.toLowerCase().split('d')
             let result = []
             let histogram = {}
             for (let i = 0; i < count; ++i) {
@@ -38,7 +39,6 @@
             let histr = ''
             for (const [k, v] of Object.entries(histogram)) histr += `${k}: ${v}, `
             histr = `<br>(${histr} total: ${result.reduce((a, b) => a + b)})`
-            console.log(histr)
             let p = document.createElement('p')
             p.innerHTML = what + ':<br>' + result.join(', ') + (count > 1 ? histr : '')
             results.append(p)
