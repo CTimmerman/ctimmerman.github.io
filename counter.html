@@ -34,7 +34,13 @@
 			color: red;
 		}
 
+		.flip {
+			color: grey;
+			float: right;
+			margin: 1.2em;
+		}
 		.name {
+			display: inline-block;
 			margin-top: 1.5em;
 		}
 		.player {
@@ -69,7 +75,7 @@
 
 <body>
 	<div id="container"></div>
-	<div onclick="add_player()" style="margin: 2em; display: inline-block">Add player</div>
+	<div onclick="add_player()" style="margin: 2em; display: inline-block; color: grey;">Add player</div>
 	<script>
 		'use strict'
 		function add_player() {
@@ -91,7 +97,8 @@
 <div class="black counter">0</div>
 <div class="red counter">0</div>
 <div class="green counter">0</div>
-<div class="name">Player ${number + 1}</div>`
+<div class="name">Player ${number + 1}</div>
+<span class="flip">↕</span>`
 			document.getElementById('container').appendChild(d);
 
 			[...document.querySelectorAll('.counter')].forEach(e => {
@@ -103,6 +110,15 @@
 			[...document.querySelectorAll('.name')].forEach(e => {
 				e.ondblclick = set
 				e.onblur = function () { this.contentEditable = false }
+			});
+			[...document.querySelectorAll('.flip')].forEach(e => {
+				e.onclick = function() {
+					console.log("flip", this)
+					let r = this.parentNode.style.transform
+					if (r == 'rotate(180deg)') r = ''
+					else r = 'rotate(180deg)'
+					this.parentNode.style.transform = r
+				}
 			})
 		}
 		function up(e) {
@@ -112,7 +128,7 @@
 			this.innerText = parseInt(this.innerText) - 1
 			e.preventDefault()
 		}
-		function set() {
+		function set(e) {
 			this.contentEditable = true
 			this.focus()
 			document.execCommand('selectAll', false, null)
