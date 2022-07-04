@@ -71,6 +71,7 @@
 	<div id="container"></div>
 	<div onclick="add_player()" style="margin:1em">Add player</div>
 	<script>
+		'use strict'
 		function add_player() {
 			const number = document.querySelectorAll('.player').length
 			const d = document.createElement('div')
@@ -98,6 +99,10 @@
 				e.oncontextmenu = down
 				e.ondblclick = set
 				e.onblur = function () { this.contentEditable = false }
+			});
+			[...document.querySelectorAll('.name')].forEach(e => {
+				e.ondblclick = set
+				e.onblur = function () { this.contentEditable = false }
 			})
 		}
 		function up(e) {
@@ -111,7 +116,6 @@
 			this.contentEditable = true
 			this.focus()
 			document.execCommand('selectAll', false, null)
-			
 		}
 	</script>
 </body>
