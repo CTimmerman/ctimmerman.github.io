@@ -1,4 +1,4 @@
-"use strict"
+'use strict'
 
 // Prevent accidental reload on swipe up.
 onbeforeunload = () => false
@@ -17,7 +17,7 @@ const el = (id) => document.getElementById(id)
 const sel = (q, e=document) => e.querySelectorAll(q)
 
 const saying = new Set()
-function say(s, rate=1.0, pitch=1.0, lang="en-US"){
+function say(s, rate=1.0, pitch=1.0, lang='en-US'){
 	// rate: [0.1, 10], pitch: [0, 2], lang: BCP 47 language tag
 	const u = new SpeechSynthesisUtterance(s)
 	u.lang = lang
@@ -26,7 +26,7 @@ function say(s, rate=1.0, pitch=1.0, lang="en-US"){
 	saying.add(u)
 	u.onend = e => {
 		saying.delete(e.utterance)
-		if(saying.size < 1) [...document.getElementsByClassName("say")].forEach(e => e.disabled = false)
+		if(saying.size < 1) [...document.getElementsByClassName('say')].forEach(e => e.disabled = false)
 	}
 	speechSynthesis.speak(u)
 	// In case Windows speech server starts leaving out first part again every 10 seconds.
@@ -44,8 +44,8 @@ function set_colors(){
 	const [bg, fg] = location.hash.slice(1).split('&')
 	document.body.style.backgroundColor = bg || bs.backgroundColor
 	document.body.style.color = fg || bs.color
-	el('alert').style.backgroundColor = bg || bs.backgroundColor
-	;[...document.querySelectorAll('hr, input, table, #alert')].forEach(e => e.style.borderColor = fg || bs.color)
+	;[...sel('.alert')].forEach(e => e.style.backgroundColor = bg || bs.backgroundColor)
+	;[...sel('hr, input, table, .alert')].forEach(e => e.style.borderColor = fg || bs.color)
 }
 
 function make_node(html){
@@ -72,12 +72,12 @@ function rank_players(){
 		if(!(name in played)) played[name] = new Set()
 	}
 
-	const rows = [...sel(".match tr")].filter(e => e.querySelector("td"))
+	const rows = [...sel('.match tr')].filter(e => e.querySelector('td'))
 	for(const row of rows){
 		for(let player=0; player < 2; ++player){
-			const name = sel("td", row)[1 + player].innerText
-			const opponent = sel("td", row)[1 + (1-player)].innerText
-			let [p1, p2] = [...sel(".score", row)].map(e => int(e.innerText))
+			const name = sel('td', row)[1 + player].innerText
+			const opponent = sel('td', row)[1 + (1-player)].innerText
+			let [p1, p2] = [...sel('.score', row)].map(e => int(e.innerText))
 			if(player == 1) [p1, p2] = [p2, p1]
 			if(p1 !== undefined && p2 !== undefined){
 				if(p1 > p2){
@@ -127,8 +127,8 @@ function rank_players(){
 		html += `<tr><td>${rank}</td><td>${name}</td><td>${-a[0]}</td><td>${-a[1]}</td><td>${-a[2]}</td><td>${a[3]}</td><td>${-a[4]}</td><td>${-a[5]}</td></tr>`
 		prev = a
 	}
-	html += '</table><br><input type="button" onclick="this.disabled = true; tell_pairs()" class="say" value="Announce pairings">'
-	el("names").innerHTML = html
+	html += `</table><br><input type='button' onclick='this.disabled = true; tell_pairs()' class='say' value='Announce pairings'>`
+	el('names').innerHTML = html
 	set_colors()
 	sortable_tables()
 }
@@ -138,7 +138,7 @@ function sortable_tables(){
 	function sort_column(e){
 		let th = e.target
 		if(th.className === 'arrow') th = th.parentNode 
-		if(th.tagName !== "TH") return
+		if(th.tagName !== 'TH') return
 		const table = th.closest('table')
 		const getCellValue = (tr, idx) => (
 			tr.children[idx].innerText ||
@@ -162,7 +162,7 @@ function sortable_tables(){
 			sel('.arrow', h)[0].innerText = (h !== th? '' : th.asc? up : down)
 		}
 	}
-	document.querySelectorAll('th').forEach(th => th.onclick = sort_column)
+	sel('th').forEach(th => th.onclick = sort_column)
 }
 
 const shuffled = (arr) => arr.map(e => [Math.random(), e]).sort().map(a => a[1])
@@ -175,14 +175,21 @@ function shuffle_players(){
 }
 
 function nonblocking_alert(msg){
-	const a = el("alert")
-	a.innerHTML = msg
-	a.parentNode.style.visibility = 'visible'
+	const ac = el('alertcontainer')
+	if (getComputedStyle(ac).visibility == 'hidden'){
+		ac.innerText = ''
+		ac.style.visibility = 'visible'
+	}
+	const d = document.createElement('div')
+	d.className = 'alert'
+	d.innerHTML = msg
+	el('alertcontainer').appendChild(d)
+	set_colors()
 }
 
 function pair_players(){
 	if(match_nr && [...sel('.match .score')].slice(-names.length).map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
-		nonblocking_alert("Last match results incomplete.")
+		nonblocking_alert('Last match results incomplete.')
 		return
 	}
 	stop_timer()
@@ -194,7 +201,7 @@ function pair_players(){
 	}else{
 		const opponent_sets = Object.values(played)
 		if(opponent_sets.length && opponent_sets[0].size > names.length-2){
-			if(confirm("All pairs have played. Still add a new round?")){
+			if(confirm('All pairs have played. Still add a new round?')){
 				played = {}
 			}else{
 				rank_players()
@@ -230,19 +237,19 @@ function pair_players(){
 		const p2 = names[i*2+1]
 		if(p1 in played){ played[p1].add(p2) }else{ played[p1] = new Set([p2]) }
 		if(p2 in played){ played[p2].add(p1) }else{ played[p2] = new Set([p1]) }
-		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td class='score' contentEditable></td><td class='score' ${p2 == BYE ? "" : "contentEditable"}></td></tr>`
+		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td class='score' contentEditable></td><td class='score' ${p2 == BYE ? '' : 'contentEditable'}></td></tr>`
 	}
-	html += "</table>"
+	html += '</table>'
 	add_node(html)
 	set_colors()
 	sortable_tables()
 }
 
 function tell_pairs(check){
-	[...sel(".match")].pop().querySelectorAll('tr').forEach(e=>{
-		const td = sel("td", e)
+	[...sel('.match')].pop().querySelectorAll('tr').forEach(e=>{
+		const td = sel('td', e)
 		if(!td.length) return  // Don't read table header.
-		say("Table " + td[0].innerText + ": " + td[1].innerText + " versus " + td[2].innerText)
+		say('Table ' + td[0].innerText + ': ' + td[1].innerText + ' versus ' + td[2].innerText)
 	})
 }
 
@@ -253,26 +260,26 @@ function toggle_timer(){
 }
 function start_timer(){
 	timer = setInterval(tick, 1000)
-	el("btn_timer").value = "Stop timer"
-	el("woke").play()
+	el('btn_timer').value = 'Stop timer'
+	el('woke').play()
 	const end_date = new Date()
-	const [m, s] = el("duration").value.split(":").map(e => int(e))
+	const [m, s] = el('duration').value.split(':').map(e => int(e))
 	end_date.setSeconds(end_date.getSeconds() + s + 60*m)
 	const match_info = `Match ${match_nr} ends at ${end_date.toTimeString().slice(0, 5)}.`
 	say(match_info, 0.9)
-	add_node(`<h3>${match_info} <span class="timer">Time left: <span class="time">${el("duration").value}</span></h3>`)
+	add_node(`<h3>${match_info} <span class='timer'>Time left: <span class='time'>${el('duration').value}</span></h3>`)
 }
 function stop_timer(){
 	clearInterval(timer)
 	timer = null
-	el("btn_timer").value = "Start timer"
+	el('btn_timer').value = 'Start timer'
 }
 function tick(){
-	let timer = sel(".timer")
+	let timer = sel('.timer')
 	if(timer.length < 1) return
 	timer = timer[timer.length-1]
-	const t = sel(".time", timer)[0]
-	let [m, s] = t.innerText.split(":")
+	const t = sel('.time', timer)[0]
+	let [m, s] = t.innerText.split(':')
 	if(s){
 		if(s > 0) s = int(s) - 1
 		else if(m > 0){
@@ -280,24 +287,24 @@ function tick(){
 			m = int(m) - 1
 		}
 	}
-	const time = ("0"+m).slice(-2) + ":" + ("0"+s).slice(-2)
+	const time = ('0'+m).slice(-2) + ':' + ('0'+s).slice(-2)
 	t.innerText = document.title = time
 	let bc = timer.style.backgroundColor
 	let c = timer.style.color
-	s = ""
-	if(time == "00:00" && c != "red"){
-		bc = "red"
-		c = "black"
-		s = "Time. Active player finishes turn and opponent gets one last turn."
+	s = ''
+	if(time == '00:00' && c != 'red'){
+		bc = 'red'
+		c = 'black'
+		s = 'Time. Active player finishes turn and opponent gets one last turn.'
 		stop_timer()
-	}else if(time == "05:00"){
-		bc = "orange"
-		c = "black"
-		s = "5 minutes."
-	}else if(time == "10:00"){
-		bc = "yellow"
-		c = "black"
-		s = "10 minutes."
+	}else if(time == '05:00'){
+		bc = 'orange'
+		c = 'black'
+		s = '5 minutes.'
+	}else if(time == '10:00'){
+		bc = 'yellow'
+		c = 'black'
+		s = '10 minutes.'
 	}
 	timer.style.backgroundColor = bc
 	timer.style.color = c
@@ -306,5 +313,5 @@ function tick(){
 
 function init(){
 	set_colors()
-	el("date").innerHTML = new Date()
+	el('date').innerHTML = new Date()
 }

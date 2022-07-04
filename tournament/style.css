@@ -53,7 +53,7 @@ th {
 	cursor: pointer;
 }
 tr:hover {
-    background: rgba(255, 255, 255, 0.5) !important;
+	background: rgba(255, 255, 255, 0.5) !important;
 }
 tr:nth-child(odd) {
 	background-color: rgba(255, 255, 255, 0.2);
@@ -73,13 +73,14 @@ video {
 	height: 100%;
 	position: fixed;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;  /* vertical */
 	justify-content: center;  /* horizontal */
 	visibility: hidden;
 	background-color: rgba(0, 0, 0, 0.5);
 }
-#alert {
-	position: fixed;
+
+.alert {
 	margin: auto;
 	border: 1px solid black;
 	border-radius: 5px;
@@ -99,7 +100,7 @@ video {
 	background-size: 50vw 20px;
 	-webkit-background-clip: text;
 	background-clip: text;
-    -webkit-text-fill-color: transparent;
+	-webkit-text-fill-color: transparent;
 }
 
 @keyframes fadein {
