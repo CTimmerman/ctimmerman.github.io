@@ -113,11 +113,8 @@
 			});
 			[...document.querySelectorAll('.flip')].forEach(e => {
 				e.onclick = function() {
-					console.log("flip", this)
-					let r = this.parentNode.style.transform
-					if (r == 'rotate(180deg)') r = ''
-					else r = 'rotate(180deg)'
-					this.parentNode.style.transform = r
+					const s = this.parentNode.style
+					s.transform = (s.transform == '') ? 'rotate(180deg)' : ''
 				}
 			})
 		}
