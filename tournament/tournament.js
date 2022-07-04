@@ -44,7 +44,8 @@ function set_colors(){
 	const [bg, fg] = location.hash.slice(1).split('&')
 	document.body.style.backgroundColor = bg || bs.backgroundColor
 	document.body.style.color = fg || bs.color
-	;[...document.querySelectorAll('hr, input, table')].forEach(e => e.style.borderColor = fg || bs.color)
+	el('alert').style.backgroundColor = bg || bs.backgroundColor
+	;[...document.querySelectorAll('hr, input, table, #alert')].forEach(e => e.style.borderColor = fg || bs.color)
 }
 
 function make_node(html){
@@ -173,9 +174,15 @@ function shuffle_players(){
 	}
 }
 
+function nonblocking_alert(msg){
+	const a = el("alert")
+	a.innerHTML = msg
+	a.parentNode.style.visibility = 'visible'
+}
+
 function pair_players(){
 	if(match_nr && [...sel('.match .score')].slice(-names.length).map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
-		alert("Last match results incomplete.")
+		nonblocking_alert("Last match results incomplete.")
 		return
 	}
 	stop_timer()
