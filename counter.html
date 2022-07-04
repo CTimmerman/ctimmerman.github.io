@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Life Counter by Cees Timmerman, 2022-07-05</title>
+	<link rel="icon"
+	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+	<style>
+		body {
+			background-color: black;
+			color: white;
+			font-family: cursive;
+			font-size: 150%;
+			margin: 0;
+			text-align: center;
+		}
+
+		#container {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-content: stretch;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.life {
+			background: radial-gradient(white 40%, transparent);
+			color: black;
+		}
+		.life:after {
+			content: '♥';
+			color: red;
+		}
+
+		.name {
+			margin-top: 1.5em;
+		}
+		.player {
+			min-width: 50%;
+		}
+
+		.counter {
+			border-radius: 1em;
+			margin: 0.7em 0.2em;
+			padding: 0.7em;
+			text-align: center;
+			float: left;
+		}
+		.white {
+			background: radial-gradient(rgb(255, 255, 180) 25%, black);
+			color: black;
+		}
+		.blue {
+			background: radial-gradient(rgb(0, 120, 255) 25%, black);
+		}
+		.black {
+			background: radial-gradient(rgb(50, 50, 50) 25%, black)
+		}
+		.red {
+			background: radial-gradient(rgb(240, 60, 60) 25%, black);
+		}
+		.green {
+			background: radial-gradient(rgb(20, 180, 20) 25%, black);
+		}
+	</style>
+</head>
+
+<body>
+	<div id="container"></div>
+	<div onclick="add_player()" style="margin:1em">Add player</div>
+	<script>
+		function add_player() {
+			const number = document.querySelectorAll('.player').length
+			const d = document.createElement('div')
+			d.className = 'player'
+			const colors = [
+				'red',
+				'yellow',
+				'green',
+				'cyan',
+				'blue',
+			]
+			d.style.background = `radial-gradient(${colors[number % colors.length]}, transparent)`
+			d.innerHTML = `
+<div class="life counter">20</div>
+<div class="white counter">0</div>
+<div class="blue counter">0</div>
+<div class="black counter">0</div>
+<div class="red counter">0</div>
+<div class="green counter">0</div>
+<div class="name">Player ${number}</div>`
+			document.getElementById('container').appendChild(d);
+
+			[...document.querySelectorAll('.counter')].forEach(e => {
+				e.onclick = up
+				e.oncontextmenu = down
+				e.ondblclick = set
+				e.onblur = function () { this.contentEditable = false }
+			})
+		}
+		function up(e) {
+			this.innerText = parseInt(this.innerText) + 1
+		}
+		function down(e) {
+			this.innerText = parseInt(this.innerText) - 1
+			e.preventDefault()
+		}
+		function set() {
+			this.contentEditable = true
+			this.focus()
+			document.execCommand('selectAll', false, null)
+			
+		}
+	</script>
+</body>
+
+</html>
