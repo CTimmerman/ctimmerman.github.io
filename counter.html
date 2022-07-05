@@ -62,15 +62,36 @@
 			text-align: center;
 			float: left;
 		}
+		@media only screen and (min-width: 375px) and (max-width: 1025px) {
+			.counter {
+				margin: 0.7em 0em;
+				padding: 0.7em 0.4em;
+			}
+			.flip {
+				margin: 1.18em 0.2em 0 0;
+			}
+		}
+		@media only screen and (max-width: 375px) {
+			.counter {
+				margin: 0.7em 0em;
+				padding: 0.7em 0.55em;
+			}
+			.name {
+				margin-top: 0;
+			}
+			.flip {
+				margin: -0.05em 0.4em 0.4em 0;
+			}
+		}
 		.white {
-			background: radial-gradient(rgb(255, 255, 180) 25%, black);
+			background: radial-gradient(rgb(255, 255, 190) 25%, black);
 			color: black;
 		}
 		.blue {
 			background: radial-gradient(rgb(0, 120, 255) 25%, black);
 		}
 		.black {
-			background: radial-gradient(rgb(50, 50, 50) 25%, black)
+			background: radial-gradient(rgb(60, 60, 60) 25%, black)
 		}
 		.red {
 			background: radial-gradient(rgb(240, 60, 60) 25%, black);
