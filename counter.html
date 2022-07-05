@@ -16,6 +16,12 @@
 			text-align: center;
 		}
 
+		input[type="color"] {
+			vertical-align: middle;
+			padding: 0px;
+			opacity: 0;
+		}
+
 		#container {
 			display: flex;
 			flex-direction: row;
@@ -87,12 +93,14 @@
 			d.className = 'player'
 			const colors = [
 				'red',
+				'orange',
 				'yellow',
 				'green',
 				'cyan',
 				'blue',
+				'purple',
 			]
-			d.style.background = `radial-gradient(${colors[number % colors.length]}, transparent)`
+			d.style.background = `${colors[number % colors.length]} radial-gradient(transparent, black)`
 			d.innerHTML = `
 <div class="life counter">20</div>
 <div class="white counter">0</div>
@@ -100,6 +108,7 @@
 <div class="black counter">0</div>
 <div class="red counter">0</div>
 <div class="green counter">0</div>
+<input type="color" onchange="this.parentNode.style.backgroundColor = this.value">
 <div class="name">Player ${number + 1}</div>
 <span class="flip">↕</span>`
 			document.getElementById('container').appendChild(d);
@@ -118,6 +127,10 @@
 					const s = this.parentNode.style
 					s.transform = (s.transform == '') ? 'rotate(180deg)' : ''
 				}
+			});
+			[...document.querySelectorAll('input[type=color]')].forEach(e => {
+				e.value = '#' + getComputedStyle(e.parentNode).backgroundColor.replace(/.*?(\d+).+?/g,
+					(match, content, offset, input) => parseInt(content).toString(16).padStart(2, '0'))
 			})
 		}
 		function add(e) {
