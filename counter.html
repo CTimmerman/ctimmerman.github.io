@@ -73,11 +73,14 @@
 	</style>
 </head>
 
-<body>
+<body ondblclick="dblclick(event)">
 	<div id="container"></div>
 	<div onclick="add_player()" style="margin: 2em; display: inline-block; color: grey;">Add player</div>
 	<script>
 		'use strict'
+		// Prevent accidental reload on swipe up.
+		onbeforeunload = () => false
+
 		function add_player() {
 			const number = document.querySelectorAll('.player').length
 			const d = document.createElement('div')
@@ -125,6 +128,10 @@
 			this.focus()
 			document.execCommand('selectAll', false, null)
 			e.preventDefault()
+		}
+		function dblclick(e) {
+			e.preventDefault()
+			window.getSelection().empty()
 		}
 	</script>
 </body>
