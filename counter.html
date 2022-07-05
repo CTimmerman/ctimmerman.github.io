@@ -102,13 +102,12 @@
 			document.getElementById('container').appendChild(d);
 
 			[...document.querySelectorAll('.counter')].forEach(e => {
-				e.onclick = up
-				e.oncontextmenu = down
-				e.ondblclick = set
+				e.onclick = add
+				e.oncontextmenu = set
 				e.onblur = function () { this.contentEditable = false }
 			});
 			[...document.querySelectorAll('.name')].forEach(e => {
-				e.ondblclick = set
+				e.oncontextmenu = set
 				e.onblur = function () { this.contentEditable = false }
 			});
 			[...document.querySelectorAll('.flip')].forEach(e => {
@@ -118,17 +117,14 @@
 				}
 			})
 		}
-		function up(e) {
-			this.innerText = parseInt(this.innerText) + 1
-		}
-		function down(e) {
-			this.innerText = parseInt(this.innerText) - 1
-			e.preventDefault()
+		function add(e) {
+			this.innerText = parseInt(this.innerText) + ((e.offsetY < e.target.clientHeight/2) ? 1 : -1)
 		}
 		function set(e) {
 			this.contentEditable = true
 			this.focus()
 			document.execCommand('selectAll', false, null)
+			e.preventDefault()
 		}
 	</script>
 </body>
