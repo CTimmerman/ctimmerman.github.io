@@ -10,39 +10,77 @@
 			font-family: sans-serif;
 			font-weight: bold;
 			text-align: center;
+			text-shadow: 1px 1px 1px #00000066;
 		}
 		
 		h1 {
 			text-shadow: 6px 6px 6px #00000066;
 		}
 
-		span {
+		#results {
+			height: 52%;
+			margin-bottom: 2em;
+			overflow: auto;
+			border: 1px solid #00ffbb;
+			border-radius: 0.5em;
+			border: 1px solid rgb(15, 224, 165);
+			box-shadow: 6px 6px 6px #00000066 inset;
+		}
+
+		.die {
 			background: white;
 			border: 1px solid black;
 			border-radius: 0.5em;
+			display: inline-table;
+			margin: 1em;
 			padding: 0.5em;
 			box-shadow: 6px 6px 6px #00000066;
+			width: fit-content;
 		}
 
-		#results {
-			margin-bottom: 2em;
+		.preset {
+			animation: spin 0.1s linear reverse 0;
+		}
+
+		.inset {
+			background-clip: text;
+			-moz-background-clip: text;
+			-webkit-background-clip: text;
+			background-color: black;
+			color: transparent;
+			text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+		}
+
+		@keyframes spin {
+			25% {
+				box-shadow: 6px -6px 6px #00000066;
+			}
+			50% {
+				box-shadow: -6px -6px 6px #00000066;
+			}
+			75% {
+				box-shadow: -6px 6px 6px #00000066;
+			}
+			100% {
+				transform: rotate(360deg);
+			}
 		}
 	</style>
 </head>
 
-<body>
-	<h1>Dice Roller</h1>
+<body onload="set_colors()" onhashchange="set_colors()">
+	<h1><span onclick="egg('white&black')">Dice</span> <span onclick="egg()">Roller</span></h1>
 	<div id="results">
 	</div>
 	<p>
-		<span onclick="sleep(1).then(roll_prompt)">Roll</span>
-		<span class="preset">1d2</span>
-		<span class="preset">1d3</span>
-		<span class="preset">1d4</span>
-		<span class="preset">1d5</span>
-		<span class="preset">1d6</span>
-		<span class="preset">1d20</span>
-		<span onclick="do_clear()">Clear</span>
+		<span class="die" onclick="sleep(1).then(roll_prompt)"><span class="inset">Roll</span></span>
+		<span class="die preset"><b class="inset">1d2</b></span>
+		<span class="die preset"><b class="inset">1d3</b></span>
+		<span class="die preset"><b class="inset">1d4</b></span>
+		<span class="die preset"><b class="inset">1d5</b></span>
+		<span class="die preset"><span class="inset">1d6</span></span>
+		<span class="die preset"><span class="inset">1d20</span></span>
+		<span class="die" onclick="do_clear()"><span class="inset">Clear</span></span>
 	</p>
 	<script>
 		'use strict'
@@ -72,6 +110,7 @@
 			const p = document.createElement('p')
 			p.innerHTML = what + ':<br>' + result.join(', ') + (count > 1 ? histr : '')
 			results.append(p)
+			p.scrollIntoView()
 		}
 		function do_clear() {
 			results.innerText = ''
@@ -86,7 +125,8 @@
 		;[...document.querySelectorAll('.preset')].forEach(e => {
 			e.onclick = function () {
 				if (this.contentEditable == 'true') return
-				sleep(1).then(()=>{roll(this.innerText)})
+				e.style.animationIterationCount = 'infinite'
+				sleep(100).then(()=>{e.style.animationIterationCount = ''; roll(this.innerText)})
 			}
 			e.oncontextmenu = set
 			e.onblur = function () { this.contentEditable = false }
@@ -97,6 +137,23 @@
 				}
 			}
 		})
+		
+		function egg(s){
+			const a = [...Array(13)].map(_ => '0123456789abcdef'[Math.floor(Math.random() * 16)])
+			a[6] = '&#'
+			location.hash = s? s : '##' + a.join('')
+		}
+
+		function set_colors(){
+			const bs = getComputedStyle(document.body)
+			let [bg, fg] = location.hash.slice(1).split('&')
+			if (!bg) return
+			document.body.style.backgroundColor = bg
+			document.body.style.color = fg
+			document.getElementById('results').style.border = '1px solid ' + fg
+			;[...document.querySelectorAll('.die')].forEach(e => e.style.backgroundColor = fg)
+			;[...document.querySelectorAll('.inset')].forEach(e => e.style.textShadow = '1px 1px 1px ' + bg)
+		}
 	</script>
 </body>
 
