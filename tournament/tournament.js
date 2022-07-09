@@ -41,11 +41,13 @@ function egg(s){
 
 function set_colors(){
 	const bs = getComputedStyle(document.body)
-	const [bg, fg] = location.hash.slice(1).split('&')
-	document.body.style.backgroundColor = bg || bs.backgroundColor
-	document.body.style.color = fg || bs.color
-	;[...sel('.alert')].forEach(e => e.style.backgroundColor = bg || bs.backgroundColor)
-	;[...sel('hr, input, table, .alert')].forEach(e => e.style.borderColor = fg || bs.color)
+	let [bg, fg] = location.hash.slice(1).split('&')
+	bg = bg || bs.backgroundColor
+	fg = fg || bs.color
+	document.body.style.backgroundColor = bg
+	document.body.style.color = fg
+	;[...sel('.alert')].forEach(e => e.style.backgroundColor = bg)
+	;[...sel('hr, input, table, .alert')].forEach(e => e.style.borderColor = fg)
 }
 
 function make_node(html){
