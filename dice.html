@@ -1,53 +1,103 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Roller, by Cees Timmerman</title>
-    <link rel="icon"
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Dice Roller by Cees Timmerman, 2022-07-09</title>
+	<link rel="icon"
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
-    <style>
-        body {
-            text-align: center;
-        }
+	<style>
+		body {
+			font-family: sans-serif;
+			font-weight: bold;
+			text-align: center;
+		}
+		
+		h1 {
+			text-shadow: 6px 6px 6px #00000066;
+		}
 
-        #results,
-        button {
-            font-weight: bold;
-        }
-    </style>
+		span {
+			background: white;
+			border: 1px solid black;
+			border-radius: 0.5em;
+			padding: 0.5em;
+			box-shadow: 6px 6px 6px #00000066;
+		}
+
+		#results {
+			margin-bottom: 2em;
+		}
+	</style>
 </head>
 
 <body>
-    <h1>Dice Roller</h1>
-    <div id='results'>
-    </div>
-    <button onclick='roll()'>Roll dice</button> <button onclick='do_clear()'>Clear</button>
-    <script>
-        'use strict'
-        let results = document.getElementById('results')
-        async function roll() {
-            let what = await prompt('Die count and type:', '1d6')
-            if (!what) return
-            let [count, sides] = what.toLowerCase().split('d')
-            let result = []
-            let histogram = {}
-            for (let i = 0; i < count; ++i) {
-                let number = Math.ceil(Math.random() * sides)
-                result.push(number)
-                if (number in histogram) histogram[number] += 1
-                else histogram[number] = 1
-            }
-            let histr = ''
-            for (const [k, v] of Object.entries(histogram)) histr += `${k}: ${v}, `
-            histr = `<br>(${histr} total: ${result.reduce((a, b) => a + b)})`
-            let p = document.createElement('p')
-            p.innerHTML = what + ':<br>' + result.join(', ') + (count > 1 ? histr : '')
-            results.append(p)
-        }
-        function do_clear() {
-            results.innerText = ''
-        }
-    </script>
+	<h1>Dice Roller</h1>
+	<div id="results">
+	</div>
+	<p>
+		<span onclick="sleep(1).then(roll_prompt)">Roll</span>
+		<span class="preset">1d2</span>
+		<span class="preset">1d3</span>
+		<span class="preset">1d4</span>
+		<span class="preset">1d5</span>
+		<span class="preset">1d6</span>
+		<span class="preset">1d20</span>
+		<span onclick="do_clear()">Clear</span>
+	</p>
+	<script>
+		'use strict'
+		
+		// Even awaiting prompt makes Chrome complain about handlers taking too long.
+		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+		const results = document.getElementById('results')
+		function roll_prompt() {
+			const what = prompt('Die count and type:', '1d6')
+			if (!what) return
+			roll(what)
+		}
+		function roll(what) {
+			const [count, sides] = what.toLowerCase().split('d')
+			const result = []
+			const histogram = {}
+			for (let i = 0; i < count; ++i) {
+				const number = Math.ceil(Math.random() * sides)
+				result.push(number)
+				if (number in histogram) histogram[number] += 1
+				else histogram[number] = 1
+			}
+			let histr = ''
+			for (const [k, v] of Object.entries(histogram)) histr += `${k}: ${v}, `
+			histr = `<br>(${histr} total: ${result.reduce((a, b) => a + b)})`
+			const p = document.createElement('p')
+			p.innerHTML = what + ':<br>' + result.join(', ') + (count > 1 ? histr : '')
+			results.append(p)
+		}
+		function do_clear() {
+			results.innerText = ''
+		}
+
+		function set(e) {
+			this.contentEditable = true
+			this.focus()
+			document.execCommand('selectAll', false, null)
+			e.preventDefault()
+		}
+		;[...document.querySelectorAll('.preset')].forEach(e => {
+			e.onclick = function () {
+				if (this.contentEditable == 'true') return
+				sleep(1).then(()=>{roll(this.innerText)})
+			}
+			e.oncontextmenu = set
+			e.onblur = function () { this.contentEditable = false }
+			e.onkeydown = function(event) {
+				if (event.keyCode === 13){
+					event.preventDefault()
+					e.blur()
+				}
+			}
+		})
+	</script>
 </body>
 
 </html>
