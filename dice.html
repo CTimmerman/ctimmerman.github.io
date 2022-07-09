@@ -6,6 +6,18 @@
 	<link rel="icon"
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
 	<style>
+		::-webkit-scrollbar {
+			width: 10px;
+		}
+		::-webkit-scrollbar-thumb {
+			border: 1px outset;
+			border-color: black;
+			border-radius: 5px;
+		}
+		::-webkit-scrollbar-thumb:hover {
+			border-width: 2px;
+		}
+
 		body {
 			font-family: sans-serif;
 			font-weight: bold;
@@ -21,9 +33,8 @@
 			height: 52%;
 			margin-bottom: 2em;
 			overflow: auto;
-			border: 1px solid #00ffbb;
+			border: 1px solid black;
 			border-radius: 0.5em;
-			border: 1px solid rgb(15, 224, 165);
 			box-shadow: 6px 6px 6px #00000066 inset;
 		}
 
@@ -150,7 +161,9 @@
 			if (!bg) return
 			document.body.style.backgroundColor = bg
 			document.body.style.color = fg
-			document.getElementById('results').style.border = '1px solid ' + fg
+			const style = document.querySelector('style')
+			style.innerText = style.innerText.replaceAll(/(scrollbar-thumb[ \t{]+.*?\s)border-color:.*?;/gs, `$1border-color: ${fg};`)
+			document.getElementById('results').style.borderColor = fg
 			;[...document.querySelectorAll('.die')].forEach(e => e.style.backgroundColor = fg)
 			;[...document.querySelectorAll('.inset')].forEach(e => e.style.textShadow = '1px 1px 1px ' + bg)
 		}
