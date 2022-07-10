@@ -2,14 +2,13 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Dice Roller by Cees Timmerman, 2022-07-09</title>
+	<title>Dice Roller by Cees Timmerman, 2022-07-10</title>
 	<link rel="icon"
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
 	<style>
 		.styled-scrollbars {
-			--scrollbar-grip-color: black;
 			overflow: auto;
-			scrollbar-color: var(--scrollbar-grip-color) transparent;
+			scrollbar-color: var(--fgcolor) transparent;
 			scrollbar-width: thin;
 		}
 		.styled-scrollbars::-webkit-scrollbar {
@@ -17,8 +16,9 @@
 			height: 10px;
 		}
 		.styled-scrollbars::-webkit-scrollbar-thumb {
+			background-color: var(--bgcolor);
 			border: 1px outset;
-			border-color: var(--scrollbar-grip-color);
+			border-color: var(--fgcolor);
 			border-radius: 5px;
 		}
 		.styled-scrollbars::-webkit-scrollbar-thumb:hover {
@@ -26,6 +26,10 @@
 		}
 
 		body {
+			--fgcolor: black;
+			--bgcolor: white;
+			background: var(--bgcolor);
+			color: var(--fgcolor);
 			font-family: sans-serif;
 			font-weight: bold;
 			text-align: center;
@@ -40,13 +44,13 @@
 			height: 52%;
 			margin-bottom: 2em;
 			overflow: auto;
-			border: 1px solid black;
+			border: 1px solid var(--fgcolor);
 			border-radius: 0.5em;
 			box-shadow: 6px 6px 6px #00000066 inset;
 		}
 
 		.die {
-			background: white;
+			background: var(--fgcolor);
 			border: 1px solid black;
 			border-radius: 0.5em;
 			display: inline-table;
@@ -66,7 +70,7 @@
 			-webkit-background-clip: text;
 			background-color: black;
 			color: transparent;
-			text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+			text-shadow: 1px 1px 1px var(--bgcolor);
 		}
 
 		@keyframes spin {
@@ -163,16 +167,10 @@
 		}
 
 		function set_colors(){
-			const bs = getComputedStyle(document.body)
-			let [bg, fg] = location.hash.slice(1).split('&')
+			const [bg, fg] = location.hash.slice(1).split('&')
 			if (!bg) return
-			document.body.style.backgroundColor = bg
-			document.body.style.color = fg
 			const style = document.querySelector('style')
-			style.innerText = style.innerText.replaceAll(/(--scrollbar-grip-color:).*?;/gs, `$1${fg};`)
-			document.getElementById('results').style.borderColor = fg
-			;[...document.querySelectorAll('.die')].forEach(e => e.style.backgroundColor = fg)
-			;[...document.querySelectorAll('.inset')].forEach(e => e.style.textShadow = '1px 1px 1px ' + bg)
+			style.innerText = style.innerText.replaceAll(/(--bgcolor:).*?;/gs, `$1${bg};`).replaceAll(/(--fgcolor:).*?;/gs, `$1${fg};`)
 		}
 	</script>
 </body>

@@ -40,14 +40,10 @@ function egg(s){
 }
 
 function set_colors(){
-	const bs = getComputedStyle(document.body)
-	let [bg, fg] = location.hash.slice(1).split('&')
-	bg = bg || bs.backgroundColor
-	fg = fg || bs.color
-	document.body.style.backgroundColor = bg
-	document.body.style.color = fg
-	;[...sel('.alert')].forEach(e => e.style.backgroundColor = bg)
-	;[...sel('hr, input, table, .alert')].forEach(e => e.style.borderColor = fg)
+	const [bg, fg] = location.hash.slice(1).split('&')
+	if (!bg) return
+	const style = document.querySelector('style')
+	style.innerText = style.innerText.replaceAll(/(--bgcolor:).*?;/gs, `$1${bg};`).replaceAll(/(--fgcolor:).*?;/gs, `$1${fg};`)
 }
 
 function make_node(html){

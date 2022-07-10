@@ -1,6 +1,6 @@
 body {
-	color: rgb(252, 155, 23);
-	background-color: rgb(89, 19, 25);
+	background: var(--bgcolor);
+	color: var(--fgcolor);
 	margin: 0;
 	text-align: center;
 	text-shadow: 1px 1px rgb(0 0 0 / 20%);
@@ -8,6 +8,10 @@ body {
 
 div {
 	margin: 1rem;
+}
+
+hr, input, table {
+	border-color: var(--fgcolor);
 }
 
 input {
@@ -38,7 +42,7 @@ span {
 }
 
 table {
-	border: none;
+	border-width: 0;
 	border-spacing: 0;
 	text-align: center;
 	width: 100%;
@@ -82,12 +86,12 @@ video {
 
 .alert {
 	margin: auto;
-	border: 1px solid black;
+	border: 1px solid var(--fgcolor);
 	border-radius: 5px;
 	box-shadow: 10px 10px 10px rgb(0 0 0 / 20%);
 	min-width: 10em;
 	padding: 1em;
-	background-color: white;
+	background-color: var(--bgcolor);
 }
 
 .fade {
