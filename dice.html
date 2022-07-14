@@ -2,7 +2,7 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Dice Roller by Cees Timmerman, 2022-07-10</title>
+	<title>Dice Roller by Cees Timmerman, 2022-07-14</title>
 	<link rel="icon"
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
 	<style>
@@ -50,6 +50,7 @@
 		}
 
 		.die {
+			animation: spin 0.1s linear reverse 0;
 			background: var(--fgcolor);
 			border: 1px solid black;
 			border-radius: 0.5em;
@@ -59,11 +60,6 @@
 			box-shadow: 6px 6px 6px #00000066;
 			width: fit-content;
 		}
-
-		.preset {
-			animation: spin 0.1s linear reverse 0;
-		}
-
 		.inset {
 			background-clip: text;
 			-moz-background-clip: text;
@@ -72,7 +68,6 @@
 			color: transparent;
 			text-shadow: 1px 1px 1px var(--bgcolor);
 		}
-
 		@keyframes spin {
 			25% {
 				box-shadow: 6px -6px 6px #00000066;
@@ -95,14 +90,14 @@
 	<div id="results" class="styled-scrollbars">
 	</div>
 	<p>
-		<span class="die" onclick="sleep(1).then(roll_prompt)"><span class="inset">Roll</span></span>
+		<span class="die" onclick="sleep(1).then(roll_prompt)"><b class="inset">Roll</b></span>
 		<span class="die preset"><b class="inset">1d2</b></span>
 		<span class="die preset"><b class="inset">1d3</b></span>
 		<span class="die preset"><b class="inset">1d4</b></span>
 		<span class="die preset"><b class="inset">1d5</b></span>
-		<span class="die preset"><span class="inset">1d6</span></span>
-		<span class="die preset"><span class="inset">1d20</span></span>
-		<span class="die" onclick="do_clear()"><span class="inset">Clear</span></span>
+		<span class="die preset"><b class="inset">1d6</b></span>
+		<span class="die preset"><b class="inset">1d20</b></span>
+		<span class="die" onclick="do_clear()"><b class="inset">Clear</b></span>
 	</p>
 	<script>
 		'use strict'
@@ -117,18 +112,21 @@
 			roll(what)
 		}
 		function roll(what) {
-			const [count, sides] = what.toLowerCase().split('d')
+			const [count, sides] = what.toLowerCase().split('d').map(s => Number(s))  // Support "1e3" etc.
+			if (!count || !sides) return
+			let total = 0
 			const result = []
 			const histogram = {}
 			for (let i = 0; i < count; ++i) {
 				const number = Math.ceil(Math.random() * sides)
+				total += number
 				result.push(number)
 				if (number in histogram) histogram[number] += 1
 				else histogram[number] = 1
 			}
 			let histr = ''
 			for (const [k, v] of Object.entries(histogram)) histr += `${k}: ${v}, `
-			histr = `<br>(${histr} total: ${result.reduce((a, b) => a + b)})`
+			histr = `<br>(${histr} total: ${total})`
 			const p = document.createElement('p')
 			p.innerHTML = what + ':<br>' + result.join(', ') + (count > 1 ? histr : '')
 			results.append(p)
@@ -139,34 +137,45 @@
 		}
 
 		function set(e) {
+			this.style.color = 'var(--bgcolor)'
 			this.contentEditable = true
 			this.focus()
 			document.execCommand('selectAll', false, null)
 			e.preventDefault()
 		}
-		;[...document.querySelectorAll('.preset')].forEach(e => {
-			e.onclick = function () {
-				if (this.contentEditable == 'true') return
+		;[...document.querySelectorAll('.die')].forEach(e => {
+			e.addEventListener('click', function () {
 				e.style.animationIterationCount = 'infinite'
-				sleep(100).then(()=>{e.style.animationIterationCount = ''; roll(this.innerText)})
+				sleep(100).then(() => {
+					e.style.animationIterationCount = ''
+					roll(this.innerText)
+				})
+			})
+		})
+		;[...document.querySelectorAll('.preset .inset')].forEach(e => {
+			e.onclick = function (event) {
+				if (this.contentEditable == 'true') event.stopPropagation()
 			}
 			e.oncontextmenu = set
-			e.onblur = function () { this.contentEditable = false }
+			e.onblur = function () {
+				this.contentEditable = false
+				this.style.color = 'transparent'
+			}
 			e.onkeydown = function(event) {
-				if (event.keyCode === 13){
+				if (event.keyCode === 13) {
 					event.preventDefault()
 					e.blur()
 				}
 			}
 		})
 		
-		function egg(s){
+		function egg(s) {
 			const a = [...Array(13)].map(_ => '0123456789abcdef'[Math.floor(Math.random() * 16)])
 			a[6] = '&#'
 			location.hash = s? s : '##' + a.join('')
 		}
 
-		function set_colors(){
+		function set_colors() {
 			const [bg, fg] = location.hash.slice(1).split('&')
 			if (!bg) return
 			const style = document.querySelector('style')
