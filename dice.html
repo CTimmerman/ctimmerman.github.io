@@ -1,26 +1,30 @@
+<!DOCTYPE html>
 <html>
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Dice Roller by Cees Timmerman, 2022-07-14</title>
 	<link rel="icon"
-	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
 	<style>
 		.styled-scrollbars {
 			overflow: auto;
 			scrollbar-color: var(--fgcolor) transparent;
 			scrollbar-width: thin;
 		}
+
 		.styled-scrollbars::-webkit-scrollbar {
 			width: 10px;
 			height: 10px;
 		}
+
 		.styled-scrollbars::-webkit-scrollbar-thumb {
 			background-color: var(--bgcolor);
 			border: 1px outset;
 			border-color: var(--fgcolor);
 			border-radius: 5px;
 		}
+
 		.styled-scrollbars::-webkit-scrollbar-thumb:hover {
 			border-width: 2px;
 		}
@@ -35,13 +39,13 @@
 			text-align: center;
 			text-shadow: 1px 1px 1px #00000066;
 		}
-		
+
 		h1 {
 			text-shadow: 6px 6px 6px #00000066;
 		}
 
 		#results {
-			height: 52%;
+			height: 52vh;
 			margin-bottom: 2em;
 			overflow: auto;
 			border: 1px solid var(--fgcolor);
@@ -60,6 +64,7 @@
 			box-shadow: 6px 6px 6px #00000066;
 			width: fit-content;
 		}
+
 		.inset {
 			background-clip: text;
 			-moz-background-clip: text;
@@ -68,16 +73,20 @@
 			color: transparent;
 			text-shadow: 1px 1px 1px var(--bgcolor);
 		}
+
 		@keyframes spin {
 			25% {
 				box-shadow: 6px -6px 6px #00000066;
 			}
+
 			50% {
 				box-shadow: -6px -6px 6px #00000066;
 			}
+
 			75% {
 				box-shadow: -6px 6px 6px #00000066;
 			}
+
 			100% {
 				transform: rotate(360deg);
 			}
@@ -89,7 +98,7 @@
 	<h1><span onclick="egg('white&black')">Dice</span> <span onclick="egg()">Roller</span></h1>
 	<div id="results" class="styled-scrollbars">
 	</div>
-	<p>
+	<div>
 		<span class="die" onclick="sleep(1).then(roll_prompt)"><b class="inset">Roll</b></span>
 		<span class="die preset"><b class="inset">1d2</b></span>
 		<span class="die preset"><b class="inset">1d3</b></span>
@@ -98,10 +107,10 @@
 		<span class="die preset"><b class="inset">1d6</b></span>
 		<span class="die preset"><b class="inset">1d20</b></span>
 		<span class="die" onclick="do_clear()"><b class="inset">Clear</b></span>
-	</p>
+	</div>
 	<script>
 		'use strict'
-		
+
 		// Even awaiting prompt makes Chrome complain about handlers taking too long.
 		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -142,8 +151,8 @@
 			this.focus()
 			document.execCommand('selectAll', false, null)
 			e.preventDefault()
-		}
-		;[...document.querySelectorAll('.die')].forEach(e => {
+		};
+		[...document.querySelectorAll('.die')].forEach(e => {
 			e.addEventListener('click', function () {
 				e.style.animationIterationCount = 'infinite'
 				sleep(100).then(() => {
@@ -151,8 +160,8 @@
 					roll(this.innerText)
 				})
 			})
-		})
-		;[...document.querySelectorAll('.preset .inset')].forEach(e => {
+		});
+		[...document.querySelectorAll('.preset .inset')].forEach(e => {
 			e.onclick = function (event) {
 				if (this.contentEditable == 'true') event.stopPropagation()
 			}
@@ -161,20 +170,25 @@
 				this.contentEditable = false
 				this.style.color = 'transparent'
 			}
-			e.onkeydown = function(event) {
+			e.onkeydown = function (event) {
 				if (event.keyCode === 13) {
 					event.preventDefault()
 					e.blur()
 				}
 			}
 		})
-		
+		document.ondblclick = function (event) {
+			if (event.target.contentEditable == 'true' || event.target.nodeName == 'P') return
+			// Clear tripleclick selection in Firefox.
+			window.myselection = window.getSelection()
+			setTimeout('myselection.empty()', 100)
+		}
+
 		function egg(s) {
 			const a = [...Array(13)].map(_ => '0123456789abcdef'[Math.floor(Math.random() * 16)])
 			a[6] = '&#'
-			location.hash = s? s : '##' + a.join('')
+			location.hash = s ? s : '##' + a.join('')
 		}
-
 		function set_colors() {
 			const [bg, fg] = location.hash.slice(1).split('&')
 			if (!bg) return
