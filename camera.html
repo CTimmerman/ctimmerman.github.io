@@ -19,6 +19,7 @@
 		}
 
 		.box {
+			background: yellow;
 			border: 1px solid red;
 			position: absolute;
 		}
@@ -31,8 +32,8 @@
 
 <body>
 	<div>
-		<label for="audioSource">Audio source: </label><select id="audioSource"></select>
-		<label for="videoSource">Video source: </label><select id="videoSource"></select>
+		<label for="audioSource">Audio: </label><select id="audioSource"></select>
+		<label for="videoSource">Video: </label><select id="videoSource"></select>
 		<button onclick="snap()">Snapshot</button>
 		<video autoplay muted playsinline></video>
 		<div class="box"></div>
@@ -126,7 +127,7 @@
 			const barcodes = await barcodeDetector.detect(img).catch(err => log(err))
 			for (let i = 0; i < barcodes.length; ++i) {
 				let barcode = barcodes[i]
-				log(`${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`)
+				boxes[i].innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`
 				boxes[i].left = vidX + barcode.boundingBox['x']
 				boxes[i].top = vidY + barcode.boundingBox['y']
 				boxes[i].height = barcode.boundingBox['height']
