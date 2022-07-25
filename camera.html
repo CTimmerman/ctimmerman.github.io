@@ -51,8 +51,8 @@
 		const pixEl = document.getElementById('pix')
 		const logEl = document.getElementById('log')
 		const vidEl = document.querySelector('video')
-		const vidX = parseInt(vidEl.left)
-		const vidY = parseInt(vidEl.top)
+		const vidX = vidEl.getBoundingClientRect().left
+		const vidY = vidEl.getBoundingClientRect().top
 		const boxes = document.getElementsByClassName('box')
 		const audSel = document.querySelector('select#audioSource')
 		const vidSel = document.querySelector('select#videoSource')
