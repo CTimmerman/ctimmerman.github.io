@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Camera / QR scanner</title>
+	<title>Camera / QR scanner, by Cees Timmerman 2022-07-25</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 	<style>
@@ -19,8 +19,9 @@
 		}
 
 		.box {
-			background: yellow;
+			background: #ffffffaa;
 			border: 1px solid red;
+			color: black;
 			position: absolute;
 		}
 		.pix {
@@ -120,9 +121,6 @@
 		async function scan(img) {
 			if (!img) img = vidEl
 			if (!('BarcodeDetector' in window)) return
-			const supportedFormats = await BarcodeDetector.getSupportedFormats()
-				.then(supportedFormats => supportedFormats)  //.forEach(format => log(format)))
-			log(`Supported formats: ${supportedFormats}`)
 			const barcodeDetector = new BarcodeDetector()
 			const barcodes = await barcodeDetector.detect(img).catch(err => log(err))
 			for (let i = 0; i < barcodes.length; ++i) {
