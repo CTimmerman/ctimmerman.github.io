@@ -105,8 +105,8 @@
 			img.width = 320
 			pixEl.appendChild(img)
 
-			logEl.innerText = ''
-			const barcodes = await scan(img)
+			logEl.innerText = '' + img
+			const barcodes = await setTimeout('scan(img)', 10)
 			const label = document.createElement('div')
 			label.className = 'label'
 			barcodes.forEach(barcode => {
