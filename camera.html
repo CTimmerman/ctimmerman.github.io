@@ -15,7 +15,16 @@
 
 		img,
 		video {
+			border: 1px solid blue;
+		}
+
+		.box {
 			border: 1px solid red;
+			position: absolute;
+		}
+		.pix {
+			max-height: 40%;
+			overflow: auto;
 		}
 	</style>
 </head>
@@ -25,16 +34,23 @@
 		<label for="audioSource">Audio source: </label><select id="audioSource"></select>
 		<label for="videoSource">Video source: </label><select id="videoSource"></select>
 		<button onclick="snap()">Snapshot</button>
-		<div id="pics"></div>
+		<video autoplay muted playsinline></video>
+		<div class="box"></div>
+		<div class="box"></div>
+		<div class="box"></div>
+		<div class="box"></div>
+		<div id="pix"></div>
 		<div id="log"></div>
 	</div>
-	<video autoplay muted playsinline></video>
 	<script>
 		'use strict'
 
-		const pixEl = document.getElementById('pics')
+		const pixEl = document.getElementById('pix')
 		const logEl = document.getElementById('log')
 		const vidEl = document.querySelector('video')
+		const vidX = parseInt(vidEl.left)
+		const vidY = parseInt(vidEl.top)
+		const boxes = document.getElementsByClassName('box')
 		const audSel = document.querySelector('select#audioSource')
 		const vidSel = document.querySelector('select#videoSource')
 		audSel.onchange = setSource
@@ -54,16 +70,20 @@
 			})
 		}).catch(err => console.log(err))
 
-		function setSource() {
+		let scanner = null
+		async function setSource() {
 			const audioSource = audSel.value
 			const videoSource = vidSel.value
 			const query = {
 				audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
 				video: { deviceId: videoSource ? { exact: videoSource } : undefined },
 			}
-			navigator.mediaDevices.getUserMedia(query)
+			await navigator.mediaDevices.getUserMedia(query)
 				.then(src => vidEl.srcObject = src)
 				.catch(err => console.log(err))
+			
+			clearInterval(scanner)
+			scanner = setInterval(scan, 500)
 		}
 
 		function snap() {
@@ -82,22 +102,36 @@
 			img.src = canvas.toDataURL('image/jpg')
 			img.width = 320
 			pixEl.appendChild(img)
+			img.scrollIntoView()
+
 			logEl.innerText = ''
-			scan(img)
+			const barcodes = scan(img)
+			const label = document.createElement('div')
+			label.className = 'label'
+			barcodes.forEach(barcode => {
+				label.innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`
+			})
+			pixEl.appendChild(img)
 		}
 
 		const log = msg => logEl.innerHTML += msg + '<br>'
 
 		async function scan(img) {
+			if (!img) img = vidEl
 			if (!('BarcodeDetector' in window)) return
 			const supportedFormats = await BarcodeDetector.getSupportedFormats()
 				.then(supportedFormats => supportedFormats)  //.forEach(format => log(format)))
 			log(`Supported formats: ${supportedFormats}`)
 			const barcodeDetector = new BarcodeDetector()
-			const barcodes = await barcodeDetector.detect(img)
-				.then(barcodes => barcodes)
-				.catch(err => log(err))
-			barcodes.forEach(barcode => { log(barcode); log(barcode.rawValue) })
+			const barcodes = await barcodeDetector.detect(img).catch(err => log(err))
+			for (let i = 0; i < barcodes.length; ++i) {
+				let barcode = barcodes[i]
+				log(`${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`)
+				boxes[i].left = vidX + barcode.boundingBox['x']
+				boxes[i].top = vidY + barcode.boundingBox['y']
+				boxes[i].height = barcode.boundingBox['height']
+				boxes[i].width = barcode.boundingBox['width']
+			}
 			return barcodes
 		}
 	</script>
