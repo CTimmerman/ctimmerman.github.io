@@ -1,15 +1,25 @@
-<html>
-<head><title>Autocue/Teleprompter by Cees Timmerman</title><head>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Autocue/Teleprompter by Cees Timmerman</title>
+	<link rel="icon"
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🎥</text></svg>">
+</head>
+
 <body>
-<button onclick="toggle_cue(true)" title="Click to toggle">Autocue/teleprompt</button>
-Frame time <input id='ac-slowness' type='number' style="width:70px" value='30'> ms. 
-Scroll step <input id='ac-scrollstep' type="number" style="width:60px" value="1"> px. 
-Padding <input id='ac-padding' style="width:70px" value='2in 4in' onchange="set_style()"> 
-Font <input id='ac-font' value="0.5in Georgia, serif" onchange="set_style()"> 
-Transform <input id='ac-transform'  style="width:90px" value="scale(-1, 1)" onchange="set_style()" title="scale(-1, 1) to mirror"> 
-Text (from <a href="https://www.youtube.com/watch?v=YeRu4xYH_W0">here</a>): <br>
-<div id='autocue' onclick="toggle_cue(false)">
-<textarea id='autocue-content'>
+	<button onclick="toggle_cue(true)" title="Click to toggle">Autocue/teleprompt</button>
+	Frame time <input id="ac-slowness" type="number" style="width:70px" value="30"> ms.
+	Scroll step <input id="ac-scrollstep" type="number" style="width:60px" value="1"> px.
+	Padding <input id="ac-padding" style="width:70px" value="2in 4in" onchange="set_style()">
+	Font <input id="ac-font" value="0.5in Georgia, serif" onchange="set_style()">
+	Transform <input id="ac-transform" style="width:90px" value="scale(-1, 1)" onchange="set_style()"
+		title="scale(-1, 1) to mirror">
+	Text (from <a href="https://www.youtube.com/watch?v=YeRu4xYH_W0">here</a>): <br>
+	<div id="autocue" onclick="toggle_cue(false)">
+		<textarea id="autocue-content">
 
 
 
@@ -24,42 +34,48 @@ I personally don’t find that to be all that difficult, but it is significantly
 Of course, the key here is that the camera is looking through this piece of glass at me, your charming host.
 This means that when I’m looking at the words,
 I’m pretty much looking right at the camera lens.
-</textarea>
-</div>
-<script>
-var duration = 20
-var scroller = null
-function getel(id){ return document.getElementById(id) }
-var ac = getel('autocue')
-var acc = getel('autocue-content')
+		</textarea>
+	</div>
+	<script>
+		var duration = 20
+		var scroller = null
+		function getel(id) { return document.getElementById(id) }
+		var ac = getel('autocue')
+		var acc = getel('autocue-content')
 
-function set_style(){
-	acc.style.font = getel('ac-font').value
-	acc.style.padding = getel('ac-padding').value
-	acc.style.transform = getel('ac-transform').value
-}
-set_style()
+		function set_style() {
+			acc.style.font = getel('ac-font').value
+			acc.style.padding = getel('ac-padding').value
+			acc.style.transform = getel('ac-transform').value
+		}
+		set_style()
 
-function toggle_cue(on){
-	ac.className = on? 'autocue' : ''
-	var scrollstep = parseInt(getel('ac-scrollstep').value)
-	if(on) scroller = setInterval(()=> acc.scrollTop += scrollstep, getel('ac-slowness').value)
-	else clearInterval(scroller)
-}
-</script>
-<style>
-#autocue, #autocue-content{
-	width: 100%;
-	height: 100%;
-	color: white;
-	background-color: black;
-	border: 0;
-}
-.autocue{
-	position: fixed;
-	left: 0;
-	top: 0;
-	z-index: 9000;
-}
-</style>
-</body></html>
+		function toggle_cue(on) {
+			ac.className = on ? 'autocue' : ''
+			var scrollstep = parseInt(getel('ac-scrollstep').value)
+			if (on) scroller = setInterval(() => acc.scrollTop += scrollstep, getel('ac-slowness').value)
+			else clearInterval(scroller)
+		}
+	</script>
+	<style>
+		#autocue,
+		#autocue-content {
+			width: -moz-available;
+			width: -webkit-fill-available;
+			width: available;
+			height: 100%;
+			color: white;
+			background-color: black;
+			border: 0;
+		}
+
+		.autocue {
+			position: fixed;
+			left: 0;
+			top: 0;
+			z-index: 9000;
+		}
+	</style>
+</body>
+
+</html>
