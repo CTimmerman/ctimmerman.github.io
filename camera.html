@@ -78,6 +78,7 @@
 			img.src = canvas.toDataURL('image/jpg')
 			img.width = 320
 			document.body.appendChild(img)
+			document.getElementById('log').innerText = ''
 			scan(img)
 		}
 
@@ -88,7 +89,7 @@
 			const supportedFormats = await BarcodeDetector.getSupportedFormats()
 				.then(supportedFormats => supportedFormats)  //.forEach(format => log(format)))
 			log(`Supported formats: ${supportedFormats}`)
-			const barcodeDetector = new BarcodeDetector()
+			const barcodeDetector = new BarcodeDetector({formats: supportedFormats})
 			barcodeDetector.detect(img)
 				.then(barcodes => barcodes.forEach((barcode) => log(barcode.rawData)))
 				.catch(err => log(err))
