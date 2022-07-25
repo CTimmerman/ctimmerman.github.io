@@ -84,17 +84,11 @@
 		const log = msg => document.getElementById('log').innerHTML += msg + '<br>'
 
 		async function scan(img) {
-			if (!('BarcodeDetector' in window)) {
-				log('Barcode Detector is not supported by this browser.')
-				return
-			}
-			log('Barcode Detector supported!')
-
+			if (!('BarcodeDetector' in window)) return
 			const supportedFormats = await BarcodeDetector.getSupportedFormats()
 				.then(supportedFormats => supportedFormats)  //.forEach(format => log(format)))
-
-			const barcodeDetector = new BarcodeDetector({formats: ['code_39', 'codabar', 'ean_13']})
-
+			log(`Supported formats: ${supportedFormats}`)
+			const barcodeDetector = new BarcodeDetector()
 			barcodeDetector.detect(img)
 				.then(barcodes => barcodes.forEach((barcode) => log(barcode.rawData)))
 				.catch(err => log(err))
