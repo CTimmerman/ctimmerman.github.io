@@ -36,7 +36,7 @@
 	<div>
 		<label for="audioSource">Audio: </label><select id="audioSource"></select>
 		<label for="videoSource">Video: </label><select id="videoSource"></select>
-		<button onclick="snap()">Snapshot</button>
+		<button onclick="snap()">Snapshot</button><br>
 		<video autoplay muted playsinline></video>
 		<div class="box"></div>
 		<div class="box"></div>
@@ -51,8 +51,8 @@
 		const pixEl = document.getElementById('pix')
 		const logEl = document.getElementById('log')
 		const vidEl = document.querySelector('video')
-		const vidX = vidEl.getBoundingClientRect().left
-		const vidY = vidEl.getBoundingClientRect().top
+		const vidX = vidEl.offsetLeft
+		const vidY = vidEl.offsetTop
 		const boxes = document.getElementsByClassName('box')
 		const audSel = document.querySelector('select#audioSource')
 		const vidSel = document.querySelector('select#videoSource')
@@ -127,10 +127,10 @@
 			for (let i = 0; i < barcodes.length; ++i) {
 				let barcode = barcodes[i]
 				boxes[i].innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a><br>${vidX} ${vidY} ${barcode.boundingBox['x']}`
-				boxes[i].left = (vidX + barcode.boundingBox['x']) + 'px'
-				boxes[i].top = (vidY + barcode.boundingBox['y']) + 'px'
-				boxes[i].height = barcode.boundingBox['height'] + 'px'
-				boxes[i].width = barcode.boundingBox['width'] + 'px'
+				boxes[i].style.left = (vidX + barcode.boundingBox.x) + 'px'
+				boxes[i].style.top = (vidY + barcode.boundingBox.y) + 'px'
+				boxes[i].style.height = barcode.boundingBox.height + 'px'
+				boxes[i].style.width = barcode.boundingBox.width + 'px'
 			}
 			return barcodes
 		}
