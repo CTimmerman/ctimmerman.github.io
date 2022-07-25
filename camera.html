@@ -19,9 +19,10 @@
 		}
 
 		.box {
-			background: #ffffffaa;
+			background: #ffffff99;
 			border: 1px solid red;
 			color: black;
+			font-size: 0.5em;
 			position: absolute;
 			word-break: break-all;
 		}
@@ -87,7 +88,7 @@
 			scanner = setInterval(scan, 500)
 		}
 
-		function snap() {
+		async function snap() {
 			var canvas = document.createElement('canvas')
 			canvas.width = vidEl.videoWidth
 			canvas.height = vidEl.videoHeight
@@ -103,16 +104,16 @@
 			img.src = canvas.toDataURL('image/jpg')
 			img.width = 320
 			pixEl.appendChild(img)
-			img.scrollIntoView()
 
 			logEl.innerText = ''
-			const barcodes = scan(img)
+			const barcodes = await scan(img)
 			const label = document.createElement('div')
 			label.className = 'label'
 			barcodes.forEach(barcode => {
 				label.innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`
 			})
 			pixEl.appendChild(label)
+			label.scrollIntoView()
 		}
 
 		const log = msg => logEl.innerHTML += msg + '<br>'
