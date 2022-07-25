@@ -1,9 +1,11 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-	<link rel="icon"
-	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
-	<title>Camera</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Camera / QR scanner</title>
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 	<style>
 		body {
 			background-color: black;
@@ -22,6 +24,7 @@
 		<label for="audioSource">Audio source: </label><select id="audioSource"></select>
 		<label for="videoSource">Video source: </label><select id="videoSource"></select>
 		<button onclick="snap()">Snapshot</button>
+		<div id="log"></div>
 	</div>
 	<video autoplay muted playsinline></video>
 	<script>
@@ -75,6 +78,26 @@
 			img.src = canvas.toDataURL('image/jpg')
 			img.width = 320
 			document.body.appendChild(img)
+			scan(img)
+		}
+
+		const log = msg => document.getElementById('log').innerHTML += msg + '<br>'
+
+		async function scan(img) {
+			if (!('BarcodeDetector' in window)) {
+				log('Barcode Detector is not supported by this browser.')
+				return
+			}
+			log('Barcode Detector supported!')
+
+			const supportedFormats = await BarcodeDetector.getSupportedFormats()
+				.then(supportedFormats => supportedFormats)  //.forEach(format => log(format)))
+
+			const barcodeDetector = new BarcodeDetector({formats: ['code_39', 'codabar', 'ean_13']})
+
+			barcodeDetector.detect(img)
+				.then(barcodes => barcodes.forEach((barcode) => log(barcode.rawData)))
+				.catch(err => log(err))
 		}
 	</script>
 </body>
