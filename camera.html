@@ -23,6 +23,7 @@
 			border: 1px solid red;
 			color: black;
 			position: absolute;
+			word-break: break-all;
 		}
 
 		#pix {
@@ -38,10 +39,7 @@
 		<label for="videoSource">Video: </label><select id="videoSource"></select>
 		<button onclick="snap()">Snapshot</button><br>
 		<video autoplay muted playsinline></video>
-		<div class="box"></div>
-		<div class="box"></div>
-		<div class="box"></div>
-		<div class="box"></div>
+		<div id="overlay"></div>
 		<div id="pix"></div>
 		<div id="log"></div>
 	</div>
@@ -53,7 +51,7 @@
 		const vidEl = document.querySelector('video')
 		const vidX = vidEl.offsetLeft
 		const vidY = vidEl.offsetTop
-		const boxes = document.getElementsByClassName('box')
+		const overlay = document.getElementById('overlay')
 		const audSel = document.querySelector('select#audioSource')
 		const vidSel = document.querySelector('select#videoSource')
 		audSel.onchange = setSource
@@ -114,7 +112,7 @@
 			barcodes.forEach(barcode => {
 				label.innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`
 			})
-			pixEl.appendChild(img)
+			pixEl.appendChild(label)
 		}
 
 		const log = msg => logEl.innerHTML += msg + '<br>'
@@ -124,13 +122,16 @@
 			if (!('BarcodeDetector' in window)) return
 			const barcodeDetector = new BarcodeDetector()
 			const barcodes = await barcodeDetector.detect(img).catch(err => log(err))
+			overlay.innerText = ''
 			for (let i = 0; i < barcodes.length; ++i) {
 				let barcode = barcodes[i]
-				boxes[i].innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a><br>${vidX} ${vidY} ${barcode.boundingBox['x']}`
-				boxes[i].style.left = (vidX + barcode.boundingBox.x) + 'px'
-				boxes[i].style.top = (vidY + barcode.boundingBox.y) + 'px'
-				boxes[i].style.height = barcode.boundingBox.height + 'px'
-				boxes[i].style.width = barcode.boundingBox.width + 'px'
+				let box = document.createElement('div', {class: 'box'})
+				box.innerHTML = `<a href="${barcode.rawValue}">${barcode.rawValue}</a>}`
+				box.style.left = (vidX + barcode.boundingBox.x) + 'px'
+				box.style.top = (vidY + barcode.boundingBox.y) + 'px'
+				box.style.height = barcode.boundingBox.height + 'px'
+				box.style.width = barcode.boundingBox.width + 'px'
+				overlay.appendChild(box)
 			}
 			return barcodes
 		}
