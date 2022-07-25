@@ -125,8 +125,8 @@
 			overlay.innerText = ''
 			for (let i = 0; i < barcodes.length; ++i) {
 				let barcode = barcodes[i]
-				let box = document.createElement('div', {className: 'box'})
-				//box.className = 'box'
+				let box = document.createElement('div')
+				box.className = 'box'
 				box.innerHTML = `<a href="${barcode.rawValue}">${barcode.rawValue}</a>`
 				box.style.left = (vidX + barcode.boundingBox.x) + 'px'
 				box.style.top = (vidY + barcode.boundingBox.y) + 'px'
