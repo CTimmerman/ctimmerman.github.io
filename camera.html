@@ -24,7 +24,8 @@
 			color: black;
 			position: absolute;
 		}
-		.pix {
+
+		#pix {
 			max-height: 40%;
 			overflow: auto;
 		}
@@ -125,7 +126,7 @@
 			const barcodes = await barcodeDetector.detect(img).catch(err => log(err))
 			for (let i = 0; i < barcodes.length; ++i) {
 				let barcode = barcodes[i]
-				boxes[i].innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`
+				boxes[i].innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a><br>${vidX} ${vidY} ${barcode.boundingBox['x']}`
 				boxes[i].left = (vidX + barcode.boundingBox['x']) + 'px'
 				boxes[i].top = (vidY + barcode.boundingBox['y']) + 'px'
 				boxes[i].height = barcode.boundingBox['height'] + 'px'
