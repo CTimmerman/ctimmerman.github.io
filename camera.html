@@ -5,7 +5,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Camera / QR scanner</title>
-	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
+	<link rel="icon"
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 	<style>
 		body {
 			background-color: black;
@@ -24,49 +25,52 @@
 		<label for="audioSource">Audio source: </label><select id="audioSource"></select>
 		<label for="videoSource">Video source: </label><select id="videoSource"></select>
 		<button onclick="snap()">Snapshot</button>
+		<div id="pics"></div>
 		<div id="log"></div>
 	</div>
 	<video autoplay muted playsinline></video>
 	<script>
 		'use strict'
 
-		var videoElement = document.querySelector('video')
-		var audioSelect = document.querySelector('select#audioSource')
-		var videoSelect = document.querySelector('select#videoSource')
-		audioSelect.onchange = setSource
-		videoSelect.onchange = setSource
-		
+		const pixEl = document.getElementById('pics')
+		const logEl = document.getElementById('log')
+		const vidEl = document.querySelector('video')
+		const audSel = document.querySelector('select#audioSource')
+		const vidSel = document.querySelector('select#videoSource')
+		audSel.onchange = setSource
+		vidSel.onchange = setSource
+
 		navigator.mediaDevices.enumerateDevices().then(devices => {
 			devices.forEach(device => {
 				const option = document.createElement('option')
 				option.value = device.deviceId
 				if (device.kind === 'audioinput') {
-					option.text = device.label || `Microphone ${audioSelect.length + 1}`
-					audioSelect.appendChild(option)
+					option.text = device.label || `Microphone ${audSel.length + 1}`
+					audSel.appendChild(option)
 				} else if (device.kind === 'videoinput') {
-					option.text = device.label || `Camera ${videoSelect.length + 1}`
-					videoSelect.appendChild(option)
+					option.text = device.label || `Camera ${vidSel.length + 1}`
+					vidSel.appendChild(option)
 				}
 			})
 		}).catch(err => console.log(err))
 
 		function setSource() {
-			const audioSource = audioSelect.value
-			const videoSource = videoSelect.value
+			const audioSource = audSel.value
+			const videoSource = vidSel.value
 			const query = {
 				audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
 				video: { deviceId: videoSource ? { exact: videoSource } : undefined },
 			}
 			navigator.mediaDevices.getUserMedia(query)
-			.then(src => videoElement.srcObject = src)
-			.catch(err => console.log(err))
+				.then(src => vidEl.srcObject = src)
+				.catch(err => console.log(err))
 		}
 
 		function snap() {
 			var canvas = document.createElement('canvas')
-			canvas.width = videoElement.videoWidth
-			canvas.height = videoElement.videoHeight
-			canvas.getContext('2d').drawImage(videoElement, 0, 0)
+			canvas.width = vidEl.videoWidth
+			canvas.height = vidEl.videoHeight
+			canvas.getContext('2d').drawImage(vidEl, 0, 0)
 			/*
 			// download
 			const a = document.createElement('a')
@@ -77,22 +81,24 @@
 			const img = document.createElement('img')
 			img.src = canvas.toDataURL('image/jpg')
 			img.width = 320
-			document.body.appendChild(img)
-			document.getElementById('log').innerText = ''
+			pixEl.appendChild(img)
+			logEl.innerText = ''
 			scan(img)
 		}
 
-		const log = msg => document.getElementById('log').innerHTML += msg + '<br>'
+		const log = msg => logEl.innerHTML += msg + '<br>'
 
 		async function scan(img) {
 			if (!('BarcodeDetector' in window)) return
 			const supportedFormats = await BarcodeDetector.getSupportedFormats()
 				.then(supportedFormats => supportedFormats)  //.forEach(format => log(format)))
 			log(`Supported formats: ${supportedFormats}`)
-			const barcodeDetector = new BarcodeDetector({formats: supportedFormats})
-			barcodeDetector.detect(img)
-				.then(barcodes => barcodes.forEach((barcode) => log(barcode.rawData)))
+			const barcodeDetector = new BarcodeDetector()
+			const barcodes = await barcodeDetector.detect(img)
+				.then(barcodes => barcodes)
 				.catch(err => log(err))
+			barcodes.forEach(barcode => { log(barcode); log(barcode.rawValue) })
+			return barcodes
 		}
 	</script>
 </body>
