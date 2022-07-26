@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Life Counter by Cees Timmerman, 2022-07-05</title>
 	<link rel="icon"
@@ -24,6 +24,11 @@
 			width: 2em;
 		}
 
+		#addplayer {
+			margin: 2em;
+			display: inline-block;
+			color: grey;
+		}
 		#container {
 			display: flex;
 			flex-direction: row;
@@ -105,7 +110,7 @@
 
 <body ondblclick="dblclick(event)">
 	<div id="container"></div>
-	<div onclick="add_player()" style="margin: 2em; display: inline-block; color: grey;">Add player</div>
+	<div onclick="add_player()">Add player</div>
 	<script>
 		'use strict'
 		// Prevent accidental reload on swipe up.
