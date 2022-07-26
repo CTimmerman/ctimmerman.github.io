@@ -51,6 +51,7 @@
 	</div>
 	<script>
 		'use strict'
+		onbeforeunload = () => false
 
 		const pixEl = document.getElementById('pix')
 		const logEl = document.getElementById('log')
@@ -119,7 +120,7 @@
 			const label = document.createElement('div')
 			label.className = 'label'
 			barcodes.forEach(barcode => {
-				label.innerHTML += `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a><br>`
+				label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}">${barcode.rawValue}</a><br>`
 			})
 			pixEl.appendChild(label)
 			label.scrollIntoView()
