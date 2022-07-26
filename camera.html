@@ -124,7 +124,9 @@
 
 		async function scan(img) {
 			if (!img) img = vidEl
+			console.log('scanning', img)
 			const barcodes = await barcodeDetector.detect(img)
+			console.log('barcodes', barcodes)
 			overlay.innerText = ''
 			for (let i = 0; i < barcodes.length; ++i) {
 				let barcode = barcodes[i]
