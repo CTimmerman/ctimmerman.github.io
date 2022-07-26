@@ -73,6 +73,7 @@
 		}).catch(err => console.log(err))
 
 		let scanner = null
+		let barcodeDetector = null
 		async function setSource() {
 			const audioSource = audSel.value
 			const videoSource = vidSel.value
@@ -84,6 +85,8 @@
 				.then(src => vidEl.srcObject = src)
 				.catch(err => console.log(err))
 			
+			if (!('BarcodeDetector' in window)) return
+			barcodeDetector = new BarcodeDetector()
 			clearInterval(scanner)
 			scanner = setInterval(scan, 500)
 		}
@@ -103,6 +106,7 @@
 			const img = document.createElement('img')
 			img.src = canvas.toDataURL('image/jpg')
 			img.width = 320
+			img.onclick = e => scan(img)
 			pixEl.appendChild(img)
 
 			logEl.innerText = '' + img
@@ -120,8 +124,6 @@
 
 		async function scan(img) {
 			if (!img) img = vidEl
-			if (!('BarcodeDetector' in window)) return
-			const barcodeDetector = new BarcodeDetector()
 			const barcodes = await barcodeDetector.detect(img).catch(err => log(err))
 			overlay.innerText = ''
 			for (let i = 0; i < barcodes.length; ++i) {
