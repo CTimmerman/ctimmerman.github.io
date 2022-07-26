@@ -26,9 +26,14 @@
 			position: absolute;
 			word-break: break-all;
 		}
+		.label {
+			background-color: white;
+			border: 1px solid blue;
+			color: black;
+		}
 
 		#pix {
-			max-height: 40%;
+			max-height: 40vh;
 			overflow: auto;
 		}
 	</style>
@@ -70,7 +75,7 @@
 					vidSel.appendChild(option)
 				}
 			})
-		}).catch(err => console.log(err))
+		}).catch(err => log(err))
 
 		let scanner = null
 		let barcodeDetector = null
@@ -83,7 +88,7 @@
 			}
 			await navigator.mediaDevices.getUserMedia(query)
 				.then(src => vidEl.srcObject = src)
-				.catch(err => console.log(err))
+				.catch(err => log(err))
 			
 			if (!('BarcodeDetector' in window)) return
 			barcodeDetector = new BarcodeDetector()
@@ -109,12 +114,12 @@
 			img.onclick = e => scan(img)
 			pixEl.appendChild(img)
 
-			logEl.innerText = '' + img
+			logEl.innerText = ''
 			const barcodes = await scan(img)
 			const label = document.createElement('div')
 			label.className = 'label'
 			barcodes.forEach(barcode => {
-				label.innerHTML = `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a>`
+				label.innerHTML += `${barcode.format}<br><a href="${barcode.rawValue}">${barcode.rawValue}</a><br>`
 			})
 			pixEl.appendChild(label)
 			label.scrollIntoView()

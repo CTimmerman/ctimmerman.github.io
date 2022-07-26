@@ -8,7 +8,7 @@
 </head>
 <body>
 <h1>Zodiac Calculator</h1>
-<input id="date" type="datetime-local" onchange="zodiac(this.value)">
+<label for="date">Date of birth: </label><input id="date" type="datetime-local" title="Birth date, with AM/PM if not 24h format." onchange="zodiac(this.value)">
 <div id="zodiac"></div>
 <script>
 // v1.0 by Cees Timmerman, 2020-08-16.
