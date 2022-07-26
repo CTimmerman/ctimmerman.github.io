@@ -121,9 +121,11 @@
 		}
 
 		const log = msg => logEl.innerHTML += msg + '<br>'
+		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 		async function scan(img) {
 			if (!img) img = vidEl
+			else await sleep(0.2)
 			console.log('scanning', img)
 			const barcodes = await barcodeDetector.detect(img)
 			console.log('barcodes', barcodes)
