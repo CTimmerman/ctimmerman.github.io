@@ -106,7 +106,7 @@
 			pixEl.appendChild(img)
 
 			logEl.innerText = '' + img
-			const barcodes = await setTimeout('scan(img)', 10)
+			const barcodes = await scan(img)
 			const label = document.createElement('div')
 			label.className = 'label'
 			barcodes.forEach(barcode => {
