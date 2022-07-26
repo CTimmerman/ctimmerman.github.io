@@ -24,6 +24,12 @@
 			width: 2em;
 		}
 
+		p {
+			margin: 1em auto;
+			width: -moz-fit-content;
+			width: fit-content;
+		}
+
 		#addplayer {
 			margin: 2em;
 			display: inline-block;
@@ -67,7 +73,7 @@
 			text-align: center;
 			float: left;
 		}
-		@media only screen and (min-width: 375px) and (max-width: 1025px) {
+		@media (min-width: 375px) and (max-width: 1025px) {
 			.counter {
 				margin: 0.7em 0em;
 				padding: 0.7em 0.4em;
@@ -76,7 +82,7 @@
 				margin: 1.18em 0.2em 0 0;
 			}
 		}
-		@media only screen and (max-width: 375px) {
+		@media (max-width: 375px) {
 			.counter {
 				margin: 0.7em 0em;
 				padding: 0.7em 0.55em;
@@ -110,7 +116,7 @@
 
 <body ondblclick="dblclick(event)">
 	<div id="container"></div>
-	<div onclick="add_player()">Add player</div>
+	<p onclick="add_player()">Add player</p>
 	<script>
 		'use strict'
 		// Prevent accidental reload on swipe up.
