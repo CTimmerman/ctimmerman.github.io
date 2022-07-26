@@ -114,8 +114,10 @@
 			img.width = 320
 			img.onclick = e => scan(img)
 			pixEl.appendChild(img)
+			await sleep(0.2)
+			img.scrollIntoView()
 
-			logEl.innerText = ''
+			if (!barcodeDetector) return
 			const barcodes = await scan(img)
 			const label = document.createElement('div')
 			label.className = 'label'
@@ -123,7 +125,6 @@
 				label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}">${barcode.rawValue}</a><br>`
 			})
 			pixEl.appendChild(label)
-			label.scrollIntoView()
 		}
 
 		const log = msg => logEl.innerHTML += msg + '<br>'
@@ -131,7 +132,6 @@
 
 		async function scan(img) {
 			if (!img) img = vidEl
-			else await sleep(0.2)
 			const barcodes = await barcodeDetector.detect(img)
 			overlay.innerText = ''
 			for (let i = 0; i < barcodes.length; ++i) {
