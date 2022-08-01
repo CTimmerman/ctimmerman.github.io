@@ -122,7 +122,7 @@
 			const label = document.createElement('div')
 			label.className = 'label'
 			barcodes.forEach(barcode => {
-				label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}">${barcode.rawValue}</a><br>`
+				label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}" target="_blank">${barcode.rawValue}</a><br>`
 			})
 			pixEl.appendChild(label)
 		}
@@ -138,7 +138,7 @@
 				let barcode = barcodes[i]
 				let box = document.createElement('div')
 				box.className = 'box'
-				box.innerHTML = `<a href="${barcode.rawValue}">${barcode.rawValue}</a>`
+				box.innerHTML = `<a href="${barcode.rawValue}" target="_blank">${barcode.rawValue}</a>`
 				box.style.left = (vidX + barcode.boundingBox.x) + 'px'
 				box.style.top = (vidY + barcode.boundingBox.y) + 'px'
 				box.style.height = barcode.boundingBox.height + 'px'
