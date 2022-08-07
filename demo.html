@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<head>
+		<title>Demo, Cees Timmerman 2022-08-07</title>
+	</head>
+	<body>
+		<div id="player"><button onclick="play()">Start</button></div>
+		<div class="pipe"></div>
+		<style>
+			body {
+				margin: 0;
+				text-align: center;
+			}
+
+			html {
+				background: black;
+				color: white;
+			}
+
+			.foo {
+				animation: linearmov 3s linear infinite alternate, bounce 0.455s infinite alternate, movez 0.455s infinite;
+				display: inline-block;
+				position: relative;
+				vertical-align: bottom;
+				font: 1.5em impact;
+				/* letter-spacing: 2px; */
+				text-shadow: 2px 2px #000a;
+			}
+
+			.pipe {
+				animation: spin 10s infinite;
+				background: linear-gradient(red, black);
+				height: 1.5em;
+				margin-top: 1.5em;
+				position: relative;
+				z-index: 1;
+			}
+
+			@keyframes linearmov {
+				from {
+					margin-left: 0;
+					/* perspective: 300px */
+				}
+
+				to {
+					/* margin-left: 300px; */
+				}
+			}
+
+			@keyframes bounce {
+				from {
+					transform: translate(0, 0);
+				}
+
+				to {
+					transform: translate(1em, -2.5em);
+				}
+			}
+
+			@keyframes movez {
+				0% {
+					z-index: -6;
+					opacity: 0.9;
+				}
+
+				100% {
+					z-index: 2;
+					opacity: 1
+				}
+			}
+
+			@keyframes spin {
+				100% {
+					transform: rotate(360)
+				}
+			}
+		</style>
+		<script src="grapheme-splitter.js"></script>
+		<script>
+			var player
+			function onYouTubeIframeAPIReady() {
+				player = new YT.Player('player', {
+					height: '390',
+					width: '640',
+					videoId: 'S0ximxe4XtU',
+					startSeconds: 0,
+					playerVars: {
+						'playsinline': 1
+					},
+					events: {
+						'onReady': onPlayerReady,
+					}
+				})
+			}
+			async function onPlayerReady(event) {
+				player.setLoop(true)
+				// Some laptops like HP's with Windows 10 cut off the first bit of audio jack output after idle.
+				player.playVideo()
+				await sleep(500)
+				player.stopVideo()
+				player.seekTo(0)
+				await sleep(1000).then(player.playVideo)
+			}
+			function embed() {
+				var tag = document.createElement('script')
+				tag.src = "https://www.youtube.com/iframe_api"
+				var firstScriptTag = document.getElementsByTagName('script')[0]
+				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+			}
+
+			const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+			const splitEmoji = (string) => {
+				try {
+					// The following line might not work on Firefox. https://stackoverflow.com/a/71619350/819417
+					// UTF8 ease over supposed UTF16 speed is advised, else you might as well stick to opcodes.
+					return [...new Intl.Segmenter().segment(string)].map(x => x.segment)
+				} catch (ex) {
+					let gs = new GraphemeSplitter()
+					return gs.splitGraphemes(string)
+				}
+			}
+			const utf16_sucks_at_utf8 = {
+				'☺': '👦🏾',
+				'☻': '👨🏾‍👨🏾‍👦🏾',
+				'♣': '🌎',
+				' ': '&nbsp;'
+			}
+			async function bar(text=`☺Tunnel Snakes Rule!             We're the Tunnel Snakes.             ☻ That's us.        And we rule!   ♣♣♣♣♣`) {
+				for (let i = 0; i < text.length; ++i) {
+					await sleep(80)
+					let letter = document.createElement('div')
+					letter.className = 'foo'
+					letter.innerHTML = utf16_sucks_at_utf8[text[i]] || text[i]
+					document.body.append(letter)
+				}
+			}
+			function play() {
+				embed()
+				bar()
+			}
+		</script>
+	</body>
+</html>
