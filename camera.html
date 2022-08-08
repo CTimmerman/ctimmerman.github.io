@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=0.5">
 	<title>Camera / QR scanner, by Cees Timmerman 2022-08-08</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%223 10 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
@@ -18,6 +18,10 @@
 
 		img {
 			width: 240px;
+		}
+
+		video {
+			max-width: 100vw;
 		}
 
 		table, th, td {
@@ -45,12 +49,13 @@
 		}
 
 		#log {
-			max-height: 3em;
+			max-height: 2em;
 			overflow: auto;
 		}
 
 		#pix {
 			font-size: 0;
+			max-height: 180px;
 			overflow: auto;
 			width: 100%;
 		}
@@ -76,19 +81,11 @@
 			type="number" size="4" max="120" min="-1" value="420"> of <span id="vid-level"></span>.
 	</div>
 	<div id="log"></div>
-	<table>
-		<tr>
-			<td nowrap>
-				<canvas id="vu" width="50" height="100"></canvas><!-- Don't render whitespace!
-				--><video autoplay muted playsinline></video>
-				<canvas id="vid"></canvas>
-				<div id="overlay"></div>
-			</td>
-			<td>
-				<div id="pix"></div>
-			</td>
-		</tr>
-	</table>
+	<canvas id="vu" width="50" height="100"></canvas><!-- Don't render whitespace!
+	--><video autoplay muted playsinline></video>
+	<canvas id="vid"></canvas>
+	<div id="overlay"></div>
+	<div id="pix"></div>
 	<script>
 		'use strict'
 		onbeforeunload = () => false
@@ -220,7 +217,7 @@
 				box.style.width = barcode.boundingBox.width + 'px'
 				overlay.appendChild(box)
 			}
-			if (JSON.stringify(barcodes) != JSON.stringify(old_barcodes)) {
+			if (JSON.stringify(barcodes) !== JSON.stringify(old_barcodes)) {
 				old_barcodes = barcodes
 				snap('Code')
 			}
