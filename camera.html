@@ -225,7 +225,7 @@
 				let sum = 0
 				for (let i = 0; i < imgData.length; ++i) sum += Math.abs(imgData[i] - oldImageData[i])
 				const level = Math.round(Math.abs(sum - old_sum) / sum * 100, 2)
-				vid_level.innerText = (` of ${level}`)
+				vid_level.innerText = level
 				old_sum = sum
 				if (level >= vid_trigger) snap()
 			}
