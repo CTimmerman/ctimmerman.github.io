@@ -59,7 +59,7 @@
 	<div>
 		<label for="audioSource">Audio: </label><select id="audioSource"></select>
 		<label for="videoSource">Video: </label><select id="videoSource"></select>
-		<button onclick="snap()">Snapshot</button>
+		<button onclick="snap('Manual')">Snapshot</button>
 		<label for="vu-trigger">Autosnap at audio </label><input id="vu-trigger"
 			onchange="vu_trigger = parseInt(this.value)" type="number" size="4" max="120" min="-1" value="69">
 		<label for="vid-trigger"> or video </label><input id="vid-trigger" onchange="vid_trigger = parseInt(this.value)"
@@ -148,7 +148,7 @@
 			scanner = setInterval(scan, 500)
 		}
 
-		async function snap() {
+		async function snap(source='Auto') {
 			vid.drawImage(vidEl, 0, 0)
 			/*
 			// download
@@ -159,7 +159,8 @@
 			*/
 			const img = document.createElement('img')
 			img.src = vid.canvas.toDataURL('image/jpg')
-			img.onclick = e => scan(img)
+			img.title = `${source} snap at ${new Date()}`
+			console.log(img.title)
 			pixEl.appendChild(img)
 			await sleep(200)
 			img.scrollIntoView()
@@ -211,10 +212,10 @@
 			javascriptNode.onaudioprocess = () => {
 				const array = new Uint8Array(analyser.frequencyBinCount)
 				analyser.getByteFrequencyData(array)
-				let total = 0
+				let sum = 0
 				const length = array.length
-				for (let i = 0; i < length; ++i) total += array[i]
-				const level = total / length * 2
+				for (let i = 0; i < length; ++i) sum += array[i]
+				const level = sum / length * 2
 				const percentage = level / 100
 				const h = vu.canvas.height
 				vu.clearRect(0, 0, 50, h)
@@ -223,7 +224,7 @@
 				vu.fillStyle = 'white'
 				vu.font = '32px impact'
 				vu.fillText(Math.round(level), 0, h / 2)
-				if (level >= vu_trigger) snap()
+				if (level >= vu_trigger) snap('Audio')
 			}
 		}
 
@@ -237,7 +238,7 @@
 				const level = Math.round(Math.abs(sum - old_sum) / sum * 100, 2)
 				vid_level.innerText = level
 				old_sum = sum
-				if (level >= vid_trigger) snap()
+				if (level >= vid_trigger) snap('Video')
 			}
 			oldImageData = imgData
 		}
