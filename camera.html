@@ -45,7 +45,7 @@
 		}
 
 		#log {
-			max-height: 4em;
+			max-height: 3em;
 			overflow: auto;
 		}
 
@@ -170,7 +170,7 @@
 			img.title = `${source} snap at ${new Date()}`
 			log(img.title)
 			if (barcodeDetector) {
-				const barcodes = await scan()  // [{'format': 'test', 'rawValue': '123'}]  
+				const barcodes = await scan()  // [{'format': 'test', 'rawValue': '123'}]  // chrome://flags/#unsafely-treat-insecure-origin-as-secure
 				if (barcodes.length < 1) return
 				const label = document.createElement('div')
 				label.className = 'label'
@@ -190,7 +190,10 @@
 			img.scrollIntoView()
 		}
 
-		const log = msg => logEl.innerHTML += msg + '<br>'
+		const log = msg => {
+			logEl.innerHTML += msg + '<br>'
+			logEl.scrollTop = logEl.scrollHeight
+		}
 		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 		let old_barcodes
