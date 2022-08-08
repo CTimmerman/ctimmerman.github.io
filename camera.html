@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Camera / QR scanner, by Cees Timmerman 2022-08-07</title>
+	<title>Camera / QR scanner, by Cees Timmerman 2022-08-08</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%222 4 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 	<style>
@@ -24,6 +24,7 @@
 			position: absolute;
 			word-break: break-all;
 		}
+
 		.label {
 			background-color: white;
 			border: 1px solid blue;
@@ -32,6 +33,10 @@
 
 		#pix {
 			overflow: auto;
+		}
+
+		#vid {
+			display: none;
 		}
 
 		#vu {
@@ -45,7 +50,10 @@
 		<label for="audioSource">Audio: </label><select id="audioSource"></select>
 		<label for="videoSource">Video: </label><select id="videoSource"></select>
 		<button onclick="snap()">Snapshot</button>
-		<label for="vu-trigger">Autosnap at </label><input id="vu-trigger" onchange="vu_trigger = parseInt(this.value)" type="number" size="4" max="120" min="-1" value="69">
+		<label for="vu-trigger">Autosnap at audio </label><input id="vu-trigger"
+			onchange="vu_trigger = parseInt(this.value)" type="number" size="4" max="120" min="-1" value="69">
+		<label for="vid-trigger"> or video </label><input id="vid-trigger" onchange="vid_trigger = parseInt(this.value)"
+			type="number" size="4" max="120" min="-1" value="69"> of <span id="vid-level"></span>.
 	</div>
 	<div id="log"></div>
 	<table>
@@ -53,6 +61,7 @@
 			<td nowrap>
 				<canvas id="vu" width="50" height="100"></canvas>
 				<video autoplay muted playsinline></video>
+				<canvas id="vid"></canvas>
 				<div id="overlay"></div>
 			</td>
 			<td>
@@ -69,6 +78,7 @@
 		const logEl = el('log')
 		const vu = el('vu').getContext('2d')
 		vu.fillStyle = 'white'
+		const vid = el('vid').getContext('2d')
 		const vidEl = document.querySelector('video')
 		const vidX = vidEl.offsetLeft
 		const vidY = vidEl.offsetTop
@@ -77,8 +87,10 @@
 		const vidSel = document.querySelector('select#videoSource')
 		audSel.onchange = setSource
 		vidSel.onchange = setSource
-		let vu_trigger
+		let vid_trigger, vu_trigger
+		el('vid-trigger').onchange()
 		el('vu-trigger').onchange()
+		const vid_level = el('vid-level')
 
 		navigator.mediaDevices.enumerateDevices().then(devices => {
 			devices.forEach(device => {
@@ -94,31 +106,32 @@
 			})
 		}).catch(err => log(err))
 
-		let scanner = null
-		let barcodeDetector = null
+		let barcodeDetector, looker, scanner
 		async function setSource() {
-			const audioSource = audSel.value
-			const videoSource = vidSel.value
 			const query = {
-				audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
-				video: { deviceId: videoSource ? { exact: videoSource } : undefined },
+				audio: { deviceId: audSel.value ? { exact: audSel.value } : undefined },
+				video: { deviceId: vidSel.value ? { exact: vidSel.value } : undefined },
 			}
 			await navigator.mediaDevices.getUserMedia(query)
 				.then(async src => {
-						vidEl.srcObject = src
-						await sleep(1000).then(a => {
-							el('pix').style.height = getComputedStyle(vidEl).height
-							vu.canvas.height = parseInt(getComputedStyle(vidEl).height)
-							listen(src)
-						})
-					}
+					vidEl.srcObject = src
+					await sleep(1000).then(() => {
+						vid.canvas.width = vidEl.videoWidth
+						vid.canvas.height = vidEl.videoHeight
+						el('pix').style.height = getComputedStyle(vidEl).height
+						vu.canvas.height = parseInt(getComputedStyle(vidEl).height)
+						listen(src)
+					})
+				}
 				)
 				.catch(err => {
-						log(err)
-						throw(err)
-					}
-				)
-			
+					log(err)
+					throw err
+				})
+
+			clearInterval(looker)
+			looker = setInterval(look, 200)
+
 			if (!('BarcodeDetector' in window)) return
 			barcodeDetector = new BarcodeDetector()
 			clearInterval(scanner)
@@ -126,10 +139,7 @@
 		}
 
 		async function snap() {
-			var canvas = document.createElement('canvas')
-			canvas.width = vidEl.videoWidth
-			canvas.height = vidEl.videoHeight
-			canvas.getContext('2d').drawImage(vidEl, 0, 0)
+			vid.drawImage(vidEl, 0, 0)
 			/*
 			// download
 			const a = document.createElement('a')
@@ -138,7 +148,7 @@
 			a.click()
 			*/
 			const img = document.createElement('img')
-			img.src = canvas.toDataURL('image/jpg')
+			img.src = vid.canvas.toDataURL('image/jpg')
 			img.onclick = e => scan(img)
 			pixEl.appendChild(img)
 			await sleep(200)
@@ -188,7 +198,7 @@
 			microphone.connect(analyser)
 			analyser.connect(javascriptNode)
 			javascriptNode.connect(audioContext.destination)
-			javascriptNode.onaudioprocess = function() {
+			javascriptNode.onaudioprocess = () => {
 				const array = new Uint8Array(analyser.frequencyBinCount)
 				analyser.getByteFrequencyData(array)
 				let total = 0
@@ -196,15 +206,30 @@
 				for (let i = 0; i < length; ++i) total += array[i]
 				const level = total / length * 2
 				const percentage = level / 100
-				const h  = vu.canvas.height
+				const h = vu.canvas.height
 				vu.clearRect(0, 0, 50, h)
 				vu.fillStyle = '#444'
-				vu.fillRect(0, 0, 50, h - level/100*h)
+				vu.fillRect(0, 0, 50, h - level / 100 * h)
 				vu.fillStyle = 'white'
 				vu.font = '32px impact'
-				vu.fillText(Math.round(level), 0, h/2)
+				vu.fillText(Math.round(level), 0, h / 2)
 				if (level >= vu_trigger) snap()
 			}
+		}
+
+		let oldImageData, old_sum = 0
+		function look() {
+			vid.drawImage(vidEl, 0, 0)
+			const imgData = vid.getImageData(0, 0, vid.canvas.width, vid.canvas.height).data
+			if (oldImageData) {
+				let sum = 0
+				for (let i = 0; i < imgData.length; ++i) sum += Math.abs(imgData[i] - oldImageData[i])
+				const level = Math.round(Math.abs(sum - old_sum) / sum * 100, 2)
+				vid_level.innerText = (` of ${level}`)
+				old_sum = sum
+				if (level >= vid_trigger) snap()
+			}
+			oldImageData = imgData
 		}
 	</script>
 </body>
