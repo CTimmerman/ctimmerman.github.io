@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<head>
-		<title>Demo, Cees Timmerman 2022-08-07</title>
+		<title>Demo, Cees Timmerman 2022-08-08</title>
 	</head>
 	<body>
 		<div id="player"><button onclick="play()">Start</button></div>
@@ -85,9 +85,10 @@
 				player = new YT.Player('player', {
 					height: '390',
 					width: '640',
-					videoId: 'S0ximxe4XtU',
 					startSeconds: 0,
 					playerVars: {
+						'loop': 1,
+						'playlist': 'S0ximxe4XtU',
 						'playsinline': 1
 					},
 					events: {
@@ -96,13 +97,12 @@
 				})
 			}
 			async function onPlayerReady(event) {
-				player.setLoop(true)
-				// Some laptops like HP's with Windows 10 cut off the first bit of audio jack output after idle.
+				// Some laptops like HP's with Windows 10 cut off the first bit of audio jack output after idle. Wake up, HPeople!
 				player.playVideo()
 				await sleep(500)
 				player.stopVideo()
 				player.seekTo(0)
-				await sleep(1000).then(player.playVideo)
+				player.playVideo()
 			}
 			function embed() {
 				var tag = document.createElement('script')
@@ -128,7 +128,7 @@
 				'♣': '🌎',
 				' ': '&nbsp;'
 			}
-			async function bar(text=`☺Tunnel Snakes Rule!             We're the Tunnel Snakes.             ☻ That's us.        And we rule!   ♣♣♣♣♣`) {
+			async function bar(text=`☺Tunnel Snakes rule!             We're the Tunnel Snakes.             ☻ That's us.        And we rule!   ♣♣♣♣♣♣`) {
 				for (let i = 0; i < text.length; ++i) {
 					await sleep(80)
 					let letter = document.createElement('div')
