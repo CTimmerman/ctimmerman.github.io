@@ -7,6 +7,10 @@
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%222 4 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 	<style>
+		body {
+			margin: 0;
+		}
+
 		html {
 			background-color: #444;
 			color: white;
@@ -14,6 +18,12 @@
 
 		img {
 			width: 240px;
+		}
+
+		table, th, td {
+			border: 0;
+			border-collapse: collapse;
+			padding: 0;
 		}
 
 		.box {
@@ -59,8 +69,8 @@
 	<table>
 		<tr>
 			<td nowrap>
-				<canvas id="vu" width="50" height="100"></canvas>
-				<video autoplay muted playsinline></video>
+				<canvas id="vu" width="50" height="100"></canvas><!-- Don't render whitespace!
+				--><video autoplay muted playsinline></video>
 				<canvas id="vid"></canvas>
 				<div id="overlay"></div>
 			</td>
