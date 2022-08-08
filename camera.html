@@ -39,9 +39,11 @@
 			background-color: white;
 			border: 1px solid blue;
 			color: black;
+			font-size: 1em;
 		}
 
 		#pix {
+			font-size: 0;
 			overflow: auto;
 		}
 
@@ -235,7 +237,7 @@
 			if (oldImageData) {
 				let sum = 0
 				for (let i = 0; i < imgData.length; ++i) sum += Math.abs(imgData[i] - oldImageData[i])
-				const level = Math.round(Math.abs(sum - old_sum) / sum * 100, 2)
+				const level = Math.round(Math.abs(sum - old_sum) / (sum || 1) * 100, 2) || 0
 				vid_level.innerText = level
 				old_sum = sum
 				if (level >= vid_trigger) snap('Video')
