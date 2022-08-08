@@ -168,7 +168,6 @@
 			log(img.title)
 			if (barcodeDetector) {
 				const barcodes = await scan()  // [{'format': 'test', 'rawValue': '123'}]  // chrome://flags/#unsafely-treat-insecure-origin-as-secure
-				if (barcodes.length < 1) return
 				const label = document.createElement('div')
 				label.className = 'label'
 				label.appendChild(img)
