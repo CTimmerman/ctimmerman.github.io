@@ -183,6 +183,7 @@
 		const log = msg => logEl.innerHTML += msg + '<br>'
 		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
+		let old_barcodes
 		async function scan(img) {
 			if (!img) img = vidEl
 			const barcodes = await barcodeDetector.detect(img)
@@ -198,6 +199,9 @@
 				box.style.height = barcode.boundingBox.height + 'px'
 				box.style.width = barcode.boundingBox.width + 'px'
 				overlay.appendChild(box)
+			}
+			if (`${barcodes}` != `${old_barcodes}`) {
+				snap('Code')
 			}
 			return barcodes
 		}
