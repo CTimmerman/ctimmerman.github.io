@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Camera / QR scanner, by Cees Timmerman 2022-08-08</title>
 	<link rel="icon"
-		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%222 8 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%223 10 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 	<style>
 		body {
 			margin: 0;
@@ -41,6 +41,11 @@
 			font-size: 16px;
 			width: 240px;
 			float: left;
+		}
+
+		#log {
+			max-height: 4em;
+			overflow: auto;
 		}
 
 		#pix {
@@ -162,9 +167,9 @@
 			const img = document.createElement('img')
 			img.src = vid.canvas.toDataURL('image/jpg')
 			img.title = `${source} snap at ${new Date()}`
-			console.log(img.title)
+			log(img.title)
 			if (barcodeDetector) {
-				const barcodes = await scan(img)
+				const barcodes = await scan()
 				if (barcodes.length < 1) return
 				const label = document.createElement('div')
 				label.className = 'label'
@@ -184,9 +189,15 @@
 		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 		let old_barcodes
-		async function scan(img) {
-			if (!img) img = vidEl
-			const barcodes = await barcodeDetector.detect(img)
+		async function scan() {
+			img = vidEl
+			try {
+				const barcodes = await barcodeDetector.detect(img)
+			} catch(ex) {
+				console.error("Detect failed on", img)
+				log(`Detect failed on ${img}`)
+				throw ex
+			}
 			overlay.innerText = ''
 			const rect = vidEl.getBoundingClientRect()
 			for (let i = 0; i < barcodes.length; ++i) {
@@ -201,7 +212,10 @@
 				overlay.appendChild(box)
 			}
 			if (`${barcodes}` != `${old_barcodes}`) {
+				old_barcodes = barcodes
 				snap('Code')
+			} else {
+				log(`${barcodes} == ${old_barcodes}`)
 			}
 			return barcodes
 		}
@@ -251,6 +265,21 @@
 				if (level >= vid_trigger) snap('Video')
 			}
 			oldImageData = imgData
+		}
+
+		const saying = new Set()
+		function say(s, rate=1.0, pitch=1.0, lang="en-US"){
+			// rate: [0.1, 10], pitch: [0, 2], lang: BCP 47 language tag
+			const u = new SpeechSynthesisUtterance(s)
+			u.lang = lang
+			u.pitch = pitch
+			u.rate = rate
+			saying.add(u)
+			u.onend = e => {
+				saying.delete(e.utterance)
+				if(saying.size < 1) [...document.getElementsByClassName("say")].forEach(e => e.disabled = false)
+			}
+			speechSynthesis.speak(u)
 		}
 	</script>
 </body>
