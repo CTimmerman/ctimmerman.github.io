@@ -220,7 +220,7 @@
 				box.style.width = barcode.boundingBox.width + 'px'
 				overlay.appendChild(box)
 			}
-			if (`${JSON.stringify(barcodes)}` != `${JSON.stringify(old_barcodes)}`) {
+			if (JSON.stringify(barcodes) != JSON.stringify(old_barcodes)) {
 				old_barcodes = barcodes
 				snap('Code')
 			}
