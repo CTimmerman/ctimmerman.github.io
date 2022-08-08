@@ -27,7 +27,7 @@
 				vertical-align: bottom;
 				font: 1.5em impact;
 				/* letter-spacing: 2px; */
-				text-shadow: 2px 2px #000a;
+				text-shadow: 2px 2px 4px #000a;
 			}
 
 			.pipe {
@@ -78,11 +78,11 @@
 				}
 			}
 		</style>
-		<script src="grapheme-splitter.js"></script>
 		<script>
 			var player
 			function onYouTubeIframeAPIReady() {
 				player = new YT.Player('player', {
+					host: 'https://www.youtube-nocookie.com',
 					height: '390',
 					width: '640',
 					startSeconds: 0,
@@ -128,7 +128,7 @@
 				'♣': '🌎',
 				' ': '&nbsp;'
 			}
-			async function bar(text=`☺Tunnel Snakes rule!             We're the Tunnel Snakes.             ☻ That's us.        And we rule!   ♣♣♣♣♣♣`) {
+			async function bar(text=`☺Tunnel Snakes rule!             We're the Tunnel Snakes.           ☻That's us.            And we rule!   ♣♣♣♣♣♣`) {
 				for (let i = 0; i < text.length; ++i) {
 					await sleep(80)
 					let letter = document.createElement('div')
