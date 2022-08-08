@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Camera / QR scanner, by Cees Timmerman 2022-08-08</title>
 	<link rel="icon"
-		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%222 4 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%222 8 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 	<style>
 		body {
 			margin: 0;
@@ -169,6 +169,7 @@
 
 			if (!barcodeDetector) return
 			const barcodes = await scan(img)
+			if (barcodes.length < 1) return
 			const label = document.createElement('div')
 			label.className = 'label'
 			barcodes.forEach(barcode => {
