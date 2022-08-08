@@ -190,12 +190,11 @@
 
 		let old_barcodes
 		async function scan() {
-			img = vidEl
 			try {
-				const barcodes = await barcodeDetector.detect(img)
+				const barcodes = await barcodeDetector.detect(vidEl)
 			} catch(ex) {
-				console.error("Detect failed on", img)
-				log(`Detect failed on ${img}`)
+				console.error("Detect failed on", vidEl)
+				log(`Detect failed on ${vidEl}`)
 				throw ex
 			}
 			overlay.innerText = ''
