@@ -186,6 +186,7 @@ function nonblocking_alert(msg){
 }
 
 function pair_players(){
+	el('woke').play()  // Should keep audio jack from being suspended, which misses seconds of new speech after 15 seconds.
 	if(match_nr && [...sel('.match .score')].slice(-names.length).map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
 		nonblocking_alert('Last match results incomplete.')
 		return
