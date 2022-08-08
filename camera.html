@@ -37,14 +37,16 @@
 
 		.label {
 			background-color: white;
-			border: 1px solid blue;
 			color: black;
-			font-size: 1em !important;
+			font-size: 16px;
+			width: 240px;
+			float: left;
 		}
 
 		#pix {
 			font-size: 0;
 			overflow: auto;
+			width: 100%;
 		}
 
 		#vid {
@@ -92,8 +94,6 @@
 		vu.fillStyle = 'white'
 		const vid = el('vid').getContext('2d')
 		const vidEl = document.querySelector('video')
-		const vidX = vidEl.clientLeft
-		const vidY = vidEl.clientTop
 		const overlay = el('overlay')
 		const audSel = document.querySelector('select#audioSource')
 		const vidSel = document.querySelector('select#videoSource')
@@ -163,19 +163,21 @@
 			img.src = vid.canvas.toDataURL('image/jpg')
 			img.title = `${source} snap at ${new Date()}`
 			console.log(img.title)
-			pixEl.appendChild(img)
-			await sleep(200)
+			if (barcodeDetector) {
+				const barcodes = await scan(img)
+				if (barcodes.length < 1) return
+				const label = document.createElement('div')
+				label.className = 'label'
+				barcodes.forEach(barcode => {
+					label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}" target="_blank">${barcode.rawValue}</a><br>`
+				})
+				label.appendChild(img)
+				pixEl.appendChild(label)
+			} else {
+				pixEl.appendChild(img)
+			}
+			await sleep(100)
 			img.scrollIntoView()
-
-			if (!barcodeDetector) return
-			const barcodes = await scan(img)
-			if (barcodes.length < 1) return
-			const label = document.createElement('div')
-			label.className = 'label'
-			barcodes.forEach(barcode => {
-				label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}" target="_blank">${barcode.rawValue}</a><br>`
-			})
-			pixEl.appendChild(label)
 		}
 
 		const log = msg => logEl.innerHTML += msg + '<br>'
