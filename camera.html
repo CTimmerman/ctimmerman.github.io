@@ -39,7 +39,7 @@
 			background-color: white;
 			border: 1px solid blue;
 			color: black;
-			font-size: 1em;
+			font-size: 1em !important;
 		}
 
 		#pix {
@@ -92,8 +92,8 @@
 		vu.fillStyle = 'white'
 		const vid = el('vid').getContext('2d')
 		const vidEl = document.querySelector('video')
-		const vidX = vidEl.offsetLeft
-		const vidY = vidEl.offsetTop
+		const vidX = vidEl.clientLeft
+		const vidY = vidEl.clientTop
 		const overlay = el('overlay')
 		const audSel = document.querySelector('select#audioSource')
 		const vidSel = document.querySelector('select#videoSource')
@@ -237,7 +237,7 @@
 			const imgData = vid.getImageData(0, 0, vid.canvas.width, vid.canvas.height).data
 			if (oldImageData) {
 				let sum = 0
-				for (let i = 0; i < imgData.length; ++i) sum += Math.abs(imgData[i] - oldImageData[i])
+				for (let i = 0; i < imgData.length; ++i) sum += Math.abs(imgData[i] - (oldImageData[i] || 0))
 				const level = Math.round(Math.abs(sum - old_sum) / (sum || 1) * 100, 2) || 0
 				vid_level.innerText = level
 				old_sum = sum
