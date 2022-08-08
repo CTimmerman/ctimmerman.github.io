@@ -30,7 +30,7 @@
 			background: #ffffff99;
 			border: 1px solid red;
 			color: black;
-			font-size: 0.5em;
+			font-size: 16px;
 			position: absolute;
 			word-break: break-all;
 		}
@@ -173,10 +173,14 @@
 				if (barcodes.length < 1) return
 				const label = document.createElement('div')
 				label.className = 'label'
-				barcodes.forEach(barcode => {
-					label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}" target="_blank">${barcode.rawValue}</a><br>`
-				})
 				label.appendChild(img)
+				barcodes.forEach(barcode => {
+					if (barcode.rawValue.indexOf(':') > -1) {
+						label.innerHTML += `${barcode.format} <a href="${barcode.rawValue}" target="_blank">${barcode.rawValue}</a><br>`
+					} else {
+						label.innerHTML += `${barcode.format} ${barcode.rawValue}<br>`
+					}
+				})
 				pixEl.appendChild(label)
 			} else {
 				pixEl.appendChild(img)
