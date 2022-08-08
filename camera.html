@@ -185,13 +185,14 @@
 			if (!img) img = vidEl
 			const barcodes = await barcodeDetector.detect(img)
 			overlay.innerText = ''
+			const rect = vidEl.getBoundingClientRect()
 			for (let i = 0; i < barcodes.length; ++i) {
 				let barcode = barcodes[i]
 				let box = document.createElement('div')
 				box.className = 'box'
 				box.innerHTML = `<a href="${barcode.rawValue}" target="_blank">${barcode.rawValue}</a>`
-				box.style.left = (vidX + barcode.boundingBox.x) + 'px'
-				box.style.top = (vidY + barcode.boundingBox.y) + 'px'
+				box.style.left = (rect.left + barcode.boundingBox.x) + 'px'
+				box.style.top = (rect.top + barcode.boundingBox.y) + 'px'
 				box.style.height = barcode.boundingBox.height + 'px'
 				box.style.width = barcode.boundingBox.width + 'px'
 				overlay.appendChild(box)
