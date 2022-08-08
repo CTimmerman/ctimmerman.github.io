@@ -190,8 +190,9 @@
 
 		let old_barcodes
 		async function scan() {
+			const barcodes = []
 			try {
-				const barcodes = await barcodeDetector.detect(vidEl)
+				barcodes = await barcodeDetector.detect(vidEl)
 			} catch(ex) {
 				console.error("Detect failed on", vidEl)
 				log(`Detect failed on ${vidEl}`)
