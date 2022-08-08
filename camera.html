@@ -38,9 +38,10 @@
 		.label {
 			background-color: white;
 			color: black;
+			float: left;
 			font-size: 16px;
 			width: 240px;
-			float: left;
+			word-break: break-all;
 		}
 
 		#log {
@@ -169,7 +170,7 @@
 			img.title = `${source} snap at ${new Date()}`
 			log(img.title)
 			if (barcodeDetector) {
-				const barcodes = await scan()
+				const barcodes = await scan()  // [{'format': 'test', 'rawValue': '123'}]  
 				if (barcodes.length < 1) return
 				const label = document.createElement('div')
 				label.className = 'label'
