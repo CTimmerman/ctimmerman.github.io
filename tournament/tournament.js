@@ -161,7 +161,14 @@ function sortable_tables(){
 			sel('.arrow', h)[0].innerText = (h !== th? '' : th.asc? up : down)
 		}
 	}
-	sel('th').forEach(th => th.onclick = sort_column)
+	sel('th').forEach(th => {
+		th.onclick = sort_column
+		th.oncontextmenu = show_help
+	})
+}
+
+function show_help(){
+	[...sel('th')].forEach(e=>{if(e.title) nonblocking_alert(`${e.innerText}: ${e.title}`) })
 }
 
 const shuffled = (arr) => arr.map(e => [Math.random(), e]).sort().map(a => a[1])
@@ -312,4 +319,6 @@ function tick(){
 function init(){
 	set_colors()
 	el('date').innerHTML = new Date()
+	addEventListener('mousedown', ()=>window.woke.play())
+
 }
