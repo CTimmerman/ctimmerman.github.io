@@ -135,13 +135,14 @@ function sortable_tables(){
 	// Based on https://stackoverflow.com/a/49041392/819417
 	function sort_column(e){
 		let th = e.target
-		if(th.className === 'arrow') th = th.parentNode 
+		if(th.className === 'arrow') th = th.parentNode
 		if(th.tagName !== 'TH') return
 		const table = th.closest('table')
-		const getCellValue = (tr, idx) => (
-			tr.children[idx].innerText ||
-			tr.children[idx].textContent
-		)
+		const getCellValue = (tr, idx) => {
+			let s = tr.children[idx].innerText || tr.children[idx].textContent
+			let v = parseFloat(s)
+			return (v.toString() === s) ? v : s
+		}
 		const comparer = (idx, asc) => (a, b) => (
 			(v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
 		)(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx))
