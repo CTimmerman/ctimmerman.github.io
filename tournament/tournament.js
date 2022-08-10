@@ -111,9 +111,9 @@ function rank_players(){
 	})
 	names = ranking.map(a => a[a.length-1])
 	let html = `<table><th>#</th><th>Name</th><th title="Points scored">PTS</th>
-	<th title="Win x points">W <span contentEditable onblur='points_per_win = float(this.innerText); rank_players()'>${points_per_win}</span></th>
-	<th title="Draw x points">D <span contentEditable onblur='points_per_draw = float(this.innerText); rank_players()'>${points_per_draw}</span></th>
-	<th title="Loss x points">L <span contentEditable onblur='points_per_loss = float(this.innerText); rank_players()'>${points_per_loss}</span></th>
+	<th title="Win points">Win <span contentEditable onblur='points_per_win = float(this.innerText); rank_players()'>${points_per_win}</span></th>
+	<th title="Draw points">Draw <span contentEditable onblur='points_per_draw = float(this.innerText); rank_players()'>${points_per_draw}</span></th>
+	<th title="Loss points">Loss <span contentEditable onblur='points_per_loss = float(this.innerText); rank_players()'>${points_per_loss}</span></th>
 	<th title="Neustadtl score: win SOS + 1/2 draw SOS">Neu.</th><th title="Sum of Opponents' Scores">SOS</th></tr>`
 	let rank = 0
 	let prev = []
@@ -168,7 +168,7 @@ function sortable_tables(){
 }
 
 function show_help(){
-	[...sel('th')].forEach(e=>{if(e.title) nonblocking_alert(`${e.innerText}: ${e.title}`) })
+	sel('th').forEach(e=>{if(e.title) nonblocking_alert(`${e.innerText}: ${e.title}`) })
 }
 
 const shuffled = (arr) => arr.map(e => [Math.random(), e]).sort().map(a => a[1])
@@ -320,5 +320,4 @@ function init(){
 	set_colors()
 	el('date').innerHTML = new Date()
 	addEventListener('mousedown', ()=>window.woke.play())
-
 }
