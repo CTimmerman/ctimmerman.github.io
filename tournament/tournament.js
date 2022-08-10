@@ -110,11 +110,11 @@ function rank_players(){
 		}
 	})
 	names = ranking.map(a => a[a.length-1])
-	let html = `<table><th>Rank</th><th>Player</th><th>Score</th>
-	<th>Win <span contentEditable onblur='points_per_win = float(this.innerText); rank_players()'>${points_per_win}</span>pt</th>
-	<th>Draw <span contentEditable onblur='points_per_draw = float(this.innerText); rank_players()'>${points_per_draw}</span>pt</th>
-	<th>Loss <span contentEditable onblur='points_per_loss = float(this.innerText); rank_players()'>${points_per_loss}</span>pt</th>
-	<th>Neustadtl score</th><th title="Sum of Opponents' Scores">SOS</th></tr>`
+	let html = `<table><th>#</th><th>Name</th><th title="Points scored">PTS</th>
+	<th title="Win">W <span contentEditable onblur='points_per_win = float(this.innerText); rank_players()'>${points_per_win}</span></th>
+	<th title="Draw">D <span contentEditable onblur='points_per_draw = float(this.innerText); rank_players()'>${points_per_draw}</span></th>
+	<th title="Loss">L <span contentEditable onblur='points_per_loss = float(this.innerText); rank_players()'>${points_per_loss}</span></th>
+	<th title="Neustadtl score: win SOS + 1/2 draw SOS">Neu.</th><th title="Sum of Opponents' Scores">SOS</th></tr>`
 	let rank = 0
 	let prev = []
 	for(let i in ranking){
@@ -187,7 +187,6 @@ function nonblocking_alert(msg){
 }
 
 function pair_players(){
-	el('woke').play()  // Should keep audio jack from being suspended, which misses seconds of new speech after 15 seconds.
 	if(match_nr && [...sel('.match .score')].slice(-names.length).map(e => e.innerText).filter(s => s.trim() != '').length !== names.length - names.includes(BYE)? 1 : 0){
 		nonblocking_alert('Last match results incomplete.')
 		return
@@ -261,7 +260,6 @@ function toggle_timer(){
 function start_timer(){
 	timer = setInterval(tick, 1000)
 	el('btn_timer').value = 'Stop timer'
-	el('woke').play()
 	const end_date = new Date()
 	const [m, s] = el('duration').value.split(':').map(e => int(e))
 	end_date.setSeconds(end_date.getSeconds() + s + 60*m)
@@ -311,7 +309,9 @@ function tick(){
 	if(s) say(s)
 }
 
+let woke
 function init(){
 	set_colors()
 	el('date').innerHTML = new Date()
+	woke = setInterval(()=>el('woke').play(), 1000)  // Should keep audio jack from being suspended, which misses seconds of new speech after 15 seconds.
 }
