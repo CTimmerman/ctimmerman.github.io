@@ -236,7 +236,7 @@ function pair_players(){
 		const p2 = names[i*2+1]
 		if(p1 in played){ played[p1].add(p2) }else{ played[p1] = new Set([p2]) }
 		if(p2 in played){ played[p2].add(p1) }else{ played[p2] = new Set([p1]) }
-		html += `<tr><td>${i+1}</td><td>${p1}</td><td>${p2}</td><td class='score' contentEditable></td><td class='score' ${p2 == BYE ? '' : 'contentEditable'}></td></tr>`
+		html += `<tr><td contentEditable>${i+1}</td><td contentEditable>${p1}</td><td contentEditable>${p2}</td><td class='score' contentEditable></td><td class='score' contentEditable></td></tr>`
 	}
 	html += '</table>'
 	add_node(html)
