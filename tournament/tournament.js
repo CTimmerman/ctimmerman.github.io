@@ -309,9 +309,7 @@ function tick(){
 	if(s) say(s)
 }
 
-let woke
 function init(){
 	set_colors()
 	el('date').innerHTML = new Date()
-	woke = setInterval(()=>el('woke').play(), 1000)  // Should keep audio jack from being suspended, which misses seconds of new speech after 15 seconds.
 }
