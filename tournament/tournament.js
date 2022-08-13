@@ -110,10 +110,10 @@ function rank_players(){
 		}
 	})
 	names = ranking.map(a => a[a.length-1])
-	let html = `<table><th>#</th><th>Name</th><th title="Points scored">PTS</th>
-	<th title="Win points">Win <span contentEditable onblur='points_per_win = float(this.innerText); rank_players()'>${points_per_win}</span></th>
-	<th title="Draw points">Draw <span contentEditable onblur='points_per_draw = float(this.innerText); rank_players()'>${points_per_draw}</span></th>
-	<th title="Loss points">Loss <span contentEditable onblur='points_per_loss = float(this.innerText); rank_players()'>${points_per_loss}</span></th>
+	let html = `<table><th>#</th><th>Name</th><th title="Points scored">Score</th>
+	<th title="Win points">Win <span contentEditable onblur='points_per_win = float(this.innerText); rank_players()'>${points_per_win}</span>x</th>
+	<th title="Draw points">Draw <span contentEditable onblur='points_per_draw = float(this.innerText); rank_players()'>${points_per_draw}</span>x</th>
+	<th title="Loss points">Loss <span contentEditable onblur='points_per_loss = float(this.innerText); rank_players()'>${points_per_loss}</span>x</th>
 	<th title="Neustadtl score: win SOS + 1/2 draw SOS">Neu.</th><th title="Sum of Opponents' Scores">SOS</th></tr>`
 	let rank = 0
 	let prev = []
