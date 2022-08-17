@@ -218,9 +218,15 @@ function zodiac(date){
 	var html = ''
 	var mm_dd = date.slice(5, 10)
 	for(let sign of signs){
-		if(sign.old_start <= mm_dd && sign.old_end >= mm_dd) html += "<br>Old sign: " + blurb(sign)
-		if(sign.cetus_start <= mm_dd && sign.cetus_end >= mm_dd) html += "<br>Cetus sign: " + blurb(sign)
-		if(sign.new_start <= mm_dd && sign.new_end >= mm_dd) html += "<br>New sign: " + blurb(sign)
+		if((sign.old_start <= mm_dd || (sign.old_start?.startsWith('12') && mm_dd.startsWith('01')))
+		   && (sign.old_end >= mm_dd || (sign.old_end?.startsWith('01') && mm_dd.startsWith('12'))))
+		   html += "<br>Old sign: " + blurb(sign)
+		if((sign.cetus_start <= mm_dd || (sign.cetus_start.startsWith('12') && mm_dd.startsWith('01')))
+		   && (sign.cetus_end >= mm_dd || (sign.cetus_end?.startsWith('01') && mm_dd.startsWith('12'))))
+		   html += "<br>Cetus sign: " + blurb(sign)
+		if((sign.new_start <= mm_dd || (sign.new_start?.startsWith('12') && mm_dd.startsWith('01')))
+		   && (sign.new_end >= mm_dd || (sign.new_end?.startsWith('01') && mm_dd.startsWith('12'))))
+		   html += "<br>New sign: " + blurb(sign)
 	}
 	// https://www.chinahighlights.com/travelguide/chinese-zodiac/
 	var chinese_signs = [
