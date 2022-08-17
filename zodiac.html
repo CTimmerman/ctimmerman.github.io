@@ -19,7 +19,7 @@ function zodiac(date){
 	// http://old-new-horoscopes-signs.blogspot.com/new/01/new-horoscope-list-new.html
 	// https://en.wikipedia.org/wiki/Ophiuchus_(astrology)
 	// https://www.yourzodiacsign.com/cetus/
-	var signs = [
+	const signs = [
 		{
 			"name": "Capricorn",
 			"old_start": "12-22",
@@ -68,7 +68,9 @@ function zodiac(date){
 			"cetus_end": "03-28",
 			"element": "Fire",
 			"symbol": "Whale",
-			"ruling planet": "Pluto"
+			"ruling planet": "Pluto",
+			"traits": "introspective, obsessive, fierce",  // https://www.findyourfate.com/astrology/articles/articlespage.php?topic=cetus-the-14th-zodiac-sign---dates-traits-compatibility&language=1
+			"matches": "Aries, Leo, Sagittarius, Cancer, Scorpio, Pisces"
 		},
 		{
 			"name": "Aries",
@@ -213,11 +215,11 @@ function zodiac(date){
 		}
 	]
 	function blurb(sign){
-		return sign.name + ". <i>" + sign.traits + "</i>. Best matches: " + sign.matches
+		return sign.name + ". Best matches: " + sign.matches
 	}
-	var html = ''
-	var mm_dd = date.slice(5, 10)
-	for(let sign of signs){
+	let html = ''
+	const mm_dd = date.slice(5, 10)
+	for(const sign of signs){
 		if((sign.old_start <= mm_dd || (sign.old_start?.startsWith('12') && mm_dd.startsWith('01')))
 		   && (sign.old_end >= mm_dd || (sign.old_end?.startsWith('01') && mm_dd.startsWith('12'))))
 		   html += "<br>Old sign: " + blurb(sign)
@@ -229,7 +231,7 @@ function zodiac(date){
 		   html += "<br>New sign: " + blurb(sign)
 	}
 	// https://www.chinahighlights.com/travelguide/chinese-zodiac/
-	var chinese_signs = [
+	const chinese_signs = [
 		{
 			"name": "Rat",
 			"years": [1924, 1936, 1948, 1960, 1972, 1984, 1996, 2008, 2020],
@@ -315,14 +317,19 @@ function zodiac(date){
 			"matches": "Goat, Tiger, Rabbit"
 		}
 	]
-	let year = parseInt(date.slice(0, 4))
-	let hour = parseInt(date.slice(11, 13))
-	for(let sign of chinese_signs){
+	const year = parseInt(date.slice(0, 4))
+	const hour = parseInt(date.slice(11, 13))
+	for(const sign of chinese_signs){
 		if(sign.years.includes(year)) html += "<br>Chinese solar sign: " + blurb(sign)
 		if(sign.hours.includes(hour)) html += "<br>Chinese hour sign: " + blurb(sign)
 	}
-	document.getElementById('zodiac').innerHTML = html
-	// Not getting into  https://www.chinahighlights.com/travelguide/chinese-zodiac/china-five-elements-philosophy.htm
+	window.signs = signs
+	window.chinese_signs = chinese_signs
+	for(const sign of signs.concat(chinese_signs)){
+		html = html.replaceAll(sign.name, `<span title="${sign.traits}">${sign.name} <i>(${sign.traits})</i></span>`)
+	}
+	document.getElementById('zodiac').innerHTML = html.replaceAll('<br>', '<br><br>')
+	// Not getting into https://www.chinahighlights.com/travelguide/chinese-zodiac/china-five-elements-philosophy.htm
 }
 </script>
 <hr>
