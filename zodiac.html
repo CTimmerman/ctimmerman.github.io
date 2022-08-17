@@ -69,7 +69,7 @@ function zodiac(date){
 			"element": "Fire",
 			"symbol": "Whale",
 			"ruling planet": "Pluto",
-			"traits": "introspective, obsessive, fierce",  // https://www.findyourfate.com/astrology/articles/articlespage.php?topic=cetus-the-14th-zodiac-sign---dates-traits-compatibility&language=1
+			"traits": "Introspective, obsessive, fierce",  // https://www.findyourfate.com/astrology/articles/articlespage.php?topic=cetus-the-14th-zodiac-sign---dates-traits-compatibility&language=1
 			"matches": "Aries, Leo, Sagittarius, Cancer, Scorpio, Pisces"
 		},
 		{
@@ -326,7 +326,7 @@ function zodiac(date){
 	window.signs = signs
 	window.chinese_signs = chinese_signs
 	for(const sign of signs.concat(chinese_signs)){
-		html = html.replaceAll(sign.name, `<span title="${sign.traits}">${sign.name} <i>(${sign.traits})</i></span>`)
+		html = html.replaceAll(' '+sign.name, ` <span title="${sign.traits}">${sign.name} <i>(${sign.traits})</i></span>`)
 	}
 	document.getElementById('zodiac').innerHTML = html.replaceAll('<br>', '<br><br>')
 	// Not getting into https://www.chinahighlights.com/travelguide/chinese-zodiac/china-five-elements-philosophy.htm
