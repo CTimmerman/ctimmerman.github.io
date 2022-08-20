@@ -142,7 +142,7 @@
 			const p = document.createElement('p')
 			p.innerHTML = what + ':<br>' + result.join(', ') + (count > 1 ? histr : '')
 			results.append(p)
-			p.scrollIntoView()
+			p.scrollIntoViewIfNeeded ? p.scrollIntoViewIfNeeded() : p.scrollIntoView()
 		}
 		function do_clear() {
 			results.innerText = ''
@@ -158,7 +158,7 @@
 		[...document.querySelectorAll('.die')].forEach(e => {
 			e.addEventListener('click', function () {
 				e.style.animationIterationCount = 'infinite'
-				sleep(100).then(() => {
+				sleep(200).then(() => {
 					e.style.animationIterationCount = ''
 					roll(this.innerText)
 				})
