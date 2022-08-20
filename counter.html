@@ -15,7 +15,11 @@
 			margin: 0;
 			text-align: center;
 		}
-
+		iframe {
+			border: 0;
+			height: 50vh;
+			width: 90vw;
+		}
 		input[type="color"] {
 			border: 0;
 			padding: 0;
@@ -23,11 +27,13 @@
 			vertical-align: middle;
 			width: 2em;
 		}
-
 		p {
 			margin: 1em auto;
 			width: -moz-fit-content;
 			width: fit-content;
+		}
+		video {
+			height: 1px;
 		}
 
 		#addplayer {
@@ -48,9 +54,13 @@
 			background: radial-gradient(white 40%, transparent);
 			color: black;
 		}
-		.life:after {
+		.life:before {
 			content: '♥';
-			color: red;
+			color: #ff000033;
+			font-size: 2em;
+			line-height: 0px;
+			margin-right: -28px;
+			vertical-align: sub;
 		}
 
 		.flip {
@@ -115,11 +125,12 @@
 </head>
 
 <body ondblclick="dblclick(event)">
+	<iframe src="dice.html#black&white"></iframe>
 	<div id="container"></div>
 	<p onclick="add_player()">Add player</p>
 	<video autoplay loop id="woke">
 		<source src="tournament/silent.ogx" type="audio/ogg">
-		Your browser does not support the video element used to keep the page and audio jack active.
+		Your browser does not support the video element used to keep the page active.
 	</video>
 	<script>
 		'use strict'
@@ -127,6 +138,7 @@
 		onbeforeunload = () => false
 
 		function add_player() {
+			window.woke.play()
 			const number = document.querySelectorAll('.player').length
 			const d = document.createElement('div')
 			d.className = 'player'
