@@ -170,7 +170,7 @@
 			d.id = "editor"
 			d.innerHTML = `
 				<pre style="text-align: left"><code id=src contentEditable>${s.replaceAll('<', '&lt;').replaceAll(/(\/\*.*\*\/)/gs, '<span style="color:green">$1</span>')}</code></pre><br>
-				<button onclick='save_source(src.innerHTML); editor.remove()'>Save</button>`
+				<button onclick='save_source(src.innerText); editor.remove()'>Save</button>`
 			document.body.appendChild(d)
 		}
 		function save_source(s) {
