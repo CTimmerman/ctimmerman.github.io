@@ -125,9 +125,9 @@
 </head>
 
 <body ondblclick="dblclick(event)">
-	<iframe src="dice.html#black&white"></iframe>
+	<iframe src="dice.html#black&white" sandbox="allow-scripts allow-same-origin"></iframe>
 	<div id="container"></div>
-	<p onclick="add_player()">Add player</p>
+	<p onclick="add_player()" oncontextmenu="edit_source()">Add player</p>
 	<video autoplay loop id="woke">
 		<source src="tournament/silent.ogx" type="audio/ogg">
 		Your browser does not support the video element used to keep the page active.
@@ -136,6 +136,13 @@
 		'use strict'
 		// Prevent accidental reload on swipe up.
 		onbeforeunload = () => false
+
+		function edit_source(){
+			let s = document.body.innerHTML
+			document.body.innerHTML = `
+				<pre><code id=src contentEditable>${s.replaceAll('<', '&lt;')}</code></pre><br>
+				<button onclick='document.body.innerHTML = src.innerText'>Save</button>`
+		}
 
 		function add_player() {
 			window.woke.play()
