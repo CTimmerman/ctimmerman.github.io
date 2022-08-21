@@ -17,6 +17,7 @@
 		}
 		iframe {
 			border: 0;
+			display: none;
 			height: 69px;
 			width: 100%;
 		}
@@ -204,6 +205,7 @@
 	<iframe id="dice" src="dice.html#black&white" sandbox="allow-same-origin allow-modals allow-scripts"></iframe>
 	<div id="container"></div>
 	<p onclick="add_player()" oncontextmenu="edit_source()">Add player</p>
+	<p onclick="dice.style.display = (dice.style.display === 'block')? 'none' : 'block'">🎲</p>
 	<video autoplay loop id="woke">
 		<source src="tournament/silent.ogx" type="audio/ogg">
 		Your browser does not support the video element used to keep the page active.
@@ -289,7 +291,7 @@
 		}
 		// Because manually tweaking media rules per browser is a pain.
 		function fit_frame() {
-			window.dice.style.height = window.dice.contentDocument.body.scrollHeight + 'px'
+			window.dice.style.height = window.dice.contentDocument.body.scrollHeight + 6 + 'px'
 		}
 		// Doesn't trigger on wrap!
 		// new ResizeObserver(fit_frame).observe(window.dice.contentDocument.body)
