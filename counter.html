@@ -54,7 +54,7 @@
 			border: 1px solid red;
 			position: absolute;
 			padding: 1em;
-			tab-size: 4;
+			tab-size: 2;
 			text-align: left;
 			top: 0px;
 		}
@@ -66,10 +66,9 @@
 		.life::before {
 			content: '♥';
 			color: #ff000033;
-			font-size: 1cm;
-			line-height: 0px;
-			margin-left: -0.1cm;
-			margin-right: -1cm;
+			font-size: 2em;
+    		line-height: 0.5em;
+			position: absolute;
 			vertical-align: sub;
 		}
 
@@ -180,7 +179,8 @@
 			d.id = "editor"
 			d.innerHTML = `
 				<pre><code id=src contentEditable>${s.replaceAll('<', '&lt;').replaceAll(/(\/\*.*\*\/)/gs, '<span style="color:green">$1</span>')}</code></pre><br>
-				<button onclick='save_source(src.innerText); editor.remove()'>Save</button>`
+				<button onclick='save_source(src.innerText); editor.remove()'>Save</button>
+				<button onclick='editor.remove()'>Cancel</button>`
 			document.body.appendChild(d)
 		}
 		function save_source(s) {
