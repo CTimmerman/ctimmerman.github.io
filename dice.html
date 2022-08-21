@@ -124,6 +124,13 @@
 	<script>
 		'use strict'
 
+		function isScrolledIntoView(el) {
+			let r = el.getBoundingClientRect()
+			return (r.top >= 0) && (r.bottom <= window.innerHeight)
+			// Partially visible
+			// return r.top < window.innerHeight && r.bottom >= 0
+		}
+
 		// Even awaiting prompt makes Chrome complain about handlers taking too long.
 		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -152,7 +159,8 @@
 			const p = document.createElement('p')
 			p.innerHTML = what + ':<br>' + result.join(', ') + (count > 1 ? histr : '')
 			results.append(p)
-			p.scrollIntoViewIfNeeded ? p.scrollIntoViewIfNeeded() : p.scrollIntoView()
+			if (p.scrollIntoViewIfNeeded) p.scrollIntoViewIfNeeded()
+			else if (!isScrolledIntoView(p)) p.scrollIntoView()
 		}
 		function do_clear() {
 			results.innerText = ''
