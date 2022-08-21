@@ -49,6 +49,15 @@
 			justify-content: center;
 			align-items: center;
 		}
+		#editor {
+			background: #000e;
+			border: 1px solid red;
+			position: absolute;
+			padding: 1em;
+			tab-size: 4;
+			text-align: left;
+			top: 0px;
+		}
 
 		.life {
 			background: radial-gradient(white 40%, transparent);
@@ -57,9 +66,10 @@
 		.life::before {
 			content: '♥';
 			color: #ff000033;
-			font-size: 1.4cm;
+			font-size: 1cm;
 			line-height: 0px;
-			margin-right: -0.8cm;
+			margin-left: -0.1cm;
+			margin-right: -1cm;
 			vertical-align: sub;
 		}
 
@@ -169,7 +179,7 @@
 			let d = document.createElement('div')
 			d.id = "editor"
 			d.innerHTML = `
-				<pre style="text-align: left"><code id=src contentEditable>${s.replaceAll('<', '&lt;').replaceAll(/(\/\*.*\*\/)/gs, '<span style="color:green">$1</span>')}</code></pre><br>
+				<pre><code id=src contentEditable>${s.replaceAll('<', '&lt;').replaceAll(/(\/\*.*\*\/)/gs, '<span style="color:green">$1</span>')}</code></pre><br>
 				<button onclick='save_source(src.innerText); editor.remove()'>Save</button>`
 			document.body.appendChild(d)
 		}
