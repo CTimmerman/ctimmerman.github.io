@@ -165,10 +165,16 @@
 		onbeforeunload = () => false
 
 		function edit_source(){
-			let s = document.body.innerHTML
-			document.body.innerHTML = `
-				<pre><code id=src contentEditable>${s.replaceAll('<', '&lt;')}</code></pre><br>
-				<button onclick='document.body.innerHTML = src.innerText'>Save</button>`
+			let s = document.getElementsByTagName('style')[0].innerHTML
+			let d = document.createElement('div')
+			d.id = "editor"
+			d.innerHTML = `
+				<pre style="text-align: left"><code id=src contentEditable>${s.replaceAll('<', '&lt;').replaceAll(/(\/\*.*\*\/)/gs, '<span style="color:green">$1</span>')}</code></pre><br>
+				<button onclick='save_source(src.innerHTML); editor.remove()'>Save</button>`
+			document.body.appendChild(d)
+		}
+		function save_source(s) {
+			document.getElementsByTagName('style')[0].innerHTML = s
 		}
 
 		function add_player() {
