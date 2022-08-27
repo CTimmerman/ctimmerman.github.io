@@ -331,6 +331,19 @@ function zodiac(date){
 	document.getElementById('zodiac').innerHTML = html.replaceAll('<br>', '<br><br>')
 	// Not getting into https://www.chinahighlights.com/travelguide/chinese-zodiac/china-five-elements-philosophy.htm
 }
+
+function answer_dob(n){
+	let days_left = 365.25
+	let p_unique = 1
+	for(let i=0; i < n; ++i){
+		p_unique *= (365.25 - i) / 365.25
+	}
+	let p = 1 - p_unique
+	const locale = new Intl.NumberFormat({ maximumSignificantDigits: 5 })
+	window.dobanswer.innerText = `probability ${locale.format(p)}, chance ${locale.format(p * 100)}%, and odds ${locale.format(p / (1 - p))}:1`
+	return p
+}
+document.body.onload = () => window.dobinput.onchange()
 </script>
 <hr>
 See also these links and marvel at the coincidences while ignoring the rest, unlike Bayesian logic:
@@ -342,5 +355,7 @@ See also these links and marvel at the coincidences while ignoring the rest, unl
 <li><a href="https://www.yourzodiacsign.com/cetus/">https://www.yourzodiacsign.com/cetus/</a></li>
 <li><a href="https://www.universeguide.com/fact/ophiuchus">https://www.universeguide.com/fact/ophiuchus</a> has slightly different dates.</li>
 </ul>
+
+<p>PS: A <a href="https://en.wikipedia.org/wiki/Birthday_problem">shared birthday</a> among <input id=dobinput type=number value=10 style="width:3em" onchange="answer_dob(parseInt(this.value))"> has <span id="dobanswer">11.69%</span>.</p>
 </body>
 </html>
