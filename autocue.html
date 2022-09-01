@@ -11,13 +11,13 @@
 
 <body>
 <button onclick="toggle_cue(true)" title="Click to toggle">Autocue/teleprompt</button>
-Frame time <input id="ac-slowness" type="number" style="width:70px" value="30"> ms.
-Scroll step <input id="ac-scrollstep" type="number" style="width:60px" value="1"> px.
-Padding <input id="ac-padding" style="width:70px" value="2in 4in" onchange="set_style()">
-Font <input id="ac-font" value="0.5in Georgia, serif" onchange="set_style()">
-Transform <input id="ac-transform" style="width:90px" value="scale(-1, 1)" onchange="set_style()"
+<label for="ac-slowness">Frame time </label><input id="ac-slowness" type="number" style="width:70px" value="30"> ms.
+<label for="ac-scrollstep">Scroll step </label><input id="ac-scrollstep" type="number" style="width:60px" value="1"> px.
+<label for="ac-padding">Padding </label><input id="ac-padding" style="width:70px" value="2in 4in" onchange="set_style()">
+<label for="ac-font">Font </label><input id="ac-font" value="0.5in Georgia, serif" onchange="set_style()">
+<label for="ac-transform">Transform </label><input id="ac-transform" style="width:90px" value="scale(-1, 1)" onchange="set_style()"
 	title="scale(-1, 1) to mirror">
-Text (from <a href="https://www.youtube.com/watch?v=YeRu4xYH_W0">here</a>): <br>
+<label for="autocue-content">Text </label>(from <a href="https://www.youtube.com/watch?v=YeRu4xYH_W0">here</a>): <br>
 <div id="autocue" onclick="toggle_cue(false)">
 	<textarea id="autocue-content">
 
