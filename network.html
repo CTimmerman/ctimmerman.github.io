@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Network Monitor by Cees Timmerman</title>
+	<link rel="icon"
+	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+	<style>
+		body {
+			background-color: black;
+			color: white;
+			font-size: 5mm;
+			margin: 0;
+			text-align: center;
+		}
+		canvas {
+			background: linear-gradient(red, lightgreen);
+			border: 1px solid white;
+		}
+	</style>
+</head>
+<body>
+	<audio autoplay loop id="woke">
+		<source src="tournament/silent.ogx" type="audio/ogg">
+		Your browser does not support the audio element used to keep the page active.
+	</audio>
+	<p><label for="target">Target IP: </label><input id="target" value="192.168.178.1"></p>
+	<canvas id="canvas" width="1000" height="200">
+		Ping time to IP.
+	</canvas>
+	<script>
+		'use strict'
+		onbeforeunload = () => false  // Prevent accidental reload on swipe up.
+
+		let ctx
+		let data = []
+		for(let i = 0; i < 1000; ++i) data.push(0)
+
+		function main(){
+			addEventListener('mousedown', ()=>window.woke.play())
+			const canvas = document.getElementById('canvas')
+			ctx = canvas.getContext('2d')
+			ctx.fillStyle = 'rgb(0, 0, 0)'
+			setInterval(ping, 50)
+		}
+
+		function ping() {
+			let e = document.createElement('img')
+			let start_time = new Date().getTime()
+			e.onerror = () => {
+				update(new Date().getTime() - start_time)
+			}
+			e.src = window.target.value
+		}
+
+		function update(ms){
+			data = data.slice(1)
+			data.push(ms)
+			ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight)
+			for(let i=0; i < data.length; ++i){
+				ctx.fillRect(i, 0, 1, 200 - data[i])
+			}
+		}
+
+		addEventListener('load', main)
+	</script>
+</body>
+
+</html>
