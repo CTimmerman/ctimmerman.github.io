@@ -38,9 +38,8 @@
 	</canvas>
 	<script>
 		'use strict'
-		onbeforeunload = () => false  // Prevent accidental reload on swipe up.
-
 		let ch, cw, ctx
+		const img = document.createElement('img')
 		let data = []
 		let next_ping = new Date()
 		function main(){
@@ -54,12 +53,11 @@
 		}
 
 		function ping() {
-			let e = document.createElement('img')
-			let start_time = new Date().getTime()
-			e.onerror = () => {
-				update(new Date().getTime() - start_time)
+			let start_time = new Date()
+			img.onerror = () => {
+				update(new Date() - start_time)
 			}
-			e.src = window.target.value
+			img.src = window.target.value
 		}
 
 		function update(ms){
@@ -78,9 +76,9 @@
 			}
 			ctx.fillStyle = '#fff'
 			ctx.fillText(`Avg. ${Math.round(sum / not_zero)} ms`, 10, 20)
-			const now = new Date().getTime()
+			const now = new Date()
 			setTimeout(ping, next_ping - now)
-			next_ping = now + parseInt(window.interval.value)
+			next_ping = now.getTime() + parseInt(window.interval.value)
 		}
 
 		addEventListener('load', main)
