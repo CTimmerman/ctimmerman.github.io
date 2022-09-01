@@ -7,9 +7,10 @@
 	<link rel="icon"
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
 	<style>
-		body {
+		* {
 			background-color: black;
 			color: white;
+			font-family: monospace;
 			font-size: 5mm;
 			margin: 0;
 			text-align: center;
@@ -18,6 +19,9 @@
 			background: linear-gradient(red, lightgreen);
 			border: 1px solid white;
 		}
+		#interval {
+			width: 4em;
+		}
 	</style>
 </head>
 <body>
@@ -25,7 +29,10 @@
 		<source src="tournament/silent.ogx" type="audio/ogg">
 		Your browser does not support the audio element used to keep the page active.
 	</audio>
-	<p><label for="target">Target IP: </label><input id="target" value="192.168.178.1"></p>
+	<p>
+		<label for="target">Target IP: </label><input id="target" value="192.168.178.1">
+		<label for="interval">Interval ms: </label><input id="interval" value="50">
+	</p>
 	<canvas id="canvas" width="1000" height="200">
 		Ping time to IP.
 	</canvas>
@@ -33,16 +40,17 @@
 		'use strict'
 		onbeforeunload = () => false  // Prevent accidental reload on swipe up.
 
-		let ctx
+		let ch, cw, ctx
 		let data = []
-		for(let i = 0; i < 1000; ++i) data.push(0)
-
+		let next_ping = new Date()
 		function main(){
 			addEventListener('mousedown', ()=>window.woke.play())
 			const canvas = document.getElementById('canvas')
+			ch = canvas.clientHeight
+			cw = canvas.clientWidth
+			for(let i = 0; i < cw; ++i) data.push(0)
 			ctx = canvas.getContext('2d')
-			ctx.fillStyle = 'rgb(0, 0, 0)'
-			setInterval(ping, 50)
+			ping()
 		}
 
 		function ping() {
@@ -57,10 +65,22 @@
 		function update(ms){
 			data = data.slice(1)
 			data.push(ms)
-			ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight)
-			for(let i=0; i < data.length; ++i){
-				ctx.fillRect(i, 0, 1, 200 - data[i])
+			ctx.clearRect(0, 0, cw, ch)
+			ctx.fillStyle = '#000'
+			let not_zero = 0
+			let sum = 0
+			for(let i = 0; i < cw; ++i){
+				ctx.fillRect(i, 0, 1, ch - data[i])
+				if(data[i] > 0) {
+					not_zero += 1
+					sum += data[i]
+				}
 			}
+			ctx.fillStyle = '#fff'
+			ctx.fillText(`Avg. ${Math.round(sum / not_zero)} ms`, 10, 20)
+			const now = new Date().getTime()
+			setTimeout(ping, next_ping - now)
+			next_ping = now + parseInt(window.interval.value)
 		}
 
 		addEventListener('load', main)
