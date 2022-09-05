@@ -28,10 +28,6 @@
 	</style>
 </head>
 <body>
-	<audio autoplay loop id="woke">
-		<source src="tournament/silent.ogx" type="audio/ogg">
-		Your browser does not support the audio element used to keep the page active.
-	</audio>
 	<p>
 		<label for="target">Target: </label><input id="target" value="http://192.168.178.122:8000/">
 		<label for="interval">Interval ms: </label><input id="interval" value="200">
@@ -56,20 +52,15 @@
 			ping()
 		}
 
-		// CORB warning in console.
-		// 302, 200 in 125 ms in Chrome.
-		// 302, 200 in 1085 ms in Firefox! Log lag.
 		function ping() {
 			let img = document.createElement('img')
 			const start_time = new Date()
 			const timeout = parseInt(window.timeout.value)
 			let to = setTimeout(()=>{
-				console.log("T", to, start_time, img.src)
 				img.onerror = null
 				update(timeout)
 			}, timeout)
 			img.onerror = () => {
-				console.log("B", to, start_time, img.src)
 				clearTimeout(to)
 				update(new Date() - start_time)
 			}
@@ -81,27 +72,7 @@
 				src += start_time.getTime()
 			}
 			img.src = src
-			console.log("A", to, start_time, img.src)
 		}
-
-		// Times out!
-		// function ping() {
-		// 	const start_time = new Date()
-		// 	var socket = new WebSocket("ws://" + window.target.value)
-		// 	socket.onclose = function(event) {
-		// 		update(new Date() - start_time)
-		// 	}
-		// 	socket.onerror = socket.onopen = ()=>socket.close(1000)
-		// 	setTimeout(function(){ 
-		// 		if(socket != null) {
-		// 			console.log("timeout", socket)
-		// 			socket.close(1000)
-		// 			socket = null
-		// 		} else {
-		// 			console.log("socket already closed")
-		// 		}
-		// 	}, 200)
-		// }
 
 		function update(ms){
 			data = data.slice(1)
