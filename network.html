@@ -19,11 +19,11 @@
 			background: linear-gradient(red, lightgreen);
 			border: 1px solid white;
 		}
+		#interval, #timeout {
+			width: 4em;
+		}
 		#target {
 			width: 20em;
-		}
-		#interval {
-			width: 4em;
 		}
 	</style>
 </head>
@@ -35,6 +35,7 @@
 	<p>
 		<label for="target">Target: </label><input id="target" value="http://192.168.178.122:8000/">
 		<label for="interval">Interval ms: </label><input id="interval" value="200">
+		<label for="timeout">Time-out ms: </label><input id="timeout" value="2000">
 	</p>
 	<canvas id="canvas" width="1000" height="200">
 		Ping time graph.
@@ -56,14 +57,30 @@
 
 		// CORB warning in console.
 		// 302, 200 in 125 ms in Chrome.
-		// 302, 200 in 1085 ms in Firefox!
+		// 302, 200 in 1085 ms in Firefox! Log lag.
 		function ping() {
-			const img = document.createElement('img')
+			let img = document.createElement('img')
 			const start_time = new Date()
+			const timeout = parseInt(window.timeout.value)
+			let to = setTimeout(()=>{
+				console.log("T", to, start_time, img.src)
+				img.onerror = null
+				update(timeout)
+			}, timeout)
 			img.onerror = () => {
+				console.log("B", to, start_time, img.src)
+				clearTimeout(to)
 				update(new Date() - start_time)
 			}
-			img.src = window.target.value
+			let src = window.target.value
+			if(src.startsWith('http')){
+				if(src.indexOf('?') > -1) src += '&t='
+				else if(!src.endsWith('/')) src += '/?t='
+				else src += '?t='
+				src += start_time.getTime()
+			}
+			img.src = src
+			console.log("A", to, start_time, img.src)
 		}
 
 		// Times out!
