@@ -33,7 +33,7 @@
 		<label for="interval">Interval ms: </label><input id="interval" value="200">
 		<label for="timeout">Time-out ms: </label><input id="timeout" value="2000">
 	</p>
-	<canvas id="canvas" width="1000" height="200">
+	<canvas id="canvas" width="500" height="200">
 		Ping time graph.
 	</canvas>
 	<script>
@@ -42,7 +42,6 @@
 		let data = []
 		let next_ping = new Date()
 		function main(){
-			addEventListener('mousedown', ()=>window.woke.play())
 			const canvas = document.getElementById('canvas')
 			ch = canvas.clientHeight
 			cw = canvas.clientWidth
