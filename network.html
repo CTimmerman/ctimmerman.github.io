@@ -52,6 +52,7 @@
 			cw = canvas.clientWidth
 			for(let i = 0; i < cw; ++i) data.push(0)
 			ctx = canvas.getContext('2d')
+			ctx.font = '5mm monospace'
 			ping()
 		}
 
@@ -107,17 +108,19 @@
 			data.push(ms)
 			ctx.clearRect(0, 0, cw, ch)
 			ctx.fillStyle = '#000'
-			let not_zero = 0
-			let sum = 0
+			let max = 0, min = Infinity, not_zero = 0, sum = 0
 			for(let i = 0; i < cw; ++i){
-				ctx.fillRect(i, 0, 1, ch - data[i])
+				const ms = data[i]
+				ctx.fillRect(i, 0, 1, ch - ms)
 				if(data[i] > 0) {
 					not_zero += 1
-					sum += data[i]
+					if(ms < min) min = ms
+					if(ms > max) max = ms
+					sum += ms
 				}
 			}
 			ctx.fillStyle = '#fff'
-			ctx.fillText(`Avg. ${Math.round(sum / not_zero)} ms`, 10, 20)
+			ctx.fillText(`Min ${min} ms Max ${max} ms Avg ${Math.round(sum / not_zero)} ms`, 10, 20)
 			const now = new Date()
 			setTimeout(ping, next_ping - now)
 			next_ping = now.getTime() + parseInt(window.interval.value)
@@ -126,5 +129,4 @@
 		addEventListener('load', main)
 	</script>
 </body>
-
 </html>
