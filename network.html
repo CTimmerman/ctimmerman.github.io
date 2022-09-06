@@ -31,24 +31,25 @@
 	<p>
 		<label for="target">Target: </label><input id="target" value="http://192.168.178.122:8000/">
 		<label for="interval">Interval ms: </label><input id="interval" value="200">
-		<label for="timeout">Time-out ms: </label><input id="timeout" value="2000">
+		<span style="white-space:nowrap"><label for="timeout">Time-out ms: </label><input id="timeout" value="2000"></span>
 	</p>
 	<canvas id="canvas" width="500" height="200">
 		Ping time graph.
 	</canvas>
 	<script>
 		'use strict'
+		const canvas = document.getElementById('canvas')
 		let ch, cw, ctx
 		let data = []
 		let next_ping = new Date()
-		function main(){
-			const canvas = document.getElementById('canvas')
+		function init(){
+			canvas.width = window.innerWidth - 10
 			ch = canvas.clientHeight
 			cw = canvas.clientWidth
-			for(let i = 0; i < cw; ++i) data.push(0)
+			data = data.slice(0, cw)
+			for(let i = 0; i < cw; ++i) if(!data[i]) data[i] = 0
 			ctx = canvas.getContext('2d')
 			ctx.font = '5mm monospace'
-			ping()
 		}
 
 		function ping() {
@@ -96,7 +97,8 @@
 			next_ping = now.getTime() + parseInt(window.interval.value)
 		}
 
-		addEventListener('load', main)
+		addEventListener('load', ()=>{init(); ping()})
+		addEventListener('resize', init)
 	</script>
 </body>
 </html>
