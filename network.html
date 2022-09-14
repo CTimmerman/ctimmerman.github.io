@@ -32,9 +32,9 @@
 </head>
 <body>
 	<p>
-		<label for="target">Target: </label><input id="target" value="http://192.168.178.122:8000/">
+		<label for="target">Target: </label><input id="target" value="http://127.0.0.1:8000/">
 		<span class="nowrap"><label for="interval">Interval ms: </label><input id="interval" value="200"></span>
-		<span class="nowrap"><label for="timeout">Time-out ms: </label><input id="timeout" value="2000"></span>
+		<span class="nowrap"><label for="timeout">Time-out ms: </label><input id="timeout" value="200"></span>
 	</p>
 	<canvas id="canvas" width="500" height="200">
 		Ping time graph.
@@ -44,7 +44,6 @@
 		const canvas = document.getElementById('canvas')
 		let ch, cw, ctx
 		let data = []
-		let next_ping = new Date()
 		function init(){
 			canvas.width = window.innerWidth - 20 // Account for scrollbars.
 			canvas.height = Math.max(20, window.innerHeight - canvas.getBoundingClientRect().y - 10)
@@ -56,7 +55,7 @@
 			ctx.font = '5mm monospace'
 		}
 
-		function ping() {
+		function ping(){
 			let img = document.createElement('img')
 			const start_time = new Date()
 			const timeout = parseInt(window.timeout.value)
@@ -64,7 +63,7 @@
 				img.onerror = null
 				update(timeout)
 			}, timeout)
-			img.onerror = () => {
+			img.onerror = ()=>{
 				clearTimeout(to)
 				update(new Date() - start_time)
 			}
@@ -97,12 +96,11 @@
 			}
 			ctx.fillStyle = '#fff'
 			ctx.fillText(`Min ${min} ms Max ${max} ms Avg ${Math.round(sum / not_zero)} ms`, 10, 20)
-			const now = new Date()
-			setTimeout(ping, next_ping - now)
-			next_ping = now.getTime() + parseInt(window.interval.value)
+
+			setTimeout(ping, parseInt(window.interval.value) - ms)
 		}
 
-		addEventListener('load', ()=>{init(); ping()})
+		addEventListener('load', ()=>{init(); update(0)})
 		addEventListener('resize', init)
 	</script>
 </body>
