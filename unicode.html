@@ -63,10 +63,8 @@
 		}
 
 		window.onclick = (e)=>{
-			const n = e.target
-			if(n.nodeName !== 'SPAN') return
-			const s = n.innerText
-			n.classList.toggle('selected')
+			if(e.target.nodeName !== 'SPAN') return
+			e.target.classList.toggle('selected')
 		}
 	</script>
 </body>
