@@ -51,7 +51,7 @@
 			html += '<br><br>'
 			for(var i = from; i <= from + amount - 1; ++i){
 				let c = String.fromCodePoint(i)
-				html += ` <span dir=ltr><label>${labels.checked? `${i.toString(base)}&nbsp;</label>` : ''}${c}</span>`
+				html += ` <span dir=ltr><label style="display:${labels.checked?'inline':'none'}">${i.toString(base)}&nbsp;</label>${c}</span>`
 			}
 			chart.innerHTML = html
 			document.body.oncontextmenu = (e)=>{
