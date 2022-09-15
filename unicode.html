@@ -20,31 +20,35 @@
 		}
 	</style>
 </head>
-<body>
+<body onload="run()" onhashchange="run()">
 	As of Unicode version 15, there are <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters with code points, covering 161 modern and historical scripts, as well as multiple symbol sets.<br><br>
 	<div id="chart"></div>
 	<script>
 		'use strict'
 		const MAX = 149186
-		function get(name) {
+
+		function arg(name){
 			const re = new RegExp(name + '=(.*)&?')
-			const m = document.location.search.match(re)
+			const m = document.location.search.match(re) || document.location.hash.match(re)
 			if(m) return parseFloat(decodeURIComponent(m[1]))
 		}
-		const base = get('base') || 10
-		const from = get('from') || 0
-		const amount = get('amount') || 1000
 
-		let html = ''
-		const prev = Math.max(from - amount, 0)
-		const next = Math.min(from + amount, 150000)
-		if(from > 0) html += `<a href="?base=${base}&from=${prev}&amount=${amount}">&lt; prev</a>`
-		if(from < MAX) html += ` <a href="?base=${base}&from=${next}&amount=${amount}">next &gt;</a>`
-		html += '<br><br>'
-		for(var i = from; i <= from + amount; ++i) {
-			html += ' <span>' + i.toString(base) + ' ' + String.fromCodePoint(i) + '</span>'
+		function run(){
+			const base = arg('base') || 10
+			const from = arg('from') || 0
+			const amount = arg('amount') || 1000
+
+			let html = ''
+			const prev = Math.max(from - amount, 0)
+			const next = Math.min(from + amount, 150000)
+			if(from > 0) html += `<a href="#base=${base}&from=${prev}&amount=${amount}">&lt; prev</a>`
+			if(from < MAX) html += ` <a href="#base=${base}&from=${next}&amount=${amount}">next &gt;</a>`
+			html += '<br><br>'
+			for(var i = from; i <= from + amount; ++i){
+				html += ' <span>' + i.toString(base) + ' ' + String.fromCodePoint(i) + '</span>'
+			}
+			chart.innerHTML = html
 		}
-		chart.innerHTML = html
 
 		addEventListener('click', (e)=>{
 			const n = e.target
