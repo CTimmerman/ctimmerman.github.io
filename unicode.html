@@ -7,7 +7,7 @@
 	<link rel="icon"
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
 	<style>
-		* {
+		body, a {
 			background-color: black;
 			color: white;
 			font-family: monospace;
@@ -44,24 +44,30 @@
 			if(from > 0) html += `<a href="#base=${base}&from=${prev}&amount=${amount}">&lt; prev</a>`
 			if(from < MAX) html += ` <a href="#base=${base}&from=${next}&amount=${amount}">next &gt;</a>`
 			html += '<br><br>'
-			for(var i = from; i <= from + amount; ++i){
-				html += ' <span>' + i.toString(base) + ' ' + String.fromCodePoint(i) + '</span>'
+			for(var i = from; i <= from + amount - 1; ++i){
+				let c = String.fromCodePoint(i)
+				html += ` <span dir=ltr>${i.toString(base)} ${c}</span> `
 			}
 			chart.innerHTML = html
+			document.body.oncontextmenu = (e)=>{
+				const n = e.target
+				if(n.nodeName !== 'SPAN') return
+				const s = n.innerText
+				let [cp, c] = s.split(' ')
+				cp = parseInt(cp, base)
+				const msg = ` &#${cp}; \\u{${cp.toString(16)}} ${c}`
+				console.log(msg)
+				alert(msg)
+				e.preventDefault()
+			}
 		}
 
-		addEventListener('click', (e)=>{
+		window.onclick = (e)=>{
 			const n = e.target
 			if(n.nodeName !== 'SPAN') return
 			const s = n.innerText
 			n.classList.toggle('selected')
-			if(n.classList.contains('selected')){
-				const cp = parseInt(s)
-				const msg = s + ' \\u{' + cp.toString(16) + '}'
-				console.log(msg)
-				setTimeout(()=>alert(msg))  // highlight first
-			}
-		})
+		}
 	</script>
 </body>
 </html>
