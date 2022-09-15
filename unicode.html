@@ -21,7 +21,8 @@
 	</style>
 </head>
 <body onload="run()" onhashchange="run()">
-	As of Unicode version 15, there are <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters with code points, covering 161 modern and historical scripts, as well as multiple symbol sets.<br><br>
+	Unicode  15 has <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters.
+	<input type="checkbox" id="labels" checked onchange="toggle_labels()"><label for="labels">Labels</label><br><br>
 	<div id="chart"></div>
 	<script>
 		'use strict'
@@ -33,6 +34,10 @@
 			if(m) return parseFloat(decodeURIComponent(m[1]))
 		}
 
+		function toggle_labels(){
+			document.querySelectorAll('span>label').forEach(e=>e.style.display=labels.checked?'inline':'none')
+		}
+
 		function run(){
 			const base = arg('base') || 10
 			const from = arg('from') || 0
@@ -41,30 +46,32 @@
 			let html = ''
 			const prev = Math.max(from - amount, 0)
 			const next = Math.min(from + amount, 150000)
-			if(from > 0) html += `<a href="#base=${base}&from=${prev}&amount=${amount}">&lt; prev</a>`
-			if(from < MAX) html += ` <a href="#base=${base}&from=${next}&amount=${amount}">next &gt;</a>`
+			if(from > 0) html += `<a href="#base=${base}&from=${prev}&amount=${amount}">&lt; Prev</a>`
+			if(from < MAX) html += ` <a href="#base=${base}&from=${next}&amount=${amount}">Next &gt;</a>`
 			html += '<br><br>'
 			for(var i = from; i <= from + amount - 1; ++i){
 				let c = String.fromCodePoint(i)
-				html += ` <span dir=ltr>${i.toString(base)} ${c}</span> `
+				html += ` <span dir=ltr><label>${labels.checked? `${i.toString(base)}&nbsp;</label>` : ''}${c}</span>`
 			}
 			chart.innerHTML = html
 			document.body.oncontextmenu = (e)=>{
-				const n = e.target
-				if(n.nodeName !== 'SPAN') return
-				const s = n.innerText
-				let [cp, c] = s.split(' ')
-				cp = parseInt(cp, base)
-				const msg = ` &#${cp}; \\u{${cp.toString(16)}} ${c}`
-				console.log(msg)
-				alert(msg)
-				e.preventDefault()
+				const n = e.target.nodeName === 'LABEL' ? e.target.parentNode : e.target
+				if(n.nodeName === 'SPAN'){
+					const s = n.innerText
+					let [cp, c] = s.split(/\s/)
+					if(!c) c = cp
+					cp = c.codePointAt(0)
+					const msg = `&#${cp}; \\u{${cp.toString(16)}} ${c}`
+					console.log(msg)
+					alert(msg)
+				}
+				if(e.target.nodeName !== 'A') e.preventDefault()
 			}
 		}
 
 		window.onclick = (e)=>{
-			if(e.target.nodeName !== 'SPAN') return
-			e.target.classList.toggle('selected')
+			if(e.target.nodeName === 'SPAN') e.target.classList.toggle('selected')
+			else if(e.target.parentNode.nodeName === 'SPAN') e.target.parentNode.classList.toggle('selected')
 		}
 	</script>
 </body>
