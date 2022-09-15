@@ -21,30 +21,42 @@
 	</style>
 </head>
 <body>
-	<p>As of Unicode version 15.0, there are <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters with code points, covering 161 modern and historical scripts, as well as multiple symbol sets. Use <A href="?from=149000&to=149186">from and to parameters</a> to adjust the chart below.<br></p>
+	As of Unicode version 15, there are <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters with code points, covering 161 modern and historical scripts, as well as multiple symbol sets.<br><br>
 	<div id="chart"></div>
 	<script>
 		'use strict'
+		const MAX = 149186
 		function get(name) {
-			var re = new RegExp(name + '=(.*)&?')
-			var m = document.location.search.match(re)
+			const re = new RegExp(name + '=(.*)&?')
+			const m = document.location.search.match(re)
 			if(m) return parseFloat(decodeURIComponent(m[1]))
 		}
-		var from = get('from') || 0
-		var to = get('to') || 13056
-		if(from > to) to = from
-		var html = ''
-		for(var i = from; i <= to; ++i) {
-			html += ' <span>' + i + ' ' + String.fromCodePoint(i) + '</span>'
+		const base = get('base') || 10
+		const from = get('from') || 0
+		const amount = get('amount') || 1000
+
+		let html = ''
+		const prev = Math.max(from - amount, 0)
+		const next = Math.min(from + amount, 150000)
+		if(from > 0) html += `<a href="?base=${base}&from=${prev}&amount=${amount}">&lt; prev</a>`
+		if(from < MAX) html += ` <a href="?base=${base}&from=${next}&amount=${amount}">next &gt;</a>`
+		html += '<br><br>'
+		for(var i = from; i <= from + amount; ++i) {
+			html += ' <span>' + i.toString(base) + ' ' + String.fromCodePoint(i) + '</span>'
 		}
 		chart.innerHTML = html
 
 		addEventListener('click', (e)=>{
-			var n = e.target
+			const n = e.target
 			if(n.nodeName !== 'SPAN') return
-			var s = n.innerText
+			const s = n.innerText
 			n.classList.toggle('selected')
-			console.log(s, '\\u{' + parseInt(s).toString(16) + '}')
+			if(n.classList.contains('selected')){
+				const cp = parseInt(s)
+				const msg = s + ' \\u{' + cp.toString(16) + '}'
+				console.log(msg)
+				setTimeout(()=>alert(msg))  // highlight first
+			}
 		})
 	</script>
 </body>
