@@ -44,7 +44,7 @@
 		<span class="nowrap"><label for="interval">Interval ms: </label><input id="interval" value="200"></span>
 		<span class="nowrap"><label for="timeout">Time-out ms: </label><input id="timeout" value="200"></span>
 	</p>
-	<video autoplay loop id="woke">
+	<video loop id="woke">
 		<source src="tournament/silent.ogx" type="audio/ogg">
 		Your browser does not support the video element used to keep the page active.
 	</video>
@@ -126,6 +126,7 @@
 
 		addEventListener('load', ()=>{init(); update(0)})
 		addEventListener('resize', init)
+		addEventListener('mousedown', ()=>woke.play())
 	</script>
 </body>
 </html>
