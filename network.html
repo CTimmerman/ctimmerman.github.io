@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Network Monitor by Cees Timmerman</title>
 	<link rel="icon"
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
@@ -25,6 +25,9 @@
 		#interval, #timeout {
 			width: 4em;
 		}
+		#play {
+			font-family: default;
+		}
 		#target {
 			width: 20em;
 		}
@@ -33,6 +36,7 @@
 <body>
 	<p>
 		<label for="target">Target: </label><input id="target" value="http://127.0.0.1:8000/">
+		<input type="button" id="play" onclick="toggle()" value="&#x23f8;&#xfe0e;">
 		<span class="nowrap"><label for="interval">Interval ms: </label><input id="interval" value="200"></span>
 		<span class="nowrap"><label for="timeout">Time-out ms: </label><input id="timeout" value="200"></span>
 	</p>
@@ -41,6 +45,9 @@
 	</canvas>
 	<script>
 		'use strict'
+		const PAUSE = '\u23f8\uFE0E'
+		const PLAY = '\u23f5\uFE0E'
+
 		const canvas = document.getElementById('canvas')
 		let ch, cw, ctx
 		let data = []
@@ -77,6 +84,15 @@
 			img.src = src
 		}
 
+		function toggle(){
+			if(play.value === PAUSE){
+				play.value = PLAY
+			} else {
+				play.value = PAUSE
+				update(0)
+			}
+		}
+
 		function update(ms){
 			data.pop()
 			data.unshift(ms)
@@ -87,7 +103,7 @@
 				const ms = data[i - 1]
 				ctx.fillRect(cw - i, 0, 1, ch - ms)
 
-				if(data[i] > 0) {
+				if(ms > 0) {
 					not_zero += 1
 					if(ms < min) min = ms
 					if(ms > max) max = ms
@@ -97,7 +113,7 @@
 			ctx.fillStyle = '#fff'
 			ctx.fillText(`Min ${min} ms Max ${max} ms Avg ${Math.round(sum / not_zero)} ms`, 10, 20)
 
-			setTimeout(ping, parseInt(window.interval.value) - ms)
+			if(play.value === PAUSE) setTimeout(ping, parseInt(window.interval.value) - ms)
 		}
 
 		addEventListener('load', ()=>{init(); update(0)})
