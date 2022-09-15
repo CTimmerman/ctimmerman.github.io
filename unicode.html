@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Unicode Chart by Cees Timmerman</title>
+	<link rel="icon"
+	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+	<style>
+		* {
+			background-color: black;
+			color: white;
+			font-family: monospace;
+			font-size: 5mm;
+			margin: 0;
+			text-align: center;
+		}
+		.selected {
+			color: yellow;
+		}
+	</style>
+</head>
+<body>
+	<p>As of Unicode version 15.0, there are <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters with code points, covering 161 modern and historical scripts, as well as multiple symbol sets. Use <A href="?from=149000&to=149186">from and to parameters</a> to adjust the chart below.<br></p>
+	<div id="chart"></div>
+	<script>
+		'use strict'
+		function get(name) {
+			var re = new RegExp(name + '=(.*)&?')
+			var m = document.location.search.match(re)
+			if(m) return parseFloat(decodeURIComponent(m[1]))
+		}
+		var from = get('from') || 0
+		var to = get('to') || 13056
+		if(from > to) to = from
+		var html = ''
+		for(var i = from; i <= to; ++i) {
+			html += ' <span>' + i + ' ' + String.fromCodePoint(i) + '</span>'
+		}
+		chart.innerHTML = html
+
+		addEventListener('click', (e)=>{
+			var n = e.target
+			if(n.nodeName !== 'SPAN') return
+			var s = n.innerText
+			n.classList.toggle('selected')
+			console.log(s, '\\u{' + parseInt(s).toString(16) + '}')
+		})
+	</script>
+</body>
+</html>
