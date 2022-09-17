@@ -8,15 +8,43 @@
 	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
 	<style>
 		body, a {
-			background-color: black;
-			color: white;
+			--bgcolor: black;
+			--fgcolor: white;
+			background-color: var(--bgcolor);
+			color: var(--fgcolor);
 			font-family: monospace;
 			font-size: 5mm;
 			margin: 0;
 			text-align: center;
 		}
+		#alertcontainer {
+			margin: 0;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			position: fixed;
+			overflow: auto;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;  /* vertical */
+			justify-content: center;  /* horizontal */
+			visibility: hidden;
+			background-color: rgba(0, 0, 0, 0.5);
+		}
+		.alert {
+			margin: auto;
+			border: 1px solid var(--fgcolor);
+			border-radius: 5px;
+			box-shadow: 10px 10px 10px rgb(0 0 0 / 20%);
+			min-width: 10em;
+			padding: 1em;
+			background-color: var(--bgcolor);
+			font-size: 200%;
+		}
 		.selected {
-			color: yellow;
+			background-color: var(--fgcolor);
+			color: var(--bgcolor);
 		}
 	</style>
 </head>
@@ -24,14 +52,29 @@
 	Unicode  15 has <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters.
 	<input type="checkbox" id="labels" checked onchange="toggle_labels()"><label for="labels">Labels</label><br><br>
 	<div id="chart"></div>
+	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script>
 		'use strict'
 		const MAX = 149186
 
 		function arg(name){
-			const re = new RegExp(name + '=(.*)&?')
+			const re = new RegExp(name + '=([^&]*)')
 			const m = document.location.search.match(re) || document.location.hash.match(re)
-			if(m) return parseFloat(decodeURIComponent(m[1]))
+			if(!m) return
+			let rv = decodeURIComponent(m[1])
+			return ('' + parseFloat(rv) == rv)? parseFloat(rv) : rv
+		}
+
+		function nonblocking_alert(msg){
+			if (getComputedStyle(alertcontainer).visibility == 'hidden'){
+				alertcontainer.innerText = ''
+				alertcontainer.style.visibility = 'visible'
+			}
+			const d = document.createElement('div')
+			d.className = 'alert'
+			d.innerText = msg
+			alertcontainer.appendChild(d)
+			set_colors()
 		}
 
 		function toggle_labels(){
@@ -42,19 +85,24 @@
 			const base = arg('base') || 10
 			const from = arg('from') || 0
 			const amount = arg('amount') || 1000
+			const bg = arg('bg') || 'black'
+			const fg = arg('fg') || 'white'
+			const style = document.querySelector('style')
+			style.innerText = style.innerText.replaceAll(/(--bgcolor:).*?;/gs, `$1${bg};`).replaceAll(/(--fgcolor:).*?;/gs, `$1${fg};`)
 
 			let html = ''
 			const prev = Math.max(from - amount, 0)
 			const next = Math.min(from + amount, 150000)
-			if(from > 0) html += `<a href="#base=${base}&from=${prev}&amount=${amount}">&lt; Prev</a>`
-			if(from < MAX) html += ` <a href="#base=${base}&from=${next}&amount=${amount}">Next &gt;</a>`
+			if(from > 0) html += `<a href="#bg=${bg}&fg=${fg}&base=${base}&from=${prev}&amount=${amount}">&lt; Prev</a>`
+			if(from + amount < MAX) html += ` <a href="#bg=${bg}&fg=${fg}&base=${base}&from=${next}&amount=${amount}">Next &gt;</a>`
 			html += '<br><br>'
 			for(var i = from; i <= from + amount - 1; ++i){
+				if(i > MAX) break
 				let c = String.fromCodePoint(i)
 				html += ` <span dir=ltr><label style="display:${labels.checked?'inline':'none'}">${i.toString(base)}&nbsp;</label>${c}</span>`
 			}
 			chart.innerHTML = html
-			document.body.oncontextmenu = (e)=>{
+			document.body.ondblclick = (e)=>{
 				const n = e.target.nodeName === 'LABEL' ? e.target.parentNode : e.target
 				if(n.nodeName === 'SPAN'){
 					const s = n.innerText
@@ -63,7 +111,7 @@
 					cp = c.codePointAt(0)
 					const msg = `&#${cp}; \\u{${cp.toString(16)}} ${c}`
 					console.log(msg)
-					alert(msg)
+					nonblocking_alert(msg)
 				}
 				if(e.target.nodeName !== 'A') e.preventDefault()
 			}
