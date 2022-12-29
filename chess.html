@@ -7,9 +7,39 @@
 	<title>Chess by Cees Timmerman, 2022-12-28</title>
 	<style>
 		* {
-			color: yellow;
-			background-color: brown;
+			--bgcolor: brown;
+			--fgcolor: yellow;
+			color: var(--fgcolor);
+			background-color: var(--bgcolor);
 			font-size: 10mm;
+		}
+
+		#alertcontainer {
+			margin: 0;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			position: fixed;
+			overflow: auto;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;  /* vertical */
+			justify-content: center;  /* horizontal */
+			visibility: hidden;
+			background-color: rgba(0, 0, 0, 0.5);
+		}
+
+		.alert {
+			margin: auto;
+			border: 1px solid var(--fgcolor);
+			border-radius: 5px;
+			box-shadow: 10px 10px 10px rgb(0 0 0 / 20%);
+			min-width: 10em;
+			padding: 1em;
+			background-color: var(--bgcolor);
+			font-size: 200%;
+			text-align: center;
 		}
 
 		#boardtext {
@@ -66,6 +96,7 @@
 
 <body>
 	<div id="boardtext"></div>
+	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script>
 		"use strict"
 		const WHITE = 0
@@ -242,6 +273,38 @@
 				}
 				return moves
 			}
+
+			move(fr){
+				super.move(fr)
+				if(this.color === BLACK && this.y === 7
+				|| this.color === WHITE && this.y === 0) {
+					let html = `
+					<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
+					<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
+					<button onclick="promote('${fr}', 'K', ${this.color})">♞</button>
+					<button onclick="promote('${fr}', 'R', ${this.color})">♜</button>
+					`
+					nonblocking_alert(html)
+				}
+			}
+		}
+		function promote(fr, kind, color){
+			let [x, y] = fr2xy(fr)
+			switch(kind){
+				case 'Q':
+					grid[y][x] = new Queen(x, y, color)
+					break
+				case 'B':
+					grid[y][x] = new Bishop(x, y, color)
+					break
+				case 'K':
+					grid[y][x] = new Knight(x, y, color)
+					break
+				case 'R':
+					grid[y][x] = new Rook(x, y, color)
+					break
+			}
+			render(grid)
 		}
 
 		function xy2fr(xy) {
@@ -340,6 +403,17 @@
 		let piece = grid[6][4]
 		console.log(piece.color, piece.name, "at", piece.x, piece.y, "can move", piece.get_moves(grid))
 		render(grid)
+
+		function nonblocking_alert(html){
+			if (getComputedStyle(alertcontainer).visibility == 'hidden'){
+				alertcontainer.innerText = ''
+				alertcontainer.style.visibility = 'visible'
+			}
+			const d = document.createElement('div')
+			d.className = 'alert'
+			d.innerHTML = html
+			alertcontainer.appendChild(d)
+		}
 	</script>
 </body>
 
