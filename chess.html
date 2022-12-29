@@ -278,6 +278,7 @@
 				super.move(fr)
 				if(this.color === BLACK && this.y === 7
 				|| this.color === WHITE && this.y === 0) {
+					promote(fr, 'Q', this.color)
 					let html = `
 					<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
 					<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
