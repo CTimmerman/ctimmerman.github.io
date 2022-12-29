@@ -1,333 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Chess by Cees Timmerman, 2022-12-28</title>
-		<style>
-			* {
-				color: yellow;
-				background-color: brown;
-				font-size: 10mm;
-			}
-			#boardtext{
-				display: block;
-				font-family: monospace;
-				font-size: 0;  // Gets rid of newline spaces.
-				margin: 1em 0;
-				white-space: pre;
-			}
-			.w{
-				background-color: lightgrey;
-			}
-			.b{
-				background-color: darkgrey;
-			}
-			.wf {
-				color: white;
-			}
-			.bf {
-				color: black;
-			}
-			.square {
-				height: 1em;
-				width: 1em;
-				display: inline-block;
-				line-height: 1em;
-				text-align: center;
-				cursor: pointer;
-			}
-			.piece {
-				background-color: transparent;
-				position: relative;
-			}
-			.over {
-				margin-left: -1em;
-			}
-			.selected.w {
-				background: radial-gradient(lightgray 30%, yellow);
-			}
-			.selected.b {
-				background: radial-gradient(darkgray 30%, yellow);
-			}
-		</style>
-	</head>
-	<body>
-		<div id="boardtext"></div>
-		<script>
-			"use strict"
-			const WHITE = 0
-			const BLACK = 1
 
-			class Piece {
-				name = "Piece"
-				value = 0
-				dirs = []
-				moves = []
-				constructor(x, y, color) {
-					this.x = x
-					this.y = y
-					this.color = color ? color : WHITE
-					this.char = this.color ? '<span class="piece bf">?</span>' : '<span class="piece bf over">?</span>'
-				}
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Chess by Cees Timmerman, 2022-12-28</title>
+	<style>
+		* {
+			color: yellow;
+			background-color: brown;
+			font-size: 10mm;
+		}
 
-				get_moves(grid) {
-					let moves = []
-					for(let dir of this.dirs){
-						let tx = this.x + dir[0]
-						let ty = this.y + dir[1]
-						while(1) {
-							let piece = xy2p([tx, ty])
-							//console.log("Found", piece?.color, piece?.name, "at", tx, ty, xy2fr([tx,ty]))
-							if (piece === ' ') moves.push([tx, ty])
-							else if (piece && piece.color !== this.color) {
-								moves.push([tx, ty])
-								break
-							}
-							else break
+		#boardtext {
+			display: block;
+			font-family: monospace;
+			font-size: 0; // Gets rid of newline spaces.
+			margin: 1em 0;
+			white-space: pre;
+		}
 
-							tx += dir[0]
-							ty += dir[1]
-						}
-					}
-					return moves
-				}
+		.w {
+			background-color: lightgrey;
+		}
 
-				move(fr) {
-					console.log(this.name, "to", fr)
-					let xy = fr2xy(fr)
-					grid[this.y][this.x] = ' '
-					this.x = xy[0]
-					this.y = xy[1]
-					grid[this.y][this.x] = this
-				}
+		.b {
+			background-color: darkgrey;
+		}
+
+		.wf {
+			color: white;
+		}
+
+		.bf {
+			color: black;
+		}
+
+		.square {
+			height: 1em;
+			width: 1em;
+			display: inline-block;
+			line-height: 1em;
+			text-align: center;
+			cursor: pointer;
+		}
+
+		.piece {
+			background-color: transparent;
+			position: relative;
+		}
+
+		.over {
+			margin-left: -1em;
+		}
+
+		.selected.w {
+			background: radial-gradient(lightgray 30%, yellow);
+		}
+
+		.selected.b {
+			background: radial-gradient(darkgray 30%, yellow);
+		}
+	</style>
+</head>
+
+<body>
+	<div id="boardtext"></div>
+	<script>
+		"use strict"
+		const WHITE = 0
+		const BLACK = 1
+
+		class Piece {
+			name = "Piece"
+			value = 0
+			dirs = []
+			moves = []
+			constructor(x, y, color) {
+				this.x = x
+				this.y = y
+				this.color = color ? color : WHITE
+				this.char = this.color ? '<span class="piece bf">?</span>' : '<span class="piece bf over">?</span>'
 			}
 
-			class Rook extends Piece {
-				name = "Rook"
-				value = 5
-				dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-				constructor(x, y, color) {
-					super(x, y, color)
-					this.char = this.color ? '<span class="piece bf">♜</span>' : '<span class="piece wf">♜</span><span class="piece bf over">♖</span>'
-				}
-
-				get_moves(grid) {
-					let moves = super.get_moves(grid)
-					// TODO: Castling.
-					return moves
-				}
-			}
-
-			class Knight extends Piece {
-				name = "Knight"
-				value = 3
-				constructor(x, y, color) {
-					super(x, y, color)
-					this.char = this.color ? '<span class="piece bf">♞</span>' : '<span class="piece wf">♞</span><span class="piece bf over">♘</span>'
-				}
-
-				get_moves(grid) {
-					let moves = []
-					for(let dir of [[-2, -1], [-2, 1], [-1, -2], [1, -2], [2, -1], [2, 1], [1, 2], [-1, 2]]){
-						let tx = this.x + dir[0]
-						let ty = this.y + dir[1]
+			get_moves(grid) {
+				let moves = []
+				for (let dir of this.dirs) {
+					let tx = this.x + dir[0]
+					let ty = this.y + dir[1]
+					while (1) {
 						let piece = xy2p([tx, ty])
-						if(piece === ' ' || (piece && piece.color !== this.color)) {
+						//console.log("Found", piece?.color, piece?.name, "at", tx, ty, xy2fr([tx,ty]))
+						if (piece === ' ') moves.push([tx, ty])
+						else if (piece && piece.color !== this.color) {
 							moves.push([tx, ty])
+							break
 						}
+						else break
+
+						tx += dir[0]
+						ty += dir[1]
 					}
-					return moves
 				}
+				return moves
 			}
 
-			class Bishop extends Piece {
-				name = "Bishop"
-				value = 3
-				dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
-				constructor(x, y, color) {
-					super(x, y, color)
-					this.char = this.color ? '<span class="piece bf">♝</span>' : '<span class="piece wf">♝</span><span class="piece bf over">♗</span>'
-				}
+			move(fr) {
+				console.log(this.name, "to", fr)
+				let xy = fr2xy(fr)
+				grid[this.y][this.x] = ' '
+				this.x = xy[0]
+				this.y = xy[1]
+				grid[this.y][this.x] = this
+			}
+		}
+
+		class Rook extends Piece {
+			name = "Rook"
+			value = 5
+			dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+			constructor(x, y, color) {
+				super(x, y, color)
+				this.char = this.color ? '<span class="piece bf">♜</span>' : '<span class="piece wf">♜</span><span class="piece bf over">♖</span>'
 			}
 
-			class Queen extends Piece {
-				name = "Queen"
-				value = 9
-				dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]
-				constructor(x, y, color) {
-					super(x, y, color)
-					this.char = this.color ? '<span class="piece bf">♛</span>' : '<span class="piece wf">♛</span><span class="piece bf over">♕</span>'
-				}
+			get_moves(grid) {
+				let moves = super.get_moves(grid)
+				// TODO: Castling.
+				return moves
+			}
+		}
+
+		class Knight extends Piece {
+			name = "Knight"
+			value = 3
+			constructor(x, y, color) {
+				super(x, y, color)
+				this.char = this.color ? '<span class="piece bf">♞</span>' : '<span class="piece wf">♞</span><span class="piece bf over">♘</span>'
 			}
 
-			class King extends Piece {
-				name = "King"
-				value = 10  // Officially 0; playwise 3.5 to 4.
-				constructor(x, y, color) {
-					super(x, y, color)
-					this.char = this.color ? '<span class="piece bf">♚</span>' : '<span class="piece wf">♚</span><span class="piece bf over">♔</span>'
-				}
-
-				get_moves(grid) {
-					let moves = []
-					for(let dir of [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]){
-						let tx = this.x + dir[0]
-						let ty = this.y + dir[1]
-						let piece = xy2p([tx, ty])
-						if(piece === ' ' || (piece && piece.color !== this.color)) {
-							moves.push([tx, ty])
-						}
+			get_moves(grid) {
+				let moves = []
+				for (let dir of [[-2, -1], [-2, 1], [-1, -2], [1, -2], [2, -1], [2, 1], [1, 2], [-1, 2]]) {
+					let tx = this.x + dir[0]
+					let ty = this.y + dir[1]
+					let piece = xy2p([tx, ty])
+					if (piece === ' ' || (piece && piece.color !== this.color)) {
+						moves.push([tx, ty])
 					}
-					// TODO: Castling.
-					/* https://chessily.com/learn-chess/king/
-					The king and rook have not yet been moved in the game.
-					The king is not in check before and immediately after castling
-					The king will not move through a check during castling
-					All squares between the rook and king are empty
-					*/
-					return moves
 				}
+				return moves
+			}
+		}
+
+		class Bishop extends Piece {
+			name = "Bishop"
+			value = 3
+			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
+			constructor(x, y, color) {
+				super(x, y, color)
+				this.char = this.color ? '<span class="piece bf">♝</span>' : '<span class="piece wf">♝</span><span class="piece bf over">♗</span>'
+			}
+		}
+
+		class Queen extends Piece {
+			name = "Queen"
+			value = 9
+			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]
+			constructor(x, y, color) {
+				super(x, y, color)
+				this.char = this.color ? '<span class="piece bf">♛</span>' : '<span class="piece wf">♛</span><span class="piece bf over">♕</span>'
+			}
+		}
+
+		class King extends Piece {
+			name = "King"
+			value = 10  // Officially 0; playwise 3.5 to 4.
+			constructor(x, y, color) {
+				super(x, y, color)
+				this.char = this.color ? '<span class="piece bf">♚</span>' : '<span class="piece wf">♚</span><span class="piece bf over">♔</span>'
 			}
 
-			class Pawn extends Piece {
-				name = "Pawn"
-				value = 1
-				constructor(x, y, color) {
-					super(x, y, color)
-					this.char = this.color ? '<span class="piece bf">♟︎</span>' : '<span class="piece wf">♟︎</span><span class="piece bf over">♙</span>'
-				}
-
-				get_moves(grid) {
-					let moves = []
-					// Move straight.
-					let dirs = this.color? [[0, 1]] : [[0, -1]]
-					for(let dir of dirs){
-						let tx = this.x + dir[0]
-						let ty = this.y + dir[1]
-						let piece = xy2p([tx, ty])
-						if(piece === ' ') {
-							moves.push([tx, ty])
-							if (this.color && this.y === 1 && grid[ty + 1][tx] === ' ') moves.push([tx, ty + 1])
-							if (!this.color && this.y === 6 && grid[ty - 1][tx] === ' ') moves.push([tx, ty - 1])
-						}
+			get_moves(grid) {
+				let moves = []
+				for (let dir of [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+					let tx = this.x + dir[0]
+					let ty = this.y + dir[1]
+					let piece = xy2p([tx, ty])
+					if (piece === ' ' || (piece && piece.color !== this.color)) {
+						moves.push([tx, ty])
 					}
-					// Capture diagonally.
-					dirs = this.color? [[-1, 1], [1, 1]] : [[-1, -1], [1, -1]]
-					for(let dir of dirs){
-						let tx = this.x + dir[0]
-						let ty = this.y + dir[1]
-						let piece = xy2p([tx, ty])
-						if((piece && piece !== ' ' && piece.color !== this.color)) {
-							moves.push([tx, ty])
-						}
-						// TODO: En passant only if pawn last moved double.
-						piece = xy2p([tx, ty - dir[1]])
-						if(piece && piece.name == "Pawn" && piece.color !== this.color){
-							console.log("Adding en passant")
-							moves.push([tx, ty])
-						}
-					}
-					return moves
 				}
-			}
-
-			function xy2fr(xy){
-				return "abcdefgh"[xy[0]] + (8 - xy[1])
-			}
-			function xy2p(xy){
-				if(xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
-				return grid[xy[1]][xy[0]]
-			}
-			function fr2xy(fr){
-				return ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
-			}
-			function fr2p(fr){
-				const xy = fr2xy(fr)
-				if(xy[0] >= 0 && xy[1] >= 0) return grid[xy[1]][xy[0]]
-				return ''
-			}
-
-			let grid = [
-				[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
-				[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)], 
-				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-				[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)], 
-				[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
-			]
-
-			function render(grid){
-				let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
-				let lines = [files]
-				for (let row in grid) {
-					let line = `<span class="square">${8 - row}</span>`
-					for(let col in grid) {
-						line += `<span id="${xy2fr([col, row])}" class="square ${'wbw'[row % 2 + col % 2]}">${grid[row][col].char || '  '}</span>`
-					}
-					line += `<span class="square">${8 - row}</span>`
-					lines.push(line)
-				}
-				lines.push(files)
-				boardtext.innerHTML = lines.join('\n') 
-				/*
-				 a b c d e f g h 
-				8♜♞♝♛♚♝♞♜8
-				7♟︎♟︎♟︎♟︎♟︎♟︎♟︎♟︎7
-				6                6
-				5                5
-				4                4
-				3                3
-				2♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙2
-				1♜♖♞♘♝♗♛♕♚♔♝♗♞♘♜♖1
-				 a b c d e f g h 
+				// TODO: Castling.
+				/* https://chessily.com/learn-chess/king/
+				The king and rook have not yet been moved in the game.
+				The king is not in check before and immediately after castling
+				The king will not move through a check during castling
+				All squares between the rook and king are empty
 				*/
-				let s = boardtext.innerText.replaceAll(/([a-z])/g, '$1 ')
-				for(let pair of [['♟︎♙', '♙'], ['♜♖', '♖'], ['♞♘', '♘'], ['♝♗', '♗'], ['♛♕', '♕'], ['♚♔', '♔']]) s = s.replaceAll(new RegExp(pair[0], 'g'), pair[1])
-				console.log(s)
-				document.querySelectorAll('.square').forEach(el => {
-					//console.log(e)
-					el.onmousedown = function(e){
-						e.preventDefault()  // Stop doubleclick select.
-					}
-					el.onmouseup = function(e){
-						if(this.classList.contains('selected')){
-							let piece = window.selected_piece
-							if(this.id !== xy2fr([piece.x, piece.y])) {
-								piece.move(this.id)
-								render(grid)
-							}
-							return
-						}
-						let piece = fr2p(this.id)
-						if(!piece || piece === ' ') return
-						window.selected_piece = piece
-						console.log("Selected", piece.color, piece.name, "at", this.id)
-						document.querySelectorAll('.selected').forEach(el=>el.classList.remove('selected'))
-						this.classList.add('selected')
-						let moves = piece.get_moves(grid)
-						console.log("Moves", moves)
-						for(let move of moves){
-							document.getElementById(xy2fr(move)).classList.add('selected')
-						}
-					}
-				})
+				return moves
+			}
+		}
+
+		class Pawn extends Piece {
+			name = "Pawn"
+			value = 1
+			constructor(x, y, color) {
+				super(x, y, color)
+				this.char = this.color ? '<span class="piece bf">♟︎</span>' : '<span class="piece wf">♟︎</span><span class="piece bf over">♙</span>'
 			}
 
-			// let all_moves = []
-			// for (let row in grid) {
-			// 	for(let col in grid) {
-			// 		let piece = grid[row][col]
-			// 		all_moves.concat(piece.get_moves())
-			// 	}
-			// 	line += `<span class="square">${8 - row}</span>`
-			// 	lines.push(line)
-			// }
-			let piece = grid[6][4]
-			console.log(piece.color, piece.name, "at", piece.x, piece.y, "can move", piece.get_moves(grid))
-			render(grid)
-		</script>
-	</body>
+			get_moves(grid) {
+				let moves = []
+				// Move straight.
+				let dirs = this.color ? [[0, 1]] : [[0, -1]]
+				for (let dir of dirs) {
+					let tx = this.x + dir[0]
+					let ty = this.y + dir[1]
+					let piece = xy2p([tx, ty])
+					if (piece === ' ') {
+						moves.push([tx, ty])
+						if (this.color && this.y === 1 && grid[ty + 1][tx] === ' ') moves.push([tx, ty + 1])
+						if (!this.color && this.y === 6 && grid[ty - 1][tx] === ' ') moves.push([tx, ty - 1])
+					}
+				}
+				// Capture diagonally.
+				dirs = this.color ? [[-1, 1], [1, 1]] : [[-1, -1], [1, -1]]
+				for (let dir of dirs) {
+					let tx = this.x + dir[0]
+					let ty = this.y + dir[1]
+					let piece = xy2p([tx, ty])
+					if ((piece && piece !== ' ' && piece.color !== this.color)) {
+						moves.push([tx, ty])
+					}
+					// TODO: En passant only if pawn last moved double.
+					piece = xy2p([tx, ty - dir[1]])
+					if (piece && piece.name == "Pawn" && piece.color !== this.color) {
+						console.log("Adding en passant")
+						moves.push([tx, ty])
+					}
+				}
+				return moves
+			}
+		}
+
+		function xy2fr(xy) {
+			return "abcdefgh"[xy[0]] + (8 - xy[1])
+		}
+		function xy2p(xy) {
+			if (xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
+			return grid[xy[1]][xy[0]]
+		}
+		function fr2xy(fr) {
+			return ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
+		}
+		function fr2p(fr) {
+			const xy = fr2xy(fr)
+			if (xy[0] >= 0 && xy[1] >= 0) return grid[xy[1]][xy[0]]
+			return ''
+		}
+
+		let grid = [
+			[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
+			[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
+			[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
+		]
+
+		function render(grid) {
+			let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
+			let lines = [files]
+			for (let row in grid) {
+				let line = `<span class="square">${8 - row}</span>`
+				for (let col in grid) {
+					line += `<span id="${xy2fr([col, row])}" class="square ${'wbw'[row % 2 + col % 2]}">${grid[row][col].char || '  '}</span>`
+				}
+				line += `<span class="square">${8 - row}</span>`
+				lines.push(line)
+			}
+			lines.push(files)
+			boardtext.innerHTML = lines.join('\n')
+			/*
+			 a b c d e f g h 
+			8♜♞♝♛♚♝♞♜8
+			7♟︎♟︎♟︎♟︎♟︎♟︎♟︎♟︎7
+			6                6
+			5                5
+			4                4
+			3                3
+			2♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙2
+			1♜♖♞♘♝♗♛♕♚♔♝♗♞♘♜♖1
+			 a b c d e f g h 
+			*/
+			let s = boardtext.innerText.replaceAll(/([a-z])/g, '$1 ')
+			for (let pair of [['♟︎♙', '♙'], ['♜♖', '♖'], ['♞♘', '♘'], ['♝♗', '♗'], ['♛♕', '♕'], ['♚♔', '♔']]) s = s.replaceAll(new RegExp(pair[0], 'g'), pair[1])
+			console.log(s)
+			document.querySelectorAll('.square').forEach(el => {
+				//console.log(e)
+				el.onmousedown = function (e) {
+					e.preventDefault()  // Stop doubleclick select.
+				}
+				el.onmouseup = function (e) {
+					if (this.classList.contains('selected')) {
+						let piece = window.selected_piece
+						if (this.id !== xy2fr([piece.x, piece.y])) {
+							piece.move(this.id)
+							render(grid)
+						}
+						return
+					}
+					let piece = fr2p(this.id)
+					if (!piece || piece === ' ') return
+					window.selected_piece = piece
+					console.log("Selected", piece.color, piece.name, "at", this.id)
+					document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
+					this.classList.add('selected')
+					let moves = piece.get_moves(grid)
+					console.log("Moves", moves)
+					for (let move of moves) {
+						document.getElementById(xy2fr(move)).classList.add('selected')
+					}
+				}
+			})
+		}
+
+		// let all_moves = []
+		// for (let row in grid) {
+		// 	for(let col in grid) {
+		// 		let piece = grid[row][col]
+		// 		all_moves.concat(piece.get_moves())
+		// 	}
+		// 	line += `<span class="square">${8 - row}</span>`
+		// 	lines.push(line)
+		// }
+		let piece = grid[6][4]
+		console.log(piece.color, piece.name, "at", piece.x, piece.y, "can move", piece.get_moves(grid))
+		render(grid)
+	</script>
+</body>
+
 </html>
