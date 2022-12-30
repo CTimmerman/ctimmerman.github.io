@@ -93,11 +93,22 @@
 		.selected.b {
 			background: radial-gradient(darkgray 30%, yellow);
 		}
+
+		.selected.w.nobg {
+			background: lightgray;
+		}
+		.selected.b.nobg {
+			background: darkgray;
+		}
+		label {
+			font-size: 0.5em;
+		}
 	</style>
 </head>
 
 <body>
 	<div id="boardtext"></div>
+	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label>
 	<div id="logtext"></div>
 	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script>
@@ -405,12 +416,17 @@
 					if (!piece || piece === ' ') return
 					window.selected_piece = piece
 					console.log("Selected", piece.color, piece.name, "at", this.id)
-					document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'))
+					document.querySelectorAll('.selected').forEach(el => {
+						el.classList.remove('selected')
+						el.classList.remove('nobg')
+					})
 					this.classList.add('selected')
 					let moves = piece.get_moves(grid)
 					console.log("Moves", moves)
 					for (let move of moves) {
-						document.getElementById(xy2fr(...move)).classList.add('selected')
+						let square = document.getElementById(xy2fr(...move))
+						square.classList.add('selected')
+						if(!guides.checked) square.classList.add('nobg')
 					}
 				}
 			})
