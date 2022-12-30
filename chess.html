@@ -24,8 +24,10 @@
 			overflow: auto;
 			display: flex;
 			flex-wrap: wrap;
-			align-items: center;  /* vertical */
-			justify-content: center;  /* horizontal */
+			align-items: center;
+			/* vertical */
+			justify-content: center;
+			/* horizontal */
 			visibility: hidden;
 			background-color: rgba(0, 0, 0, 0.5);
 		}
@@ -96,22 +98,25 @@
 
 <body>
 	<div id="boardtext"></div>
+	<div id="logtext"></div>
 	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script>
 		"use strict"
 		const WHITE = 0
 		const BLACK = 1
 
+		let log = []
+
 		class Piece {
 			name = "Piece"
+			char = "P"
 			value = 0
 			dirs = []
-			moves = []
 			constructor(x, y, color) {
 				this.x = x
 				this.y = y
 				this.color = color ? color : WHITE
-				this.char = this.color ? '<span class="piece bf">?</span>' : '<span class="piece bf over">?</span>'
+				this.html = this.color ? '<span class="piece bf">?</span>' : '<span class="piece bf over">?</span>'
 			}
 
 			get_moves(grid) {
@@ -121,7 +126,7 @@
 					let ty = this.y + dir[1]
 					while (1) {
 						let piece = xy2p([tx, ty])
-						//console.log("Found", piece?.color, piece?.name, "at", tx, ty, xy2fr([tx,ty]))
+						//console.log("Found", piece?.color, piece?.name, "at", tx, ty, xy2fr(tx,ty))
 						if (piece === ' ') moves.push([tx, ty])
 						else if (piece && piece.color !== this.color) {
 							moves.push([tx, ty])
@@ -139,6 +144,7 @@
 			move(fr) {
 				console.log(this.name, "to", fr)
 				let xy = fr2xy(fr)
+				log.push(this.char + xy2fr(this.x, this.y) + (fr2p(fr) === ' ' ? '' : 'x') + fr)
 				grid[this.y][this.x] = ' '
 				this.x = xy[0]
 				this.y = xy[1]
@@ -148,11 +154,12 @@
 
 		class Rook extends Piece {
 			name = "Rook"
+			char = "R"
 			value = 5
 			dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
 			constructor(x, y, color) {
 				super(x, y, color)
-				this.char = this.color ? '<span class="piece bf">♜</span>' : '<span class="piece wf">♜</span><span class="piece bf over">♖</span>'
+				this.html = this.color ? '<span class="piece bf">♜</span>' : '<span class="piece wf">♜</span><span class="piece bf over">♖</span>'
 			}
 
 			get_moves(grid) {
@@ -164,10 +171,11 @@
 
 		class Knight extends Piece {
 			name = "Knight"
+			char = "N"
 			value = 3
 			constructor(x, y, color) {
 				super(x, y, color)
-				this.char = this.color ? '<span class="piece bf">♞</span>' : '<span class="piece wf">♞</span><span class="piece bf over">♘</span>'
+				this.html = this.color ? '<span class="piece bf">♞</span>' : '<span class="piece wf">♞</span><span class="piece bf over">♘</span>'
 			}
 
 			get_moves(grid) {
@@ -186,30 +194,33 @@
 
 		class Bishop extends Piece {
 			name = "Bishop"
+			char = "B"
 			value = 3
 			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
 			constructor(x, y, color) {
 				super(x, y, color)
-				this.char = this.color ? '<span class="piece bf">♝</span>' : '<span class="piece wf">♝</span><span class="piece bf over">♗</span>'
+				this.html = this.color ? '<span class="piece bf">♝</span>' : '<span class="piece wf">♝</span><span class="piece bf over">♗</span>'
 			}
 		}
 
 		class Queen extends Piece {
 			name = "Queen"
+			char = "Q"
 			value = 9
 			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]
 			constructor(x, y, color) {
 				super(x, y, color)
-				this.char = this.color ? '<span class="piece bf">♛</span>' : '<span class="piece wf">♛</span><span class="piece bf over">♕</span>'
+				this.html = this.color ? '<span class="piece bf">♛</span>' : '<span class="piece wf">♛</span><span class="piece bf over">♕</span>'
 			}
 		}
 
 		class King extends Piece {
 			name = "King"
+			char = "K"
 			value = 10  // Officially 0; playwise 3.5 to 4.
 			constructor(x, y, color) {
 				super(x, y, color)
-				this.char = this.color ? '<span class="piece bf">♚</span>' : '<span class="piece wf">♚</span><span class="piece bf over">♔</span>'
+				this.html = this.color ? '<span class="piece bf">♚</span>' : '<span class="piece wf">♚</span><span class="piece bf over">♔</span>'
 			}
 
 			get_moves(grid) {
@@ -235,10 +246,11 @@
 
 		class Pawn extends Piece {
 			name = "Pawn"
+			char = ""
 			value = 1
 			constructor(x, y, color) {
 				super(x, y, color)
-				this.char = this.color ? '<span class="piece bf">♟︎</span>' : '<span class="piece wf">♟︎</span><span class="piece bf over">♙</span>'
+				this.html = this.color ? '<span class="piece bf">♟︎</span>' : '<span class="piece wf">♟︎</span><span class="piece bf over">♙</span>'
 			}
 
 			get_moves(grid) {
@@ -264,41 +276,51 @@
 					if ((piece && piece !== ' ' && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
-					// TODO: En passant only if pawn last moved double.
-					piece = xy2p([tx, ty - dir[1]])
-					if (piece && piece.name == "Pawn" && piece.color !== this.color) {
-						console.log("Adding en passant")
-						moves.push([tx, ty])
+					// En passant.
+					if ((this.color === BLACK && this.y === 4)
+						|| (this.color === WHITE && this.y === 3)) {
+						let double_jump = xy2fr(tx, this.color ? 6 : 1) + xy2fr(tx, this.color ? 4 : 3)
+						if (log.slice(-1)[0] === double_jump) {
+							moves.push([tx, ty])
+						}
 					}
 				}
 				return moves
 			}
 
-			move(fr){
+			move(fr) {
 				super.move(fr)
-				if(this.color === BLACK && this.y === 7
-				|| this.color === WHITE && this.y === 0) {
+				if (this.color === BLACK && this.y === 7
+					|| this.color === WHITE && this.y === 0) {
 					promote(fr, 'Q', this.color)
 					let html = `
 					<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
 					<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
-					<button onclick="promote('${fr}', 'K', ${this.color})">♞</button>
+					<button onclick="promote('${fr}', 'N', ${this.color})">♞</button>
 					<button onclick="promote('${fr}', 'R', ${this.color})">♜</button>
 					`
 					nonblocking_alert(html)
 				}
+				// En passant.
+				if (this.color === BLACK && this.y != 5) return
+				if (this.color === WHITE && this.y != 2) return
+				let double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
+				if (log.slice(-2)[0] === double_jump) {
+					log[log.length - 1] += ' e.p.'
+					grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
+				}
 			}
 		}
-		function promote(fr, kind, color){
+		function promote(fr, kind, color) {
 			let [x, y] = fr2xy(fr)
-			switch(kind){
+			switch (kind) {
 				case 'Q':
 					grid[y][x] = new Queen(x, y, color)
 					break
 				case 'B':
 					grid[y][x] = new Bishop(x, y, color)
 					break
-				case 'K':
+				case 'N':
 					grid[y][x] = new Knight(x, y, color)
 					break
 				case 'R':
@@ -308,8 +330,8 @@
 			render(grid)
 		}
 
-		function xy2fr(xy) {
-			return "abcdefgh"[xy[0]] + (8 - xy[1])
+		function xy2fr(x, y) {
+			return "abcdefgh"[x] + (8 - y)
 		}
 		function xy2p(xy) {
 			if (xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
@@ -341,12 +363,13 @@
 			for (let row in grid) {
 				let line = `<span class="square">${8 - row}</span>`
 				for (let col in grid) {
-					line += `<span id="${xy2fr([col, row])}" class="square ${'wbw'[row % 2 + col % 2]}">${grid[row][col].char || '  '}</span>`
+					line += `<span id="${xy2fr(col, row)}" class="square ${'wbw'[row % 2 + col % 2]}">${grid[row][col].html || '  '}</span>`
 				}
 				line += `<span class="square">${8 - row}</span>`
 				lines.push(line)
 			}
 			lines.push(files)
+			logtext.innerHTML = '<ol><li>' + log.join('</li><li>') + '</li></ol>'
 			boardtext.innerHTML = lines.join('\n')
 			/*
 			 a b c d e f g h 
@@ -360,9 +383,10 @@
 			1♜♖♞♘♝♗♛♕♚♔♝♗♞♘♜♖1
 			 a b c d e f g h 
 			*/
-			let s = boardtext.innerText.replaceAll(/([a-z])/g, '$1 ')
+			let s = boardtext.innerText.replaceAll(/([a-z])([a-z])/g, '$1 $2 ')
 			for (let pair of [['♟︎♙', '♙'], ['♜♖', '♖'], ['♞♘', '♘'], ['♝♗', '♗'], ['♛♕', '♕'], ['♚♔', '♔']]) s = s.replaceAll(new RegExp(pair[0], 'g'), pair[1])
 			console.log(s)
+			console.log(log)
 			document.querySelectorAll('.square').forEach(el => {
 				//console.log(e)
 				el.onmousedown = function (e) {
@@ -371,7 +395,7 @@
 				el.onmouseup = function (e) {
 					if (this.classList.contains('selected')) {
 						let piece = window.selected_piece
-						if (this.id !== xy2fr([piece.x, piece.y])) {
+						if (this.id !== xy2fr(piece.x, piece.y)) {
 							piece.move(this.id)
 							render(grid)
 						}
@@ -386,7 +410,7 @@
 					let moves = piece.get_moves(grid)
 					console.log("Moves", moves)
 					for (let move of moves) {
-						document.getElementById(xy2fr(move)).classList.add('selected')
+						document.getElementById(xy2fr(...move)).classList.add('selected')
 					}
 				}
 			})
@@ -405,8 +429,8 @@
 		console.log(piece.color, piece.name, "at", piece.x, piece.y, "can move", piece.get_moves(grid))
 		render(grid)
 
-		function nonblocking_alert(html){
-			if (getComputedStyle(alertcontainer).visibility == 'hidden'){
+		function nonblocking_alert(html) {
+			if (getComputedStyle(alertcontainer).visibility == 'hidden') {
 				alertcontainer.innerText = ''
 				alertcontainer.style.visibility = 'visible'
 			}
