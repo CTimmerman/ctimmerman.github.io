@@ -253,20 +253,7 @@
 					let ty = this.y + dir[1]
 					let piece = board.xy2p([tx, ty])
 					if (piece === ' ' || (piece && piece.color !== this.color)) {
-						let new_board = structuredClone(board)  // Doesn't clone methods! FIXME
-						for (let row in grid) {
-							for (let col in grid) {
-								let piece = grid[row][col]
-								new_board.grid[row][col] = copyInstance(piece)
-							}
-						}
-						let new_piece = new_board.grid[this.y][this.x]
-						let fr = xy2fr(tx, ty)
-						new_piece.move(new_board, fr)
-						//debugger
-						let threats = new_piece.get_threats(board, depth)
-						console.log('K', fr, '=>', threats)
-						if (threats.length === 0) moves.push([tx, ty])
+						moves.push([tx, ty])
 					}
 				}
 				// Castling.
@@ -295,7 +282,26 @@
 						if (clear) moves.push([6, 8 - rank])
 					}
 				}
-				return moves
+
+				// Remove unsafe moves.
+				let safe_moves = []
+				for (let move of moves) {
+					let new_board = structuredClone(board)  // Doesn't clone methods!
+					for (let row in grid) {
+						for (let col in grid) {
+							let piece = grid[row][col]
+							new_board.grid[row][col] = copyInstance(piece)
+						}
+					}
+					let new_piece = new_board.grid[this.y][this.x]
+					let fr = xy2fr(...move)
+					new_piece.move(new_board, fr)
+					//debugger
+					let threats = new_piece.get_threats(board, depth)
+					console.log('K', fr, '=>', threats)
+					if (threats.length === 0) safe_moves.push(move)
+				}
+				return safe_moves
 			}
 
 			move(board, fr, do_log) {
