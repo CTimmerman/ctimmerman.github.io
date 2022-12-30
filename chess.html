@@ -118,8 +118,6 @@
 		const WHITE = 0
 		const BLACK = 1
 
-		let log = []
-
 		class Piece {
 			name = "Piece"
 			char = "P"
@@ -133,13 +131,14 @@
 				this.html = this.color ? '<span class="piece bf">?</span>' : '<span class="piece bf over">?</span>'
 			}
 
-			get_moves(grid) {
+			get_moves(board, depth) {
+				let grid = board.grid
 				let moves = []
 				for (let dir of this.dirs) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
 					while (1) {
-						let piece = xy2p([tx, ty])
+						let piece = board.xy2p([tx, ty])
 						//console.log("Found", piece?.color, piece?.name, "at", tx, ty, xy2fr(tx,ty))
 						if (piece === ' ') moves.push([tx, ty])
 						else if (piece && piece.color !== this.color) {
@@ -155,15 +154,27 @@
 				return moves
 			}
 
-			move(fr, no_log) {
-				console.log(this.name, "to", fr)
+			get_threats(board, depth) {
+				let grid = board.grid
+				let threats = []
+				for (let row in grid) {
+					for (let col in grid) {
+						let piece = grid[row][col]
+						if (piece === ' ' || piece.color === this.color) continue
+						if (piece.get_moves(board, depth + 1).find(xy => xy[0] === this.x && xy[1] === this.y)) threats.push(piece)
+					}
+				}
+				return threats
+			}
+
+			move(board, fr, do_log) {
 				this.moved = true
 				let xy = fr2xy(fr)
-				if (!no_log) log.push(this.char + xy2fr(this.x, this.y) + (fr2p(fr) === ' ' ? '' : 'x') + fr)
-				grid[this.y][this.x] = ' '
+				if (do_log) board.log.push(this.char + xy2fr(this.x, this.y) + (board.fr2p(fr) === ' ' ? '' : 'x') + fr)
+				board.grid[this.y][this.x] = ' '
 				this.x = xy[0]
 				this.y = xy[1]
-				grid[this.y][this.x] = this
+				board.grid[this.y][this.x] = this
 			}
 		}
 
@@ -187,12 +198,12 @@
 				this.html = this.color ? '<span class="piece bf">♞</span>' : '<span class="piece wf">♞</span><span class="piece bf over">♘</span>'
 			}
 
-			get_moves(grid) {
+			get_moves(board, depth) {
 				let moves = []
 				for (let dir of [[-2, -1], [-2, 1], [-1, -2], [1, -2], [2, -1], [2, 1], [1, 2], [-1, 2]]) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
-					let piece = xy2p([tx, ty])
+					let piece = board.xy2p([tx, ty])
 					if (piece === ' ' || (piece && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
@@ -232,39 +243,53 @@
 				this.html = this.color ? '<span class="piece bf">♚</span>' : '<span class="piece wf">♚</span><span class="piece bf over">♔</span>'
 			}
 
-			get_moves(grid) {
+			get_moves(board, depth) {
+				if (!depth) depth = 0
+				if (depth > 1) return []
+				let grid = board.grid
 				let moves = []
 				for (let dir of [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
-					let piece = xy2p([tx, ty])
+					let piece = board.xy2p([tx, ty])
 					if (piece === ' ' || (piece && piece.color !== this.color)) {
-						moves.push([tx, ty])
+						let new_board = structuredClone(board)  // Doesn't clone methods! FIXME
+						for (let row in grid) {
+							for (let col in grid) {
+								let piece = grid[row][col]
+								new_board.grid[row][col] = copyInstance(piece)
+							}
+						}
+						let new_piece = new_board.grid[this.y][this.x]
+						let fr = xy2fr(tx, ty)
+						new_piece.move(new_board, fr)
+						//debugger
+						let threats = new_piece.get_threats(board, depth)
+						console.log('K', fr, '=>', threats)
+						if (threats.length === 0) moves.push([tx, ty])
 					}
 				}
-				// TODO: Castling.
+				// Castling.
 				/* https://chessily.com/learn-chess/king/
 				The king and rook have not yet been moved in the game.
-				The king is not in check before and immediately after castling
-				The king will not move through a check during castling
-				All squares between the rook and king are empty
+				TODO: The king is not in check before and immediately after castling
+				TODO: The king will not move through a check during castling
+				All squares between the rook and king are empty.
 				*/
 				let rank = this.color ? 8 : 1
 				if (!this.moved) {
-					if (!fr2p('a'+rank).moved) {
+					if (!board.fr2p('a' + rank).moved) {
 						// Queenside: 0-0-0
 						let clear = true
 						for (let i = 1; i < this.x; ++i) {
-							console.log('check', 8 - rank, i, grid[8 - rank][i])
 							if (grid[8 - rank][i] !== ' ') clear = false
 						}
 						if (clear) moves.push([2, 8 - rank])
 					}
-					if (!fr2p('h'+rank).moved) {
+					if (!board.fr2p('h' + rank).moved) {
 						// Kingside: 0-0
 						let clear = true
 						for (let i = 6; i > this.x; --i) {
-							console.log('check', 8 - rank, i, grid[8 - rank][i])
 							if (grid[8 - rank][i] !== ' ') clear = false
 						}
 						if (clear) moves.push([6, 8 - rank])
@@ -273,23 +298,32 @@
 				return moves
 			}
 
-			move(fr) {
-				super.move(fr)
-				let move = log[log.length - 1]
+			move(board, fr, do_log) {
+				super.move(board, fr, do_log)
+				let move = board.log[board.log.length - 1]
 				let y = this.y
 				let rank = 8 - y
-				console.log(y, `Ke${rank}g${rank}`)
 				if (move === `Ke${rank}g${rank}`) { // TODO? Only 5171 according to https://en.wikipedia.org/wiki/ICCF_numeric_notation
 					move = '0-0'
-					console.log(move)
-					grid[y][7].move('f' + rank, true)
+					board.grid[y][7].move(board, 'f' + rank)
 				}
 				if (move === `Ke${rank}c${rank}`) {
 					move = '0-0-0'
-					grid[y][0].move('d' + rank, true)
+					board.grid[y][0].move(board, 'd' + rank)
 				}
-				log[log.length - 1] = move
+				board.log[board.log.length - 1] = move
 			}
+		}
+
+		// https://www.nickang.com/2018-01-17-how-to-clone-class-instance-javascript/
+		function copyInstance(original) {
+			var copied = Object.assign(
+				Object.create(
+					Object.getPrototypeOf(original)
+				),
+				original
+			)
+			return copied
 		}
 
 		class Pawn extends Piece {
@@ -301,14 +335,16 @@
 				this.html = this.color ? '<span class="piece bf">♟︎</span>' : '<span class="piece wf">♟︎</span><span class="piece bf over">♙</span>'
 			}
 
-			get_moves(grid) {
+			get_moves(board, depth) {
+				let grid = board.grid
+				let log = board.log
 				let moves = []
 				// Move straight.
 				let dirs = this.color ? [[0, 1]] : [[0, -1]]
 				for (let dir of dirs) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
-					let piece = xy2p([tx, ty])
+					let piece = board.xy2p([tx, ty])
 					if (piece === ' ') {
 						moves.push([tx, ty])
 						if (this.color && this.y === 1 && grid[ty + 1][tx] === ' ') moves.push([tx, ty + 1])
@@ -320,7 +356,7 @@
 				for (let dir of dirs) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
-					let piece = xy2p([tx, ty])
+					let piece = board.xy2p([tx, ty])
 					if ((piece && piece !== ' ' && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
@@ -336,16 +372,16 @@
 				return moves
 			}
 
-			move(fr) {
-				super.move(fr)
+			move(board, fr, do_log) {
+				super.move(board, fr, do_log)
 				if (this.color === BLACK && this.y === 7
 					|| this.color === WHITE && this.y === 0) {
-					promote(fr, 'Q', this.color)
+					board.promote(fr, 'Q', this.color)
 					let html = `
-					<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
-					<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
-					<button onclick="promote('${fr}', 'N', ${this.color})">♞</button>
-					<button onclick="promote('${fr}', 'R', ${this.color})">♜</button>
+					<button onclick="board.promote('${fr}', 'Q', ${this.color}); render(board)">♛</button>
+					<button onclick="board.promote('${fr}', 'B', ${this.color}); render(board)">♝</button>
+					<button onclick="board.promote('${fr}', 'N', ${this.color}); render(board)">♞</button>
+					<button onclick="board.promote('${fr}', 'R', ${this.color}); render(board)">♜</button>
 					`
 					nonblocking_alert(html)
 				}
@@ -353,59 +389,25 @@
 				if (this.color === BLACK && this.y != 5) return
 				if (this.color === WHITE && this.y != 2) return
 				let double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
+				let log = board.log
 				if (log.slice(-2)[0] === double_jump) {
 					log[log.length - 1] += ' e.p.'
-					grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
+					board.grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
 				}
 			}
-		}
-		function promote(fr, kind, color) {
-			let [x, y] = fr2xy(fr)
-			switch (kind) {
-				case 'Q':
-					grid[y][x] = new Queen(x, y, color)
-					break
-				case 'B':
-					grid[y][x] = new Bishop(x, y, color)
-					break
-				case 'N':
-					grid[y][x] = new Knight(x, y, color)
-					break
-				case 'R':
-					grid[y][x] = new Rook(x, y, color)
-					break
-			}
-			render(grid)
 		}
 
 		function xy2fr(x, y) {
 			return "abcdefgh"[x] + (8 - y)
 		}
-		function xy2p(xy) {
-			if (xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
-			return grid[xy[1]][xy[0]]
-		}
+
 		function fr2xy(fr) {
 			return ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
 		}
-		function fr2p(fr) {
-			const xy = fr2xy(fr)
-			if (xy[0] >= 0 && xy[1] >= 0) return grid[xy[1]][xy[0]]
-			return ''
-		}
 
-		let grid = [
-			[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
-			[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
-			[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
-		]
-
-		function render(grid) {
+		function render(board) {
+			let grid = board.grid
+			let log = board.log
 			let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
 			let lines = [files]
 			for (let row in grid) {
@@ -444,12 +446,12 @@
 					if (this.classList.contains('selected')) {
 						let piece = window.selected_piece
 						if (this.id !== xy2fr(piece.x, piece.y)) {
-							piece.move(this.id)
-							render(grid)
+							piece.move(board, this.id, true)
+							render(board)
 						}
 						return
 					}
-					let piece = fr2p(this.id)
+					let piece = board.fr2p(this.id)
 					if (!piece || piece === ' ') return
 					window.selected_piece = piece
 					console.log("Selected", piece.color, piece.name, "at", this.id)
@@ -458,7 +460,7 @@
 						el.classList.remove('nobg')
 					})
 					this.classList.add('selected')
-					let moves = piece.get_moves(grid)
+					let moves = piece.get_moves(board)
 					console.log("Moves", moves)
 					for (let move of moves) {
 						let square = document.getElementById(xy2fr(...move))
@@ -468,19 +470,6 @@
 				}
 			})
 		}
-
-		// let all_moves = []
-		// for (let row in grid) {
-		// 	for(let col in grid) {
-		// 		let piece = grid[row][col]
-		// 		all_moves.concat(piece.get_moves())
-		// 	}
-		// 	line += `<span class="square">${8 - row}</span>`
-		// 	lines.push(line)
-		// }
-		let piece = grid[6][4]
-		console.log(piece.color, piece.name, "at", piece.x, piece.y, "can move", piece.get_moves(grid))
-		render(grid)
 
 		function nonblocking_alert(html) {
 			if (getComputedStyle(alertcontainer).visibility == 'hidden') {
@@ -492,6 +481,52 @@
 			d.innerHTML = html
 			alertcontainer.appendChild(d)
 		}
+
+		class Board {
+			log = []
+			grid = [
+				[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
+				[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)],
+				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+				[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+				[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
+				[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
+			]
+
+			xy2p(xy) {
+				if (xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
+				return this.grid[xy[1]][xy[0]]
+			}
+
+			fr2p(fr) {
+				const xy = fr2xy(fr)
+				if (xy[0] >= 0 && xy[1] >= 0) return this.grid[xy[1]][xy[0]]
+				return ''
+			}
+
+			promote(fr, kind, color) {
+				let [x, y] = fr2xy(fr)
+				switch (kind) {
+					case 'Q':
+						grid[y][x] = new Queen(x, y, color)
+						break
+					case 'B':
+						grid[y][x] = new Bishop(x, y, color)
+						break
+					case 'N':
+						grid[y][x] = new Knight(x, y, color)
+						break
+					case 'R':
+						grid[y][x] = new Rook(x, y, color)
+						break
+				}
+			}
+		}
+
+		let board = new Board()
+		render(board)
 	</script>
 </body>
 
