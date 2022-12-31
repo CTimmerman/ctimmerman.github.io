@@ -284,7 +284,7 @@
 				/* https://chessily.com/learn-chess/king/
 				The king and rook have not yet been moved in the game.
 				The king is not in check before and immediately after castling.
-				TODO: The king will not move through a check during castling.
+				The king will not move through a check during castling.
 				All squares between the rook and king are empty.
 				*/
 				if (this.get_threats(board, depth).length === 0) {
@@ -312,18 +312,25 @@
 				let safe_moves = []
 				for (let move of moves) {
 					let new_board = board.copy()
-					console.log("New board:")
-					//render(new_board)
 					let new_piece = new_board.grid[this.y][this.x]
-					console.log(depth, "Getting cloned piece at", this.x, this.y, ":", new_piece)
 					let fr = xy2fr(...move)
 					new_piece.move(new_board, fr)
 					let threats = new_piece.get_threats(new_board, depth)
-					console.log('K', fr, '=>', threats)
+					//console.log('K', fr, '=>', threats)
 					if (threats.length === 0) safe_moves.push(move)
 				}
-				let frs = safe_moves.map(e => xy2fr(e))
-				console.log("Safe moves", frs)
+				if(!this.moved) {
+					// Can't castle over unsafe space.
+					let frs = safe_moves.map(e => xy2fr(...e))
+					for (let i = safe_moves.length-1; i >= 0; --i){
+						let fr = xy2fr(...safe_moves[i])
+						if (
+							(fr === 'c8' && frs.indexOf('d8') < 0) ||
+							(fr === 'g8' && frs.indexOf('f8') < 0) ||
+							(fr === 'c1' && frs.indexOf('d1') < 0)
+						) safe_moves.splice(i, 1)
+					}
+				}
 				return safe_moves
 			}
 
