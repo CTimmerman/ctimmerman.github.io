@@ -173,12 +173,17 @@
 
 			move(board, fr, do_log) {
 				this.moved = true
-				let xy = fr2xy(fr)
-				if (do_log) board.log.push(this.char + xy2fr(this.x, this.y) + (board.fr2p(fr) === ' ' ? '' : 'x') + fr)
-				board.grid[this.y][this.x] = ' '
+				const enemy = 1 - this.color
+				const ox = this.x
+				const oy = this.y
+				const xy = fr2xy(fr)
+				board.grid[oy][ox] = ' '
 				this.x = xy[0]
 				this.y = xy[1]
 				board.grid[this.y][this.x] = this
+				if (do_log) {
+					board.log.push(this.char + xy2fr(ox, oy) + (board.fr2p(fr) === ' ' ? '' : 'x') + fr + (board.is_mate(enemy) ? '#' : (board.is_check(enemy) ? '!' : '')))
+				}
 			}
 		}
 
@@ -319,10 +324,10 @@
 					//console.log('K', fr, '=>', threats)
 					if (threats.length === 0) safe_moves.push(move)
 				}
-				if(!this.moved) {
+				if (!this.moved) {
 					// Can't castle over unsafe space.
 					let frs = safe_moves.map(e => xy2fr(...e))
-					for (let i = safe_moves.length-1; i >= 0; --i){
+					for (let i = safe_moves.length - 1; i >= 0; --i) {
 						let fr = xy2fr(...safe_moves[i])
 						if (
 							(fr === 'c8' && frs.indexOf('d8') < 0) ||
@@ -465,7 +470,7 @@
 			let s = boardtext.innerText.replaceAll(/([a-z])([a-z])/g, '$1 $2 ')
 			for (let pair of [['♟︎♙', '♙'], ['♜♖', '♖'], ['♞♘', '♘'], ['♝♗', '♗'], ['♛♕', '♕'], ['♚♔', '♔']]) s = s.replaceAll(new RegExp(pair[0], 'g'), pair[1])
 			console.log(s)
-			console.log(log)
+			console.log(log.join(' '))
 			document.querySelectorAll('.square').forEach(el => {
 				//console.log(e)
 				el.onmousedown = function (e) {
@@ -483,14 +488,12 @@
 					let piece = board.fr2p(this.id)
 					if (!piece || piece === ' ') return
 					window.selected_piece = piece
-					console.log("Selected", piece.color, piece.name, "at", this.id)
 					document.querySelectorAll('.selected').forEach(el => {
 						el.classList.remove('selected')
 						el.classList.remove('nobg')
 					})
 					this.classList.add('selected')
 					let moves = piece.get_moves(board)
-					console.log("Moves", moves)
 					for (let move of moves) {
 						let square = document.getElementById(xy2fr(...move))
 						square.classList.add('selected')
@@ -513,7 +516,7 @@
 
 		class Board {
 			log = []
-			grid = [[],[],[],[],[],[],[],[]]
+			grid = [[], [], [], [], [], [], [], []]
 
 			reset() {
 				this.log = []
@@ -527,6 +530,25 @@
 					[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
 					[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
 				]
+			}
+
+			get_king(color) {
+				for (let row in this.grid) {
+					for (let col in this.grid) {
+						let piece = this.grid[row][col]
+						if (piece.name === "King" && piece.color === color) return piece
+					}
+				}
+			}
+
+			is_check(color) {
+				return this.get_king(color).get_threats(this).length > 0
+			}
+
+			is_mate(color) {
+				let saves = []
+				// TODO: Check all moves for check resolution.
+				return this.is_check(color) && this.get_king(color).get_moves(this).length === 0 && saves.length === 0
 			}
 
 			copy() {
