@@ -176,13 +176,14 @@
 				const enemy = 1 - this.color
 				const ox = this.x
 				const oy = this.y
+				let move = this.char + xy2fr(ox, oy) + (board.fr2p(fr) === ' ' ? '' : 'x') + fr
 				const xy = fr2xy(fr)
 				board.grid[oy][ox] = ' '
 				this.x = xy[0]
 				this.y = xy[1]
 				board.grid[this.y][this.x] = this
 				if (do_log) {
-					board.log.push(this.char + xy2fr(ox, oy) + (board.fr2p(fr) === ' ' ? '' : 'x') + fr + (board.is_mate(enemy) ? '#' : (board.is_check(enemy) ? '!' : '')))
+					board.log.push(move + (board.is_mate(enemy) ? '#' : (board.is_check(enemy) ? '!' : '')))
 				}
 			}
 		}
