@@ -177,7 +177,6 @@
 
 			move(board, fr, do_log) {
 				this.moved = true
-				const enemy = 1 - this.color
 				const ox = this.x
 				const oy = this.y
 				let move = this.char + xy2fr(ox, oy) + (board.fr2p(fr) === ' ' ? '' : 'x') + fr
@@ -187,7 +186,7 @@
 				this.y = xy[1]
 				board.grid[this.y][this.x] = this
 				if (do_log) {
-					board.log.push(move + (board.is_mate(enemy) ? '#' : (board.is_check(enemy) ? '!' : '')))
+					board.log_check(move, 1 - this.color)
 				}
 			}
 		}
@@ -571,6 +570,10 @@
 				return ''
 			}
 
+			log_check(move, color) {
+				this.log.push(move + (this.is_mate(color) ? '#' : (this.is_check(color) ? '!' : '')))
+			}
+
 			promote(fr, kind, color) {
 				let [x, y] = fr2xy(fr)
 				switch (kind) {
@@ -592,7 +595,7 @@
 
 		function promote(fr, kind, color) {
 			board.promote(fr, kind, color)
-			board.log[board.log.length - 1] += kind
+			board.log_check(board.log.pop() + kind, 1 - color)
 			render(board)
 			alertcontainer.style.visibility = 'hidden'
 		}
