@@ -11,6 +11,7 @@
 			--fgcolor: yellow;
 			color: var(--fgcolor);
 			background-color: var(--bgcolor);
+			border-color: var(--fgcolor);
 			font-size: 10mm;
 		}
 
@@ -394,10 +395,10 @@
 					|| this.color === WHITE && this.y === 0) {
 					board.promote(fr, 'Q', this.color)
 					let html = `
-					<button onclick="board.promote('${fr}', 'Q', ${this.color}); render(board)">♛</button>
-					<button onclick="board.promote('${fr}', 'B', ${this.color}); render(board)">♝</button>
-					<button onclick="board.promote('${fr}', 'N', ${this.color}); render(board)">♞</button>
-					<button onclick="board.promote('${fr}', 'R', ${this.color}); render(board)">♜</button>
+					<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
+					<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
+					<button onclick="promote('${fr}', 'N', ${this.color})">♞</button>
+					<button onclick="promote('${fr}', 'R', ${this.color})">♜</button>
 					`
 					nonblocking_alert(html)
 				}
@@ -467,13 +468,13 @@
 						}
 						return
 					}
-					let piece = board.fr2p(this.id)
-					if (!piece || piece === ' ') return
-					window.selected_piece = piece
 					document.querySelectorAll('.selected').forEach(el => {
 						el.classList.remove('selected')
 						el.classList.remove('nobg')
 					})
+					let piece = board.fr2p(this.id)
+					if (!piece || piece === ' ') return
+					window.selected_piece = piece
 					this.classList.add('selected')
 					let moves = piece.get_moves(board)
 					for (let move of moves) {
@@ -574,19 +575,26 @@
 				let [x, y] = fr2xy(fr)
 				switch (kind) {
 					case 'Q':
-						grid[y][x] = new Queen(x, y, color)
+						this.grid[y][x] = new Queen(x, y, color)
 						break
 					case 'B':
-						grid[y][x] = new Bishop(x, y, color)
+						this.grid[y][x] = new Bishop(x, y, color)
 						break
 					case 'N':
-						grid[y][x] = new Knight(x, y, color)
+						this.grid[y][x] = new Knight(x, y, color)
 						break
 					case 'R':
-						grid[y][x] = new Rook(x, y, color)
+						this.grid[y][x] = new Rook(x, y, color)
 						break
 				}
 			}
+		}
+
+		function promote(fr, kind, color) {
+			board.promote(fr, kind, color)
+			board.log[board.log.length - 1] += kind
+			render(board)
+			alertcontainer.style.visibility = 'hidden'
 		}
 
 		let board = new Board()
