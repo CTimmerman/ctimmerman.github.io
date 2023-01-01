@@ -131,8 +131,11 @@
 				this.html = this.color ? '<span class="piece bf">?</span>' : '<span class="piece bf over">?</span>'
 			}
 
-			copy() {
-				return new Piece(this.x, this.y, this.color)
+			copy(piece) {
+				if (!piece) piece = this
+				const copy = new piece.constructor(this.x, this.y, this.color)
+				copy.moved = this.moved
+				return copy
 			}
 
 			get_moves(board, depth) {
@@ -197,10 +200,6 @@
 				super(x, y, color)
 				this.html = this.color ? '<span class="piece bf">♜</span>' : '<span class="piece wf">♜</span><span class="piece bf over">♖</span>'
 			}
-
-			copy() {
-				return new Rook(this.x, this.y, this.color)
-			}
 		}
 
 		class Knight extends Piece {
@@ -210,10 +209,6 @@
 			constructor(x, y, color) {
 				super(x, y, color)
 				this.html = this.color ? '<span class="piece bf">♞</span>' : '<span class="piece wf">♞</span><span class="piece bf over">♘</span>'
-			}
-
-			copy() {
-				return new Knight(this.x, this.y, this.color)
 			}
 
 			get_moves(board, depth) {
@@ -239,10 +234,6 @@
 				super(x, y, color)
 				this.html = this.color ? '<span class="piece bf">♝</span>' : '<span class="piece wf">♝</span><span class="piece bf over">♗</span>'
 			}
-
-			copy() {
-				return new Bishop(this.x, this.y, this.color)
-			}
 		}
 
 		class Queen extends Piece {
@@ -254,10 +245,6 @@
 				super(x, y, color)
 				this.html = this.color ? '<span class="piece bf">♛</span>' : '<span class="piece wf">♛</span><span class="piece bf over">♕</span>'
 			}
-
-			copy() {
-				return new Queen(this.x, this.y, this.color)
-			}
 		}
 
 		class King extends Piece {
@@ -267,10 +254,6 @@
 			constructor(x, y, color) {
 				super(x, y, color)
 				this.html = this.color ? '<span class="piece bf">♚</span>' : '<span class="piece wf">♚</span><span class="piece bf over">♔</span>'
-			}
-
-			copy() {
-				return new King(this.x, this.y, this.color)
 			}
 
 			get_moves(board, depth) {
@@ -322,8 +305,8 @@
 					let fr = xy2fr(...move)
 					new_piece.move(new_board, fr)
 					let threats = new_piece.get_threats(new_board, depth)
-					//console.log('K', fr, '=>', threats)
 					if (threats.length === 0) safe_moves.push(move)
+					else console.log('K', fr, '=>', threats)
 				}
 				if (!this.moved) {
 					// Can't castle over unsafe space.
@@ -337,6 +320,7 @@
 						) safe_moves.splice(i, 1)
 					}
 				}
+				// TODO: Remove covered move next to enemy king.
 				return safe_moves
 			}
 
@@ -364,10 +348,6 @@
 			constructor(x, y, color) {
 				super(x, y, color)
 				this.html = this.color ? '<span class="piece bf">♟︎</span>' : '<span class="piece wf">♟︎</span><span class="piece bf over">♙</span>'
-			}
-
-			copy() {
-				return new Pawn(this.x, this.y, this.color)
 			}
 
 			get_moves(board, depth) {
@@ -548,7 +528,21 @@
 
 			is_mate(color) {
 				let saves = []
-				// TODO: Check all moves for check resolution.
+				for (let row in this.grid) {
+					for (let col in this.grid) {
+						let piece = this.grid[row][col]
+						if (piece.color === color) {
+							const moves = piece.get_moves(this)
+							for (let move of moves) {
+								let new_board = this.copy()
+								let new_piece = new_board.grid[row][col]
+								new_piece.move(new_board, xy2fr(...move))  // TODO: Castling? Limit depth again.
+								if (!new_board.is_check(color)) saves.push(new_piece.char + xy2fr(...move))
+							}
+						}
+					}
+				}
+				if (saves.length > 0) console.log("save by", saves)
 				return this.is_check(color) && this.get_king(color).get_moves(this).length === 0 && saves.length === 0
 			}
 
