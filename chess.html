@@ -327,7 +327,7 @@
 			move(board, fr, do_log) {
 				super.move(board, fr, do_log)
 				if (!do_log) return
-				let move = board.log[board.log.length - 1].slice(0, 5)  // In case rook checks.
+				let move = board.log.pop()
 				let y = this.y
 				let rank = 8 - y
 				if (move === `Ke${rank}g${rank}`) { // TODO? Only 5171 according to https://en.wikipedia.org/wiki/ICCF_numeric_notation
@@ -435,7 +435,11 @@
 				lines.push(line)
 			}
 			lines.push(files)
-			logtext.innerHTML = '<ol><li>' + log.join('</li><li>') + '</li></ol>'
+			let html = ''
+			for (let i = 0; i < log.length; i += 2) {
+				html += `<li>${log[i]} ${log[i + 1] || ''}</li>`
+			}
+			logtext.innerHTML = `<ol>${html}</ol>`
 			boardtext.innerHTML = lines.join('\n')
 			/*
 			 a b c d e f g h 
@@ -454,7 +458,6 @@
 			console.log(s)
 			console.log(log.join(' '))
 			document.querySelectorAll('.square').forEach(el => {
-				//console.log(e)
 				el.onmousedown = function (e) {
 					e.preventDefault()  // Stop doubleclick select.
 				}
@@ -571,7 +574,7 @@
 			}
 
 			log_check(move, color) {
-				this.log.push(move + (this.is_mate(color) ? '#' : (this.is_check(color) ? '!' : '')))
+				this.log.push(move + (this.is_mate(color) ? '#' : (this.is_check(color) ? '+' : '')))
 			}
 
 			promote(fr, kind, color) {
