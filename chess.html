@@ -326,7 +326,8 @@
 
 			move(board, fr, do_log) {
 				super.move(board, fr, do_log)
-				let move = board.log[board.log.length - 1]
+				if (!do_log) return
+				let move = board.log[board.log.length - 1].slice(0, 5)  // In case rook checks.
 				let y = this.y
 				let rank = 8 - y
 				if (move === `Ke${rank}g${rank}`) { // TODO? Only 5171 according to https://en.wikipedia.org/wiki/ICCF_numeric_notation
@@ -405,7 +406,7 @@
 				if (this.color === WHITE && this.y != 2) return
 				let double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
 				let log = board.log
-				if (log.slice(-2)[0] === double_jump) {
+				if (log.slice(-2)[0].slice(0, 4) === double_jump) {
 					log[log.length - 1] += ' e.p.'
 					board.grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
 				}
@@ -536,8 +537,8 @@
 							for (let move of moves) {
 								let new_board = this.copy()
 								let new_piece = new_board.grid[row][col]
-								new_piece.move(new_board, xy2fr(...move))  // TODO: Castling? Limit depth again.
-								if (!new_board.is_check(color)) saves.push(new_piece.char + xy2fr(...move))
+								new_piece.move(new_board, xy2fr(...move))
+								if (!new_board.is_check(color)) saves.push(new_piece.char + xy2fr(piece.x, piece.y) + xy2fr(...move))
 							}
 						}
 					}
