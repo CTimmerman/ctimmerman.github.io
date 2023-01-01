@@ -48,8 +48,11 @@
 		#boardtext {
 			display: block;
 			font-family: monospace;
-			font-size: 0; // Gets rid of newline spaces.
+			font-size: 0;
+			/* Gets rid of newline spaces. */
 			margin: 1em 0;
+			position: relative;
+			/* For relative position absolute children. */
 			white-space: pre;
 		}
 
@@ -80,11 +83,10 @@
 
 		.piece {
 			background-color: transparent;
-			position: relative;
-		}
-
-		.over {
-			margin-left: -1em;
+			line-height: 1em;
+			pointer-events: none;
+			position: absolute;
+			transition: 0.4s;
 		}
 
 		.selected.w {
@@ -129,7 +131,6 @@
 				this.x = x
 				this.y = y
 				this.color = color ? color : WHITE
-				this.html = this.color ? '<span class="piece bf">?</span>' : '<span class="piece bf over">?</span>'
 			}
 
 			copy(piece) {
@@ -196,20 +197,12 @@
 			char = "R"
 			value = 5
 			dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-			constructor(x, y, color) {
-				super(x, y, color)
-				this.html = this.color ? '<span class="piece bf">♜</span>' : '<span class="piece wf">♜</span><span class="piece bf over">♖</span>'
-			}
 		}
 
 		class Knight extends Piece {
 			name = "Knight"
 			char = "N"
 			value = 3
-			constructor(x, y, color) {
-				super(x, y, color)
-				this.html = this.color ? '<span class="piece bf">♞</span>' : '<span class="piece wf">♞</span><span class="piece bf over">♘</span>'
-			}
 
 			get_moves(board, depth) {
 				let moves = []
@@ -230,10 +223,6 @@
 			char = "B"
 			value = 3
 			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
-			constructor(x, y, color) {
-				super(x, y, color)
-				this.html = this.color ? '<span class="piece bf">♝</span>' : '<span class="piece wf">♝</span><span class="piece bf over">♗</span>'
-			}
 		}
 
 		class Queen extends Piece {
@@ -241,20 +230,12 @@
 			char = "Q"
 			value = 9
 			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]
-			constructor(x, y, color) {
-				super(x, y, color)
-				this.html = this.color ? '<span class="piece bf">♛</span>' : '<span class="piece wf">♛</span><span class="piece bf over">♕</span>'
-			}
 		}
 
 		class King extends Piece {
 			name = "King"
 			char = "K"
 			value = 10  // Officially 0; playwise 3.5 to 4.
-			constructor(x, y, color) {
-				super(x, y, color)
-				this.html = this.color ? '<span class="piece bf">♚</span>' : '<span class="piece wf">♚</span><span class="piece bf over">♔</span>'
-			}
 
 			get_moves(board, depth) {
 				if (!depth) depth = 0
@@ -346,10 +327,6 @@
 			name = "Pawn"
 			char = ""
 			value = 1
-			constructor(x, y, color) {
-				super(x, y, color)
-				this.html = this.color ? '<span class="piece bf">♟︎</span>' : '<span class="piece wf">♟︎</span><span class="piece bf over">♙</span>'
-			}
 
 			get_moves(board, depth) {
 				let grid = board.grid
@@ -421,62 +398,87 @@
 			return ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
 		}
 
+		const icons = {
+			'0': '♙', '1': '♟︎',
+			'R0': '♖', 'R1': '♜',
+			'N0': '♘', 'N1': '♞',
+			'B0': '♗', 'B1': '♝',
+			'Q0': '♕', 'Q1': '♛',
+			'K0': '♔', 'K1': '♚',
+		}
+
 		function render(board) {
-			let grid = board.grid
-			let log = board.log
+			const grid = board.grid
+			const log = board.log
+
 			let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
 			let lines = [files]
 			for (let row in grid) {
 				let line = `<span class="square">${8 - row}</span>`
 				for (let col in grid) {
-					line += `<span id="${xy2fr(col, row)}" class="square ${'wbw'[row % 2 + col % 2]}">${grid[row][col].html || '  '}</span>`
+					line += `<span id="${xy2fr(col, row)}" class="square ${'wbw'[row % 2 + col % 2]}">  </span>`
 				}
 				line += `<span class="square">${8 - row}</span>`
 				lines.push(line)
 			}
 			lines.push(files)
+
+			console.log(" a b c d e f g h")
+			for (let row in grid) {
+				let text_line = `${8 - row}`
+				for (let col in grid) {
+					const p = grid[row][col]
+					if (p === ' ') {
+						text_line += '  '
+						continue
+					}
+					text_line += icons[p.char + p.color]
+					let html = ''
+					if (p.color) html = `<span class="piece bf">${icons[p.char + '1']}</span>`
+					else html = `<span class="piece wf">${icons[p.char + '1']}</span><span class="piece bf">${icons[p.char + '0']}</span>`
+					lines.push(`<div id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</div>`)
+				}
+				console.log(text_line + `${8 - row}`)
+			}
+			console.log(" a b c d e f g h")
+			boardtext.innerHTML = lines.join('\n')
+
 			let html = ''
 			for (let i = 0; i < log.length; i += 2) {
 				html += `<li>${log[i]} ${log[i + 1] || ''}</li>`
 			}
 			logtext.innerHTML = `<ol>${html}</ol>`
-			boardtext.innerHTML = lines.join('\n')
-			/*
-			 a b c d e f g h 
-			8♜♞♝♛♚♝♞♜8
-			7♟︎♟︎♟︎♟︎♟︎♟︎♟︎♟︎7
-			6                6
-			5                5
-			4                4
-			3                3
-			2♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙♟︎♙2
-			1♜♖♞♘♝♗♛♕♚♔♝♗♞♘♜♖1
-			 a b c d e f g h 
-			*/
-			let s = boardtext.innerText.replaceAll(/([a-z])([a-z])/g, '$1 $2 ')
-			for (let pair of [['♟︎♙', '♙'], ['♜♖', '♖'], ['♞♘', '♘'], ['♝♗', '♗'], ['♛♕', '♕'], ['♚♔', '♔']]) s = s.replaceAll(new RegExp(pair[0], 'g'), pair[1])
-			console.log(s)
 			console.log(log.join(' '))
+
 			document.querySelectorAll('.square').forEach(el => {
 				el.onmousedown = function (e) {
 					e.preventDefault()  // Stop doubleclick select.
 				}
 				el.onmouseup = function (e) {
 					if (this.classList.contains('selected')) {
-						let piece = window.selected_piece
-						if (this.id !== xy2fr(piece.x, piece.y)) {
+						if (start_fr && start_fr !== this.id) {
+							// Move piece.
+							const style = document.getElementById('p' + start_fr).style
+							let [x, y] = fr2xy(this.id)
+							style.left = (1 + x) + 'em'
+							style.top = (1 + y) + 'em'
+							const piece = board.fr2p(start_fr)
 							piece.move(board, this.id, true)
-							render(board)
+							start_fr = null
+							setTimeout(x => render(board), 400)
+							return
 						}
-						return
 					}
 					document.querySelectorAll('.selected').forEach(el => {
 						el.classList.remove('selected')
 						el.classList.remove('nobg')
 					})
 					let piece = board.fr2p(this.id)
-					if (!piece || piece === ' ') return
-					window.selected_piece = piece
+					if (!piece || piece === ' ' || this.id === window.start_fr) {
+						start_fr = null
+						return
+					}
+					window.start_fr = this.id
 					this.classList.add('selected')
 					let moves = piece.get_moves(board)
 					for (let move of moves) {
@@ -546,7 +548,7 @@
 						}
 					}
 				}
-				if (saves.length > 0) console.log("save by", saves)
+				if (saves.length > 0) console.log("Save by", saves)
 				return this.is_check(color) && this.get_king(color).get_moves(this).length === 0 && saves.length === 0
 			}
 
