@@ -6,6 +6,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Chess by Cees Timmerman, 2022-12-28</title>
 	<style>
+		/* Doesn't work in console.
+		@font-face {
+			font-family: 'TrueMonospace';
+			src: url('fonts/GnuUnifontFull-Pm9P.ttf');
+		}
+		*/
 		* {
 			--bgcolor: brown;
 			--fgcolor: yellow;
@@ -47,7 +53,7 @@
 
 		#boardtext {
 			display: block;
-			font-family: monospace;
+			/*font-family: TrueMonospace;*/
 			font-size: 0;
 			/* Gets rid of newline spaces. */
 			margin: 1em 0;
@@ -184,7 +190,8 @@
 				this.moved = true
 				const ox = this.x
 				const oy = this.y
-				let move = this.char + xy2fr(ox, oy) + (board.fr2p(fr) === ' ' ? '' : 'x') + fr
+				const capture = board.fr2p(fr)
+				let move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + fr
 				const xy = fr2xy(fr)
 				board.grid[oy][ox] = ' '
 				this.x = xy[0]
@@ -192,6 +199,7 @@
 				board.grid[this.y][this.x] = this
 				if (do_log) {
 					board.log_check(move, 1 - this.color)
+					if (capture !== ' ') board.captured.push(capture)
 				}
 			}
 		}
@@ -261,25 +269,23 @@
 				The king will not move through a check during castling.
 				All squares between the rook and king are empty.
 				*/
-				if (this.get_threats(board, depth).length === 0) {
+				if (!this.moved && this.get_threats(board, depth).length === 0) {
 					let rank = this.color ? 8 : 1
-					if (!this.moved) {
-						if (!board.fr2p('a' + rank).moved) {
-							// Queenside: 0-0-0
-							let clear = true
-							for (let i = 1; i < this.x; ++i) {
-								if (grid[8 - rank][i] !== ' ') clear = false
-							}
-							if (clear) moves.push([2, 8 - rank])
+					let piece = board.fr2p('a' + rank)
+					if (piece.char === 'R' && !piece.moved) {
+						let clear = true
+						for (let i = 1; i < this.x; ++i) {
+							if (grid[8 - rank][i] !== ' ') clear = false
 						}
-						if (!board.fr2p('h' + rank).moved) {
-							// Kingside: 0-0
-							let clear = true
-							for (let i = 6; i > this.x; --i) {
-								if (grid[8 - rank][i] !== ' ') clear = false
-							}
-							if (clear) moves.push([6, 8 - rank])
+						if (clear) moves.push([2, 8 - rank])
+					}
+					piece = board.fr2p('h' + rank)
+					if (piece.char === 'R' && !piece.moved) {
+						let clear = true
+						for (let i = 6; i > this.x; --i) {
+							if (grid[8 - rank][i] !== ' ') clear = false
 						}
+						if (clear) moves.push([6, 8 - rank])
 					}
 				}
 				// Remove unsafe moves.
@@ -427,24 +433,33 @@
 			}
 			lines.push(files)
 
-			console.log(" a b c d e f g h")
+			files = ' abcdefgh'
+			let blank = ' '
+			if (navigator.userAgent.indexOf('Windows') > -1) {
+				files = ' a b c d e f g h '
+				blank = '  '
+			}
+			let text_lines = [files]
 			for (let row in grid) {
-				let text_line = `${8 - row}`
+				let text_line = `${8 - row}\x1B[30m`
 				for (let col in grid) {
+					text_line += ['\x1B[47m', '\x1B[100m', '\x1B[47m'][row % 2 + col % 2]
 					const p = grid[row][col]
 					if (p === ' ') {
-						text_line += '  '
+						text_line += navigator.userAgent.indexOf('Windows') > -1 ? '  ' : ' '
 						continue
 					}
+					// text_line += (p.color? '\x1B[30m' : '\x1B[97m') + icons[p.char + 1]  // Lacks contrast.
 					text_line += icons[p.char + p.color]
 					let html = ''
 					if (p.color) html = `<span class="piece bf">${icons[p.char + '1']}</span>`
 					else html = `<span class="piece wf">${icons[p.char + '1']}</span><span class="piece bf">${icons[p.char + '0']}</span>`
 					lines.push(`<div id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</div>`)
 				}
-				console.log(text_line + `${8 - row}`)
+				text_lines.push(text_line + `\x1B[m${8 - row}`)
 			}
-			console.log(" a b c d e f g h")
+			text_lines.push(files)
+			console.log(text_lines.join('\n'))
 			boardtext.innerHTML = lines.join('\n')
 
 			let html = ''
@@ -453,6 +468,7 @@
 			}
 			logtext.innerHTML = `<ol>${html}</ol>`
 			console.log(log.join(' '))
+			console.log(board.captured.map(e => icons[e.char + e.color]).join(''))
 
 			document.querySelectorAll('.square').forEach(el => {
 				el.onmousedown = function (e) {
@@ -506,8 +522,9 @@
 		}
 
 		class Board {
-			log = []
 			grid = [[], [], [], [], [], [], [], []]
+			log = []
+			captured = []
 
 			reset() {
 				this.log = []
@@ -559,6 +576,7 @@
 			copy() {
 				let new_board = new Board()
 				new_board.log = [...this.log]
+				new_board.captured = [...this.captured]
 				for (let row in this.grid) {
 					for (let col in this.grid) {
 						let piece = this.grid[row][col]
