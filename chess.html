@@ -5,6 +5,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Chess by Cees Timmerman, 2022-12-28</title>
+	<link rel="icon"
+	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 60 70%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
 	<style>
 		/* Doesn't work in console.
 		@font-face {
@@ -609,11 +611,11 @@
 						el.classList.remove('nobg')
 					})
 					const piece = board.fr2p(this.id)
-					if (!piece || piece === ' ' || this.id === window.start_fr) {
-						window.start_fr = null
+					if (!piece || piece === ' ' || this.id === globalThis.start_fr) {
+						globalThis.start_fr = null
 						return
 					}
-					window.start_fr = this.id
+					globalThis.start_fr = this.id
 					this.classList.add('selected')
 					const moves = piece.get_moves(board)
 					for (let move of moves) {
@@ -630,6 +632,7 @@
 		}
 
 		async function ai_move(color) {
+			if(typeof color === "undefined") color = 1 - board.log.length % 2
 			const pieces = board.get_pieces(color)
 			let moves = null
 			let tries = 0
@@ -651,9 +654,9 @@
 			}
 		}
 
-		import sleep from './sleep.js'
-		import say from './say.js'
-		window.say = say
+		import sleep from './lib/sleep.mjs'
+		import say from './lib/say.mjs'
+		globalThis.say = say
 
 		async function show_move(start_fr, stop_fr, is_human) {
 			const piece = board.fr2p(start_fr)
@@ -698,7 +701,7 @@
 			render(board)
 			alertcontainer.style.visibility = 'hidden'
 		}
-		window.promote = promote
+		globalThis.promote = promote
 
 		function nonblocking_alert(html) {
 			if (getComputedStyle(alertcontainer).visibility == 'hidden') {
@@ -714,7 +717,7 @@
 		const board = new Board()
 		board.reset()
 		render(board)
-		window.board = board
+		globalThis.board = board
 		if (white_ai_box.checked) ai_move(WHITE)
 	</script>
 </body>
