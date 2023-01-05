@@ -291,13 +291,14 @@
 				// Remove unsafe moves.
 				let safe_moves = []
 				for (let move of moves) {
-					let new_board = board.copy()
-					let new_piece = new_board.grid[this.y][this.x]
-					let fr = xy2fr(...move)
-					new_piece.move(new_board, fr)
-					let threats = new_piece.get_threats(new_board, depth)
-					if (threats.length === 0) safe_moves.push(move)
-					else console.log('K', fr, '=>', threats)
+					if (board.xy2p(move).char === "K") safe_moves.push(move)
+					else {
+						let new_board = board.copy()
+						let new_piece = new_board.grid[this.y][this.x]
+						let fr = xy2fr(...move)
+						new_piece.move(new_board, fr)
+						if (new_piece.get_threats(new_board, depth).length === 0) safe_moves.push(move)
+					}
 				}
 				if (!this.moved) {
 					// Can't castle over unsafe space.
@@ -311,7 +312,6 @@
 						) safe_moves.splice(i, 1)
 					}
 				}
-				// TODO: Remove covered move next to enemy king.
 				return safe_moves
 			}
 
