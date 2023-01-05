@@ -124,9 +124,13 @@
 <body>
 	<div id="boardtext"></div>
 	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label>
+	<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">Black AI</label>
+	<input id="white_ai_box" type="checkbox" checked><label for="white_ai_box">White AI</label>
+	<input id="speak_black" type="checkbox" checked><label for="speak_black">Speak black moves</label>
+	<input id="speak_white" type="checkbox" checked><label for="speak_white">Speak white moves</label>
 	<div id="logtext"></div>
 	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
-	<script>
+	<script type="module">
 		"use strict"
 		const WHITE = 0
 		const BLACK = 1
@@ -151,8 +155,8 @@
 			}
 
 			get_moves(board, depth) {
-				let grid = board.grid
-				let moves = []
+				const grid = board.grid
+				const moves = []
 				for (let dir of this.dirs) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
@@ -174,11 +178,11 @@
 			}
 
 			get_threats(board, depth) {
-				let grid = board.grid
-				let threats = []
+				const grid = board.grid
+				const threats = []
 				for (let row in grid) {
 					for (let col in grid) {
-						let piece = grid[row][col]
+						const piece = grid[row][col]
 						if (piece == ' ' || piece.color === this.color) continue
 						if (piece.get_moves(board, depth + 1).find(xy => xy[0] === this.x && xy[1] === this.y)) threats.push(piece)
 					}
@@ -191,7 +195,7 @@
 				const ox = this.x
 				const oy = this.y
 				const capture = board.fr2p(fr)
-				let move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + fr
+				const move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + fr
 				const xy = fr2xy(fr)
 				board.grid[oy][ox] = ' '
 				this.x = xy[0]
@@ -219,9 +223,9 @@
 			get_moves(board, depth) {
 				let moves = []
 				for (let dir of [[-2, -1], [-2, 1], [-1, -2], [1, -2], [2, -1], [2, 1], [1, 2], [-1, 2]]) {
-					let tx = this.x + dir[0]
-					let ty = this.y + dir[1]
-					let piece = board.xy2p([tx, ty])
+					const tx = this.x + dir[0]
+					const ty = this.y + dir[1]
+					const piece = board.xy2p([tx, ty])
 					if (piece === ' ' || (piece && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
@@ -252,8 +256,8 @@
 			get_moves(board, depth) {
 				if (!depth) depth = 0
 				if (depth > 1) return []
-				let grid = board.grid
-				let moves = []
+				const grid = board.grid
+				const moves = []
 				for (let dir of [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
@@ -270,7 +274,7 @@
 				All squares between the rook and king are empty.
 				*/
 				if (!this.moved && this.get_threats(board, depth).length === 0) {
-					let rank = this.color ? 8 : 1
+					const rank = this.color ? 8 : 1
 					let piece = board.fr2p('a' + rank)
 					if (piece.char === 'R' && !piece.moved) {
 						let clear = true
@@ -302,7 +306,7 @@
 				}
 				if (!this.moved) {
 					// Can't castle over unsafe space.
-					let frs = safe_moves.map(e => xy2fr(...e))
+					const frs = safe_moves.map(e => xy2fr(...e))
 					for (let i = safe_moves.length - 1; i >= 0; --i) {
 						let fr = xy2fr(...safe_moves[i])
 						if (
@@ -319,8 +323,8 @@
 				super.move(board, fr, do_log)
 				if (!do_log) return
 				let move = board.log.pop()
-				let y = this.y
-				let rank = 8 - y
+				const y = this.y
+				const rank = 8 - y
 				if (move === `Ke${rank}g${rank}`) { // TODO? Only 5171 according to https://en.wikipedia.org/wiki/ICCF_numeric_notation
 					move = '0-0'
 					board.grid[y][7].move(board, 'f' + rank)
@@ -339,15 +343,15 @@
 			value = 1
 
 			get_moves(board, depth) {
-				let grid = board.grid
-				let log = board.log
-				let moves = []
+				const grid = board.grid
+				const log = board.log
+				const moves = []
 				// Move straight.
 				let dirs = this.color ? [[0, 1]] : [[0, -1]]
 				for (let dir of dirs) {
-					let tx = this.x + dir[0]
-					let ty = this.y + dir[1]
-					let piece = board.xy2p([tx, ty])
+					const tx = this.x + dir[0]
+					const ty = this.y + dir[1]
+					const piece = board.xy2p([tx, ty])
 					if (piece === ' ') {
 						moves.push([tx, ty])
 						if (this.color && this.y === 1 && grid[ty + 1][tx] === ' ') moves.push([tx, ty + 1])
@@ -357,16 +361,16 @@
 				// Capture diagonally.
 				dirs = this.color ? [[-1, 1], [1, 1]] : [[-1, -1], [1, -1]]
 				for (let dir of dirs) {
-					let tx = this.x + dir[0]
-					let ty = this.y + dir[1]
-					let piece = board.xy2p([tx, ty])
+					const tx = this.x + dir[0]
+					const ty = this.y + dir[1]
+					const piece = board.xy2p([tx, ty])
 					if ((piece && piece !== ' ' && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
 					// En passant.
 					if ((this.color === BLACK && this.y === 4)
 						|| (this.color === WHITE && this.y === 3)) {
-						let double_jump = xy2fr(tx, this.color ? 6 : 1) + xy2fr(tx, this.color ? 4 : 3)
+						const double_jump = xy2fr(tx, this.color ? 6 : 1) + xy2fr(tx, this.color ? 4 : 3)
 						if (log.slice(-1)[0] === double_jump) {
 							moves.push([tx, ty])
 						}
@@ -380,25 +384,132 @@
 				if (this.color === BLACK && this.y === 7
 					|| this.color === WHITE && this.y === 0) {
 					board.promote(fr, 'Q', this.color)
-					let html = `
-					<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
-					<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
-					<button onclick="promote('${fr}', 'N', ${this.color})">♞</button>
-					<button onclick="promote('${fr}', 'R', ${this.color})">♜</button>
-					`
-					nonblocking_alert(html)
 				}
 				// En passant.
 				if (this.color === BLACK && this.y != 5) return
 				if (this.color === WHITE && this.y != 2) return
-				let double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
-				let log = board.log
+				const double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
+				const log = board.log
 				if (log.slice(-2)[0].slice(0, 4) === double_jump) {
 					log[log.length - 1] += ' e.p.'
 					board.grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
 				}
 			}
 		}
+
+		class Board {
+			grid = [[], [], [], [], [], [], [], []]
+			log = []
+			captured = []
+
+			reset() {
+				this.log = []
+				this.grid = [
+					[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
+					[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)],
+					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+					[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
+					[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
+				]
+			}
+
+			get_king(color) {
+				for (let row in this.grid) {
+					for (let col in this.grid) {
+						const piece = this.grid[row][col]
+						if (piece.char === "K" && piece.color === color) return piece
+					}
+				}
+			}
+
+			get_pieces(color) {
+				const rv = []
+				for (let row in this.grid) {
+					for (let col in this.grid) {
+						const piece = this.grid[row][col]
+						if (piece.color === color) rv.push(piece)
+					}
+				}
+				return rv
+			}
+
+			is_check(color) {
+				const king = this.get_king(color)
+				return !!king && king.get_threats(this).length > 0
+			}
+
+			is_mate(color) {
+				const king = this.get_king(color)
+				if (!king) return false
+				const saves = []
+				for (let row in this.grid) {
+					for (let col in this.grid) {
+						let piece = this.grid[row][col]
+						if (piece.color === color) {
+							const moves = piece.get_moves(this)
+							for (let move of moves) {
+								const new_board = this.copy()
+								const new_piece = new_board.grid[row][col]
+								new_piece.move(new_board, xy2fr(...move))
+								if (!new_board.is_check(color)) saves.push(new_piece.char + xy2fr(piece.x, piece.y) + xy2fr(...move))
+							}
+						}
+					}
+				}
+				if (saves.length > 0) console.log("Save by", saves)
+				return this.is_check(color) && king.get_moves(this).length === 0 && saves.length === 0
+			}
+
+			copy() {
+				const new_board = new Board()
+				new_board.log = [...this.log]
+				new_board.captured = [...this.captured]
+				for (let row in this.grid) {
+					for (let col in this.grid) {
+						const piece = this.grid[row][col]
+						new_board.grid[row][col] = (piece === ' ') ? ' ' : piece.copy()
+					}
+				}
+				return new_board
+			}
+
+			xy2p(xy) {
+				if (xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
+				return this.grid[xy[1]][xy[0]]
+			}
+
+			fr2p(fr) {
+				const xy = fr2xy(fr)
+				if (xy[0] >= 0 && xy[1] >= 0) return this.grid[xy[1]][xy[0]]
+				return ''
+			}
+
+			log_check(move, color) {
+				this.log.push(move + (this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''))
+			}
+
+			promote(fr, kind, color) {
+				const [x, y] = fr2xy(fr)
+				switch (kind) {
+					case 'Q':
+						this.grid[y][x] = new Queen(x, y, color)
+						break
+					case 'B':
+						this.grid[y][x] = new Bishop(x, y, color)
+						break
+					case 'N':
+						this.grid[y][x] = new Knight(x, y, color)
+						break
+					case 'R':
+						this.grid[y][x] = new Rook(x, y, color)
+						break
+				}
+			}
+		}
+
 
 		function xy2fr(x, y) {
 			return "abcdefgh"[x] + (8 - y)
@@ -463,12 +574,16 @@
 			boardtext.innerHTML = lines.join('\n')
 
 			let html = ''
+			let txt = ''
 			for (let i = 0; i < log.length; i += 2) {
 				html += `<li>${log[i]} ${log[i + 1] || ''}</li>`
+				txt += `${1 + i / 2}. ${log[i]} ${log[i + 1] || ''} `
 			}
 			logtext.innerHTML = `<ol>${html}</ol>`
-			console.log(log.join(' '))
+
 			console.log(board.captured.map(e => icons[e.char + e.color]).join(''))
+			if (txt.length > 97) console.log(`...${txt.slice(-97)}`)
+			else console.log(txt)
 
 			document.querySelectorAll('.square').forEach(el => {
 				el.onmousedown = function (e) {
@@ -477,15 +592,8 @@
 				el.onmouseup = function (e) {
 					if (this.classList.contains('selected')) {
 						if (start_fr && start_fr !== this.id) {
-							// Move piece.
-							const style = document.getElementById('p' + start_fr).style
-							let [x, y] = fr2xy(this.id)
-							style.left = (1 + x) + 'em'
-							style.top = (1 + y) + 'em'
-							const piece = board.fr2p(start_fr)
-							piece.move(board, this.id, true)
+							show_move(start_fr, this.id, true)
 							start_fr = null
-							setTimeout(x => render(board), 400)
 							return
 						}
 					}
@@ -493,14 +601,14 @@
 						el.classList.remove('selected')
 						el.classList.remove('nobg')
 					})
-					let piece = board.fr2p(this.id)
+					const piece = board.fr2p(this.id)
 					if (!piece || piece === ' ' || this.id === window.start_fr) {
-						start_fr = null
+						window.start_fr = null
 						return
 					}
 					window.start_fr = this.id
 					this.classList.add('selected')
-					let moves = piece.get_moves(board)
+					const moves = piece.get_moves(board)
 					for (let move of moves) {
 						let square = document.getElementById(xy2fr(...move))
 						square.classList.add('selected')
@@ -508,6 +616,78 @@
 					}
 				}
 			})
+		}
+
+		function random_choice(array) {
+			return array[Math.floor(Math.random() * array.length)]
+		}
+
+		async function ai_move(color) {
+			const pieces = board.get_pieces(color)
+			let moves = null
+			let tries = 0
+			while (++tries) {
+				try {
+					const piece = random_choice(pieces)
+					const moves = piece.get_moves(board)
+					if (moves.length > 0) {
+						const move = random_choice(moves)
+						await show_move(xy2fr(piece.x, piece.y), xy2fr(...move))
+						return
+					}
+				} catch (ex) {
+					if (tries > 1000) {
+						console.log("Can't find a move.")
+						break
+					}
+				}
+			}
+		}
+		import sleep from './sleep.js'
+		import say from './say.js'
+		window.say = say
+
+		async function show_move(start_fr, stop_fr, is_human) {
+			const piece = board.fr2p(start_fr)
+			// view
+			const msg = `${["White", "Black"][piece.color]} ${piece.name} from ${start_fr} to ${stop_fr}.`
+			console.log(msg)
+			if ((piece.color === BLACK && speak_black.checked) ||
+				(piece.color === WHITE && speak_white.checked)) say(msg.toUpperCase())  // fix 'a2'
+
+			const style = document.getElementById('p' + start_fr).style
+			console.log(`${style.left}, ${style.top} to ${stop_fr}...`)
+			const [x, y] = fr2xy(stop_fr)
+			style.left = (1 + x) + 'em'
+			style.top = (1 + y) + 'em'
+			// model
+			await sleep(4000).then(async () => {
+				piece.move(board, stop_fr, true)
+				if (is_human && piece.char === '' && (
+					(piece.color && piece.y === 0) ||
+					(piece.color === WHITE && piece.y === 7))) {
+					let html = `
+						<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
+						<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
+						<button onclick="promote('${fr}', 'N', ${this.color})">♞</button>
+						<button onclick="promote('${fr}', 'R', ${this.color})">♜</button>
+						`
+					nonblocking_alert(html)
+				}
+				await sleep(4000).then(() => {
+					console.log("woke")
+					render(board)
+					if (piece.color === WHITE && black_ai_box.checked) ai_move(BLACK)
+					if (piece.color === BLACK && white_ai_box.checked) ai_move(WHITE)
+				})
+			})
+		}
+
+		function promote(fr, kind, color) {
+			board.promote(fr, kind, color)
+			board.log_check(board.log.pop() + kind, 1 - color)
+			render(board)
+			alertcontainer.style.visibility = 'hidden'
 		}
 
 		function nonblocking_alert(html) {
@@ -521,115 +701,11 @@
 			alertcontainer.appendChild(d)
 		}
 
-		class Board {
-			grid = [[], [], [], [], [], [], [], []]
-			log = []
-			captured = []
-
-			reset() {
-				this.log = []
-				this.grid = [
-					[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
-					[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)],
-					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-					[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-					[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
-					[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
-				]
-			}
-
-			get_king(color) {
-				for (let row in this.grid) {
-					for (let col in this.grid) {
-						let piece = this.grid[row][col]
-						if (piece.name === "King" && piece.color === color) return piece
-					}
-				}
-			}
-
-			is_check(color) {
-				return this.get_king(color).get_threats(this).length > 0
-			}
-
-			is_mate(color) {
-				let saves = []
-				for (let row in this.grid) {
-					for (let col in this.grid) {
-						let piece = this.grid[row][col]
-						if (piece.color === color) {
-							const moves = piece.get_moves(this)
-							for (let move of moves) {
-								let new_board = this.copy()
-								let new_piece = new_board.grid[row][col]
-								new_piece.move(new_board, xy2fr(...move))
-								if (!new_board.is_check(color)) saves.push(new_piece.char + xy2fr(piece.x, piece.y) + xy2fr(...move))
-							}
-						}
-					}
-				}
-				if (saves.length > 0) console.log("Save by", saves)
-				return this.is_check(color) && this.get_king(color).get_moves(this).length === 0 && saves.length === 0
-			}
-
-			copy() {
-				let new_board = new Board()
-				new_board.log = [...this.log]
-				new_board.captured = [...this.captured]
-				for (let row in this.grid) {
-					for (let col in this.grid) {
-						let piece = this.grid[row][col]
-						new_board.grid[row][col] = (piece === ' ') ? ' ' : piece.copy()
-					}
-				}
-				return new_board
-			}
-
-			xy2p(xy) {
-				if (xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
-				return this.grid[xy[1]][xy[0]]
-			}
-
-			fr2p(fr) {
-				const xy = fr2xy(fr)
-				if (xy[0] >= 0 && xy[1] >= 0) return this.grid[xy[1]][xy[0]]
-				return ''
-			}
-
-			log_check(move, color) {
-				this.log.push(move + (this.is_mate(color) ? '#' : (this.is_check(color) ? '+' : '')))
-			}
-
-			promote(fr, kind, color) {
-				let [x, y] = fr2xy(fr)
-				switch (kind) {
-					case 'Q':
-						this.grid[y][x] = new Queen(x, y, color)
-						break
-					case 'B':
-						this.grid[y][x] = new Bishop(x, y, color)
-						break
-					case 'N':
-						this.grid[y][x] = new Knight(x, y, color)
-						break
-					case 'R':
-						this.grid[y][x] = new Rook(x, y, color)
-						break
-				}
-			}
-		}
-
-		function promote(fr, kind, color) {
-			board.promote(fr, kind, color)
-			board.log_check(board.log.pop() + kind, 1 - color)
-			render(board)
-			alertcontainer.style.visibility = 'hidden'
-		}
-
-		let board = new Board()
+		const board = new Board()
 		board.reset()
 		render(board)
+		window.board = board
+		if (white_ai_box.checked) ai_move(WHITE)
 	</script>
 </body>
 
