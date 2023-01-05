@@ -128,10 +128,10 @@
 <body>
 	<div id="boardtext"></div>
 	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label>
-	<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">Black AI</label>
-	<input id="white_ai_box" type="checkbox" checked><label for="white_ai_box">White AI</label>
-	<input id="speak_black" type="checkbox" checked><label for="speak_black">Speak black moves</label>
-	<input id="speak_white" type="checkbox" checked><label for="speak_white">Speak white moves</label>
+	<input id="black_ai_box" type="checkbox"><label for="black_ai_box">Black AI</label>
+	<input id="white_ai_box" type="checkbox"><label for="white_ai_box">White AI</label>
+	<input id="speak_black" type="checkbox"><label for="speak_black">Speak black moves</label>
+	<input id="speak_white" type="checkbox"><label for="speak_white">Speak white moves</label>
 	<div id="logtext"></div>
 	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script type="module">
@@ -657,45 +657,48 @@
 
 		async function show_move(start_fr, stop_fr, is_human) {
 			const piece = board.fr2p(start_fr)
+			const c = piece.char
+			const color = piece.color
 			// view
 			const msg = `${["White", "Black"][piece.color]} ${piece.name} from ${start_fr} to ${stop_fr}.`
 			console.log(msg)
-			if ((piece.color === BLACK && speak_black.checked) ||
-				(piece.color === WHITE && speak_white.checked)) say(msg.toUpperCase())  // fix 'a2'
+			if ((color === BLACK && speak_black.checked) ||
+				(color === WHITE && speak_white.checked)) say(msg.toUpperCase())  // fix 'a2'
 
 			const style = document.getElementById('p' + start_fr).style
 			const [x, y] = fr2xy(stop_fr)
-			console.log(`${style.left}, ${style.top} to ${(1 + x) + 'em'}, ${(1 + y) + 'em'}...`)
 			style.left = (1 + x) + 'em'
 			style.top = (1 + y) + 'em'
+
 			piece.move(board, stop_fr, true)
 			await sleep(400).then(async () => {
 				render(board)
-				if (is_human && piece.char === '' && (
-					(piece.color && piece.y === 0) ||
-					(piece.color === WHITE && piece.y === 7))) {
+				if (is_human && c === '' && (
+					(color === BLACK && y === 7) ||
+					(color === WHITE && y === 0))) {
 					let html = `
-						<button onclick="promote('${fr}', 'Q', ${this.color})">♛</button>
-						<button onclick="promote('${fr}', 'B', ${this.color})">♝</button>
-						<button onclick="promote('${fr}', 'N', ${this.color})">♞</button>
-						<button onclick="promote('${fr}', 'R', ${this.color})">♜</button>
+						<button onclick="promote('${stop_fr}', 'Q', ${color})">♛</button>
+						<button onclick="promote('${stop_fr}', 'B', ${color})">♝</button>
+						<button onclick="promote('${stop_fr}', 'N', ${color})">♞</button>
+						<button onclick="promote('${stop_fr}', 'R', ${color})">♜</button>
 						`
 					nonblocking_alert(html)
 				}
 
 				await sleep(4000).then(() => {
-					if (piece.color === WHITE && black_ai_box.checked) ai_move(BLACK)
-					if (piece.color === BLACK && white_ai_box.checked) ai_move(WHITE)
+					if (color === WHITE && black_ai_box.checked) ai_move(BLACK)
+					if (color === BLACK && white_ai_box.checked) ai_move(WHITE)
 				})
 			})
 		}
 
-		function promote(fr, kind, color) {
+		export default function promote(fr, kind, color) {
 			board.promote(fr, kind, color)
 			board.log_check(board.log.pop() + kind, 1 - color)
 			render(board)
 			alertcontainer.style.visibility = 'hidden'
 		}
+		window.promote = promote
 
 		function nonblocking_alert(html) {
 			if (getComputedStyle(alertcontainer).visibility == 'hidden') {
