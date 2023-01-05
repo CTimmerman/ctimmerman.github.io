@@ -643,7 +643,7 @@
 					if (moves.length > 0) {
 						const move = random_choice(moves)
 						await show_move(xy2fr(piece.x, piece.y), xy2fr(...move))
-						return
+						break
 					}
 				} catch (ex) {
 					if (tries > 1000) {
@@ -689,10 +689,8 @@
 					nonblocking_alert(html)
 				}
 
-				await sleep(4000).then(() => {
-					if (color === WHITE && black_ai_box.checked) ai_move(BLACK)
-					if (color === BLACK && white_ai_box.checked) ai_move(WHITE)
-				})
+				if (color === WHITE && black_ai_box.checked) await sleep(4000).then(ai_move(BLACK))
+				if (color === BLACK && white_ai_box.checked) await sleep(4000).then(ai_move(WHITE))
 			})
 		}
 
