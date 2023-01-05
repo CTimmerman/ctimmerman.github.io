@@ -492,7 +492,10 @@
 			}
 
 			log_check(move, color) {
-				this.log.push(move + (this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''))
+				const c = this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''
+				this.log.push(move + c)
+				if (c === '+') say('check')
+				else if (c === '#') say('checkmate')
 			}
 
 			promote(fr, kind, color) {
@@ -647,6 +650,7 @@
 				}
 			}
 		}
+
 		import sleep from './sleep.js'
 		import say from './say.js'
 		window.say = say
@@ -660,13 +664,13 @@
 				(piece.color === WHITE && speak_white.checked)) say(msg.toUpperCase())  // fix 'a2'
 
 			const style = document.getElementById('p' + start_fr).style
-			console.log(`${style.left}, ${style.top} to ${stop_fr}...`)
 			const [x, y] = fr2xy(stop_fr)
+			console.log(`${style.left}, ${style.top} to ${(1 + x) + 'em'}, ${(1 + y) + 'em'}...`)
 			style.left = (1 + x) + 'em'
 			style.top = (1 + y) + 'em'
-			// model
-			await sleep(4000).then(async () => {
-				piece.move(board, stop_fr, true)
+			piece.move(board, stop_fr, true)
+			await sleep(400).then(async () => {
+				render(board)
 				if (is_human && piece.char === '' && (
 					(piece.color && piece.y === 0) ||
 					(piece.color === WHITE && piece.y === 7))) {
@@ -678,9 +682,8 @@
 						`
 					nonblocking_alert(html)
 				}
+
 				await sleep(4000).then(() => {
-					console.log("woke")
-					render(board)
 					if (piece.color === WHITE && black_ai_box.checked) ai_move(BLACK)
 					if (piece.color === BLACK && white_ai_box.checked) ai_move(WHITE)
 				})
