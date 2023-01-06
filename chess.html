@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Chess by Cees Timmerman, 2022-12-28</title>
 	<link rel="icon"
-	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 60 70%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 60 70%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
 	<style>
 		/* Doesn't work in console.
 		@font-face {
@@ -130,7 +130,7 @@
 <body>
 	<div id="boardtext"></div>
 	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label>
-	<input id="black_ai_box" type="checkbox"><label for="black_ai_box">Black AI</label>
+	<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">Black AI</label>
 	<input id="white_ai_box" type="checkbox"><label for="white_ai_box">White AI</label>
 	<input id="speak_black" type="checkbox"><label for="speak_black">Speak black moves</label>
 	<input id="speak_white" type="checkbox"><label for="speak_white">Speak white moves</label>
@@ -448,8 +448,8 @@
 			}
 
 			is_mate(color) {
+				if (!this.is_check(color)) return false
 				const king = this.get_king(color)
-				if (!king) return false
 				const saves = []
 				for (let row in this.grid) {
 					for (let col in this.grid) {
@@ -632,26 +632,39 @@
 		}
 
 		async function ai_move(color) {
-			if(typeof color === "undefined") color = 1 - board.log.length % 2
+			if (typeof color === "undefined") color = 1 - board.log.length % 2
 			const pieces = board.get_pieces(color)
-			let moves = null
-			let tries = 0
-			while (++tries) {
-				try {
-					const piece = random_choice(pieces)
-					const moves = piece.get_moves(board)
-					if (moves.length > 0) {
-						const move = random_choice(moves)
-						await show_move(xy2fr(piece.x, piece.y), xy2fr(...move))
+			let best_score = 9999
+			let best_move = null
+			let best_piece = null
+			const max_think = 100
+			for(let i = 0; i < max_think; ++i) {
+				const piece = random_choice(pieces)
+				const moves = piece.get_moves(board)
+				if (moves.length > 0) {
+					const move = random_choice(moves)
+					// Eval move.
+					const new_board = board.copy()
+					const new_piece = new_board.grid[piece.y][piece.x]
+					const capture = new_board.grid[move[1]][move[0]]
+					let fr = xy2fr(...move)
+					new_piece.move(new_board, fr)
+					if (new_board.is_check(color)) continue  // Keep own king safe.
+					if (new_board.is_mate(1 - color)) {
+						best_move = move
+						best_piece = piece
 						break
 					}
-				} catch (ex) {
-					if (tries > 1000) {
-						console.log("Can't find a move.")
-						break
+					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
+					if (enemy_score < best_score) {
+						best_score = enemy_score
+						best_move = move
+						best_piece = piece
 					}
 				}
 			}
+			if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
+			else say('draw')
 		}
 		globalThis.ai_move = ai_move
 
