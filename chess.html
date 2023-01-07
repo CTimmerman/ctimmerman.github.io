@@ -494,10 +494,10 @@
 			}
 
 			log_check(move, color) {
-				const c = this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''
-				this.log.push(move + c)
+				let c = this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''
 				if (c === '+') say('check')
-				else if (c === '#') say('checkmate')
+				else if (c === '#') { c += color ? ' 1-0' : ' 0-1'; say('checkmate') }
+				this.log.push(move + c)
 			}
 
 			promote(fr, kind, color) {
@@ -638,7 +638,7 @@
 			let best_move = null
 			let best_piece = null
 			const max_think = 100
-			for(let i = 0; i < max_think; ++i) {
+			for (let i = 0; i < max_think; ++i) {
 				const piece = random_choice(pieces)
 				const moves = piece.get_moves(board)
 				if (moves.length > 0) {
@@ -664,7 +664,7 @@
 				}
 			}
 			if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
-			else say('draw')
+			else { board.log.push('½–½'); say('draw') }
 		}
 		globalThis.ai_move = ai_move
 
@@ -688,23 +688,26 @@
 			style.top = (1 + y) + 'em'
 
 			piece.move(board, stop_fr, true)
-			await sleep(400).then(async () => {
-				render(board)
-				if (is_human && c === '' && (
-					(color === BLACK && y === 7) ||
-					(color === WHITE && y === 0))) {
-					let html = `
-						<button onclick="promote('${stop_fr}', 'Q', ${color})">♛</button>
-						<button onclick="promote('${stop_fr}', 'B', ${color})">♝</button>
-						<button onclick="promote('${stop_fr}', 'N', ${color})">♞</button>
-						<button onclick="promote('${stop_fr}', 'R', ${color})">♜</button>
-						`
-					nonblocking_alert(html)
-				}
+			await sleep(400)
+			render(board)
+			await sleep(400)
 
-				if (color === WHITE && black_ai_box.checked) await sleep(4000).then(ai_move(BLACK))
-				if (color === BLACK && white_ai_box.checked) await sleep(4000).then(ai_move(WHITE))
-			})
+			if (is_human && c === '' && (
+				(color === BLACK && y === 7) ||
+				(color === WHITE && y === 0))) {
+				let html = `
+					<button onclick="promote('${stop_fr}', 'Q', ${color})">♛</button>
+					<button onclick="promote('${stop_fr}', 'B', ${color})">♝</button>
+					<button onclick="promote('${stop_fr}', 'N', ${color})">♞</button>
+					<button onclick="promote('${stop_fr}', 'R', ${color})">♜</button>
+					`
+				nonblocking_alert(html)
+				while (getComputedStyle(alertcontainer).visibility === 'visible') await(sleep(1000))
+			}
+
+			if (board.log[board.log.length-1].indexOf('#') > -1) return
+			if (color === WHITE && black_ai_box.checked) await sleep(4000).then(ai_move(BLACK))
+			if (color === BLACK && white_ai_box.checked) await sleep(4000).then(ai_move(WHITE))
 		}
 
 		export default function promote(fr, kind, color) {
