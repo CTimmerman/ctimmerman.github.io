@@ -208,8 +208,11 @@
 				this.y = xy[1]
 				board.grid[this.y][this.x] = this
 				if (do_log) {
+					if (capture !== ' ') {
+						board.captured.push(capture)
+						say('Took ' + capture.name)
+					}
 					board.log_check(move, 1 - this.color)
-					if (capture !== ' ') board.captured.push(capture)
 				}
 			}
 		}
@@ -397,7 +400,7 @@
 				const double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
 				const log = board.log
 				if (log.slice(-2)[0].slice(0, 4) === double_jump) {
-					log[log.length - 1] += ' e.p.'
+					log[log.length - 1] += ' e.p.'  // FIXME: c4 captured on c3.
 					board.grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
 				}
 			}
@@ -495,8 +498,8 @@
 
 			log_check(move, color) {
 				let c = this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''
-				if (c === '+') say('check')
-				else if (c === '#') { c += color ? ' 1-0' : ' 0-1'; say('checkmate') }
+				if (c === '+') say('Check.')
+				else if (c === '#') { c += color ? ' 1-0' : ' 0-1'; say('Checkmate. ' + ['Black', 'White'][color] + ' wins!') }
 				this.log.push(move + c)
 			}
 
@@ -664,23 +667,24 @@
 				}
 			}
 			if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
-			else { board.log.push('½–½'); say('draw') }
+			else { board.log.push('½–½'); say('Draw.') }
 		}
 		globalThis.ai_move = ai_move
+		const think_time = 2500
 
 		import sleep from './lib/sleep.mjs'
-		import say from './lib/say.mjs'
-		globalThis.say = say
+		import say_it from './lib/say.mjs'
+		function say(msg) {
+			say_it(msg, 2)
+		}
 
 		async function show_move(start_fr, stop_fr, is_human) {
 			const piece = board.fr2p(start_fr)
 			const c = piece.char
 			const color = piece.color
-			// view
-			const msg = `${["White", "Black"][piece.color]} ${piece.name} from ${start_fr} to ${stop_fr}.`
-			console.log(msg)
+
 			if ((color === BLACK && speak_black.checked) ||
-				(color === WHITE && speak_white.checked)) say(msg.toUpperCase())  // fix 'a2'
+				(color === WHITE && speak_white.checked)) say(`${piece.name} ${stop_fr}`.toUpperCase())
 
 			const style = document.getElementById('p' + start_fr).style
 			const [x, y] = fr2xy(stop_fr)
@@ -706,15 +710,16 @@
 			}
 
 			if (board.log[board.log.length-1].indexOf('#') > -1) return
-			if (color === WHITE && black_ai_box.checked) await sleep(4000).then(ai_move(BLACK))
-			if (color === BLACK && white_ai_box.checked) await sleep(4000).then(ai_move(WHITE))
+			if (color === WHITE && black_ai_box.checked) { await sleep(think_time); ai_move(BLACK) }
+			if (color === BLACK && white_ai_box.checked) { await sleep(think_time); ai_move(WHITE) }
 		}
 
 		export default function promote(fr, kind, color) {
+			alertcontainer.style.visibility = 'hidden'
 			board.promote(fr, kind, color)
+			say('Promote to ' + board.fr2p(fr).name)
 			board.log_check(board.log.pop() + kind, 1 - color)
 			render(board)
-			alertcontainer.style.visibility = 'hidden'
 		}
 		globalThis.promote = promote
 
