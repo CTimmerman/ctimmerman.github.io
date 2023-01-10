@@ -5,8 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Chess by Cees Timmerman, 2022-12-28</title>
-	<link rel="icon"
-		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 60 70%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
+	<link id="favicon" rel="icon" href="lib/rook.png">
 	<style>
 		/* Doesn't work in console.
 		@font-face {
@@ -146,8 +145,16 @@
 	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script type="module">
 		"use strict"
+		const SAFARI = navigator.userAgent.indexOf('Safari') > -1
+		const WINDOWS = navigator.userAgent.indexOf('Windows') > -1
+		const COLORS = navigator.userAgent.indexOf('Chrome') > -1
+		const MONOSPACE = !WINDOWS
 		const WHITE = 0
 		const BLACK = 1
+
+		function clog(msg) {
+			console.log("%c" + msg, "font-family: monospace; color: black; background-color: white")
+		}
 
 		class Piece {
 			name = "Piece"
@@ -176,7 +183,6 @@
 					let ty = this.y + dir[1]
 					while (1) {
 						let piece = board.xy2p([tx, ty])
-						//console.log("Found", piece?.color, piece?.name, "at", tx, ty, xy2fr(tx,ty))
 						if (piece === ' ') moves.push([tx, ty])
 						else if (piece && piece.color !== this.color) {
 							moves.push([tx, ty])
@@ -561,40 +567,40 @@
 			for (let row in grid) {
 				let line = `<span class="square">${8 - row}</span>`
 				for (let col in grid) {
-					line += `<span id="${xy2fr(col, row)}" class="square ${'wbw'[row % 2 + col % 2]}">  </span>`
+					line += `<span id="${xy2fr(col, row)}" class="square ${'wb'[(row % 2 + col % 2) % 2]}">  </span>`
 				}
 				line += `<span class="square">${8 - row}</span>`
 				lines.push(line)
 			}
 			lines.push(files + `<span id="clock0"></span>`)
 
-			files = ' abcdefgh'
+			files = ' abcdefgh '
 			let blank = ' '
-			if (navigator.userAgent.indexOf('Windows') > -1) {
+			if (!MONOSPACE) {
 				files = ' a b c d e f g h '
 				blank = '  '
 			}
 			let text_lines = [files]
 			for (let row in grid) {
-				let text_line = `${8 - row}\x1B[30m`
+				let text_line = COLORS ? `${8 - row}\x1B[30m` : `${8 - row}`
 				for (let col in grid) {
-					text_line += ['\x1B[47m', '\x1B[100m', '\x1B[47m'][row % 2 + col % 2]
+					if (COLORS) text_line += ['\x1B[47m', '\x1B[100m'][(row % 2 + col % 2) % 2]
 					const p = grid[row][col]
 					if (p === ' ') {
-						text_line += navigator.userAgent.indexOf('Windows') > -1 ? '  ' : ' '
+						text_line += COLORS ? ' ' : ' .'[(row % 2 + col % 2) % 2]
+						if (!MONOSPACE) text_line += ' '
 						continue
 					}
-					// text_line += (p.color? '\x1B[30m' : '\x1B[97m') + icons[p.char + 1]  // Lacks contrast.
 					text_line += icons[p.char + p.color]
 					let html = ''
 					if (p.color) html = `<span class="piece bf">${icons[p.char + '1']}</span>`
 					else html = `<span class="piece wf">${icons[p.char + '1']}</span><span class="piece bf">${icons[p.char + '0']}</span>`
 					lines.push(`<div id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</div>`)
 				}
-				text_lines.push(text_line + `\x1B[m${8 - row}`)
+				text_lines.push(text_line + (COLORS ? `\x1B[m${8 - row}` : `${8 - row}`))
 			}
 			text_lines.push(files)
-			console.log(text_lines.join('\n'))
+			clog(text_lines.join('\n'))
 			boardtext.innerHTML = lines.join('\n')
 
 			let html = ''
@@ -605,9 +611,9 @@
 			}
 			logtext.innerHTML = `<ol>${html}</ol>`
 
-			console.log(board.captured.map(e => icons[e.char + e.color]).join(''))
-			if (txt.length > 97) console.log(`...${txt.slice(-97)}`)
-			else console.log(txt)
+			clog(board.captured.map(e => icons[e.char + e.color]).join(''))
+			if (txt.length > 77) clog(`...${txt.slice(-77)}`)
+			else clog(txt)
 
 			show_clock()
 			document.querySelectorAll('.square').forEach(el => {
@@ -627,11 +633,11 @@
 						el.classList.remove('nobg')
 					})
 					const piece = board.fr2p(this.id)
-					if (!piece || piece === ' ' || this.id === globalThis.start_fr) {
-						globalThis.start_fr = null
+					if (!piece || piece === ' ' || this.id === window.start_fr) {
+						window.start_fr = null
 						return
 					}
-					globalThis.start_fr = this.id
+					window.start_fr = this.id
 					this.classList.add('selected')
 					const moves = piece.get_moves(board)
 					for (let move of moves) {
@@ -647,6 +653,10 @@
 			return array[Math.floor(Math.random() * array.length)]
 		}
 
+		function prune_move(piece, move) {
+			piece.moves = piece.moves.filter(m => m[0] !== move[0] || m[1] !== move[1])
+		}
+
 		async function ai_move(board_in, depth, color) {
 			var start_time = performance.now()
 			let my_board = board
@@ -654,70 +664,78 @@
 			if (typeof depth === "undefined") depth = 0
 			else if (depth > ai_level.value - 1) return
 			if (typeof color === "undefined") color = 1 - my_board.log.length % 2
-			const pieces = my_board.get_pieces(color)
+			let pieces = my_board.get_pieces(color)
 			pieces.forEach(p => p.moves = p.get_moves(my_board))
+			pieces = pieces.filter(p => p.moves.length > 0)
 			let best_score = 9999
 			let best_move = null
 			let best_piece = null
 			let max_think = 100
-			if (depth > 1) max_think = 2
+			if (depth > 1) max_think = 8
 			for (let i = 0; i < max_think; ++i) {
+				if (pieces.length < 1) break
 				const piece = random_choice(pieces)
-				const moves = piece.moves
-				if (moves.length > 0) {
-					const move = random_choice(moves)
-					// Eval move.
-					const new_board = my_board.copy()
-					const new_piece = new_board.grid[piece.y][piece.x]
-					const capture = new_board.grid[move[1]][move[0]]
-					new_piece.move(new_board, xy2fr(...move))
-					if (new_board.is_check(color)) continue  // Keep own king safe.
-					// if (new_board.is_mate(1 - color)) {
-					// 	best_move = move
-					// 	best_piece = piece
-					// 	break
-					// }
-					// Set response.
-					await ai_move(new_board, depth + 1, 1 - color)
-					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
-					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
-					const score = enemy_score - my_score
-					if (score < best_score) {
-						best_score = score
-						best_move = move
-						best_piece = piece
-					}
+				const move = random_choice(piece.moves)
+				// Eval move.
+				const new_board = my_board.copy()
+				const new_piece = new_board.grid[piece.y][piece.x]
+				const capture = new_board.grid[move[1]][move[0]]
+				new_piece.move(new_board, xy2fr(...move))
+				if (new_board.is_check(color)) {
+					prune_move(piece, move)
+					pieces = pieces.filter(p => p.moves.length > 0)
+					continue  // Keep own king safe.
+				}
+				// if (new_board.is_mate(1 - color)) {
+				// 	best_move = move
+				// 	best_piece = piece
+				// 	break
+				// }
+				// Set response.
+				await ai_move(new_board, depth + 1, 1 - color)
+				const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
+				const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
+				const score = enemy_score - my_score
+				if (score > best_score) {
+					prune_move(piece, move)
+					pieces = pieces.filter(p => p.moves.length > 0)
+				} else if (score < best_score) {
+					best_score = score
+					best_move = move
+					best_piece = piece
 				}
 			}
 			if (depth > 0) {
 				if (best_piece) best_piece.move(my_board, xy2fr(...best_move))
 			} else {
 				if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
-				else { 
+				else {
 					my_board.log.push('½–½')
 					say('Draw.')
 					clearInterval(timer)
+					render()
 				}
 			}
-			if (depth < 1) console.log(`Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)}`)
+			if (depth < 1) clog(`Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)}`)
 		}
-		globalThis.ai_move = ai_move
+		window.ai_move = ai_move
 		const think_time = 2500
 
 		import sleep from './lib/sleep.mjs'
 		import say_it from './lib/say.mjs'
-		function say(msg) {
-			say_it(msg, 1.9)
+		window.say = function say(msg) {
+			say_it(msg, WINDOWS ? 1.9 : 1, 1, "en-UK")
 		}
 		window.say = say
 
 		async function show_move(start_fr, stop_fr, is_human) {
+			favicon.href = 'lib/rook.png'
 			const piece = board.fr2p(start_fr)
 			const c = piece.char
 			const color = piece.color
 
 			if ((color === BLACK && speak_black.checked) ||
-				(color === WHITE && speak_white.checked)) say(`${piece.name} ${stop_fr}`.toUpperCase())
+				(color === WHITE && speak_white.checked)) say(`${start_fr} ${stop_fr}`.toUpperCase())  // Even uppercase fails "a7 a5" on MacOS!
 
 			const style = document.getElementById('p' + start_fr).style
 			const [x, y] = fr2xy(stop_fr)
@@ -746,24 +764,30 @@
 			const max_moves = 75
 			if (board.log.length > max_moves && !board.log.slice(-max_moves).some(s => s.indexOf('x') > -1 || s.match(/^[a-h]/) > -1)) {
 				const msg = `${max_moves} moves without checkmate, capture, or pawn move. Draw.`
-				console.log(msg)
+				clog(msg)
 				say(msg)
 				clearInterval(timer)
 				return
 			}
 			start_clock(1 - color)
-			if (color === WHITE && black_ai_box.checked) { await sleep(think_time); ai_move(board, 0, BLACK) }
-			if (color === BLACK && white_ai_box.checked) { await sleep(think_time); ai_move(board, 0, WHITE) }
+			if (color === WHITE && black_ai_box.checked) {
+				favicon.href = 'lib/think.png'
+				await sleep(think_time); ai_move(board, 0, BLACK)
+			}
+			if (color === BLACK && white_ai_box.checked) {
+				favicon.href = 'lib/think.png'
+				await sleep(think_time); ai_move(board, 0, WHITE)
+			}
 		}
 
-		export default function promote(fr, kind, color) {
+		function promote(fr, kind, color) {
 			alertcontainer.style.visibility = 'hidden'
 			board.promote(fr, kind, color)
 			say('Promote to ' + board.fr2p(fr).name)
 			board.log_check(board.log.pop() + kind, 1 - color)
 			render(board)
 		}
-		globalThis.promote = promote
+		window.promote = promote
 
 		function nonblocking_alert(html) {
 			if (getComputedStyle(alertcontainer).visibility == 'hidden') {
@@ -775,9 +799,9 @@
 			d.innerHTML = html
 			alertcontainer.appendChild(d)
 		}
-		globalThis.modal = nonblocking_alert
+		window.modal = nonblocking_alert
 
-		globalThis.timer = null
+		window.timer = null
 		const clock_start = [0, 0]
 		const clock_running = [false, false]
 		const clock_ms = [0, 0]
@@ -807,7 +831,7 @@
 		const board = new Board()
 		board.reset()
 		render(board)
-		globalThis.board = board
+		window.board = board
 		start_clock(WHITE)
 		if (white_ai_box.checked) ai_move(board, 0, WHITE)
 	</script>
