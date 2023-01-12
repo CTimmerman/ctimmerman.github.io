@@ -523,7 +523,7 @@
 			}
 
 			fen_import(fen) {
-				// e.g. "2b5/2p5/4p3/4r1kp/8/5K2/r2q4/8 b KQkq - 0 20"
+				// e.g. "2b5/2p5/4p3/4r1kp/8/5K2/r2q4/8 b KQkq - 0 20" or "8/5k2/3p4/1p1Pp2p/pP2Pp1P/P4P1K/8/8 b - - 99 50"
 				let [ppd, active_color, castling_availability, ep_target, halfmove_clock, fullmove_number] = fen.split(' ')
 				this.grid = []
 				this.log = []
@@ -552,10 +552,27 @@
 								col += parseInt(char) - 1
 						}
 						this.grid[row][col] = piece
+						if (piece !== ' ') piece.moved = true
 						++col
 					}
 					col = 0
 					++row
+				}
+				if (castling_availability.indexOf('K') > -1) {
+					this.grid[7][4].moved = false
+					this.grid[7][7].moved = false
+				}
+				if (castling_availability.indexOf('Q') > -1) {
+					this.grid[7][4].moved = false
+					this.grid[7][0].moved = false
+				}
+				if (castling_availability.indexOf('k') > -1) {
+					this.grid[0][4].moved = false
+					this.grid[0][7].moved = false
+				}
+				if (castling_availability.indexOf('q') > -1) {
+					this.grid[0][4].moved = false
+					this.grid[0][0].moved = false
 				}
 				for (let i = 1; i <= parseInt(fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0); ++i) this.log.push('?')
 				if (ep_target !== '-') {
