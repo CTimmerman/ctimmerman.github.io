@@ -23,6 +23,11 @@
 			line-height: 1em;
 		}
 
+		button {
+			cursor: pointer;
+			vertical-align: top;
+		}
+
 		input[type=number] {
 			font-size: medium;
 			vertical-align: middle;
@@ -142,8 +147,15 @@
 	<input id="speak_black" type="checkbox"><label for="speak_black">black moves</label>
 	<input id="speak_white" type="checkbox"><label for="speak_white">white moves</label>
 	<div id="logtext"></div>
-	<textarea id="movetextbox" type="text" placeholder="movetext"></textarea><button onclick="replay(movetextbox.value)"
-		type="button">Replay</button>
+	<div style="display:flex">
+		<button onclick="replay(movetextbox.value)" type="button">Replay</button>
+		<textarea id="movetextbox" type="text" placeholder="movetext"></textarea>
+	</div>
+	<div style="display:flex">
+		<button onclick="fenbox.value = board.fen_export()" type="button">Export</button>
+		<button onclick="board.fen_import(fenbox.value)" type="button">Import</button>
+		<textarea id="fenbox" type="text" placeholder="FEN"></textarea>
+	</div>
 	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script type="module">
 		"use strict"
@@ -524,26 +536,30 @@
 							case 'q': piece = new Queen(row, col, BLACK); break
 							case 'k': piece = new King(row, col, BLACK); break
 							case 'p': piece = new Pawn(row, col, BLACK); break
+
 							case 'R': piece = new Rook(row, col); break
 							case 'N': piece = new Knight(row, col); break
-							case 'K': piece = new Bishop(row, col); break
+							case 'B': piece = new Bishop(row, col); break
 							case 'Q': piece = new Queen(row, col); break
 							case 'K': piece = new King(row, col); break
 							case 'P': piece = new Pawn(row, col); break
-							case '2': col += 1; break
-							case '3': col += 2; break
-							case '4': col += 3; break
-							case '5': col += 4; break
-							case '6': col += 5; break
-							case '7': col += 6; break
+							default:
+								col += parseInt(char) - 1
 						}
+						console.log(`${char}; Setting ${row},${col} to ${piece}`)
+						this.grid[row][col] = piece
 						++col
 					}
+					col = 0
 					++row
 				}
-				for (let i = 1; i <= parseInt(fullmove_number); ++i) this.log.push('?')
-				if (halfmove_clock === '1') this.log.push('?')
-				if (ep_target) this.log[this.log.length - 1] = ep_target
+				for (let i = 1; i <= parseInt(fullmove_number) * 2; ++i) this.log.push('?')
+				if (ep_target !== '-') {
+					let [file, rank] = ep_target
+					if (rank === '4') this.log[this.log.length - 1] = `${file}3${file}5`
+					else this.log[this.log.length - 1] = `${file}5${file}7`
+				}
+				render(this)
 			}
 
 			get_king(color) {
@@ -666,7 +682,7 @@
 			'K0': '♔', 'K1': '♚',
 		}
 
-		function render(board) {
+		window.render = function render(board) {
 			const grid = board.grid
 			const log = board.log
 
@@ -960,6 +976,7 @@
 			let moves = movetext.split(' ')
 			let color = BLACK
 			for (let move of moves) {
+				if (!move) continue
 				color = 1 - color
 				if (move === "0-0") {
 					if (color === BLACK) move = "Ke8g8"
