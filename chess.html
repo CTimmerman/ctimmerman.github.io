@@ -455,23 +455,56 @@
 
 			fen_export() {
 				let ppd = ''
+				for (let row = 0; row < 8; ++row) {
+					let spaces = 0
+					for (let col = 0; col < 8; ++col) {
+						const p = this.grid[row][col]
+						if (p === ' ') {
+							++spaces
+							if (col === 7) ppd += spaces
+						} else {
+							if (spaces) {
+								ppd += spaces
+								spaces = 0
+							}
+							switch (p.char) {
+								case '': ppd += p.color ? 'p' : 'P'; break
+								case 'R': ppd += p.color ? 'r' : 'R'; break
+								case 'N': ppd += p.color ? 'n' : 'N'; break
+								case 'B': ppd += p.color ? 'b' : 'B'; break
+								case 'Q': ppd += p.color ? 'q' : 'Q'; break
+								case 'K': ppd += p.color ? 'k' : 'K'; break
+							}
+						}
+					}
+					if (row < 7) ppd += '/'
+				}
 				let active_color = 'wb'[this.log.length % 2]
 				let castling_availability = ''
-				for (let p of [this.get_king(WHITE), this.get_king(BLACK)]) {
-					let fr = xy2fr(p.x, p.y)
-					let moves = p.get_moves().map(e => xy2fr(...e))
-					if (fr === 'e1' && moves.indexOf('g1')) castling_availability += 'K'
-					if (fr === 'e1' && moves.indexOf('c1')) castling_availability += 'Q'
-					if (fr === 'e8' && moves.indexOf('g8')) castling_availability += 'k'
-					if (fr === 'e8' && moves.indexOf('c8')) castling_availability += 'q'
+				if (!this.get_king(WHITE).moved) {
+					if (!this.xy2p([7, 7]).moved) castling_availability += 'K'
+					if (!this.xy2p([0, 7]).moved) castling_availability += 'Q'
+				}
+				if (!this.get_king(BLACK).moved) {
+					if (!this.xy2p([7, 0]).moved) castling_availability += 'k'
+					if (!this.xy2p([0, 0]).moved) castling_availability += 'q'
 				}
 				let ep_target = '-'
-				let mo = this.log[this.log.length - 1].match(/^[a-h][27]([a-h][45])/)
-				if (mo) ep_target = mo[1]
-				let halfmove_clock = this.log.length % 2
-				let fullmove_number = this.log.length - halfmove_clock
+				let mo = this.log[this.log.length - 1]?.match(/^[a-h][27]([a-h][45])/)
+				if (mo) {
+					if (mo[1][1] === '4') ep_target = mo[1][0] + '3'
+					else ep_target = mo[1][0] + '6'
+				}
+				let halfmove_clock = 0
+				for (let i = this.log.length - 1; i >= 0; --i) {
+					const s = this.log[i]
+					// Reset after capture or pawn move.
+					if (s.indexOf('x') > -1 || s.match(/^[a-h]/)) break
+					++halfmove_clock
+				}
+				let fullmove_number = 1 + Math.floor(this.log.length / 2)
 
-				return [ppd, active_color, castling_availability, ep_target, halfmove_clock, fullmove_number].join(' ')
+				return [ppd, active_color, castling_availability || '-', ep_target, halfmove_clock, fullmove_number].join(' ')
 			}
 
 			fen_import(fen) {
