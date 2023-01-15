@@ -433,8 +433,8 @@
 					|| (this.y === 7 && this.color === BLACK)) {
 					this.board.promote(fr, 'Q', this.color)
 					if (do_log) {
-						log[log.length - 1] += 'Q'
 						say("Promotion.")
+						this.board.log_check(log.pop() + 'Q',  1 - this.color)
 					}
 				}
 				// En passant.
@@ -876,7 +876,7 @@
 					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
 					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
 					const score = enemy_score - my_score
-					console.log("Draw at", enemy_score, "-", my_score, "=", score)
+					console.log("Draw at", enemy_score, "-", my_score, "=", score, board.fen_export())
 					best_score = score + 0.5  // avoid draw
 					best_move = move
 					best_piece = piece
