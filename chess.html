@@ -825,8 +825,9 @@
 			let best_score = 9999
 			let best_move = null
 			let best_piece = null
-			let max_think = 128
-			if (depth > 1) max_think = 2
+			let max_think = 128  // offense
+			if (depth === 1) max_think = 100  // defense
+			else if (depth > 1) max_think = 2  // trap
 			for (let i = 0; i < max_think; ++i) {
 				if (pieces.length < 1) break
 				const piece = random_choice(pieces)
@@ -853,9 +854,10 @@
 				// 	best_piece = piece
 				// 	break
 				// }
-				// Set response.
-				const enemy_move = await ai_move(new_board, depth + 1, 1 - color)
-				if (enemy_move || depth === ai_level.value - 1) {
+				// Set response. TODO: pass breadth first to not make dumb moves.
+				let enemy_move = true
+				if (depth < ai_level.value - 1) enemy_move = await ai_move(new_board, depth + 1, 1 - color)
+				if (enemy_move) {
 					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
 					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
 					const score = enemy_score - my_score
@@ -869,14 +871,21 @@
 					}
 				} else {
 					// Draw or better!
-					best_score = -9999
+					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
+					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
+					const score = enemy_score - my_score
+					console.log("Draw at", enemy_score, "-", my_score, "=", score)
+					best_score = -90
 					best_move = move
 					best_piece = piece
 					if (new_board.is_mate(1 - color)) break
 				}
-				if (i % 10 === 0 && performance.now() - start_time > 10e3) {
-					console.log("...")
-					break
+				if (i % 20 === 0) {
+					await sleep(1)  // Update GUI.
+					if(performance.now() - start_time > 10e3) {
+						console.log("...")
+						break
+					}
 				}
 			}
 			if (depth > 0) {
@@ -898,7 +907,9 @@
 		import say_it from './lib/say.mjs'
 		window.say = function say(msg) {
 			console.log(msg)
-			if (speak.checked) say_it(msg, WINDOWS ? 1.9 : 1, 1, "en-UK")
+			if (speak.checked) {
+				say_it(msg, WINDOWS ? 1.9 : 1, 1, "en-UK")
+			}
 		}
 
 		async function show_move(start_fr, stop_fr, is_human) {
@@ -947,8 +958,8 @@
 			start_clock(1 - color)
 			if (black_ai_box.checked || white_ai_box.checked) {
 				favicon.href = 'lib/think.png'
-				if (ai_level.value < 2) await sleep(1000)
-				else await sleep(100)
+				if (ai_level.value < 2 || board.log[board.log.length - 1].indexOf('x') > -1) await sleep(1000)
+				else await sleep(400)
 				ai_move(board, 0, 1 - color)
 			}
 		}
@@ -1000,13 +1011,14 @@
 
 		window.replay = async function replay(movetext) {
 			board.reset()
+			render(board)
 			const bai = black_ai_box.checked
 			const wai = white_ai_box.checked
 			const spk = speak.checked
 			black_ai_box.checked = false
 			white_ai_box.checked = false
 			speak.checked = false
-			let moves = movetext.split(' ')
+			let moves = movetext.split(/\s/)
 			let color = BLACK
 			for (let move of moves) {
 				if (!move) continue
@@ -1026,7 +1038,6 @@
 			black_ai_box.checked = bai
 			white_ai_box.checked = wai
 			speak.checked = spk
-			render(board)
 		}
 
 		const board = new Board()
