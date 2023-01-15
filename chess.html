@@ -575,7 +575,7 @@
 					this.grid[0][4].moved = false
 					this.grid[0][0].moved = false
 				}
-				for (let i = 1; i <= parseInt(fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0); ++i) this.log.push('?')
+				for (let i = 1; i <= parseInt(halfmove_clock); ++i) this.log.push('?')
 				if (ep_target !== '-') {
 					let [file, rank] = ep_target
 					if (rank === '4') this.log[this.log.length - 1] = `${file}3${file}5`
@@ -875,7 +875,7 @@
 					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
 					const score = enemy_score - my_score
 					console.log("Draw at", enemy_score, "-", my_score, "=", score)
-					best_score = -90
+					best_score = score + 0.5  // avoid draw
 					best_move = move
 					best_piece = piece
 					if (new_board.is_mate(1 - color)) break
