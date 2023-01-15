@@ -455,7 +455,6 @@
 			captured = []
 
 			reset() {
-				this.log = []
 				this.grid = [
 					[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
 					[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)],
@@ -466,6 +465,8 @@
 					[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
 					[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
 				]
+				this.log = []
+				this.captured = []
 			}
 
 			fen_export() {
@@ -824,8 +825,8 @@
 			let best_score = 9999
 			let best_move = null
 			let best_piece = null
-			let max_think = 100 // Embarrasing moves: Math.min(128, total_moves * 3)
-			//if (depth > 1) max_think = 2
+			let max_think = 128
+			if (depth > 1) max_think = 2
 			for (let i = 0; i < max_think; ++i) {
 				if (pieces.length < 1) break
 				const piece = random_choice(pieces)
@@ -873,6 +874,10 @@
 					best_piece = piece
 					if (new_board.is_mate(1 - color)) break
 				}
+				if (i % 10 === 0 && performance.now() - start_time > 10e3) {
+					console.log("...")
+					break
+				}
 			}
 			if (depth > 0) {
 				if (best_piece) best_piece.move(xy2fr(...best_move))
@@ -884,12 +889,10 @@
 					clearInterval(timer)
 					render(my_board)
 				}
-				clog(`Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)} at ${new Date()}`)
+				console.log(`Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)} at ${new Date()}`)
 			}
 			return best_move
 		}
-
-		const think_time = 2500
 
 		import sleep from './lib/sleep.mjs'
 		import say_it from './lib/say.mjs'
@@ -942,13 +945,11 @@
 				return
 			}
 			start_clock(1 - color)
-			if (color === WHITE && black_ai_box.checked) {
+			if (black_ai_box.checked || white_ai_box.checked) {
 				favicon.href = 'lib/think.png'
-				await sleep(think_time); ai_move(board, 0, BLACK)
-			}
-			if (color === BLACK && white_ai_box.checked) {
-				favicon.href = 'lib/think.png'
-				await sleep(think_time); ai_move(board, 0, WHITE)
+				if (ai_level.value < 2) await sleep(1000)
+				else await sleep(100)
+				ai_move(board, 0, 1 - color)
 			}
 		}
 
