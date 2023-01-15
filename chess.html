@@ -575,7 +575,9 @@
 					this.grid[0][4].moved = false
 					this.grid[0][0].moved = false
 				}
-				for (let i = 1; i <= parseInt(halfmove_clock); ++i) this.log.push('?')
+				const move_count = parseInt(fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0)
+				const hmc = parseInt(halfmove_clock)
+				for (let i = 1; i <= move_count; ++i) this.log.push(i < (move_count - halfmove_clock) ? 'x' : '?')
 				if (ep_target !== '-') {
 					let [file, rank] = ep_target
 					if (rank === '4') this.log[this.log.length - 1] = `${file}3${file}5`
