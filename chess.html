@@ -219,13 +219,13 @@
 					for (let col in grid) {
 						const piece = grid[row][col]
 						if (piece == ' ' || piece.color === this.color) continue
-						if (piece.get_moves(depth).find(xy => xy[0] === this.x && xy[1] === this.y)) threats.push(piece)
+						if (piece.get_moves(depth + 1).find(xy => xy[0] === this.x && xy[1] === this.y)) threats.push(piece)
 					}
 				}
 				return threats
 			}
 
-			move(fr, do_log) {
+			move(fr, partial) {
 				const board = this.board
 				this.moved = true
 				const ox = this.x
@@ -237,13 +237,11 @@
 				this.x = xy[0]
 				this.y = xy[1]
 				board.grid[this.y][this.x] = this
-				if (do_log) {
-					if (capture !== ' ') {
-						board.captured.push(capture)
-						say('Took ' + capture.name)
-					}
-					board.log_check(move, 1 - this.color)
+				if (this.board.depth === 0 && capture !== ' ') {
+					board.captured.push(capture)
+					say('Took ' + capture.name)
 				}
+				board.log_check(move, 1 - this.color, partial)
 			}
 		}
 
@@ -294,7 +292,7 @@
 
 			get_moves(depth) {
 				if (!depth) depth = 0
-				if (depth > 1) return []
+				if (depth > 2) return [] // Depth 1 needed to cover piece for checkmate on 8/8/8/6N1/P3B3/2K5/8/kQ6 w - - 10 48
 				const board = this.board
 				const grid = board.grid
 				const moves = []
@@ -343,7 +341,7 @@
 						let new_board = board.copy()
 						let new_piece = new_board.grid[this.y][this.x]
 						let fr = xy2fr(...move)
-						new_piece.move(fr)
+						new_piece.move(fr, depth + 1)
 						if (new_piece.get_threats(depth + 1).length === 0) safe_moves.push(move)
 					}
 				}
@@ -362,24 +360,24 @@
 				return safe_moves
 			}
 
-			move(fr, do_log) {
-				super.move(fr, do_log)
-				if (!do_log) return
+			move(fr) {
+				super.move(fr, true)
+				const depth = this.board.depth
 				const board = this.board
 				let move = board.log.pop()
 				const y = this.y
 				const rank = 8 - y
 				if (move === `Ke${rank}g${rank}`) {
 					move = '0-0'
-					if (do_log) say("Castle.")
-					board.grid[y][7].move('f' + rank)
+					if (depth === 0) say("Castle.")
+					this.board.grid[y][7].move('f' + rank)
 				}
 				if (move === `Ke${rank}c${rank}`) {
 					move = '0-0-0'
-					if (do_log) say("Castle.")
-					board.grid[y][0].move('d' + rank)
+					if (depth === 0) say("Castle.")
+					this.board.grid[y][0].move('d' + rank)
 				}
-				board.log_check(move, 1 - this.color)
+				this.board.log_check(move, 1 - this.color)
 			}
 		}
 
@@ -426,15 +424,15 @@
 				return moves
 			}
 
-			move(fr, do_log) {
-				super.move(fr, do_log)
+			move(fr) {
+				super.move(fr)
 				const log = this.board.log
 				if ((this.y === 0 && this.color === WHITE)
 					|| (this.y === 7 && this.color === BLACK)) {
 					this.board.promote(fr, 'Q', this.color)
-					if (do_log) {
+					if (this.board.depth === 0) {
 						say("Promotion.")
-						this.board.log_check(log.pop() + 'Q',  1 - this.color)
+						this.board.log_check(log.pop() + 'Q', 1 - this.color)
 					}
 				}
 				// En passant.
@@ -444,7 +442,7 @@
 				if (log.slice(-2)[0].slice(0, 4) === double_jump) {
 					this.board.grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
 					log[log.length - 1] += ' e.p.'
-					if (do_log) say("En passant.")
+					if (this.board.depth === 0) say("En passant.")
 				}
 			}
 		}
@@ -453,6 +451,10 @@
 			grid = [[], [], [], [], [], [], [], []]
 			log = []
 			captured = []
+
+			constructor(depth) {
+				this.depth = depth || 0
+			}
 
 			reset() {
 				this.grid = [
@@ -612,9 +614,10 @@
 			}
 
 			is_mate(color) {
-				if (!this.is_check(color)) return false
+				// start = performance.now(); for (let i = 0; i < 100; ++i) board.is_mate(0); console.log(performance.now() - start)
 				const king = this.get_king(color)
-				const saves = []
+				if (!this.is_check(color)) return false
+				if (king.get_moves().length === 0) return false
 				for (let row in this.grid) {
 					for (let col in this.grid) {
 						let piece = this.grid[row][col]
@@ -623,16 +626,16 @@
 						for (let move of moves) {
 							const new_board = this.copy()
 							const new_piece = new_board.grid[row][col]
-							new_piece.move(xy2fr(...move))
-							if (!new_board.is_check(color)) saves.push(new_piece.char + xy2fr(piece.x, piece.y) + xy2fr(...move))
+							new_piece.move(xy2fr(...move), 1)
+							if (!new_board.is_check(color)) return false
 						}
 					}
 				}
-				return this.is_check(color) && king.get_moves().length === 0 && saves.length === 0
+				return true
 			}
 
 			copy() {
-				const new_board = new Board()
+				const new_board = new Board(this.depth + 1)
 				new_board.log = [...this.log]
 				new_board.captured = [...this.captured]
 				for (let row in this.grid) {
@@ -659,12 +662,15 @@
 				return ''
 			}
 
-			log_check(move, color) {
-				let c = this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''
-				if (c === '+') say('Check.')
-				else if (c === '#') {
-					c += color ? ' 1-0' : ' 0-1'; say('Checkmate. ' + ['Black', 'White'][color] + ' wins!')
-					clearInterval(timer)
+			log_check(move, color, partial) {
+				let c = ''
+				if (!partial && this.depth === 0) {
+					c = this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''
+					if (c === '+') say(['White', 'Black'][color] + ' in check.')
+					else if (c === '#') {
+						c += color ? ' 1-0' : ' 0-1'; say('Checkmate. ' + ['Black', 'White'][color] + ' wins!')
+						clearInterval(timer)
+					}
 				}
 				this.log.push(move + c)
 			}
@@ -812,9 +818,9 @@
 			piece.moves = piece.moves.filter(m => m[0] !== move[0] || m[1] !== move[1])
 		}
 
-		window.ai_move = async function ai_move(board_in, depth, color) {
-			if (typeof depth === "undefined") depth = 0
-			else if (depth >= ai_level.value) return
+		window.ai_move = async function ai_move(board_in, color) {
+			const depth = board_in.depth
+			if (depth >= ai_level.value) return
 
 			var start_time = performance.now()
 			let my_board = board
@@ -834,6 +840,10 @@
 				if (pieces.length < 1) break
 				const piece = random_choice(pieces)
 				const move = random_choice(piece.moves)
+				if(!move) {
+					console.log("FIXME: prune didn't clear pieces!?", [...pieces])
+					debugger
+				}
 				// Eval move.
 				const new_board = my_board.copy()
 				const new_piece = new_board.grid[piece.y][piece.x]
@@ -851,14 +861,9 @@
 					pieces = pieces.filter(p => p.moves.length > 0)
 					continue  // Keep own king safe.
 				}
-				// if (new_board.is_mate(1 - color)) {
-				// 	best_move = move
-				// 	best_piece = piece
-				// 	break
-				// }
-				// Set response. TODO: pass breadth first to not make dumb moves.
+				// Set response. TODO: pass breadth first to not make dumb moves?
 				let enemy_move = true
-				if (depth < ai_level.value - 1) enemy_move = await ai_move(new_board, depth + 1, 1 - color)
+				if (board.depth < ai_level.value - 1) enemy_move = await ai_move(new_board, 1 - color)
 				if (enemy_move) {
 					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
 					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
@@ -866,6 +871,7 @@
 					if (score > best_score) {
 						prune_move(piece, move)
 						pieces = pieces.filter(p => p.moves.length > 0)
+						continue
 					} else if (score < best_score) {
 						best_score = score
 						best_move = move
@@ -876,16 +882,16 @@
 					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
 					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
 					const score = enemy_score - my_score
-					console.log("Draw at", enemy_score, "-", my_score, "=", score, board.fen_export())
+					//console.log("Draw at", enemy_score, "-", my_score, "=", score, board.fen_export())
 					best_score = score + 0.5  // avoid draw
 					best_move = move
 					best_piece = piece
-					if (new_board.is_mate(1 - color)) break
+					if (new_board.is_check(1 - color) && new_board.is_mate(1 - color)) break
 				}
-				if (i % 20 === 0) {
+				if (i % 30 === 0) {
 					await sleep(1)  // Update GUI.
-					if(performance.now() - start_time > 10e3) {
-						console.log("...")
+					if (performance.now() - start_time > 10e3) {
+						console.log("Breaking depth", depth)
 						break
 					}
 				}
@@ -900,7 +906,7 @@
 					clearInterval(timer)
 					render(my_board)
 				}
-				console.log(`Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)} at ${new Date()}`)
+				console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)}`)
 			}
 			return best_move
 		}
@@ -923,17 +929,18 @@
 			if ((color === BLACK && speak_black.checked) ||
 				(color === WHITE && speak_white.checked)) say(`${start_fr} ${stop_fr}`.toUpperCase())  // Even uppercase fails "a7 a5" on MacOS!
 
+			//render(board)
+			await sleep(400)
 			const style = document.getElementById('p' + start_fr).style
 			const [x, y] = fr2xy(stop_fr)
 			style.left = (1 + x) + 'em'
 			style.top = (1 + y) + 'em'
-
-			piece.move(stop_fr, true)
 			await sleep(400)
+
+			piece.move(stop_fr, 0)
 			render(board)
 			document.getElementById(start_fr).classList.add('selected')
 			document.getElementById(stop_fr).classList.add('selected')
-			await sleep(400)
 
 			if (is_human && c === '' && (
 				(color === BLACK && y === 7) ||
@@ -962,7 +969,8 @@
 				favicon.href = 'lib/think.png'
 				if (ai_level.value < 2 || board.log[board.log.length - 1].indexOf('x') > -1) await sleep(1000)
 				else await sleep(400)
-				ai_move(board, 0, 1 - color)
+				if (color === WHITE && black_ai_box.checked) ai_move(board, BLACK)
+				else if (color === BLACK && white_ai_box.checked) ai_move(board, WHITE)
 			}
 		}
 
@@ -1047,7 +1055,7 @@
 		render(board)
 		window.board = board
 		start_clock(WHITE)
-		if (white_ai_box.checked) ai_move(board, 0, WHITE)
+		if (white_ai_box.checked) ai_move(board, WHITE)
 	</script>
 </body>
 
