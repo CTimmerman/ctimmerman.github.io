@@ -241,7 +241,8 @@
 					board.captured.push(capture)
 					say('Took ' + capture.name)
 				}
-				board.log_check(move, 1 - this.color, partial)
+				if(!partial) board.log_check(move, 1 - this.color)
+				return move
 			}
 		}
 
@@ -310,6 +311,8 @@
 				The king is not in check before and immediately after castling.
 				The king will not move through a check during castling.
 				All squares between the rook and king are empty.
+				Castle to checkmate by Paul Morphy vs. Alonzo Morphy, 1-0 Rook odds New Orleans 1858:
+				r4b1r/ppp3pp/8/4p3/2Pq4/3P4/PP2QPPP/2k1K2R w K - 0 19
 				*/
 				if (!this.moved && this.get_threats(depth + 1).length === 0) {
 					const rank = this.color ? 8 : 1
@@ -341,7 +344,7 @@
 						let new_board = board.copy()
 						let new_piece = new_board.grid[this.y][this.x]
 						let fr = xy2fr(...move)
-						new_piece.move(fr, depth + 1)
+						new_piece.move(fr)
 						if (new_piece.get_threats(depth + 1).length === 0) safe_moves.push(move)
 					}
 				}
@@ -361,21 +364,20 @@
 			}
 
 			move(fr) {
-				super.move(fr, true)
+				let move = super.move(fr, true)
 				const depth = this.board.depth
 				const board = this.board
-				let move = board.log.pop()
 				const y = this.y
 				const rank = 8 - y
 				if (move === `Ke${rank}g${rank}`) {
 					move = '0-0'
-					if (depth === 0) say("Castle.")
-					this.board.grid[y][7].move('f' + rank)
+					if (depth === 0) say("Kingside castle.")
+					this.board.grid[y][7].move('f' + rank, true)
 				}
 				if (move === `Ke${rank}c${rank}`) {
 					move = '0-0-0'
-					if (depth === 0) say("Castle.")
-					this.board.grid[y][0].move('d' + rank)
+					if (depth === 0) say("Queenside castle.")
+					this.board.grid[y][0].move('d' + rank, true)
 				}
 				this.board.log_check(move, 1 - this.color)
 			}
@@ -577,9 +579,9 @@
 					this.grid[0][4].moved = false
 					this.grid[0][0].moved = false
 				}
-				const move_count = parseInt(fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0)
+				const move_count = (fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0)
 				const hmc = parseInt(halfmove_clock)
-				for (let i = 1; i <= move_count; ++i) this.log.push(i < (move_count - halfmove_clock) ? 'x' : '?')
+				for (let i = 0; i < move_count; ++i) this.log.push(i < (move_count - halfmove_clock) ? 'x' : '?')
 				if (ep_target !== '-') {
 					let [file, rank] = ep_target
 					if (rank === '4') this.log[this.log.length - 1] = `${file}3${file}5`
@@ -626,7 +628,7 @@
 						for (let move of moves) {
 							const new_board = this.copy()
 							const new_piece = new_board.grid[row][col]
-							new_piece.move(xy2fr(...move), 1)
+							new_piece.move(xy2fr(...move))
 							if (!new_board.is_check(color)) return false
 						}
 					}
@@ -662,9 +664,9 @@
 				return ''
 			}
 
-			log_check(move, color, partial) {
+			log_check(move, color) {
 				let c = ''
-				if (!partial && this.depth === 0) {
+				if (this.depth === 0) {
 					c = this.is_check(color) ? (this.is_mate(color) ? '#' : '+') : ''
 					if (c === '+') say(['White', 'Black'][color] + ' in check.')
 					else if (c === '#') {
@@ -802,7 +804,7 @@
 						new_piece.move(fr)
 						if (new_board.is_check(piece.color)) continue
 
-						let square = document.getElementById(xy2fr(...move))
+						let square = document.getElementById(fr)
 						square.classList.add('selected')
 						if (!guides.checked) square.classList.add('nobg')
 					}
@@ -861,7 +863,7 @@
 					pieces = pieces.filter(p => p.moves.length > 0)
 					continue  // Keep own king safe.
 				}
-				// Set response. TODO: pass breadth first to not make dumb moves?
+				// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
 				let enemy_move = true
 				if (board.depth < ai_level.value - 1) enemy_move = await ai_move(new_board, 1 - color)
 				if (enemy_move) {
@@ -891,7 +893,7 @@
 				if (i % 30 === 0) {
 					await sleep(1)  // Update GUI.
 					if (performance.now() - start_time > 10e3) {
-						console.log("Breaking depth", depth)
+						console.log("Breaking depth", depth, "at", i)
 						break
 					}
 				}
@@ -902,7 +904,7 @@
 				if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
 				else {
 					my_board.log.push('½–½')
-					say('Draw.')  // FIXME: 3qkbn1/1p2p1p1/2P5/3p4/R7/3B4/5PPR/1N2K1N1 w KQkq - 0 16 bishop should checkmate.
+					say('Draw.')
 					clearInterval(timer)
 					render(my_board)
 				}
@@ -937,8 +939,8 @@
 			style.top = (1 + y) + 'em'
 			await sleep(400)
 
-			piece.move(stop_fr, 0)
-			render(board)
+			piece.move(stop_fr)  // TODO: xy moves
+			render(board)  // TODO: render method, pass in function for MVC.
 			document.getElementById(start_fr).classList.add('selected')
 			document.getElementById(stop_fr).classList.add('selected')
 
