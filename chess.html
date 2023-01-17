@@ -196,7 +196,7 @@
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
 					while (1) {
-						let piece = this.board.xy2p([tx, ty])
+						let piece = this.board.xy2p(tx, ty)
 						if (piece === ' ') moves.push([tx, ty])
 						else if (piece && piece.color !== this.color) {
 							moves.push([tx, ty])
@@ -225,24 +225,24 @@
 				return threats
 			}
 
-			move(fr, partial) {
-				const board = this.board
+			move(xy, partial) {
 				this.moved = true
 				const ox = this.x
 				const oy = this.y
-				const capture = board.fr2p(fr)
-				const move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + fr
-				const xy = fr2xy(fr)
+				const [x, y] = xy
+				const board = this.board
+				const capture = board.grid[y][x]
+				const move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + xy2fr(x, y)
 				board.grid[oy][ox] = ' '
-				this.x = xy[0]
-				this.y = xy[1]
-				board.grid[this.y][this.x] = this
+				board.grid[y][x] = this
+				this.x = x
+				this.y = y
 				if (this.board.depth === 0 && capture !== ' ') {
 					board.captured.push(capture)
 					say('Took ' + capture.name)
 				}
-				if(!partial) board.log_check(move, 1 - this.color)
-				return move
+				if (partial) return move
+				else board.log_check(move, 1 - this.color)
 			}
 		}
 
@@ -263,7 +263,7 @@
 				for (let dir of [[-2, -1], [-2, 1], [-1, -2], [1, -2], [2, -1], [2, 1], [1, 2], [-1, 2]]) {
 					const tx = this.x + dir[0]
 					const ty = this.y + dir[1]
-					const piece = this.board.xy2p([tx, ty])
+					const piece = this.board.xy2p(tx, ty)
 					if (piece === ' ' || (piece && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
@@ -300,7 +300,7 @@
 				for (let dir of [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
 					let tx = this.x + dir[0]
 					let ty = this.y + dir[1]
-					let piece = board.xy2p([tx, ty])
+					let piece = board.xy2p(tx, ty)
 					if (piece === ' ' || (piece && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
@@ -335,17 +335,16 @@
 				}
 				// Remove unsafe moves.
 				let safe_moves = []
-				for (let move of moves) {
-					if (board.xy2p(move).char === "K") {
+				for (let xy of moves) {
+					if (board.xy2p(...xy).char === "K") {
 						// Happens in deep thought.
 						//const foo = [...board.log]; let i = 1; let j = 0; let s = ''; while (foo.length > 0) { s += `${j}. ${foo.shift() + ' ' + foo.shift()} `; i += 2; j += 1 }; clog(s); //.replaceAll(/([A-Z]?)([a-h][0-8])(x?[a-h][0-8])/g, '$1$3'));
-						safe_moves.push(move)
+						safe_moves.push(xy)
 					} else {
 						let new_board = board.copy()
 						let new_piece = new_board.grid[this.y][this.x]
-						let fr = xy2fr(...move)
-						new_piece.move(fr)
-						if (new_piece.get_threats(depth + 1).length === 0) safe_moves.push(move)
+						new_piece.move(xy)
+						if (new_piece.get_threats(depth + 1).length === 0) safe_moves.push(xy)
 					}
 				}
 				if (!this.moved) {
@@ -363,23 +362,21 @@
 				return safe_moves
 			}
 
-			move(fr) {
-				let move = super.move(fr, true)
-				const depth = this.board.depth
-				const board = this.board
-				const y = this.y
-				const rank = 8 - y
-				if (move === `Ke${rank}g${rank}`) {
-					move = '0-0'
-					if (depth === 0) say("Kingside castle.")
-					this.board.grid[y][7].move('f' + rank, true)
+			move(xy) {
+				let move = ''
+				if (!this.moved) {
+					if (xy[0] === 2) {
+						move = '0-0-0'
+						if (this.board.depth === 0) say("Queenside castle.")
+						this.board.grid[this.y][0].move([this.x + 1, this.y], true)
+					}
+					else if (xy[0] === 6) {
+						move = '0-0'
+						if (this.board.depth === 0) say("Kingside castle.")
+						this.board.grid[this.y][7].move([this.x - 1, this.y], true)
+					}
 				}
-				if (move === `Ke${rank}c${rank}`) {
-					move = '0-0-0'
-					if (depth === 0) say("Queenside castle.")
-					this.board.grid[y][0].move('d' + rank, true)
-				}
-				this.board.log_check(move, 1 - this.color)
+				this.board.log_check(super.move(xy, true), 1 - this.color)
 			}
 		}
 
@@ -398,7 +395,7 @@
 				for (let dir of dirs) {
 					const tx = this.x + dir[0]
 					const ty = this.y + dir[1]
-					const piece = board.xy2p([tx, ty])
+					const piece = board.xy2p(tx, ty)
 					if (piece === ' ') {
 						moves.push([tx, ty])
 						if (this.color && this.y === 1 && grid[ty + 1][tx] === ' ') moves.push([tx, ty + 1])
@@ -410,7 +407,7 @@
 				for (let dir of dirs) {
 					const tx = this.x + dir[0]
 					const ty = this.y + dir[1]
-					const piece = board.xy2p([tx, ty])
+					const piece = board.xy2p(tx, ty)
 					if ((piece && piece !== ' ' && piece.color !== this.color)) {
 						moves.push([tx, ty])
 					}
@@ -426,12 +423,12 @@
 				return moves
 			}
 
-			move(fr) {
-				super.move(fr)
+			move(xy) {
+				super.move(xy)
 				const log = this.board.log
 				if ((this.y === 0 && this.color === WHITE)
 					|| (this.y === 7 && this.color === BLACK)) {
-					this.board.promote(fr, 'Q', this.color)
+					this.board.promote(...xy, 'Q', this.color)
 					if (this.board.depth === 0) {
 						say("Promotion.")
 						this.board.log_check(log.pop() + 'Q', 1 - this.color)
@@ -502,12 +499,12 @@
 				let active_color = 'wb'[this.log.length % 2]
 				let castling_availability = ''
 				if (!this.get_king(WHITE).moved) {
-					if (this.xy2p([7, 7]).moved === false) castling_availability += 'K'
-					if (this.xy2p([0, 7]).moved === false) castling_availability += 'Q'
+					if (this.xy2p(7, 7).moved === false) castling_availability += 'K'
+					if (this.xy2p(0, 7).moved === false) castling_availability += 'Q'
 				}
 				if (!this.get_king(BLACK).moved) {
-					if (this.xy2p([7, 0]).moved === false) castling_availability += 'k'
-					if (this.xy2p([0, 0]).moved === false) castling_availability += 'q'
+					if (this.xy2p(7, 0).moved === false) castling_availability += 'k'
+					if (this.xy2p(0, 0).moved === false) castling_availability += 'q'
 				}
 				let ep_target = '-'
 				let mo = this.log[this.log.length - 1]?.match(/^[a-h][27]([a-h][45])/)
@@ -625,10 +622,10 @@
 						let piece = this.grid[row][col]
 						if (piece.color !== color) continue
 						const moves = piece.get_moves()
-						for (let move of moves) {
+						for (let xy of moves) {
 							const new_board = this.copy()
 							const new_piece = new_board.grid[row][col]
-							new_piece.move(xy2fr(...move))
+							new_piece.move(xy)
 							if (!new_board.is_check(color)) return false
 						}
 					}
@@ -653,9 +650,9 @@
 				return new_board
 			}
 
-			xy2p(xy) {
-				if (xy[1] < 0 || xy[1] > 7 || xy[0] < 0 || xy[0] > 7) return ''
-				return this.grid[xy[1]][xy[0]]
+			xy2p(x, y) {
+				if (x < 0 || x > 7 || y < 0 || y > 7) return ''
+				return this.grid[y][x]
 			}
 
 			fr2p(fr) {
@@ -677,8 +674,7 @@
 				this.log.push(move + c)
 			}
 
-			promote(fr, kind, color) {
-				const [x, y] = fr2xy(fr)
+			promote(x, y, kind, color) {
 				switch (kind) {
 					case 'Q':
 						this.grid[y][x] = new Queen(x, y, color)
@@ -796,15 +792,14 @@
 					window.start_fr = this.id
 					this.classList.add('selected')
 					const moves = piece.get_moves()
-					for (let move of moves) {
+					for (let xy of moves) {
 						// Limit if in check.
 						let new_board = board.copy()
 						let new_piece = new_board.grid[piece.y][piece.x]
-						let fr = xy2fr(...move)
-						new_piece.move(fr)
+						new_piece.move(xy)
 						if (new_board.is_check(piece.color)) continue
 
-						let square = document.getElementById(fr)
+						let square = document.getElementById(xy2fr(...xy))
 						square.classList.add('selected')
 						if (!guides.checked) square.classList.add('nobg')
 					}
@@ -842,7 +837,7 @@
 				if (pieces.length < 1) break
 				const piece = random_choice(pieces)
 				const move = random_choice(piece.moves)
-				if(!move) {
+				if (!move) {
 					console.log("FIXME: prune didn't clear pieces!?", [...pieces])
 					debugger
 				}
@@ -857,7 +852,7 @@
 					best_piece = piece
 					break
 				}
-				new_piece.move(xy2fr(...move))
+				new_piece.move(move)
 				if (new_board.is_check(color)) {
 					prune_move(piece, move)
 					pieces = pieces.filter(p => p.moves.length > 0)
@@ -899,7 +894,7 @@
 				}
 			}
 			if (depth > 0) {
-				if (best_piece) best_piece.move(xy2fr(...best_move))
+				if (best_piece) best_piece.move(best_move)
 			} else {
 				if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
 				else {
@@ -939,8 +934,8 @@
 			style.top = (1 + y) + 'em'
 			await sleep(400)
 
-			piece.move(stop_fr)  // TODO: xy moves
-			render(board)  // TODO: render method, pass in function for MVC.
+			piece.move(fr2xy(stop_fr))
+			render(board)
 			document.getElementById(start_fr).classList.add('selected')
 			document.getElementById(stop_fr).classList.add('selected')
 
@@ -948,10 +943,10 @@
 				(color === BLACK && y === 7) ||
 				(color === WHITE && y === 0))) {
 				let html = `
-					<button onclick="promote('${stop_fr}', 'Q', ${color})">♛</button>
-					<button onclick="promote('${stop_fr}', 'B', ${color})">♝</button>
-					<button onclick="promote('${stop_fr}', 'N', ${color})">♞</button>
-					<button onclick="promote('${stop_fr}', 'R', ${color})">♜</button>
+					<button onclick="promote(${x}, ${y}, 'Q', ${color})">♛</button>
+					<button onclick="promote(${x}, ${y}, 'B', ${color})">♝</button>
+					<button onclick="promote(${x}, ${y}, 'N', ${color})">♞</button>
+					<button onclick="promote(${x}, ${y}, 'R', ${color})">♜</button>
 					`
 				modal(html)
 				while (getComputedStyle(alertcontainer).visibility === 'visible') await (sleep(1000))
@@ -976,10 +971,10 @@
 			}
 		}
 
-		window.promote = function promote(fr, kind, color) {
+		window.promote = function promote(x, y, kind, color) {
 			alertcontainer.style.visibility = 'hidden'
-			board.promote(fr, kind, color)
-			say('Promote to ' + board.fr2p(fr).name)
+			board.promote(x, y, kind, color)
+			say('Promote to ' + board.xy2p(x, y).name)
 			board.log_check(board.log.pop().slice(0, -1) + kind, 1 - color)
 			render(board)
 		}
@@ -1052,10 +1047,9 @@
 			speak.checked = spk
 		}
 
-		const board = new Board()
+		window.board = new Board()
 		board.reset()
 		render(board)
-		window.board = board
 		start_clock(WHITE)
 		if (white_ai_box.checked) ai_move(board, WHITE)
 	</script>
