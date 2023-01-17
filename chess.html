@@ -140,7 +140,8 @@
 <body>
 	<div id="boardtext"></div>
 	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label><br>
-	<label for="ai_level">AI level </label><input id="ai_level" type="number" value="2" min="1">
+	<label for="ai_level">AI depth </label><input id="ai_level" type="number" value="2" min="1">
+	<label for="ai_time"> max secs </label><input id="ai_time" type="number" value="10" min="1">
 	<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">black</label>
 	<input id="white_ai_box" type="checkbox"><label for="white_ai_box">white</label><br>
 	<input id="speak" type="checkbox" checked><label for="speak">Speak</label>
@@ -211,6 +212,7 @@
 				return moves
 			}
 
+			/* Too slow.
 			get_threats(depth) {
 				if ((depth || 0) > 1) return []
 				const grid = this.board.grid
@@ -223,6 +225,20 @@
 					}
 				}
 				return threats
+			}
+			*/
+
+			is_safe(depth) {
+				if ((depth || 0) > 1) return true
+				const grid = this.board.grid
+				for (const row in grid) {
+					for (const col in grid) {
+						const piece = grid[row][col]
+						if (piece == ' ' || piece.color === this.color) continue
+						if (piece.get_moves(depth + 1).find(xy => xy[0] === this.x && xy[1] === this.y)) return false
+					}
+				}
+				return true
 			}
 
 			move(xy, partial) {
@@ -314,7 +330,7 @@
 				Castle to checkmate by Paul Morphy vs. Alonzo Morphy, 1-0 Rook odds New Orleans 1858:
 				r4b1r/ppp3pp/8/4p3/2Pq4/3P4/PP2QPPP/2k1K2R w K - 0 19
 				*/
-				if (!this.moved && this.get_threats(depth + 1).length === 0) {
+				if (!this.moved && this.is_safe(depth + 1)) {
 					const rank = this.color ? 8 : 1
 					let piece = board.fr2p('a' + rank)
 					if (piece.char === 'R' && !piece.moved) {
@@ -335,7 +351,7 @@
 				}
 				// Remove unsafe moves.
 				let safe_moves = []
-				for (let xy of moves) {
+				for (const xy of moves) {
 					if (board.xy2p(...xy).char === "K") {
 						// Happens in deep thought.
 						//const foo = [...board.log]; let i = 1; let j = 0; let s = ''; while (foo.length > 0) { s += `${j}. ${foo.shift() + ' ' + foo.shift()} `; i += 2; j += 1 }; clog(s); //.replaceAll(/([A-Z]?)([a-h][0-8])(x?[a-h][0-8])/g, '$1$3'));
@@ -344,7 +360,7 @@
 						let new_board = board.copy()
 						let new_piece = new_board.grid[this.y][this.x]
 						new_piece.move(xy)
-						if (new_piece.get_threats(depth + 1).length === 0) safe_moves.push(xy)
+						if (new_piece.is_safe(depth + 1)) safe_moves.push(xy)
 					}
 				}
 				if (!this.moved) {
@@ -355,7 +371,8 @@
 						if (
 							(fr === 'c8' && frs.indexOf('d8') < 0) ||
 							(fr === 'g8' && frs.indexOf('f8') < 0) ||
-							(fr === 'c1' && frs.indexOf('d1') < 0)
+							(fr === 'c1' && frs.indexOf('d1') < 0) ||
+							(fr === 'g1' && frs.indexOf('f1') < 0)
 						) safe_moves.splice(i, 1)
 					}
 				}
@@ -609,7 +626,7 @@
 
 			is_check(color) {
 				const king = this.get_king(color)
-				return !!king && king.get_threats().length > 0
+				return !!king && !king.is_safe()
 			}
 
 			is_mate(color) {
@@ -815,18 +832,20 @@
 			piece.moves = piece.moves.filter(m => m[0] !== move[0] || m[1] !== move[1])
 		}
 
-		window.ai_move = async function ai_move(board_in, color) {
+		window.ai_move = async function ai_move(board_in, color, start_time, total) {
+			//if (typeof board_in === "undefined") board_in = board
+			if (typeof start_time === "undefined") start_time = performance.now()
 			const depth = board_in.depth
-			if (depth >= ai_level.value) return
+			if (depth >= ai_level.value || performance.now() - start_time > parseInt(ai_time.value) * 1000) return  // TODO: test window.deadline perf
 
-			var start_time = performance.now()
-			let my_board = board
-			if (typeof board_in !== "undefined") my_board = board_in
-			if (typeof color === "undefined") color = 1 - my_board.log.length % 2
-			let pieces = my_board.get_pieces(color)
+			if (typeof color === "undefined") color = 1 - board_in.log.length % 2
+			if (typeof total === "undefined") total = [0]
+
+			let pieces = board_in.get_pieces(color)
 			let total_moves = 0
 			pieces.forEach(p => { p.moves = p.get_moves(); total_moves += p.moves.length })
 			pieces = pieces.filter(p => p.moves.length > 0)
+
 			let best_score = 9999
 			let best_move = null
 			let best_piece = null
@@ -834,6 +853,7 @@
 			if (depth === 1) max_think = 100  // defense
 			else if (depth > 1) max_think = 2  // trap
 			for (let i = 0; i < max_think; ++i) {
+				++total[0]
 				if (pieces.length < 1) break
 				const piece = random_choice(pieces)
 				const move = random_choice(piece.moves)
@@ -842,7 +862,7 @@
 					debugger
 				}
 				// Eval move.
-				const new_board = my_board.copy()
+				const new_board = board_in.copy()
 				const new_piece = new_board.grid[piece.y][piece.x]
 				const capture = new_board.grid[move[1]][move[0]]
 				if (capture.char === "K") {
@@ -860,7 +880,7 @@
 				}
 				// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
 				let enemy_move = true
-				if (board.depth < ai_level.value - 1) enemy_move = await ai_move(new_board, 1 - color)
+				if (board.depth < ai_level.value - 1) enemy_move = await ai_move(new_board, 1 - color, start_time, total)
 				if (enemy_move) {
 					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
 					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
@@ -885,12 +905,15 @@
 					best_piece = piece
 					if (new_board.is_check(1 - color) && new_board.is_mate(1 - color)) break
 				}
-				if (i % 30 === 0) {
+				if (total[0] % 256 === 0) {  // Just total works as well, but feels unsafe.
 					await sleep(1)  // Update GUI.
-					if (performance.now() - start_time > 10e3) {
-						console.log("Breaking depth", depth, "at", i)
+					const think_time = performance.now() - start_time 
+					if (think_time > 10e3) {
+						console.log("Breaking depth", depth, "at", i, "of", total_moves, "after", total[0], "in", think_time / 1000, "s")
 						break
-					}
+					} /* else {
+						console.log("Waiting depth", depth, "at", i, "after", total[0], "in", think_time / 1000, "s")
+					} */
 				}
 			}
 			if (depth > 0) {
@@ -898,10 +921,10 @@
 			} else {
 				if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
 				else {
-					my_board.log.push('½–½')
+					board_in.log.push('½–½')
 					say('Draw.')
 					clearInterval(timer)
-					render(my_board)
+					render(board_in)
 				}
 				console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)}`)
 			}
