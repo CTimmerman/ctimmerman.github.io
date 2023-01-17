@@ -500,12 +500,12 @@
 				let active_color = 'wb'[this.log.length % 2]
 				let castling_availability = ''
 				if (!this.get_king(WHITE).moved) {
-					if (!this.xy2p([7, 7]).moved) castling_availability += 'K'
-					if (!this.xy2p([0, 7]).moved) castling_availability += 'Q'
+					if (this.xy2p([7, 7]).moved === false) castling_availability += 'K'
+					if (this.xy2p([0, 7]).moved === false) castling_availability += 'Q'
 				}
 				if (!this.get_king(BLACK).moved) {
-					if (!this.xy2p([7, 0]).moved) castling_availability += 'k'
-					if (!this.xy2p([0, 0]).moved) castling_availability += 'q'
+					if (this.xy2p([7, 0]).moved === false) castling_availability += 'k'
+					if (this.xy2p([0, 0]).moved === false) castling_availability += 'q'
 				}
 				let ep_target = '-'
 				let mo = this.log[this.log.length - 1]?.match(/^[a-h][27]([a-h][45])/)
@@ -617,7 +617,7 @@
 				// start = performance.now(); for (let i = 0; i < 100; ++i) board.is_mate(0); console.log(performance.now() - start)
 				const king = this.get_king(color)
 				if (!this.is_check(color)) return false
-				if (king.get_moves().length === 0) return false
+				if (king.get_moves().length > 0) return false
 				for (let row in this.grid) {
 					for (let col in this.grid) {
 						let piece = this.grid[row][col]
@@ -902,7 +902,7 @@
 				if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
 				else {
 					my_board.log.push('½–½')
-					say('Draw.')
+					say('Draw.')  // FIXME: 3qkbn1/1p2p1p1/2P5/3p4/R7/3B4/5PPR/1N2K1N1 w KQkq - 0 16 bishop should checkmate.
 					clearInterval(timer)
 					render(my_board)
 				}
