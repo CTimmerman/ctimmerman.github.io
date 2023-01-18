@@ -443,12 +443,16 @@
 			move(xy) {
 				super.move(xy)
 				const log = this.board.log
-				if ((this.y === 0 && this.color === WHITE)
-					|| (this.y === 7 && this.color === BLACK)) {
-					this.board.promote(...xy, 'Q', this.color)
+				if ((this.y === 0 && this.color === WHITE && white_ai_box.checked)
+					|| (this.y === 7 && this.color === BLACK && black_ai_box.checked)) {
+						// 8/5KP1/7k/8/6P1/8/8/8 w - - 3 86
+						this.board.promote(...xy, 'N', this.color)
+						if (this.board.get_king(1 - this.color).is_safe()) {
+							this.board.promote(...xy, 'Q', this.color)
+						}
 					if (this.board.depth === 0) {
 						say("Promotion.")
-						this.board.log_check(log.pop() + 'Q', 1 - this.color)
+						this.board.log_check(log.pop() + this.board.xy2p(...xy).char, 1 - this.color)
 					}
 				}
 				// En passant.
@@ -907,7 +911,7 @@
 				}
 				if (total[0] % 256 === 0) {  // Just total works as well, but feels unsafe.
 					await sleep(1)  // Update GUI.
-					const think_time = performance.now() - start_time 
+					const think_time = performance.now() - start_time
 					if (think_time > 10e3) {
 						console.log("Breaking depth", depth, "at", i, "of", total_moves, "after", total[0], "in", think_time / 1000, "s")
 						break
@@ -998,7 +1002,7 @@
 			alertcontainer.style.visibility = 'hidden'
 			board.promote(x, y, kind, color)
 			say('Promote to ' + board.xy2p(x, y).name)
-			board.log_check(board.log.pop().slice(0, -1) + kind, 1 - color)
+			board.log_check(board.log.pop() + kind, 1 - color)
 			render(board)
 		}
 
