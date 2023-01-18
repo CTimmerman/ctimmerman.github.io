@@ -184,8 +184,8 @@
 				this.board = board_in || board
 			}
 
-			copy(board_in) {
-				const copy = new this.constructor(this.x, this.y, this.color, board_in)
+			copy(board) {
+				const copy = new this.constructor(this.x, this.y, this.color, board)
 				copy.moved = this.moved
 				return copy
 			}
@@ -836,21 +836,18 @@
 			piece.moves = piece.moves.filter(m => m[0] !== move[0] || m[1] !== move[1])
 		}
 
-		window.ai_move = async function ai_move(board_in, color, start_time, total) {
-			//if (typeof board_in === "undefined") board_in = board
+		window.ai_move = async function ai_move(board, color, start_time, total) {
+			//if (typeof color === "undefined") color = board.log.length % 2
 			if (typeof start_time === "undefined") start_time = performance.now()
-			const depth = board_in.depth
-			if (depth >= ai_level.value || performance.now() - start_time > parseInt(ai_time.value) * 1000) return  // TODO: test window.deadline perf
-
-			if (typeof color === "undefined") color = 1 - board_in.log.length % 2
 			if (typeof total === "undefined") total = [0]
-
-			let pieces = board_in.get_pieces(color)
+			const depth = board.depth
+			const max_secs = parseInt(ai_time.value) * 1000
+			let pieces = board.get_pieces(color)
 			let total_moves = 0
 			pieces.forEach(p => { p.moves = p.get_moves(); total_moves += p.moves.length })
 			pieces = pieces.filter(p => p.moves.length > 0)
 
-			let best_score = 9999
+			let best_score = -999
 			let best_move = null
 			let best_piece = null
 			let max_think = 128  // offense
@@ -866,7 +863,7 @@
 					debugger
 				}
 				// Eval move.
-				const new_board = board_in.copy()
+				const new_board = board.copy()
 				const new_piece = new_board.grid[piece.y][piece.x]
 				const capture = new_board.grid[move[1]][move[0]]
 				if (capture.char === "K") {
@@ -882,37 +879,33 @@
 					pieces = pieces.filter(p => p.moves.length > 0)
 					continue  // Keep own king safe.
 				}
+
 				// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
 				let enemy_move = true
 				if (board.depth < ai_level.value - 1) enemy_move = await ai_move(new_board, 1 - color, start_time, total)
-				if (enemy_move) {
-					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
-					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
-					const score = enemy_score - my_score
-					if (score > best_score) {
-						prune_move(piece, move)
-						pieces = pieces.filter(p => p.moves.length > 0)
-						continue
-					} else if (score < best_score) {
-						best_score = score
-						best_move = move
-						best_piece = piece
-					}
-				} else {
-					// Draw or better!
-					const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
-					const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
-					const score = enemy_score - my_score
-					//console.log("Draw at", enemy_score, "-", my_score, "=", score, board.fen_export())
+				const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
+				const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
+				const score = my_score - enemy_score
+				if (score < best_score) {
+					prune_move(piece, move)
+					pieces = pieces.filter(p => p.moves.length > 0)
+					continue
+				} else if (score > best_score) {
+					best_score = score
+					best_move = move
+					best_piece = piece
+				} else if (!enemy_move) {
+					// Timeout, draw, or win!
 					best_score = score + 0.5  // avoid draw
 					best_move = move
 					best_piece = piece
 					if (new_board.is_check(1 - color) && new_board.is_mate(1 - color)) break
 				}
+
 				if (total[0] % 256 === 0) {  // Just total works as well, but feels unsafe.
 					await sleep(1)  // Update GUI.
 					const think_time = performance.now() - start_time
-					if (think_time > 10e3) {
+					if (think_time > max_secs) {
 						console.log("Breaking depth", depth, "at", i, "of", total_moves, "after", total[0], "in", think_time / 1000, "s")
 						break
 					} /* else {
@@ -925,10 +918,10 @@
 			} else {
 				if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
 				else {
-					board_in.log.push('½–½')
+					board.log.push('½–½')
 					say('Draw.')
 					clearInterval(timer)
-					render(board_in)
+					render(board)
 				}
 				console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)}`)
 			}
