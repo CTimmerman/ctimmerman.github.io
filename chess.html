@@ -21,16 +21,17 @@
 			border-color: var(--fgcolor);
 			font-size: 10mm;
 			line-height: 1em;
+			font-family: monospace;
 		}
 
 		button {
 			cursor: pointer;
 			vertical-align: top;
+			font-size: 0.7em;
+    		height: 2em;
 		}
 
 		input[type=number] {
-			font-size: medium;
-			vertical-align: middle;
 			width: 2em;
 		}
 
@@ -127,7 +128,7 @@
 			background: darkgray;
 		}
 
-		label {
+		input, label, li, textarea {
 			font-size: 0.5em;
 		}
 
@@ -212,7 +213,7 @@
 				return moves
 			}
 
-			get_threats(depth) {
+			/* get_threats(depth) {
 				if ((depth || 0) > 1) return []
 				const grid = this.board.grid
 				const threats = []
@@ -224,7 +225,7 @@
 					}
 				}
 				return threats
-			}
+			} */
 
 			is_safe(depth) {
 				if ((depth || 0) > 1) return true
@@ -894,7 +895,7 @@
 					best_piece = piece
 				} else if (!enemy_move) {
 					// Timeout, draw, or win!
-					best_score = score + 0.5  // avoid draw
+					best_score = score - 0.5  // avoid draw
 					best_move = move
 					best_piece = piece
 					if (new_board.is_check(1 - color) && new_board.is_mate(1 - color)) break
@@ -921,7 +922,7 @@
 					clearInterval(timer)
 					render(board)
 				}
-				console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max_think ${max_think} took ${ms2time(performance.now() - start_time)} to ${best_score}`)
+				console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max ${max_think} of ${total_moves} took ${ms2time(performance.now() - start_time)} to ${best_score}`)
 			}
 			return best_move
 		}
@@ -1043,10 +1044,11 @@
 			black_ai_box.checked = false
 			white_ai_box.checked = false
 			speak.checked = false
-			let moves = movetext.split(/\s/)
+			const re_move = /^(?<fullmove_number>\d+.\s*)?(?<char>[B-R]?)(?<from>[a-h]?[1-8]?)(?<attack>x?)(?<to>[a-h][1-8])(?<promo>[B-R]?)/
+			let moves = movetext.split(/\s/)  // e.g. 1. e4 Nf6 2. e5 Ne4 3. d3 Nc5 4. d4 Ne4 5. Qd3 d5 6. exd6 Nxd6
 			let color = BLACK
 			for (const move of moves) {
-				if (!move) continue
+				if (!re_move.test(move)) continue
 				color = 1 - color
 				if (move === "0-0") {
 					if (color === BLACK) move = "Ke8g8"
@@ -1055,9 +1057,31 @@
 					if (color === BLACK) move = "Ke8c8"
 					else move = "Ke1c1"
 				}
-				const mo = move.match(/^(?<char>[B-R]?)(?<from>[a-h][1-8])x?(?<to>[a-h][1-8])(?<promo>[B-R]?)/)
+				const mo = move.match(re_move)
 				if (mo) {
-					await show_move(mo.groups.from, mo.groups.to)
+					let from = mo.groups.from
+					let to = mo.groups.to
+					if(from.length < 2) {
+						const pieces = board.get_pieces(color)
+						for(const p of pieces) {
+							if (p.char !== mo.groups.char) continue
+							const p_fr = xy2fr(p.x, p.y)
+							console.log(p_fr, p.color, p.char, '?')
+							const frs = p.get_moves().map(xy => xy2fr(...xy))
+							for(const fr of frs) {
+								if (fr === to) {
+									if (from.length === 0) {
+										from = p_fr
+										break
+									} else if (p_fr.indexOf(from) > -1) {
+										from = p_fr
+										break
+									}
+								}
+							}
+						}
+					}
+					await show_move(from, to)
 				}
 			}
 			black_ai_box.checked = bai
