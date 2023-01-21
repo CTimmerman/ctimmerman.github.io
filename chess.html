@@ -803,7 +803,13 @@
 				}
 				el.onmouseup = async function (e) {
 					if (editmode.checked) {
+						document.querySelectorAll('.selected').forEach(el => {
+							el.classList.remove('selected')
+							el.classList.remove('nobg')
+						})
+						this.classList.add('selected')
 						const [x, y] = fr2xy(this.id)
+						if (isNaN(y)) return
 						let html = `
 							<button onclick="board.grid[${y}][${x}] = ' '; hide_modal()"> </button>
 							<button onclick="board.grid[${y}][${x}] = new King(${x}, ${y}, 1); hide_modal()">♚</button>
