@@ -29,13 +29,14 @@
 			vertical-align: top;
 			font-size: 0.7em;
 			height: 2em;
+			min-width: 2em;
 		}
 
 		input[type=number] {
 			width: 2em;
 		}
 
-		#alertcontainer {
+		#modal {
 			margin: 0;
 			left: 0;
 			top: 0;
@@ -148,7 +149,8 @@
 
 <body>
 	<div id="boardtext"></div>
-	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label><br>
+	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label>
+	<input id="editmode" type="checkbox"><label for="editmode">Edit board</label><br>
 	<label for="ai_level">AI depth </label><input id="ai_level" type="number" value="2" min="1">
 	<label for="ai_time"> max secs </label><input id="ai_time" type="number" value="15" min="1">
 	<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">black</label>
@@ -167,7 +169,7 @@
 		<button onclick="board.fen_import(fenbox.value)" type="button">Import</button>
 		<textarea id="fenbox" type="text" placeholder="FEN"></textarea>
 	</div>
-	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
+	<div id="modal" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script type="module">
 		"use strict"
 		const SAFARI = navigator.userAgent.indexOf('Safari') > -1
@@ -270,14 +272,14 @@
 			}
 		}
 
-		class Rook extends Piece {
+		window.Rook = class extends Piece {
 			name = "Rook"
 			char = "R"
 			value = 5
 			dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
 		}
 
-		class Knight extends Piece {
+		window.Knight = class extends Piece {
 			name = "Knight"
 			char = "N"
 			value = 3
@@ -296,21 +298,21 @@
 			}
 		}
 
-		class Bishop extends Piece {
+		window.Bishop = class extends Piece {
 			name = "Bishop"
 			char = "B"
 			value = 3
 			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
 		}
 
-		class Queen extends Piece {
+		window.Queen = class extends Piece {
 			name = "Queen"
 			char = "Q"
 			value = 9
 			dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]
 		}
 
-		class King extends Piece {
+		window.King = class extends Piece {
 			name = "King"
 			char = "K"
 			value = 10  // Officially 0; playwise 3.5 to 4.
@@ -403,7 +405,7 @@
 			}
 		}
 
-		class Pawn extends Piece {
+		window.Pawn = class extends Piece {
 			name = "Pawn"
 			char = ""
 			value = 1
@@ -720,11 +722,11 @@
 		}
 
 
-		window.xy2fr = function xy2fr(x, y) {
+		window.xy2fr = (x, y) => {
 			return "abcdefgh"[x] + (8 - y)
 		}
 
-		window.fr2xy = function fr2xy(fr) {
+		window.fr2xy = fr => {
 			return ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
 		}
 
@@ -737,7 +739,7 @@
 			'K0': '♔', 'K1': '♚',
 		}
 
-		window.render = function render(board) {
+		window.render = board => {
 			const grid = board.grid
 			const log = board.log
 
@@ -799,7 +801,29 @@
 				el.onmousedown = function (e) {
 					e.preventDefault()  // Stop doubleclick select.
 				}
-				el.onmouseup = function (e) {
+				el.onmouseup = async function (e) {
+					if (editmode.checked) {
+						const [x, y] = fr2xy(this.id)
+						let html = `
+							<button onclick="board.grid[${y}][${x}] = ' '; hide_modal()"> </button>
+							<button onclick="board.grid[${y}][${x}] = new King(${x}, ${y}, 1); hide_modal()">♚</button>
+							<button onclick="board.grid[${y}][${x}] = new Queen(${x}, ${y}, 1); hide_modal()">♛</button>
+							<button onclick="board.grid[${y}][${x}] = new Bishop(${x}, ${y}, 1); hide_modal()">♝</button>
+							<button onclick="board.grid[${y}][${x}] = new Knight(${x}, ${y}, 1); hide_modal()">♞</button>
+							<button onclick="board.grid[${y}][${x}] = new Rook(${x}, ${y}, 1); hide_modal()">♜</button>
+							<button onclick="board.grid[${y}][${x}] = new Pawn(${x}, ${y}, 1); hide_modal()">♟︎</button><br>
+							<button onclick="board.grid[${y}][${x}] = new King(${x}, ${y}, 0); hide_modal()">♔</button>
+							<button onclick="board.grid[${y}][${x}] = new Queen(${x}, ${y}, 0); hide_modal()">♕</button>
+							<button onclick="board.grid[${y}][${x}] = new Bishop(${x}, ${y}, 0); hide_modal()">♗</button>
+							<button onclick="board.grid[${y}][${x}] = new Knight(${x}, ${y}, 0); hide_modal()">♘</button>
+							<button onclick="board.grid[${y}][${x}] = new Rook(${x}, ${y}, 0); hide_modal()">♖</button>
+							<button onclick="board.grid[${y}][${x}] = new Pawn(${x}, ${y}, 0); hide_modal()">♙</button>
+							`
+						show_modal(html)
+						while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))
+						render(board)
+						return
+					}
 					if (this.classList.contains('selected')) {
 						if (start_fr && start_fr !== this.id) {
 							show_move(start_fr, this.id, true)
@@ -936,7 +960,7 @@
 
 		import sleep from './lib/sleep.mjs'
 		import say_it from './lib/say.mjs'
-		window.say = function say(msg) {
+		window.say = msg => {
 			console.log(msg)
 			if (speak.checked) {
 				say_it(msg, WINDOWS ? 1.9 : 1, 1, "en-UK")
@@ -974,8 +998,8 @@
 					<button onclick="promote(${x}, ${y}, 'N', ${color})">♞</button>
 					<button onclick="promote(${x}, ${y}, 'R', ${color})">♜</button>
 					`
-				modal(html)
-				while (getComputedStyle(alertcontainer).visibility === 'visible') await (sleep(1000))
+				show_modal(html)
+				while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))
 			}
 
 			if (board.log[board.log.length - 1].indexOf('#') > -1) return
@@ -998,22 +1022,25 @@
 		}
 
 		window.promote = function promote(x, y, kind, color) {
-			alertcontainer.style.visibility = 'hidden'
+			modal.style.visibility = 'hidden'
 			board.promote(x, y, kind, color)
 			say('Promote to ' + board.xy2p(x, y).name)
 			board.log_check(board.log.pop() + kind, 1 - color)
 			render(board)
 		}
 
-		window.modal = function nonblocking_alert(html) {
-			if (getComputedStyle(alertcontainer).visibility == 'hidden') {
-				alertcontainer.innerText = ''
-				alertcontainer.style.visibility = 'visible'
+		window.show_modal = (html) => {
+			if (getComputedStyle(modal).visibility == 'hidden') {
+				modal.innerText = ''
+				modal.style.visibility = 'visible'
 			}
 			const d = document.createElement('div')
 			d.className = 'alert'
 			d.innerHTML = html
-			alertcontainer.appendChild(d)
+			modal.appendChild(d)
+		}
+		window.hide_modal = () => {
+			modal.style.visibility = 'hidden'
 		}
 
 		window.timer = null
