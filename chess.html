@@ -141,8 +141,8 @@
 <body>
 	<div id="boardtext"></div>
 	<input id="guides" type="checkbox" checked><label for="guides">Show potential moves</label><br>
-	<label for="ai_level">AI depth </label><input id="ai_level" type="number" value="5" min="1">
-	<label for="ai_time"> max secs </label><input id="ai_time" type="number" value="10" min="1">
+	<label for="ai_level">AI depth </label><input id="ai_level" type="number" value="2" min="1">
+	<label for="ai_time"> max secs </label><input id="ai_time" type="number" value="15" min="1">
 	<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">black</label>
 	<input id="white_ai_box" type="checkbox"><label for="white_ai_box">white</label><br>
 	<input id="speak" type="checkbox" checked><label for="speak">Speak</label>
@@ -356,8 +356,8 @@
 						//const foo = [...board.log]; let i = 1; let j = 0; let s = ''; while (foo.length > 0) { s += `${j}. ${foo.shift() + ' ' + foo.shift()} `; i += 2; j += 1 }; clog(s); //.replaceAll(/([A-Z]?)([a-h][0-8])(x?[a-h][0-8])/g, '$1$3'));
 						safe_moves.push(xy)
 					} else {
-						let new_board = board.copy()
-						let new_piece = new_board.grid[this.y][this.x]
+						const new_board = board.copy()
+						const new_piece = new_board.grid[this.y][this.x]
 						new_piece.move(xy)
 						if (new_piece.is_safe(depth + 1)) safe_moves.push(xy)
 					}
@@ -379,20 +379,18 @@
 			}
 
 			move(xy) {
-				let move = ''
-				if (!this.moved) {
-					if (xy[0] === 2) {
-						move = '0-0-0'
-						if (this.board.depth === 0) say("Queenside castle.")
-						this.board.grid[this.y][0].move([this.x + 1, this.y], true)
-					}
-					else if (xy[0] === 6) {
-						move = '0-0'
-						if (this.board.depth === 0) say("Kingside castle.")
-						this.board.grid[this.y][7].move([this.x - 1, this.y], true)
-					}
+				let move = super.move(xy, true)
+				const rank = 8 - this.y
+				if (move === `Ke${rank}c${rank}`) {
+					move = '0-0-0'
+					if (this.board.depth === 0) say("Queenside castle.")
+					this.board.grid[this.y][0].move([this.x + 1, this.y], true)
+				} else if (move === `Ke${rank}g${rank}`) {
+					move = '0-0'
+					if (this.board.depth === 0) say("Kingside castle.")
+					this.board.grid[this.y][7].move([this.x - 1, this.y], true)
 				}
-				this.board.log_check(super.move(xy, true), 1 - this.color)
+				this.board.log_check(move, 1 - this.color)
 			}
 		}
 
@@ -516,7 +514,7 @@
 					}
 					if (row < 7) ppd += '/'
 				}
-				let active_color = 'wb'[this.log.length % 2]
+				const active_color = 'wb'[this.log.length % 2]
 				let castling_availability = ''
 				if (!this.get_king(WHITE).moved) {
 					if (this.xy2p(7, 7).moved === false) castling_availability += 'K'
@@ -527,7 +525,7 @@
 					if (this.xy2p(0, 0).moved === false) castling_availability += 'q'
 				}
 				let ep_target = '-'
-				let mo = this.log[this.log.length - 1]?.match(/^[a-h][27]([a-h][45])/)
+				const mo = this.log[this.log.length - 1]?.match(/^[a-h][27]([a-h][45])/)
 				if (mo) {
 					if (mo[1][1] === '4') ep_target = mo[1][0] + '3'
 					else ep_target = mo[1][0] + '6'
@@ -539,14 +537,14 @@
 					if (s.indexOf('x') > -1 || s.match(/^[a-h]/)) break
 					++halfmove_clock
 				}
-				let fullmove_number = 1 + Math.floor(this.log.length / 2)
+				const fullmove_number = 1 + Math.floor(this.log.length / 2)
 
 				return [ppd, active_color, castling_availability || '-', ep_target, halfmove_clock, fullmove_number].join(' ')
 			}
 
 			fen_import(fen) {
 				// e.g. "2b5/2p5/4p3/4r1kp/8/5K2/r2q4/8 b KQkq - 0 20" or "8/5k2/3p4/1p1Pp2p/pP2Pp1P/P4P1K/8/8 b - - 99 50"
-				let [ppd, active_color, castling_availability, ep_target, halfmove_clock, fullmove_number] = fen.split(' ')
+				const [ppd, active_color, castling_availability, ep_target, halfmove_clock, fullmove_number] = fen.split(' ')
 				this.grid = []
 				this.log = []
 				this.captured = []
@@ -600,7 +598,7 @@
 				const hmc = parseInt(halfmove_clock)
 				for (let i = 0; i < move_count; ++i) this.log.push(i < (move_count - halfmove_clock) ? 'x' : '?')
 				if (ep_target !== '-') {
-					let [file, rank] = ep_target
+					const [file, rank] = ep_target
 					if (rank === '4') this.log[this.log.length - 1] = `${file}3${file}5`
 					else this.log[this.log.length - 1] = `${file}5${file}7`
 				}
@@ -639,7 +637,7 @@
 				if (king.get_moves().length > 0) return false
 				for (const row in this.grid) {
 					for (const col in this.grid) {
-						let piece = this.grid[row][col]
+						const piece = this.grid[row][col]
 						if (piece.color !== color) continue
 						const moves = piece.get_moves()
 						for (const xy of moves) {
@@ -850,8 +848,8 @@
 			let best_move = null
 			let best_piece = null
 			let max_think = 128  // offense
-			if (depth === 1) max_think = 100  // defense
-			else if (depth > 1) max_think = 2  // trap
+			if (depth === 1) max_think = 128  // defense
+			else if (depth > 1) max_think = 4  // trap
 			for (let i = 0; i < max_think; ++i) {
 				++total[0]
 				if (pieces.length < 1) break
@@ -881,7 +879,10 @@
 
 				// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
 				let enemy_move = true
-				if (board.depth < ai_level.value - 1) enemy_move = await ai_move(new_board, 1 - color, start_time, total)
+				if (board.depth < ai_level.value - 1) {
+					//console.log("Awaiting depth", new_board.depth)
+					enemy_move = await ai_move(new_board, 1 - color, start_time, total)
+				}
 				const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
 				const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
 				const score = my_score - enemy_score
@@ -900,16 +901,13 @@
 					best_piece = piece
 					if (new_board.is_check(1 - color) && new_board.is_mate(1 - color)) break
 				}
-
+				const think_time = performance.now() - start_time
+				if (think_time > max_secs) {
+					console.log("Breaking depth", depth, "at", i, "of", total_moves, "after", total[0], "in", think_time / 1000, "s")
+					break
+				}
 				if (total[0] % 256 === 0) {  // Just total works as well, but feels unsafe.
 					await sleep(1)  // Update GUI.
-					const think_time = performance.now() - start_time
-					if (think_time > max_secs) {
-						console.log("Breaking depth", depth, "at", i, "of", total_moves, "after", total[0], "in", think_time / 1000, "s")
-						break
-					} /* else {
-						console.log("Waiting depth", depth, "at", i, "after", total[0], "in", think_time / 1000, "s")
-					} */
 				}
 			}
 			if (depth > 0) {
@@ -1047,20 +1045,20 @@
 			const re_move = /^(?<fullmove_number>\d+\.\s*)?(?<char>[B-R]?)(?<from>[a-h]?[1-8]?)(?<attack>x?)(?<to>[a-h][1-8])(?<promo>[B-R]?)/
 			let moves = movetext.split(/\s/)  // e.g. 1. e4 Nf6 2. e5 Ne4 3. d3 Nc5 4. d4 Ne4 5. Qd3 d5 6. exd6 Nxd6
 			let color = BLACK
-			for (const move of moves) {
-				if (!re_move.test(move)) continue
-				color = 1 - color
+			for (let move of moves) {
 				if (move === "0-0") {
-					if (color === BLACK) move = "Ke8g8"
+					if (color === WHITE) move = "Ke8g8"
 					else move = "Ke1g1"
 				} else if (move === "0-0-0") {
-					if (color === BLACK) move = "Ke8c8"
+					if (color === WHITE) move = "Ke8c8"
 					else move = "Ke1c1"
 				}
+				if (!re_move.test(move)) continue
+				color = 1 - color
 				const mo = move.match(re_move)
 				if (mo) {
 					let from = mo.groups.from
-					let to = mo.groups.to
+					const to = mo.groups.to
 					if(from.length < 2) {
 						const pieces = board.get_pieces(color)
 						for(const p of pieces) {
@@ -1087,6 +1085,11 @@
 			black_ai_box.checked = bai
 			white_ai_box.checked = wai
 			speak.checked = spk
+		}
+
+		window.test = async function test() {
+			await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8 17.Rf1f8# 1-0")
+			console.assert(board.fen_export() === "r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17")
 		}
 
 		window.board = new Board()
