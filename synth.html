@@ -208,8 +208,8 @@
     function replay() {
       const base_time = log[0][0]
       for (const entry of log) {
-        if (entry[1] === 1) setTimeout(() => notePressed({ buttons: 1, target: synth_keys[entry[2]] }), entry[0] - base_time)
-        else setTimeout(() => noteReleased({ buttons: 1, target: synth_keys[entry[2]] }), entry[0] - base_time)
+        if (entry[1] === 1) setTimeout(() => key_note(1, entry[2]), entry[0] - base_time)
+        else setTimeout(() => key_note(0, entry[2]), entry[0] - base_time)
       }
     }
 
