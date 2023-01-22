@@ -182,6 +182,7 @@
       console.log(synth_key, event.key)
       if (el_key) {
         if (down) {
+          el_key.scrollIntoView()
           el_key.classList.add('active')
           notePressed({ buttons: 1, target: el_key })
         }
