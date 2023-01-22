@@ -8,12 +8,12 @@
 </head>
 <body>
 <h1>Zodiac Calculator</h1>
-<label for="date">Date of birth: </label><input id="date" type="datetime-local" title="Birth date, with AM/PM if not 24h format." onchange="zodiac(this.value)">
+<label for="datebox">Date of birth: </label><input id="datebox" type="datetime-local" title="Birth date, with AM/PM if not 24h format." onchange="zodiac(this.value)">
 <div id="zodiac"></div>
 <script>
 // v1.0 by Cees Timmerman, 2020-08-16.
-function zodiac(date){
-	/* date: string, yyy-mm-dd */
+function zodiac(dt){
+	/* dt: string, yyy-mm-dd */
 	
 	// https://www.thesun.co.uk/tech/9149004/horoscopes-wrong-new-star-signs/
 	// http://old-new-horoscopes-signs.blogspot.com/new/01/new-horoscope-list-new.html
@@ -218,7 +218,7 @@ function zodiac(date){
 		return sign.name + ". Best matches: " + sign.matches
 	}
 	let html = ''
-	const mm_dd = date.slice(5, 10)
+	const mm_dd = dt.slice(5, 10)
 	for(const sign of signs){
 		if((sign.old_start <= mm_dd || (sign.old_start?.startsWith('12') && mm_dd.startsWith('01')))
 		   && (sign.old_end >= mm_dd || (sign.old_end?.startsWith('01') && mm_dd.startsWith('12'))))
@@ -317,8 +317,8 @@ function zodiac(date){
 			"matches": "Goat, Tiger, Rabbit"
 		}
 	]
-	const year = parseInt(date.slice(0, 4))
-	const hour = parseInt(date.slice(11, 13))
+	const year = parseInt(dt.slice(0, 4)) - 1 + in_chinese_new_year(new Date(dt))
+	const hour = parseInt(dt.slice(11, 13))
 	for(const sign of chinese_signs){
 		if(sign.years.includes(year)) html += "<br>Chinese solar sign: " + blurb(sign)
 		if(sign.hours.includes(hour)) html += "<br>Chinese hour sign: " + blurb(sign)
@@ -332,6 +332,34 @@ function zodiac(date){
 	// Not getting into https://www.chinahighlights.com/travelguide/chinese-zodiac/china-five-elements-philosophy.htm
 }
 
+function get_new_moons(date){
+	/* The date is decided by the Chinese Lunar Calendar, which is based on the cycles of the moon and sun and is generally 21–51 days behind the Gregorian (internationally-used) calendar. The date of Chinese New Year changes every year, but it always falls between January 21st and February 20th. */
+	const LUNAR_MONTH = 29.5305888531  // https://en.wikipedia.org/wiki/Lunar_month
+	let y = date.getFullYear()
+	let m = date.getMonth() + 1  // JS, why?
+	let d = date.getDate()
+	// https://www.subsystems.us/uploads/9/8/9/4/98948044/moonphase.pdf
+	if (m <= 2) {
+		y -= 1
+		m += 12
+	}
+	a = Math.floor(y/100)
+	b = Math.floor(a/4)
+	c = 2 - a + b
+	e = Math.floor(365.25 * (y+4716))
+	f = Math.floor(30.6001 * (m+1))
+	julian_day = c+d+e+f-1524.5
+	days_since_last_new_moon = julian_day - 2451549.5
+	new_moons = days_since_last_new_moon / LUNAR_MONTH
+	days_into_cycle = (new_moons % 1) * LUNAR_MONTH
+	return new_moons
+}
+
+function in_chinese_new_year(date) {
+	// for(let i=20; i<53; ++i) { start =new Date(2023, 1, 0); start.setDate(i); console.log(start, get_new_moons(start)) }
+	return Math.floor(get_new_moons(date)) > Math.floor(get_new_moons(new Date(date.getFullYear(), 0, 20)))? 1 : 0
+}
+
 function answer_dob(n){
 	let days_left = 365.25
 	let p_unique = 1
@@ -339,7 +367,7 @@ function answer_dob(n){
 		p_unique *= (365.25 - i) / 365.25
 	}
 	let p = 1 - p_unique
-	const locale = new Intl.NumberFormat({ maximumSignificantDigits: 5 })
+	const locale = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
 	window.dobanswer.innerText = `probability ${locale.format(p)}, chance ${locale.format(p * 100)}%, and odds ${locale.format(p / (1 - p))}:1`
 	return p
 }
@@ -356,6 +384,6 @@ See also these links and marvel at the coincidences while ignoring the rest, unl
 <li><a href="https://www.universeguide.com/fact/ophiuchus">https://www.universeguide.com/fact/ophiuchus</a> has slightly different dates.</li>
 </ul>
 
-<p>PS: A <a href="https://en.wikipedia.org/wiki/Birthday_problem">shared birthday</a> among <input id=dobinput type=number value=10 style="width:3em" onchange="answer_dob(parseInt(this.value))"> has <span id="dobanswer">11.69%</span>.</p>
+<p>A <a href="https://en.wikipedia.org/wiki/Birthday_problem">shared birthday</a> among <input id="dobinput" type="number" min="1" value="22" style="width:3em" onchange="answer_dob(parseInt(this.value))" title="Birthdays"> has <span id="dobanswer">probability 0.48, chance 47.55%, and odds 0.91:1</span>.</p>
 </body>
 </html>
