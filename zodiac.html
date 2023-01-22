@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zodiac Calculator</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>🌃</text></svg>">
+<style>* { background-color: black; color: white; }</style>
 </head>
 <body>
 <h1>Zodiac Calculator</h1>
@@ -21,7 +22,7 @@ function zodiac(dt){
 	// https://www.yourzodiacsign.com/cetus/
 	const signs = [
 		{
-			"name": "Capricorn",
+			"name": "Capricorn ♑︎",
 			"old_start": "12-22",
 			"old_end": "01-19",
 			"cetus_start": "12-22",
@@ -35,7 +36,7 @@ function zodiac(dt){
 			"matches": "Taurus, Cancer"
 		},
 		{
-			"name": "Aquarius",
+			"name": "Aquarius ♒︎",
 			"old_start": "01-20",
 			"old_end": "02-18",
 			"cetus_start": "01-20",
@@ -49,7 +50,7 @@ function zodiac(dt){
 			"matches": "Leo, Sagittarius"
 		},
 		{
-			"name": "Pisces",
+			"name": "Pisces ♓︎",
 			"old_start": "02-19",
 			"old_end": "03-20",
 			"cetus_start": "02-19",
@@ -73,7 +74,7 @@ function zodiac(dt){
 			"matches": "Aries, Leo, Sagittarius, Cancer, Scorpio, Pisces"
 		},
 		{
-			"name": "Aries",
+			"name": "Aries ♈︎",
 			"old_start": "03-21",
 			"old_end": "04-19",
 			"cetus_start": "03-29",
@@ -88,7 +89,7 @@ function zodiac(dt){
 			"birthstones": "Topaz, Heliotrope, Aquamarine, Jasper, Diamond"
 		},
 		{
-			"name": "Taurus",
+			"name": "Taurus ♉︎",
 			"old_start": "04-20",
 			"old_end": "05-20",
 			"cetus_start": "04-20",
@@ -103,7 +104,7 @@ function zodiac(dt){
 			"birthstones": "Emerald, Sapphire, Diamond, Garnet, Rose quartz"
 		},
 		{
-			"name": "Gemini",
+			"name": "Gemini ♊︎",
 			"old_start": "05-21",
 			"old_end": "06-20",
 			"cetus_start": "05-21",
@@ -117,7 +118,7 @@ function zodiac(dt){
 			"matches": "Sagittarius, Aquarius",
 		},
 		{
-			"name": "Cancer",
+			"name": "Cancer ♋︎",
 			"old_start": "06-21",
 			"old_end": "07-22",
 			"cetus_start": "06-22",
@@ -132,7 +133,7 @@ function zodiac(dt){
 			"birthstones": "Moonstone, Emerald, Ruby, Pearl"
 		},
 		{
-			"name": "Leo",
+			"name": "Leo ♌︎",
 			"old_start": "07-23",
 			"old_end": "08-22",
 			"cetus_start": "07-23",
@@ -146,7 +147,7 @@ function zodiac(dt){
 			"matches": "Aquarius, Gemini"
 		},
 		{
-			"name": "Virgo",
+			"name": "Virgo ♍︎",
 			"old_start": "08-23",
 			"old_end": "09-22",
 			"cetus_start": "08-23",
@@ -160,7 +161,7 @@ function zodiac(dt){
 			"matches": "Pisces, Cancer"
 		},
 		{
-			"name": "Libra",
+			"name": "Libra ♎︎",
 			"old_start": "09-23",
 			"old_end": "10-22",
 			"cetus_start": "09-23",
@@ -174,7 +175,7 @@ function zodiac(dt){
 			"matches": "Aries, Sagittarius"
 		},
 		{
-			"name": "Scorpio",
+			"name": "Scorpio ♏︎",
 			"old_start": "10-23",
 			"old_end": "11-21",
 			"cetus_start": "10-24",
@@ -188,7 +189,7 @@ function zodiac(dt){
 			"matches": "Taurus, Cancer"
 		},
 		{
-			"name": "Ophiuchus",
+			"name": "Ophiuchus ⛎",
 			"cetus_start": "11-15",
 			"cetus_end": "11-22",
 			"new_start": "11-29",
@@ -199,7 +200,7 @@ function zodiac(dt){
 			"traits": "Extremely curious, open to change, passionate"
 		},
 		{
-			"name": "Sagittarius",
+			"name": "Sagittarius ♐︎",
 			"old_start": "11-22",
 			"old_end": "12-21",
 			"cetus_start": "11-23",
@@ -233,84 +234,84 @@ function zodiac(dt){
 	// https://www.chinahighlights.com/travelguide/chinese-zodiac/
 	const chinese_signs = [
 		{
-			"name": "Rat",
+			"name": "Rat 🐀",
 			"years": [1924, 1936, 1948, 1960, 1972, 1984, 1996, 2008, 2020],
 			"hours": [23, 24, 00],
 			"traits": "Quick-witted, resourceful, versatile, kind",
 			"matches": "Ox, Dragon, Rabbit"
 		},
 		{
-			"name": "Ox",
+			"name": "Ox 🐂",
 			"years": [1925, 1937, 1949, 1961, 1973, 1985, 1997, 2009, 2021],
 			"hours": [1, 2],
 			"traits": "Diligent, dependable, strong, determined",
 			"matches": "Rat, Monkey, or Rooster"
 		},
 		{
-			"name": "Tiger",
+			"name": "Tiger 🐅",
 			"years": [1926, 1938, 1950, 1962, 1974, 1986, 1998, 2010, 2022],
 			"hours": [3, 4],
 			"traits": "Brave, confident, competitive",
 			"matches": "Dragon, Horse, or Pig"
 		},
 		{
-			"name": "Rabbit",
+			"name": "Rabbit 🐇",
 			"years": [1927, 1939, 1951, 1963, 1975, 1987, 1999, 2011, 2023],
 			"hours": [5, 6],
 			"traits": "Quiet, elegant, kind, responsible",
 			"matches": "Rat, Goat, Monkey, Dog, Pig"
 		},
 		{
-			"name": "Dragon",
+			"name": "Dragon 🐉",
 			"years": [1928, 1940, 1952, 1964, 1976, 1988, 2000, 2012, 2024],
 			"hours": [7, 8],
 			"traits": "Confident, intelligent, enthusiastic",
 			"matches": "Rat, Tiger or Snake"
 		},
 		{
-			"name": "Snake",
+			"name": "Snake 🐍",
 			"years": [1929, 1941, 1953, 1965, 1977, 1989, 2001, 2013, 2025],
 			"hours": [9, 10],
 			"traits": "Enigmatic, intelligent, wise",
 			"matches": "Dragon, Rooster"
 		},
 		{
-			"name": "Horse",
+			"name": "Horse 🐎",
 			"years": [1930, 1942, 1954, 1966, 1978, 1990, 2002, 2014, 2026],
 			"hours": [11, 12],
 			"traits": "Animated, active, energetic",
 			"matches": "Goat, Tiger"
 		},
 		{
-			"name": "Goat",
+			"name": "Goat 🐐",
 			"years": [1931, 1943, 1955, 1967, 1979, 1991, 2003, 2015, 2027],
 			"hours": [13, 14],
 			"traits": "Calm, gentle, sympathetic",
 			"matches": "Rabbit, Horse, Pig"
 		},
 		{
-			"name": "Monkey",
+			"name": "Monkey 🐒",
 			"years": [1932, 1944, 1956, 1968, 1980, 1992, 2004, 2016, 2028],
 			"hours": [15, 16],
 			"traits": "Sharp, smart, curiosity",
 			"matches": "Ox, Rabbit"
 		},
 		{
-			"name": "Rooster",
+			"name": "Rooster 🐓",
 			"years": [1933, 1945, 1957, 1969, 1981, 1993, 2005, 2017, 2029],
 			"hours": [17, 18],
 			"traits": "Observant, hardworking, courageous",
 			"matches": "Ox, Snake"
 		},
 		{
-			"name": "Dog",
+			"name": "Dog 🐕",
 			"years": [1934, 1946, 1958, 1970, 1982, 1994, 2006, 2018, 2030],
 			"hours": [19, 20],
 			"traits": "Lovely, honest, prudent",
 			"matches": "Rabbit"
 		},
 		{
-			"name": "Pig",
+			"name": "Pig 🐖",
 			"years": [1935, 1947, 1959, 1971, 1983, 1995, 2007, 2019, 2031],
 			"hours": [21, 22],
 			"traits": "Compassionate, generous, diligent",
@@ -333,7 +334,6 @@ function zodiac(dt){
 }
 
 function get_new_moons(date){
-	/* The date is decided by the Chinese Lunar Calendar, which is based on the cycles of the moon and sun and is generally 21–51 days behind the Gregorian (internationally-used) calendar. The date of Chinese New Year changes every year, but it always falls between January 21st and February 20th. */
 	const LUNAR_MONTH = 29.5305888531  // https://en.wikipedia.org/wiki/Lunar_month
 	let y = date.getFullYear()
 	let m = date.getMonth() + 1  // JS, why?
@@ -343,21 +343,29 @@ function get_new_moons(date){
 		y -= 1
 		m += 12
 	}
-	a = Math.floor(y/100)
-	b = Math.floor(a/4)
+	a = Math.floor(y / 100)
+	b = Math.floor(a / 4)
 	c = 2 - a + b
-	e = Math.floor(365.25 * (y+4716))
-	f = Math.floor(30.6001 * (m+1))
-	julian_day = c+d+e+f-1524.5
+	e = Math.floor(365.25 * (y + 4716))
+	f = Math.floor(30.6001 * (m + 1))
+	julian_day = c + d + e + f - 1524.5
 	days_since_last_new_moon = julian_day - 2451549.5
 	new_moons = days_since_last_new_moon / LUNAR_MONTH
 	days_into_cycle = (new_moons % 1) * LUNAR_MONTH
 	return new_moons
 }
 
-function in_chinese_new_year(date) {
-	// for(let i=20; i<53; ++i) { start =new Date(2023, 1, 0); start.setDate(i); console.log(start, get_new_moons(start)) }
-	return Math.floor(get_new_moons(date)) > Math.floor(get_new_moons(new Date(date.getFullYear(), 0, 20)))? 1 : 0
+function in_chinese_new_year(date){
+	/* The date is decided by the Chinese Lunar Calendar, which is based on the cycles of the moon and sun and is generally 21–51 days behind the Gregorian (internationally-used) calendar. The date of Chinese New Year changes every year, but it always falls between January 21st and February 20th. */
+	return Math.floor(get_new_moons(date)) > Math.floor(get_new_moons(new Date(date.getFullYear(), 0, 20))) ? 1 : 0
+}
+
+function get_chinese_new_year(gregorian_year){
+	for(let i = 20; i <= 31; ++i) {
+		let start = new Date(2023, 1, 0)
+		start.setDate(i)
+		if(in_chinese_new_year(start)) return start
+	}
 }
 
 function answer_dob(n){
@@ -384,6 +392,6 @@ See also these links and marvel at the coincidences while ignoring the rest, unl
 <li><a href="https://www.universeguide.com/fact/ophiuchus">https://www.universeguide.com/fact/ophiuchus</a> has slightly different dates.</li>
 </ul>
 
-<p>A <a href="https://en.wikipedia.org/wiki/Birthday_problem">shared birthday</a> among <input id="dobinput" type="number" min="1" value="22" style="width:3em" onchange="answer_dob(parseInt(this.value))" title="Birthdays"> has <span id="dobanswer">probability 0.48, chance 47.55%, and odds 0.91:1</span>.</p>
+<p>A <a href="https://en.wikipedia.org/wiki/Birthday_problem">shared birthday</a> among <input id="dobinput" type="number" min="1" value="23" style="width:3em" onchange="answer_dob(parseInt(this.value))" title="Birthdays"> has <span id="dobanswer">probability 0.51, chance 50.71%, and odds 1.03:1</span>.</p>
 </body>
 </html>
