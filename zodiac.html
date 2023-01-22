@@ -336,7 +336,7 @@ function zodiac(dt){
 function get_new_moons(date){
 	const LUNAR_MONTH = 29.5305888531  // https://en.wikipedia.org/wiki/Lunar_month
 	let y = date.getFullYear()
-	let m = date.getMonth() + 1  // JS, why?
+	let m = date.getMonth() + 1  // https://stackoverflow.com/questions/15799514/why-does-javascript-getmonth-count-from-0-and-getdate-count-from-1
 	let d = date.getDate()
 	// https://www.subsystems.us/uploads/9/8/9/4/98948044/moonphase.pdf
 	if (m <= 2) {
@@ -356,14 +356,18 @@ function get_new_moons(date){
 }
 
 function in_chinese_new_year(date){
-	/* The date is decided by the Chinese Lunar Calendar, which is based on the cycles of the moon and sun and is generally 21–51 days behind the Gregorian (internationally-used) calendar. The date of Chinese New Year changes every year, but it always falls between January 21st and February 20th. */
+	/* The date is decided by the Chinese Lunar Calendar, which is based on the
+	cycles of the moon and sun and is generally 21–51 days behind the Gregorian
+	(internationally-used) calendar. The date of Chinese New Year changes every
+	year, but it always falls between January 21st and February 20th. */
 	return Math.floor(get_new_moons(date)) > Math.floor(get_new_moons(new Date(date.getFullYear(), 0, 20))) ? 1 : 0
 }
 
 function get_chinese_new_year(gregorian_year){
-	for(let i = 20; i <= 31; ++i) {
-		let start = new Date(2023, 1, 0)
-		start.setDate(i)
+	// Does not quite line up with https://www.travelchinaguide.com/essential/holidays/new-year/dates.htm
+	for(let i = 0; i <= 30; ++i) {
+		let start = new Date(gregorian_year, 1, 0)
+		start.setDate(21 + i)
 		if(in_chinese_new_year(start)) return start
 	}
 }
