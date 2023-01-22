@@ -172,6 +172,11 @@
       <option value="custom">Custom</option>
     </select>
   </div>
+  <div class="left">
+    <button onclick="log = []">Clear</button>
+    <button onclick="replay()">Replay</button>
+    <button onclick="let rec = JSON.stringify(log); console.log(rec); alert(rec)">Export</button>
+  </div>
 
   <script>
     let audioContext
