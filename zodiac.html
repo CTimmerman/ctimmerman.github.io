@@ -366,9 +366,20 @@ function in_chinese_new_year(date){
 function get_chinese_new_year(gregorian_year){
 	// Does not quite line up with https://www.travelchinaguide.com/essential/holidays/new-year/dates.htm
 	for(let i = 0; i <= 30; ++i) {
-		let start = new Date(gregorian_year, 1, 0)
+		let start = new Date(gregorian_year, 0, 1)
 		start.setDate(21 + i)
 		if(in_chinese_new_year(start)) return start
+	}
+}
+
+function get_chinese_new_years() {
+	const yf = new Intl.DateTimeFormat('en', { year: 'numeric' })
+	const mf = new Intl.DateTimeFormat('en', { month: '2-digit' })
+	const df = new Intl.DateTimeFormat('en', { day: '2-digit' })
+	const wdf = new Intl.DateTimeFormat('en', { weekday: 'short' })
+	for(let i=1930; i <= 2030; ++i) {
+		const d = get_chinese_new_year(i)
+		console.log(`${yf.format(d)}-${mf.format(d)}-${df.format(d)} ${wdf.format(d)}`)
 	}
 }
 
