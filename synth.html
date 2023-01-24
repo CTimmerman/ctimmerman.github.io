@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- saved from url=(0118)https://yari-demos.prod.mdn.mozit.cloud/en-US/docs/Web/API/Web_Audio_API/Simple_synth/_sample_.the_video_keyboard.html -->
-<html>
+<!-- saved from url=(0118)https://yari-demos.prod.mdn.mozit.cloud/en-US/docs/Web/API/Web_Audio_API/Simple_synth/_sample_.the_video_keyboard.html which was generated from https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Simple_synth#result and fixed up/extended by Cees Timmerman on 2023-01-23 -->
+<html lang="en">
 
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+  <meta charset="utf-8">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       padding: 0;
@@ -67,10 +67,10 @@
       display: inline-block;
       position: relative;
       margin-right: 3px;
-      user-select: none;
       -moz-user-select: none;
       -webkit-user-select: none;
       -ms-user-select: none;
+      user-select: none;
     }
 
     .key div {
@@ -172,6 +172,7 @@
       <option value="custom">Custom</option>
     </select>
   </div>
+
   <div class="left">
     <button onclick="log = []">Clear</button>
     <button onclick="replay()">Replay</button>
@@ -197,11 +198,12 @@
       const el_key = synth_keys[synth_key]
       if (el_key) {
         if (down) {
-          el_key.scrollIntoView()
+          el_key.tabIndex = -1
+          el_key.focus()
+          // Doesn't scroll horizontally in iframe if vertically isn't needed. el_key.scrollIntoView()
           el_key.classList.add('active')
           notePressed({ buttons: 1, target: el_key })
-        }
-        else {
+        } else {
           el_key.classList.remove('active')
           noteReleased({ buttons: 1, target: el_key })
         }
@@ -454,10 +456,7 @@
     function changeVolume(event) {
       mainGainNode.gain.value = volumeControl.value
     }
-
   </script>
-
-
 </body>
 
 </html>
