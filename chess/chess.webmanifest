@@ -1,15 +1,15 @@
 {
-  "name": "Chess",
-  "short_name": "Chess",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "brown",
-  "theme_color": "yellow",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "rook.png",
-      "type": "image/png", "sizes": "152x152"
-    }
-  ]
+	"name": "Chess",
+	"short_name": "Chess",
+	"start_url": "index.html",
+	"display": "standalone",
+	"background_color": "brown",
+	"theme_color": "yellow",
+	"orientation": "portrait-primary",
+	"icons": [
+		{
+			"src": "rook.png",
+			"type": "image/png", "sizes": "152x152"
+		}
+	]
 }
