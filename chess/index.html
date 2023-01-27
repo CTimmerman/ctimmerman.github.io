@@ -5,7 +5,9 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Chess by Cees Timmerman, 2022-12-28</title>
-	<link id="favicon" rel="icon" href="lib/rook.png">
+	<link rel="apple-touch-icon" href="rook.png">
+	<link rel="icon" id="favicon" href="rook.png">
+	<link rel="manifest" href="chess.webmanifest">
 	<style>
 		/* Doesn't work in console.
 		@font-face {
@@ -964,8 +966,8 @@
 			return best_move
 		}
 
-		import sleep from './lib/sleep.mjs'
-		import say_it from './lib/say.mjs'
+		import sleep from '/lib/sleep.mjs'
+		import say_it from '/lib/say.mjs'
 		window.say = msg => {
 			console.log(msg)
 			if (speak.checked) {
@@ -974,7 +976,7 @@
 		}
 
 		async function show_move(start_fr, stop_fr, is_human) {
-			favicon.href = 'lib/rook.png'
+			favicon.href = 'rook.png'
 			const piece = board.fr2p(start_fr)
 			const c = piece.char
 			const color = piece.color
@@ -1019,7 +1021,7 @@
 			}
 			start_clock(1 - color)
 			if (black_ai_box.checked || white_ai_box.checked) {
-				favicon.href = 'lib/think.png'
+				favicon.href = 'think.png'
 				if (ai_level.value < 2 || board.log[board.log.length - 1].indexOf('x') > -1) await sleep(1000)
 				else await sleep(400)
 				if (color === WHITE && black_ai_box.checked) ai_move(board, BLACK)
