@@ -1,8 +1,7 @@
 const assets = [
-	"/",
-	"/index.html",
-	"/rook.png",
-	"/think.png",
+	"index.html",
+	"rook.png",
+	"think.png",
 ]
 
 self.addEventListener("fetch", fetchEvent => {
