@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>CTIDE IDE by Cees Timmerman, 2023-02-04</title>
+	<link rel="manifest" href="ide.webmanifest">
+	<style>
+		* {
+			--bgcolor: black;
+			--fgcolor: white;
+			color: var(--fgcolor);
+			background-color: var(--bgcolor);
+			border-color: var(--fgcolor);
+			font-size: 5mm;
+			line-height: 1em;
+			font-family: monospace;
+		}
+	</style>
+</head>
+
+<body>
+	<div contenteditable="true" onblur="output.innerText = eval(this.innerText)">
+		a=1
+		b=2
+		a+b
+	</div>
+	<hr>
+	<div id="output"></div>
+	<script>
+		if ("serviceWorker" in navigator) {
+			window.addEventListener("load", function () {
+				navigator.serviceWorker
+					.register("serviceWorker.js")
+					.catch(err => console.log("service worker not registered", err))
+			})
+		}
+	</script>
+</body>
+
+</html>

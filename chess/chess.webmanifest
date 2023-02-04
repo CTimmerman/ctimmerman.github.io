@@ -9,7 +9,8 @@
 	"icons": [
 		{
 			"src": "rook.png",
-			"type": "image/png", "sizes": "152x152"
+			"type": "image/png",
+			"sizes": "152x152"
 		}
 	]
 }

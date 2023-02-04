@@ -1,0 +1,9 @@
+{
+	"name": "CTIDE",
+	"short_name": "IDE",
+	"start_url": "index.html",
+	"display": "standalone",
+	"background_color": "black",
+	"theme_color": "black",
+	"orientation": "portrait-primary"
+}
