@@ -640,6 +640,9 @@
 				return rv
 			}
 
+			
+			get_score = color => this.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
+
 			is_check(color) {
 				const king = this.get_king(color)
 				return !!king && !king.is_safe()
@@ -883,6 +886,24 @@
 			const depth = board.depth
 			const max_secs = parseInt(ai_time.value) * 1000
 			let pieces = board.get_pieces(color)
+
+			// https://support.chess.com/article/128-what-does-insufficient-mating-material-mean
+			if (pieces.length < 3) {
+				const black_pieces = board.get_pieces(BLACK)
+				const white_pieces = board.get_pieces(WHITE)
+				if ((black_pieces.length + white_pieces.length) < 3 ||
+					((black_pieces.length < 3 && white_pieces.length < 3)
+						&& !black_pieces.concat(white_pieces).some(p => 'RQ'.indexOf(p.char) > -1))) {
+					if (depth === 0) {
+						say("Insufficient material to mate; draw.")
+						board.log.push('½–½')
+						clearInterval(timer)
+						render(board)
+					}
+					return
+				}
+			}
+
 			let total_moves = 0
 			pieces.forEach(p => { p.moves = p.get_moves(); total_moves += p.moves.length })
 			pieces = pieces.filter(p => p.moves.length > 0)
@@ -926,8 +947,8 @@
 					//console.log("Awaiting depth", new_board.depth)
 					enemy_move = await ai_move(new_board, 1 - color, start_time, total)
 				}
-				const my_score = new_board.get_pieces(color).reduce((sum, el) => sum + el.value, 0)
-				const enemy_score = new_board.get_pieces(1 - color).reduce((sum, el) => sum + el.value, 0)
+				const my_score = new_board.get_score(color)
+				const enemy_score = new_board.get_score(1 - color)
 				const score = my_score - enemy_score
 				if (score <= best_score) {
 					prune_move(piece, move)
@@ -1145,8 +1166,16 @@
 		}
 
 		window.test = async function test() {
-			await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8 17.Rf1f8# 1-0", true)
-			console.assert(board.fen_export() === "r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17")
+			const start = performance.now()
+			board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+			await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
+			// 17.Rf1f8# 1-0", true)
+			let fen = board.fen_export()
+			console.assert(fen === "r1b4k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K2RN1 w - - 2 17")
+			console.log(performance.now() - start)
+			await ai_move(board, WHITE)
+			console.log(board.fen_export() === "r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17")
+			console.log(performance.now() - start)
 		}
 
 		window.board = new Board()
@@ -1156,11 +1185,10 @@
 		if (white_ai_box.checked) ai_move(board, WHITE)
 
 		if ("serviceWorker" in navigator) {
-			window.addEventListener("load", function() {
+			window.addEventListener("load", () => {
 				navigator.serviceWorker
-				.register("serviceWorker.js")
-				.then(res => console.log("service worker registered"))
-				.catch(err => console.log("service worker not registered", err))
+					.register("serviceWorker.js")
+					.catch(err => console.log("service worker not registered", err))
 			})
 		}
 	</script>
