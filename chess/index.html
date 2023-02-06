@@ -157,7 +157,7 @@
 	<label for="ai_time"> max secs </label><input id="ai_time" type="number" value="15" min="1">
 	<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">black</label>
 	<input id="white_ai_box" type="checkbox"><label for="white_ai_box">white</label><br>
-	<input id="speak" type="checkbox" checked><label for="speak">Speak</label>
+	<input id="speak" type="checkbox"><label for="speak">Speak</label>
 	<input id="speak_black" type="checkbox"><label for="speak_black">black moves</label>
 	<input id="speak_white" type="checkbox"><label for="speak_white">white moves</label>
 	<div id="logtext"></div>
@@ -188,11 +188,8 @@
 		}
 
 		class Piece {
-			name = "Piece"
-			char = "P"
-			value = 0
-			dirs = []
 			moved = false
+			
 			constructor(x, y, color, board_in) {
 				this.x = x
 				this.y = y
@@ -1167,18 +1164,21 @@
 
 		window.test = async function test() {
 			const start = performance.now()
-			board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-			await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
-			// 17.Rf1f8# 1-0", true)
-			let fen = board.fen_export()
-			console.assert(fen === "r1b4k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K2RN1 w - - 2 17")
-			console.log(performance.now() - start)
-			black_ai_box.checked = false
-			white_ai_box.checked = false
-			await ai_move(board, WHITE)
-			clearTimeout(timer)
+			for (let i = 0; i < 20; ++i) {
+				board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+				await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
+				// 17.Rf1f8# 1-0", true)
+				let fen = board.fen_export()
+				console.assert(fen === "r1b4k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K2RN1 w - - 2 17")
+				console.log(performance.now() - start)
+				black_ai_box.checked = false
+				white_ai_box.checked = false
+				await ai_move(board, WHITE)
+				clearTimeout(timer)
+			}
 			console.log(board.fen_export() === "r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17")
 			console.log(performance.now() - start)
+			// TODO: Don't cap rook in 8/7k/8/8/8/K1n2b2/R7/8 b - - 12 63
 		}
 
 		window.board = new Board()
