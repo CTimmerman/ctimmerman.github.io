@@ -188,8 +188,6 @@
 		}
 
 		class Piece {
-			moved = false
-			
 			constructor(x, y, color, board_in) {
 				this.x = x
 				this.y = y
@@ -197,11 +195,7 @@
 				this.board = board_in || board
 			}
 
-			copy(board) {
-				const copy = new this.constructor(this.x, this.y, this.color, board)
-				copy.moved = this.moved
-				return copy
-			}
+			copy = board => new this.constructor(this.x, this.y, this.color, board)
 
 			get_moves() {
 				const grid = this.board.grid
@@ -225,27 +219,13 @@
 				return moves
 			}
 
-			/* get_threats(depth) {
-				if ((depth || 0) > 1) return []
-				const grid = this.board.grid
-				const threats = []
-				for (const row in grid) {
-					for (const col in grid) {
-						const piece = grid[row][col]
-						if (piece == ' ' || piece.color === this.color) continue
-						if (piece.get_moves(depth + 1).find(xy => xy[0] === this.x && xy[1] === this.y)) threats.push(piece)
-					}
-				}
-				return threats
-			} */
-
 			is_safe(depth) {
-				if ((depth || 0) > 1) return true
+				if ((depth || 0) > 1) return true  // FIXME? King is thought to move more like this.
 				const grid = this.board.grid
 				for (const row in grid) {
 					for (const col in grid) {
 						const piece = grid[row][col]
-						if (piece == ' ' || piece.color === this.color) continue
+						if (piece == ' ' || piece.color === this.color || piece === this) continue
 						if (piece.get_moves(depth + 1).find(xy => xy[0] === this.x && xy[1] === this.y)) return false
 					}
 				}
@@ -253,10 +233,11 @@
 			}
 
 			move(xy, partial) {
-				this.moved = true
 				const ox = this.x
 				const oy = this.y
 				const [x, y] = xy
+				this.board.moved |= xy2b(ox, oy)
+				this.board.moved |= xy2b(x, y)
 				const board = this.board
 				const capture = board.grid[y][x]
 				const move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + xy2fr(x, y)
@@ -341,23 +322,21 @@
 				Castle to checkmate by Paul Morphy vs. Alonzo Morphy, 1-0 Rook odds New Orleans 1858:
 				r4b1r/ppp3pp/8/4p3/2Pq4/3P4/PP2QPPP/2k1K2R w K - 0 19
 				*/
-				if (!this.moved && this.is_safe(depth + 1)) {
-					const rank = this.color ? 8 : 1
-					let piece = board.fr2p('a' + rank)
-					if (piece.char === 'R' && !piece.moved) {
+				const unmoved = !(this.board.moved & xy2b(this.x, this.y))
+				if (unmoved && this.is_safe(depth + 1)) {
+					if (!(this.board.moved & xy2b(0, this.y))) {
 						let clear = true
 						for (let i = 1; i < this.x; ++i) {
-							if (grid[8 - rank][i] !== ' ') clear = false
+							if (grid[this.y][i] !== ' ') clear = false
 						}
-						if (clear) moves.push([2, 8 - rank])
+						if (clear) moves.push([2, this.y])
 					}
-					piece = board.fr2p('h' + rank)
-					if (piece.char === 'R' && !piece.moved) {
+					if (!(this.board.moved & xy2b(7, this.y))) {
 						let clear = true
 						for (let i = 6; i > this.x; --i) {
-							if (grid[8 - rank][i] !== ' ') clear = false
+							if (grid[this.y][i] !== ' ') clear = false
 						}
-						if (clear) moves.push([6, 8 - rank])
+						if (clear) moves.push([6, this.y])
 					}
 				}
 				// Remove unsafe moves.
@@ -374,7 +353,7 @@
 						if (new_piece.is_safe(depth + 1)) safe_moves.push(xy)
 					}
 				}
-				if (!this.moved) {
+				if (unmoved) {
 					// Can't castle over unsafe space.
 					const frs = safe_moves.map(e => xy2fr(...e))
 					for (let i = safe_moves.length - 1; i >= 0; --i) {
@@ -480,6 +459,7 @@
 			grid = [[], [], [], [], [], [], [], []]
 			log = []
 			captured = []
+			moved = 0n
 
 			constructor(depth) {
 				this.depth = depth || 0
@@ -498,6 +478,7 @@
 				]
 				this.log = []
 				this.captured = []
+				this.moved = 0n
 			}
 
 			fen_export() {
@@ -528,14 +509,16 @@
 				}
 				const active_color = 'wb'[this.log.length % 2]
 				let castling_availability = ''
-				if (!this.get_king(WHITE).moved) {
-					if (this.xy2p(7, 7).moved === false) castling_availability += 'K'
-					if (this.xy2p(0, 7).moved === false) castling_availability += 'Q'
+				//if (!(this.moved & 0b00001000_00000000_00000000_00000000_00000000_00000000_00000000_00000000)) {
+				if (!(this.moved & (1n << 60n))) {
+					if (!(this.moved & (1n << 63n))) castling_availability += 'K'
+					if (!(this.moved & (1n << 56n))) castling_availability += 'Q'
 				}
-				if (!this.get_king(BLACK).moved) {
-					if (this.xy2p(7, 0).moved === false) castling_availability += 'k'
-					if (this.xy2p(0, 0).moved === false) castling_availability += 'q'
+				if (!(this.moved & 16n)) {
+					if (!(this.moved & 128n)) castling_availability += 'k'
+					if (!(this.moved & 1n)) castling_availability += 'q'
 				}
+
 				let ep_target = '-'
 				const mo = this.log[this.log.length - 1]?.match(/^[a-h][27]([a-h][45])/)
 				if (mo) {
@@ -584,27 +567,28 @@
 								col += parseInt(char) - 1
 						}
 						this.grid[row][col] = piece
-						if (piece !== ' ') piece.moved = true
 						++col
 					}
 					col = 0
 					++row
 				}
+
+				this.moved = ((1n << 64n) - 1n)
 				if (castling_availability.indexOf('K') > -1) {
-					this.grid[7][4].moved = false
-					this.grid[7][7].moved = false
+					this.moved -= xy2b(4, 7)
+					this.moved -= xy2b(7, 7)
 				}
 				if (castling_availability.indexOf('Q') > -1) {
-					this.grid[7][4].moved = false
-					this.grid[7][0].moved = false
+					this.moved -= xy2b(4, 7)
+					this.moved -= xy2b(0, 7)
 				}
 				if (castling_availability.indexOf('k') > -1) {
-					this.grid[0][4].moved = false
-					this.grid[0][7].moved = false
+					this.moved -= xy2b(4, 0)
+					this.moved -= xy2b(7, 0)
 				}
 				if (castling_availability.indexOf('q') > -1) {
-					this.grid[0][4].moved = false
-					this.grid[0][0].moved = false
+					this.moved -= xy2b(4, 0)
+					this.moved -= xy2b(0, 0)
 				}
 				const move_count = (fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0)
 				const hmc = parseInt(halfmove_clock)
@@ -667,8 +651,8 @@
 
 			copy() {
 				const new_board = new Board(this.depth + 1)
-				new_board.log = [...this.log]
-				new_board.captured = [...this.captured]
+				new_board.log = [...this.log] // this.log.slice(-1)
+				new_board.moved = this.moved  // XXX: Forgetting this line leads to random data in fen_export and Qg8 instead of Rf8 in test despite new_board.moved being a 0n bigint here according to Chrome 109.0.5414.120 on Windows 10.0.19044.2486.
 				for (const row in this.grid) {
 					for (const col in this.grid) {
 						const piece = this.grid[row][col]
@@ -723,7 +707,26 @@
 				}
 			}
 		}
+		window.get_moves = () => {
+			let m = []
+			for (let p of board.get_pieces(0).concat(board.get_pieces(1))) m = m.concat(p.get_moves())
+			return m
+		}
 
+		window.xy2b = (x, y) => 1n << BigInt(xy2i(x, y))
+		window.xy2i = (x, y) => y * 8 + x
+		window.blog = b => {
+			const s = b.toString(2).padStart(64, '0')
+			let text = ''
+			for (let row = 7; row >= 0; --row) {
+				for (let col = 7; col >= 0; --col) {
+					let i = xy2i(col, row)
+					text += s.slice(i, i + 1)
+				}
+				text += '\n'
+			}
+			console.log(text)
+		}
 
 		window.xy2fr = (x, y) => {
 			return "abcdefgh"[x] + (8 - y)
@@ -915,10 +918,6 @@
 				if (pieces.length < 1) break
 				const piece = random_choice(pieces)
 				const move = random_choice(piece.moves)
-				if (!move) {
-					console.log("FIXME: prune didn't clear pieces!?", [...pieces])
-					debugger
-				}
 				// Eval move.
 				const new_board = board.copy()
 				const new_piece = new_board.grid[piece.y][piece.x]
@@ -936,24 +935,35 @@
 					pieces = pieces.filter(p => p.moves.length > 0)
 					continue  // Keep own king safe.
 				}
-
+				if (new_board.is_check(1 - color)) {
+					if (new_board.is_mate(1 - color)) {
+						best_score = 999
+						best_move = move
+						best_piece = piece
+						//console.log("Found mate!", new_board.moved, new_board.fen_export())
+						// Found mate! 13810387119856777722n r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17
+						// bad moved = 274877907008n
+						// better moved = 2305843009213693984n
+						// best moved = 13810387119856777722n
+						break
+					}
+				}
 				// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
-				let enemy_move = true
+				let enemy_move = false
 				if (board.depth < ai_level.value - 1) {
 					//console.log("Awaiting depth", new_board.depth)
 					enemy_move = await ai_move(new_board, 1 - color, start_time, total)
 				}
 				const my_score = new_board.get_score(color)
 				const enemy_score = new_board.get_score(1 - color)
-				const score = my_score - enemy_score
-				// if (depth === 0) console.log(piece.name, "move", xy2fr(...move), "score", score, enemy_move)
+				let score = my_score - enemy_score
+				//console.log("" + depth, piece.name, "move", xy2fr(...move), "score", score, enemy_move)
 				if (!enemy_move) {
-					// Timeout, draw, or win!
-					best_score = score - 0.5  // avoid draw
-					best_move = move
-					best_piece = piece
-					if (new_board.is_check(1 - color) && new_board.is_mate(1 - color)) break
-				} else if (score <= best_score) {
+					// Draw or timeout. TODO: check timeout
+					//console.log("Lowering", score)
+					//score -= 0.5  // avoid draw
+				}
+				if (score <= best_score) {
 					prune_move(piece, move)
 					pieces = pieces.filter(p => p.moves.length > 0)
 					continue
