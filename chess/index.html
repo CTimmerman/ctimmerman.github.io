@@ -8,145 +8,7 @@
 	<link rel="apple-touch-icon" href="rook.png">
 	<link rel="icon" id="favicon" href="rook.png">
 	<link rel="manifest" href="chess.webmanifest">
-	<style>
-		/* Doesn't work in console.
-		@font-face {
-			font-family: 'TrueMonospace';
-			src: url('fonts/GnuUnifontFull-Pm9P.ttf');
-		}
-		*/
-		* {
-			--bgcolor: brown;
-			--fgcolor: yellow;
-			color: var(--fgcolor);
-			background-color: var(--bgcolor);
-			border-color: var(--fgcolor);
-			font-size: 10mm;
-			line-height: 1em;
-			font-family: monospace;
-		}
-
-		button {
-			cursor: pointer;
-			vertical-align: top;
-			font-size: 0.7em;
-			height: 2em;
-			min-width: 2em;
-		}
-
-		input[type=number] {
-			width: 2em;
-		}
-
-		#modal {
-			margin: 0;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%;
-			position: fixed;
-			overflow: auto;
-			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
-			/* vertical */
-			justify-content: center;
-			/* horizontal */
-			visibility: hidden;
-			background-color: rgba(0, 0, 0, 0.5);
-		}
-
-		.alert {
-			/* margin: auto; */
-			border: 1px solid var(--fgcolor);
-			border-radius: 5px;
-			box-shadow: 10px 10px 10px rgb(0 0 0 / 20%);
-			padding: 1em;
-			/* background-color: var(--bgcolor); */
-			/* font-size: 200%; */
-			text-align: center;
-		}
-
-		#boardtext {
-			display: block;
-			/*font-family: TrueMonospace;*/
-			font-size: 0;
-			/* Gets rid of newline spaces. */
-			margin: 1em 0;
-			position: relative;
-			/* For relative position absolute children. */
-			white-space: pre;
-		}
-
-		.w {
-			background-color: lightgrey;
-		}
-
-		.b {
-			background-color: darkgrey;
-		}
-
-		.wf {
-			color: white;
-		}
-
-		.bf {
-			color: black;
-		}
-
-		.square {
-			height: 1em;
-			width: 1em;
-			display: inline-block;
-			line-height: 1em;
-			text-align: center;
-			cursor: pointer;
-		}
-
-		.piece {
-			background-color: transparent;
-			height: 1em;
-			line-height: 1em;
-			width: 1em;
-			text-align: center;
-			display: block;
-			pointer-events: none;
-			position: absolute;
-			transition: 0.4s;
-		}
-
-		.selected.w {
-			background: radial-gradient(lightgray 30%, yellow);
-		}
-
-		.selected.b {
-			background: radial-gradient(darkgray 30%, yellow);
-		}
-
-		.selected.w.nobg {
-			background: lightgray;
-		}
-
-		.selected.b.nobg {
-			background: darkgray;
-		}
-
-		input,
-		label,
-		li,
-		li>span,
-		textarea {
-			font-size: 5mm;
-		}
-
-		li>span {
-			cursor: pointer;
-		}
-
-		ol {
-			list-style-position: inside;
-		}
-	</style>
+	<link rel="stylesheet" href="chess.css" type="text/css" media="all">
 </head>
 
 <body>
@@ -220,13 +82,12 @@
 			}
 
 			is_safe(depth) {
-				if ((depth || 0) > 1) return true  // FIXME? King is thought to move more like this.
 				const grid = this.board.grid
 				for (const row in grid) {
 					for (const col in grid) {
 						const piece = grid[row][col]
 						if (piece == ' ' || piece.color === this.color || piece === this) continue
-						if (piece.get_moves(depth + 1).find(xy => xy[0] === this.x && xy[1] === this.y)) return false
+						if (piece.get_moves(depth).find(xy => xy[0] === this.x && xy[1] === this.y)) return false
 					}
 				}
 				return true
@@ -301,7 +162,6 @@
 
 			get_moves(depth) {
 				if (!depth) depth = 0
-				if (depth > 2) return [] // Depth 1 needed to cover piece for checkmate on 8/8/8/6N1/P3B3/2K5/8/kQ6 w - - 10 48
 				const board = this.board
 				const grid = board.grid
 				const moves = []
@@ -313,6 +173,7 @@
 						moves.push([tx, ty])
 					}
 				}
+				if (depth > 0) return moves  // Prevent is_safe loop.
 				// Castling.
 				/* https://chessily.com/learn-chess/king/
 				The king and rook have not yet been moved in the game.
@@ -712,9 +573,6 @@
 			for (let p of board.get_pieces(0).concat(board.get_pieces(1))) m = m.concat(p.get_moves())
 			return m
 		}
-
-		window.xy2b = (x, y) => 1n << BigInt(xy2i(x, y))
-		window.xy2i = (x, y) => y * 8 + x
 		window.blog = b => {
 			const s = b.toString(2).padStart(64, '0')
 			let text = ''
@@ -727,14 +585,10 @@
 			}
 			console.log(text)
 		}
-
-		window.xy2fr = (x, y) => {
-			return "abcdefgh"[x] + (8 - y)
-		}
-
-		window.fr2xy = fr => {
-			return ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
-		}
+		window.fr2xy = fr => ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
+		window.xy2fr = (x, y) => "abcdefgh"[x] + (8 - y)
+		window.xy2b = (x, y) => 1n << BigInt(xy2i(x, y))
+		window.xy2i = (x, y) => y * 8 + x
 
 		const icons = {
 			'0': '♙', '1': '♟︎',
@@ -885,7 +739,6 @@
 			const depth = board.depth
 			const max_secs = parseInt(ai_time.value) * 1000
 			let pieces = board.get_pieces(color)
-
 			// https://support.chess.com/article/128-what-does-insufficient-mating-material-mean
 			if (pieces.length < 3) {
 				const black_pieces = board.get_pieces(BLACK)
@@ -1188,7 +1041,6 @@
 			}
 			console.log(board.fen_export() === "r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17")
 			console.log(performance.now() - start)
-			// TODO: Don't cap rook in 8/7k/8/8/8/K1n2b2/R7/8 b - - 12 63
 		}
 
 		window.board = new Board()
