@@ -567,7 +567,7 @@ window.render = board => {
 	const log = board.log
 
 	let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
-	let lines = [files + `<span id="clock1"></span> <span id="caps1">${board.captured.filter(e => e.color === WHITE).map(e => icons[e.char + e.color]).join('')}</span>`]
+	let lines = [files + `<span id="clock1"></span> <span class="wf">${board.captured.filter(e => e.color === WHITE).map(e => icons[e.char + 1]).join('')}</span>`]
 	for (const row in grid) {
 		let line = `<span class="square">${8 - row}</span>`
 		for (const col in grid) {
@@ -576,7 +576,7 @@ window.render = board => {
 		line += `<span class="square">${8 - row}</span>`
 		lines.push(line)
 	}
-	lines.push(files + `<span id="clock0"></span> <span id="caps0">${board.captured.filter(e => e.color === BLACK).map(e => icons[e.char + e.color]).join('')}</span>`)
+	lines.push(files + `<span id="clock0"></span> <span class="bf">${board.captured.filter(e => e.color === BLACK).map(e => icons[e.char + 1]).join('')}</span>`)
 
 	files = ' abcdefgh '
 	let blank = ' '
