@@ -1,0 +1,6 @@
+{
+	"scripts": {
+		"dev": "python -m http.server"
+	},
+	"type": "module"
+}
