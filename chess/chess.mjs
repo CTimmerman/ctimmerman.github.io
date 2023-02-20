@@ -567,7 +567,8 @@ window.render = board => {
 	const log = board.log
 
 	let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
-	let lines = [files + `<span id="clock1"></span> <span class="wf">${board.captured.filter(e => e.color === WHITE).map(e => icons[e.char + 1]).join('')}</span>`]
+	let lines = [files]
+	caps1.innerHTML = board.captured.filter(e => e.color === WHITE).map(e => icons[e.char + 1]).join('')
 	for (const row in grid) {
 		let line = `<span class="square">${8 - row}</span>`
 		for (const col in grid) {
@@ -576,7 +577,8 @@ window.render = board => {
 		line += `<span class="square">${8 - row}</span>`
 		lines.push(line)
 	}
-	lines.push(files + `<span id="clock0"></span> <span class="bf">${board.captured.filter(e => e.color === BLACK).map(e => icons[e.char + 1]).join('')}</span>`)
+	lines.push(files)
+	caps0.innerHTML = board.captured.filter(e => e.color === BLACK).map(e => icons[e.char + 1]).join('')
 
 	files = ' abcdefgh '
 	let blank = ' '
@@ -599,7 +601,7 @@ window.render = board => {
 			let html = ''
 			if (p.color) html = `<span class="piece bf">${icons[p.char + '1']}</span>`
 			else html = `<span class="piece wf">${icons[p.char + '1']}</span><span class="piece bf">${icons[p.char + '0']}</span>`
-			lines.push(`<div id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</div>`)
+			lines.push(`<span id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</span>`)
 		}
 		text_lines.push(text_line + (COLORS ? `\x1B[m${8 - row}` : `${8 - row}`))
 	}
@@ -614,6 +616,7 @@ window.render = board => {
 		txt += `${1 + i / 2}. ${log[i]} ${log[i + 1] || ''} `
 	}
 	logtext.innerHTML = `<ol>${html}</ol>`
+	logtext.scroll(0, 9999)
 
 	clog(board.captured.map(e => icons[e.char + e.color]).join(''))
 	if (txt.length > 77) clog(`...${txt.slice(-77)}`)
@@ -765,14 +768,15 @@ window.ai_move = async function ai_move(board, color, start_time, total) {
 			}
 		}
 		// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
+		let enemy_move_count = 0
 		let enemy_move = false
 		if (board.depth < ai_level.value - 1) {
 			//console.log("Awaiting depth", new_board.depth)
-			enemy_move = await ai_move(new_board, 1 - color, start_time, total)
+			[enemy_move_count, enemy_move] = await ai_move(new_board, 1 - color, start_time, total)
 		}
 		const my_score = new_board.get_score(color)
 		const enemy_score = new_board.get_score(1 - color)
-		let score = my_score - enemy_score
+		let score = my_score - enemy_score - enemy_move_count / 8
 		//console.log("" + depth, piece.name, "move", xy2fr(...move), "score", score, enemy_move)
 		if (!enemy_move) {
 			// Draw or timeout. TODO: check timeout
@@ -809,7 +813,7 @@ window.ai_move = async function ai_move(board, color, start_time, total) {
 		}
 		console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max ${max_think} of ${total_moves} took ${ms2time(performance.now() - start_time)} to ${best_score}`)
 	}
-	return best_move
+	return [total_moves, best_move]
 }
 
 import sleep from '/lib/sleep.mjs'
@@ -856,7 +860,11 @@ async function show_move(start_fr, stop_fr, is_human) {
 		while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))
 	}
 
-	if (board.log[board.log.length - 1].indexOf('#') > -1) return
+	if (board.log[board.log.length - 1].indexOf('#') > -1) {
+		const p = board.get_king(1 - color)
+		document.getElementById('p' + xy2fr(p.x, p.y)).classList.add('dead')
+		return
+	}
 	const max_moves = 75
 	if (board.log.length > max_moves && !board.log.slice(-max_moves).some(s => s.indexOf('x') > -1 || s.match(/^[a-h]/))) {
 		const msg = `${max_moves} moves without checkmate, capture, or pawn move. Draw.`
