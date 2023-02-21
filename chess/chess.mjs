@@ -620,7 +620,7 @@ window.render = board => {
 			let html = ''
 			if (p.color) html = `<span class="piece bf">${icons[p.char + '1']}</span>`
 			else html = `<span class="piece wf">${icons[p.char + '1']}</span><span class="piece bf">${icons[p.char + '0']}</span>`
-			
+
 			lines.push(`<span id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</span>`)
 		}
 		text_lines.push(text_line + (COLORS ? `\x1B[m${8 - row}` : `${8 - row}`))
@@ -1018,7 +1018,7 @@ window.rewind = function rewind(index) {
 
 window.test = async function test() {
 	const start = performance.now()
-	for (let i = 0; i < 20; ++i) {
+	for (var i = 0; i < 5; ++i) {
 		board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 		await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
 		// 17.Rf1f8# 1-0", true)
@@ -1031,7 +1031,8 @@ window.test = async function test() {
 		clearTimeout(timer)
 	}
 	console.log(board.fen_export() === "r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17")
-	console.log(performance.now() - start)
+	let ms = performance.now() - start
+	console.log(ms, "ms to", i, "x level", ai_level.value, "=", ms / i, "per move.")
 }
 
 window.board = new Board()
