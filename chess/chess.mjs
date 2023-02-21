@@ -586,12 +586,31 @@ window.render = board => {
 		files = ' a b c d e f g h '
 		blank = '  '
 	}
-	let text_lines = [files]
+	const black_coverage = new Array(64).fill(0)
+	const white_coverage = new Array(64).fill(0)
 	for (const row in grid) {
-		let text_line = COLORS ? `${8 - row}\x1B[30m` : `${8 - row}`
 		for (const col in grid) {
+			const p = board.xy2p(col, row)
+			if (p === ' ') continue
+			p.get_moves().forEach(m => {
+				const i = xy2i(...m)
+				if (p.color) black_coverage[i] = (black_coverage[i] || 0) + 1
+				else white_coverage[i] = (white_coverage[i] || 0) + 1
+			})
+		}
+	}
+
+	let text_lines = [files]
+	for (let row = 0; row < 8; ++row) {
+		let text_line = COLORS ? `${8 - row}\x1B[30m` : `${8 - row}`
+		for (let col = 0; col < 8; ++col) {
 			if (COLORS) text_line += ['\x1B[47m', '\x1B[100m'][(row % 2 + col % 2) % 2]
 			const p = grid[row][col]
+			if (stats.checked) {
+				const i = xy2i(col, row)
+				if (white_coverage[i] + black_coverage[i]) lines.push(`<span id="g${xy2fr(col, row)}" class='pos unsafe' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'><span style="background: linear-gradient(-90deg, rgba(255,255,255,1) ${white_coverage[i] / (black_coverage[i] + white_coverage[i]) * 100}%, rgba(0,0,0,1) ${100 - black_coverage[i] / (black_coverage[i] + white_coverage[i]) * 100}%);">${black_coverage[i]}B ${white_coverage[i]}W</span></span>`)
+			}
+
 			if (p === ' ') {
 				text_line += COLORS ? ' ' : ' .'[(row % 2 + col % 2) % 2]
 				if (!MONOSPACE) text_line += ' '
@@ -601,6 +620,7 @@ window.render = board => {
 			let html = ''
 			if (p.color) html = `<span class="piece bf">${icons[p.char + '1']}</span>`
 			else html = `<span class="piece wf">${icons[p.char + '1']}</span><span class="piece bf">${icons[p.char + '0']}</span>`
+			
 			lines.push(`<span id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</span>`)
 		}
 		text_lines.push(text_line + (COLORS ? `\x1B[m${8 - row}` : `${8 - row}`))
@@ -807,7 +827,7 @@ window.ai_move = async function ai_move(board, color, start_time, total) {
 		if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
 		else {
 			board.log.push('½–½')
-			say('Draw.')
+			say('Stalemate; draw.')
 			clearInterval(timer)
 			render(board)
 		}
@@ -862,7 +882,7 @@ async function show_move(start_fr, stop_fr, is_human) {
 
 	if (board.log[board.log.length - 1].indexOf('#') > -1) {
 		const p = board.get_king(1 - color)
-		document.getElementById('p' + xy2fr(p.x, p.y)).classList.add('dead')
+		document.getElementById('p' + xy2fr(p.x, p.y)).classList.add('mate')
 		return
 	}
 	const max_moves = 75
