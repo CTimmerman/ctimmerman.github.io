@@ -186,7 +186,7 @@
 	</div>
 
 	<div class="morse">
-		<textarea id="morsetext" placeholder="Morse text">S O S</textarea>
+		<textarea id="morsetext" placeholder="Morse text">SOS</textarea>
 		<button onclick="morsecode.value = morse_to(morsetext.value)">To</button>
 		<button onclick="morsetext.value = morse_from(morsecode.value)">From</button>
 		<button onclick="morse_play(morsecode.value)">Play</button>
@@ -202,8 +202,12 @@
 		const SPACE = 7 * DOT
 		// https://morsecode.world/international/morse2.html
 		const MORSE = {
-			' ': ' / ',
-			'A': ' .-',
+			'ERROR': '........',
+			'EOF': '.-.-.',  // +
+			//'\n': '/',  // https://morsecode.world/international/translator.html
+			//'\t': '/',
+			' ': '/',
+			'A': '.-',
 			'B': '-...',
 			'C': '-.-.',
 			'D': '-..',
@@ -247,7 +251,7 @@
 			':': '---...',
 			',': '--..--',
 			'=': '-...-',
-			'!': '-.-.--,',
+			'!': '-.-.--',
 			'.': '.-.-.-',
 			'-': '-....-',
 			'×': '-..-',
@@ -287,9 +291,6 @@
 			'Ŭ': '..--',
 			'Ź': '--..-.',
 			'Ż': '--..-',
-			'\n': '.-.-',
-			'EOF': '.-.-.',
-			'ERROR': '........',
 		}
 		let MORSE_CHAR = {}
 		for (let key in MORSE) {
@@ -299,17 +300,16 @@
 		function morse_to(text) {
 			let code = []
 			for (let char of text.toUpperCase()) {
-				code.push(MORSE[char] || MORSE['ERROR'])
+				code.push(MORSE[char] || char)  // MORSE['ERROR'])
 			}
 			return code.join(' ')
 		}
 
 		function morse_from(code) {
 			let text = []
-			for (let key of code.split(' ')) {
+			for (let key of code.split(/ /)) {
 				if (key === '') continue
-				if (key === '/') key = ' / '
-				text.push(MORSE_CHAR[key] || ' ')
+				text.push(MORSE_CHAR[key] || key)
 			}
 			return text.join('')
 		}
@@ -317,7 +317,6 @@
 		function morse_play(code) {
 			log = []
 			let time = 0
-			// [[10879,1,38,"5"],[10947,0,38,"5"],[11009,1,38,"5"],[11194,0,38,"5"],[11860,1,38,"5"],[11941,0,38,"5"],[12042,1,38,"5"],[12124,0,38,"5"],[12204,1,38,"5"],[12291,0,38,"5"],[12582,1,38,"5"],[12664,0,38,"5"],[12768,1,38,"5"],[12792,0,38,"5"],[12821,1,38,"5"],[12918,0,38,"5"]]
 			for (let char of code) {
 				log.push([time, 1, 38, "5"])
 				if (char === '.') time += DOT
@@ -337,6 +336,8 @@
 			}
 			replay()
 		}
+		morsecode.addEventListener('keydown', () => event.stopPropagation())
+		morsecode.addEventListener('keyup', () => event.stopPropagation())
 		morsetext.addEventListener('keydown', () => event.stopPropagation())
 		morsetext.addEventListener('keyup', () => event.stopPropagation())
 
