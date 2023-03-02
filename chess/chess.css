@@ -71,7 +71,8 @@ input[type=number] {
 	white-space: pre;
 }
 
-#caps0, #caps1 {
+#caps0,
+#caps1 {
 	font-size: 0.5em;
 }
 
@@ -83,6 +84,10 @@ input[type=number] {
 	height: 8em;
 	overflow: auto;
 	width: 8em;
+}
+
+.flex {
+	display: flex
 }
 
 .safe {

@@ -26,7 +26,7 @@
 	</table>
 	<div>
 		<label>Show </label><input id="guides" type="checkbox" checked><label for="guides">potential moves</label>
-		<input id="stats" type="checkbox" checked><label for="stats">stats</label>
+		<input id="stats" type="checkbox"><label for="stats">stats</label>
 		<input id="editmode" type="checkbox"><label for="editmode">Edit board</label><br>
 		<label for="ai_level">AI depth </label><input id="ai_level" type="number" value="2" min="1">
 		<label for="ai_time"> max secs </label><input id="ai_time" type="number" value="15" min="1">
@@ -36,12 +36,12 @@
 		<input id="speak_black" type="checkbox"><label for="speak_black">black moves</label>
 		<input id="speak_white" type="checkbox"><label for="speak_white">white moves</label>
 	</div>
-	<div style="display:flex">
+	<div class="flex">
 		<button onclick="replay(movetextbox.value, true)" type="button">Instant</button>
 		<button onclick="replay(movetextbox.value)" type="button">Replay</button>
 		<textarea id="movetextbox" type="text" placeholder="movetext"></textarea>
 	</div>
-	<div style="display:flex">
+	<div class="flex">
 		<button onclick="fenbox.value = board.fen_export()" type="button">Export</button>
 		<button onclick="board.fen_import(fenbox.value)" type="button">Import</button>
 		<textarea id="fenbox" type="text" placeholder="FEN"></textarea>
