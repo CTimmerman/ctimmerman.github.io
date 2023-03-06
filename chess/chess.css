@@ -83,7 +83,16 @@ input[type=number] {
 #logtext {
 	height: 8em;
 	overflow: auto;
-	width: 8em;
+}
+
+#logtext * {
+	font-size: 4mm;
+	margin: 3px;
+}
+
+#logtext span:hover {
+	color: var(--bgcolor);
+	background-color: var(--fgcolor);
 }
 
 .flex {
@@ -177,16 +186,10 @@ input[type=number] {
 
 input,
 label,
-li,
-li>span,
 textarea {
 	font-size: 5mm;
 }
 
 li>span {
 	cursor: pointer;
-}
-
-ol {
-	list-style-position: inside;
 }

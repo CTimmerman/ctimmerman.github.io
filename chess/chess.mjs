@@ -46,12 +46,10 @@ class Piece {
 
 	is_safe(depth) {
 		const grid = this.board.grid
-		for (const row in grid) {
-			for (const col in grid) {
-				const piece = grid[row][col]
-				if (piece == ' ' || piece.color === this.color || piece === this) continue
-				if (piece.get_moves(depth).find(xy => xy[0] === this.x && xy[1] === this.y)) return false
-			}
+		for (let i = 0; i < 64; ++i) {
+			const piece = grid[i]
+			if (piece == ' ' || piece.color === this.color || piece === this) continue
+			if (piece.get_moves(depth).find(xy => xy[0] === this.x && xy[1] === this.y)) return false
 		}
 		return true
 	}
@@ -63,10 +61,10 @@ class Piece {
 		this.board.moved |= xy2b(ox, oy)
 		this.board.moved |= xy2b(x, y)
 		const board = this.board
-		const capture = board.grid[y][x]
+		const capture = board.grid[y * 8 + x]
 		const move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + xy2fr(x, y)
-		board.grid[oy][ox] = ' '
-		board.grid[y][x] = this
+		board.grid[oy * 8 + ox] = ' '
+		board.grid[y * 8 + x] = this
 		this.x = x
 		this.y = y
 		if (this.board.depth === 0 && capture !== ' ') {
@@ -151,14 +149,14 @@ window.King = class extends Piece {
 			if (!(this.board.moved & xy2b(0, this.y))) {
 				let clear = true
 				for (let i = 1; i < this.x; ++i) {
-					if (grid[this.y][i] !== ' ') clear = false
+					if (grid[this.y * 8 + i] !== ' ') clear = false
 				}
 				if (clear) moves.push([2, this.y])
 			}
 			if (!(this.board.moved & xy2b(7, this.y))) {
 				let clear = true
 				for (let i = 6; i > this.x; --i) {
-					if (grid[this.y][i] !== ' ') clear = false
+					if (grid[this.y * 8 + i] !== ' ') clear = false
 				}
 				if (clear) moves.push([6, this.y])
 			}
@@ -172,7 +170,7 @@ window.King = class extends Piece {
 				safe_moves.push(xy)
 			} else {
 				const new_board = board.copy()
-				const new_piece = new_board.grid[this.y][this.x]
+				const new_piece = new_board.grid[this.y * 8 + this.x]
 				new_piece.move(xy)
 				if (new_piece.is_safe(depth + 1)) safe_moves.push(xy)
 			}
@@ -199,11 +197,11 @@ window.King = class extends Piece {
 		if (move === `Ke${rank}c${rank}`) {
 			move = '0-0-0'
 			if (this.board.depth === 0) say("Queenside castle.")
-			this.board.grid[this.y][0].move([this.x + 1, this.y], true)
+			this.board.grid[this.y * 8 + 0].move([this.x + 1, this.y], true)
 		} else if (move === `Ke${rank}g${rank}`) {
 			move = '0-0'
 			if (this.board.depth === 0) say("Kingside castle.")
-			this.board.grid[this.y][7].move([this.x - 1, this.y], true)
+			this.board.grid[this.y * 8 + 7].move([this.x - 1, this.y], true)
 		}
 		this.board.log_check(move, 1 - this.color)
 	}
@@ -227,8 +225,8 @@ window.Pawn = class extends Piece {
 			const piece = board.xy2p(tx, ty)
 			if (piece === ' ') {
 				moves.push([tx, ty])
-				if (this.color && this.y === 1 && grid[ty + 1][tx] === ' ') moves.push([tx, ty + 1])
-				if (!this.color && this.y === 6 && grid[ty - 1][tx] === ' ') moves.push([tx, ty - 1])
+				if (this.color && this.y === 1 && grid[(ty + 1) * 8 + tx] === ' ') moves.push([tx, ty + 1])
+				if (!this.color && this.y === 6 && grid[(ty - 1) * 8 + tx] === ' ') moves.push([tx, ty - 1])
 			}
 		}
 		// Capture diagonally.
@@ -272,7 +270,7 @@ window.Pawn = class extends Piece {
 		if (this.color === WHITE && this.y != 2) return
 		const double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
 		if (log.slice(-2)[0].slice(0, 4) === double_jump) {
-			this.board.grid[this.y + (this.color ? -1 : 1)][this.x] = ' '
+			this.board.grid[(this.y + (this.color ? -1 : 1)) * 8 + this.x] = ' '
 			log[log.length - 1] += ' e.p.'
 			if (this.board.depth === 0) say("En passant.")
 		}
@@ -280,7 +278,7 @@ window.Pawn = class extends Piece {
 }
 
 class Board {
-	grid = [[], [], [], [], [], [], [], []]
+	grid = []
 	log = []
 	captured = []
 	moved = 0n
@@ -291,14 +289,14 @@ class Board {
 
 	reset() {
 		this.grid = [
-			[new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK)],
-			[new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK)],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-			[new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6)],
-			[new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7)],
+			new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK),
+			new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK),
+			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+			new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6),
+			new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7),
 		]
 		this.log = []
 		this.captured = []
@@ -310,7 +308,7 @@ class Board {
 		for (let row = 0; row < 8; ++row) {
 			let spaces = 0
 			for (let col = 0; col < 8; ++col) {
-				const p = this.grid[row][col]
+				const p = this.grid[row * 8 + col]
 				if (p === ' ') {
 					++spaces
 					if (col === 7) ppd += spaces
@@ -367,7 +365,7 @@ class Board {
 		this.grid = []
 		this.log = []
 		this.captured = []
-		for (let i = 0; i < 8; ++i) this.grid.push([' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '])
+		for (let i = 0; i < 8; ++i) this.grid.push(' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ')
 		let row = 0
 		let col = 0
 		for (const line of ppd.split('/')) {
@@ -390,7 +388,7 @@ class Board {
 					default:
 						col += parseInt(char) - 1
 				}
-				this.grid[row][col] = piece
+				this.grid[row * 8 + col] = piece
 				++col
 			}
 			col = 0
@@ -426,21 +424,17 @@ class Board {
 	}
 
 	get_king(color) {
-		for (const row in this.grid) {
-			for (const col in this.grid) {
-				const piece = this.grid[row][col]
-				if (piece.char === "K" && piece.color === color) return piece
-			}
+		for (let i = 0; i < 64; ++i) {
+			const piece = this.grid[i]
+			if (piece.char === "K" && piece.color === color) return piece
 		}
 	}
 
 	get_pieces(color) {
 		const rv = []
-		for (const row in this.grid) {
-			for (const col in this.grid) {
-				const piece = this.grid[row][col]
-				if (piece.color === color) rv.push(piece)
-			}
+		for (let i = 0; i < 64; ++i) {
+			const piece = this.grid[i]
+			if (piece.color === color) rv.push(piece)
 		}
 		return rv
 	}
@@ -457,17 +451,15 @@ class Board {
 		const king = this.get_king(color)
 		if (!this.is_check(color)) return false
 		if (king.get_moves().length > 0) return false
-		for (const row in this.grid) {
-			for (const col in this.grid) {
-				const piece = this.grid[row][col]
-				if (piece.color !== color) continue
-				const moves = piece.get_moves()
-				for (const xy of moves) {
-					const new_board = this.copy()
-					const new_piece = new_board.grid[row][col]
-					new_piece.move(xy)
-					if (!new_board.is_check(color)) return false
-				}
+		for (let i = 0; i < 64; ++i) {
+			const piece = this.grid[i]
+			if (piece.color !== color) continue
+			const moves = piece.get_moves()
+			for (const xy of moves) {
+				const new_board = this.copy()
+				const new_piece = new_board.grid[i]
+				new_piece.move(xy)
+				if (!new_board.is_check(color)) return false
 			}
 		}
 		return true
@@ -477,14 +469,12 @@ class Board {
 		const new_board = new Board(this.depth + 1)
 		new_board.log = [...this.log] // this.log.slice(-1)
 		new_board.moved = this.moved  // XXX: Forgetting this line leads to random data in fen_export and Qg8 instead of Rf8 in test despite new_board.moved being a 0n bigint here according to Chrome 109.0.5414.120 on Windows 10.0.19044.2486.
-		for (const row in this.grid) {
-			for (const col in this.grid) {
-				const piece = this.grid[row][col]
-				if (piece === ' ') {
-					new_board.grid[row][col] = ' '
-				} else {
-					new_board.grid[row][col] = piece.copy(new_board)
-				}
+		for (let i = 0; i < 64; ++i) {
+			const piece = this.grid[i]
+			if (piece === ' ') {
+				new_board.grid[i] = ' '
+			} else {
+				new_board.grid[i] = piece.copy(new_board)
 			}
 		}
 		return new_board
@@ -492,12 +482,12 @@ class Board {
 
 	xy2p(x, y) {
 		if (x < 0 || x > 7 || y < 0 || y > 7) return ''
-		return this.grid[y][x]
+		return this.grid[y * 8 + x]
 	}
 
 	fr2p(fr) {
 		const xy = fr2xy(fr)
-		if (xy[0] >= 0 && xy[1] >= 0) return this.grid[xy[1]][xy[0]]
+		if (xy[0] >= 0 && xy[1] >= 0) return this.grid[xy[1] * 8 + xy[0]]
 		return ''
 	}
 
@@ -517,16 +507,16 @@ class Board {
 	promote(x, y, kind, color) {
 		switch (kind) {
 			case 'Q':
-				this.grid[y][x] = new Queen(x, y, color)
+				this.grid[y * 8 + x] = new Queen(x, y, color)
 				break
 			case 'B':
-				this.grid[y][x] = new Bishop(x, y, color)
+				this.grid[y * 8 + x] = new Bishop(x, y, color)
 				break
 			case 'N':
-				this.grid[y][x] = new Knight(x, y, color)
+				this.grid[y * 8 + x] = new Knight(x, y, color)
 				break
 			case 'R':
-				this.grid[y][x] = new Rook(x, y, color)
+				this.grid[y * 8 + x] = new Rook(x, y, color)
 				break
 		}
 	}
@@ -548,6 +538,8 @@ window.blog = b => {
 	}
 	console.log(text)
 }
+window.i2fr = i => "abcdefgh"[i % 8] + (8 - Math.floor(i / 8))
+window.fr2i = fr => "abcdefgh".indexOf(fr[0]) + 8 * (8 - parseInt(fr[1]))
 window.fr2xy = fr => ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
 window.xy2fr = (x, y) => "abcdefgh"[x] + (8 - y)
 window.xy2b = (x, y) => 1n << BigInt(xy2i(x, y))
@@ -569,9 +561,9 @@ window.render = board => {
 	let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
 	let lines = [files]
 	caps1.innerHTML = board.captured.filter(e => e.color === WHITE).map(e => icons[e.char + 1]).join('')
-	for (const row in grid) {
+	for (let row = 0; row < 8; ++row) {
 		let line = `<span class="square">${8 - row}</span>`
-		for (const col in grid) {
+		for (let col = 0; col < 8; ++col) {
 			line += `<span id="${xy2fr(col, row)}" class="square ${'wb'[(row % 2 + col % 2) % 2]}">  </span>`
 		}
 		line += `<span class="square">${8 - row}</span>`
@@ -588,16 +580,14 @@ window.render = board => {
 	}
 	const black_coverage = new Array(64).fill(0)
 	const white_coverage = new Array(64).fill(0)
-	for (const row in grid) {
-		for (const col in grid) {
-			const p = board.xy2p(col, row)
-			if (p === ' ') continue
-			p.get_moves().forEach(m => {
-				const i = xy2i(...m)
-				if (p.color) black_coverage[i] = (black_coverage[i] || 0) + 1
-				else white_coverage[i] = (white_coverage[i] || 0) + 1
-			})
-		}
+	for (let j = 0; j < 64; ++j) {
+		const p = board.grid[j]
+		if (p === ' ') continue
+		p.get_moves().forEach(m => {
+			const i = xy2i(...m)
+			if (p.color) black_coverage[i] = (black_coverage[i] || 0) + 1
+			else white_coverage[i] = (white_coverage[i] || 0) + 1
+		})
 	}
 
 	let text_lines = [files]
@@ -605,7 +595,7 @@ window.render = board => {
 		let text_line = COLORS ? `${8 - row}\x1B[30m` : `${8 - row}`
 		for (let col = 0; col < 8; ++col) {
 			if (COLORS) text_line += ['\x1B[47m', '\x1B[100m'][(row % 2 + col % 2) % 2]
-			const p = grid[row][col]
+			const p = grid[row * 8 + col]
 			if (stats.checked) {
 				const i = xy2i(col, row)
 				if (white_coverage[i] + black_coverage[i]) lines.push(`<span id="g${xy2fr(col, row)}" class='pos unsafe' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'><span style="background: linear-gradient(-90deg, rgba(255,255,255,1) ${white_coverage[i] / (black_coverage[i] + white_coverage[i]) * 100}%, rgba(0,0,0,1) ${100 - black_coverage[i] / (black_coverage[i] + white_coverage[i]) * 100}%);">${black_coverage[i]}B ${white_coverage[i]}W</span></span>`)
@@ -626,7 +616,7 @@ window.render = board => {
 		text_lines.push(text_line + (COLORS ? `\x1B[m${8 - row}` : `${8 - row}`))
 	}
 	text_lines.push(files)
-	clog(text_lines.join('\n'))
+	// clog(text_lines.join('\n'))
 	boardtext.innerHTML = lines.join('\n')
 
 	let html = ''
@@ -638,9 +628,9 @@ window.render = board => {
 	logtext.innerHTML = `<ol>${html}</ol>`
 	logtext.scroll(0, 9999)
 
-	clog(board.captured.map(e => icons[e.char + e.color]).join(''))
-	if (txt.length > 77) clog(`...${txt.slice(-77)}`)
-	else clog(txt)
+	// clog(board.captured.map(e => icons[e.char + e.color]).join(''))
+	// if (txt.length > 77) clog(`...${txt.slice(-77)}`)
+	// else clog(txt)
 
 	show_clock()
 	document.querySelectorAll('.square').forEach(el => {
@@ -654,22 +644,22 @@ window.render = board => {
 					el.classList.remove('nobg')
 				})
 				this.classList.add('selected')
-				const [x, y] = fr2xy(this.id)
-				if (isNaN(y)) return
+				const i = fr2xy(this.id)
+				if (isNaN(i)) return
 				let html = `
-					<button onclick="board.grid[${y}][${x}] = ' '; hide_modal()"> </button>
-					<button onclick="board.grid[${y}][${x}] = new King(${x}, ${y}, 1); hide_modal()">♚</button>
-					<button onclick="board.grid[${y}][${x}] = new Queen(${x}, ${y}, 1); hide_modal()">♛</button>
-					<button onclick="board.grid[${y}][${x}] = new Bishop(${x}, ${y}, 1); hide_modal()">♝</button>
-					<button onclick="board.grid[${y}][${x}] = new Knight(${x}, ${y}, 1); hide_modal()">♞</button>
-					<button onclick="board.grid[${y}][${x}] = new Rook(${x}, ${y}, 1); hide_modal()">♜</button>
-					<button onclick="board.grid[${y}][${x}] = new Pawn(${x}, ${y}, 1); hide_modal()">♟︎</button><br>
-					<button onclick="board.grid[${y}][${x}] = new King(${x}, ${y}, 0); hide_modal()">♔</button>
-					<button onclick="board.grid[${y}][${x}] = new Queen(${x}, ${y}, 0); hide_modal()">♕</button>
-					<button onclick="board.grid[${y}][${x}] = new Bishop(${x}, ${y}, 0); hide_modal()">♗</button>
-					<button onclick="board.grid[${y}][${x}] = new Knight(${x}, ${y}, 0); hide_modal()">♘</button>
-					<button onclick="board.grid[${y}][${x}] = new Rook(${x}, ${y}, 0); hide_modal()">♖</button>
-					<button onclick="board.grid[${y}][${x}] = new Pawn(${x}, ${y}, 0); hide_modal()">♙</button>
+					<button onclick="board.grid[${i}] = ' '; hide_modal()"> </button>
+					<button onclick="board.grid[${i}] = new King(${x}, ${y}, 1); hide_modal()">♚</button>
+					<button onclick="board.grid[${i}] = new Queen(${x}, ${y}, 1); hide_modal()">♛</button>
+					<button onclick="board.grid[${i}] = new Bishop(${x}, ${y}, 1); hide_modal()">♝</button>
+					<button onclick="board.grid[${i}] = new Knight(${x}, ${y}, 1); hide_modal()">♞</button>
+					<button onclick="board.grid[${i}] = new Rook(${x}, ${y}, 1); hide_modal()">♜</button>
+					<button onclick="board.grid[${i}] = new Pawn(${x}, ${y}, 1); hide_modal()">♟︎</button><br>
+					<button onclick="board.grid[${i}] = new King(${x}, ${y}, 0); hide_modal()">♔</button>
+					<button onclick="board.grid[${i}] = new Queen(${x}, ${y}, 0); hide_modal()">♕</button>
+					<button onclick="board.grid[${i}] = new Bishop(${x}, ${y}, 0); hide_modal()">♗</button>
+					<button onclick="board.grid[${i}] = new Knight(${x}, ${y}, 0); hide_modal()">♘</button>
+					<button onclick="board.grid[${i}] = new Rook(${x}, ${y}, 0); hide_modal()">♖</button>
+					<button onclick="board.grid[${i}] = new Pawn(${x}, ${y}, 0); hide_modal()">♙</button>
 					`
 				show_modal(html)
 				while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))
@@ -698,7 +688,7 @@ window.render = board => {
 			for (const xy of moves) {
 				// Limit if in check.
 				const new_board = board.copy()
-				const new_piece = new_board.grid[piece.y][piece.x]
+				const new_piece = new_board.grid[piece.y * 8 + piece.x]
 				new_piece.move(xy)
 				if (new_board.is_check(piece.color)) continue
 
@@ -718,10 +708,17 @@ function prune_move(piece, move) {
 	piece.moves = piece.moves.filter(m => m[0] !== move[0] || m[1] !== move[1])
 }
 
-window.ai_move = async function ai_move(board, color, start_time, total) {
+function score_move(board, move, color) {
+	const new_board = board.copy()
+	new_board.move(move)
+	return new_board.get_score(color)
+}
+
+window.get_ai_move = async function get_ai_move(board, color, limit, start_time, total) {
 	//if (typeof color === "undefined") color = board.log.length % 2
 	if (typeof start_time === "undefined") start_time = performance.now()
 	if (typeof total === "undefined") total = [0]
+	if (typeof limit === "undefined") limit = ai_level.value - 1
 	const depth = board.depth
 	const max_secs = parseInt(ai_time.value) * 1000
 	let pieces = board.get_pieces(color)
@@ -743,6 +740,7 @@ window.ai_move = async function ai_move(board, color, start_time, total) {
 	}
 
 	let total_moves = 0
+	const moves = []
 	pieces.forEach(p => { p.moves = p.get_moves(); total_moves += p.moves.length })
 	pieces = pieces.filter(p => p.moves.length > 0)
 
@@ -759,8 +757,8 @@ window.ai_move = async function ai_move(board, color, start_time, total) {
 		const move = random_choice(piece.moves)
 		// Eval move.
 		const new_board = board.copy()
-		const new_piece = new_board.grid[piece.y][piece.x]
-		const capture = new_board.grid[move[1]][move[0]]
+		const new_piece = new_board.grid[piece.y * 8 + piece.x]
+		const capture = new_board.grid[move[1] * 8 + move[0]]
 		if (capture.char === "K") {
 			clog("Capturing king.")
 			say("You are already dead.")
@@ -790,13 +788,16 @@ window.ai_move = async function ai_move(board, color, start_time, total) {
 		// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
 		let enemy_move_count = 0
 		let enemy_move = false
-		if (board.depth < ai_level.value - 1) {
+		if (board.depth < limit) {
 			//console.log("Awaiting depth", new_board.depth)
-			[enemy_move_count, enemy_move] = await ai_move(new_board, 1 - color, start_time, total)
+			[enemy_move_count, enemy_move] = await get_ai_move(new_board, 1 - color, limit, start_time, total)
 		}
 		const my_score = new_board.get_score(color)
 		const enemy_score = new_board.get_score(1 - color)
-		let score = my_score - enemy_score - enemy_move_count / 8
+		let score = my_score - enemy_score - enemy_move_count / 8 + get_moves(new_board, color).length / 8
+
+		moves.push([score, piece, move])
+
 		//console.log("" + depth, piece.name, "move", xy2fr(...move), "score", score, enemy_move)
 		if (!enemy_move) {
 			// Draw or timeout. TODO: check timeout
@@ -821,25 +822,42 @@ window.ai_move = async function ai_move(board, color, start_time, total) {
 			await sleep(1)  // Update GUI.
 		}
 	}
-	if (depth > 0) {
-		if (best_piece) best_piece.move(best_move)
-	} else {
-		if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
-		else {
-			board.log.push('½–½')
-			say('Stalemate; draw.')
-			clearInterval(timer)
-			render(board)
-		}
-		console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max ${max_think} of ${total_moves} took ${ms2time(performance.now() - start_time)} to ${best_score}`)
+
+	let from_i = 0
+
+	moves.sort((a, b) => b[0] - a[0])
+	console.log("Depth", depth, "top3", moves.slice(0, 3))
+	if (moves.length > 0) {
+		// XXX: from_i = moves[0][1].x + moves[0][1].y * 8
+		if (depth > 0) moves[0][1].move(moves[0][2])
 	}
-	return [total_moves, best_move]
+
+	if (depth === 0) console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max ${max_think} of ${total_moves} took ${ms2time(performance.now() - start_time)} to ${best_score}`)
+
+	return [total_moves, best_move, best_piece.x + best_piece.y * 8]
 }
+
+
+window.ai_move = async function ai_move(board, color) {
+	//if (typeof color === "undefined") color = board.log.length % 2
+	let rv = await get_ai_move(board.copy(), color)
+	if (rv) {
+		console.log("got", xy2fr(...rv[1]), i2fr(rv[2]))
+		const [total_moves, best_move, from_i] = rv
+		await show_move(i2fr(from_i), xy2fr(...best_move))
+	} else {
+		board.log.push('½–½')
+		say('Stalemate; draw.')
+		clearInterval(timer)
+		render(board)
+	}
+}
+
 
 import sleep from '/lib/sleep.mjs'
 import say_it from '/lib/say.mjs'
 window.say = msg => {
-	console.log(msg)
+	//console.log(msg)
 	if (speak.checked) {
 		say_it(msg, WINDOWS ? 1.9 : 1, 1, "en-UK")
 	}
@@ -1032,7 +1050,7 @@ window.test = async function test() {
 	}
 	console.log(board.fen_export() === "r1b2R1k/1pp4p/4p2p/p2p4/6QR/N7/PPP1P1P1/2K3N1 b - - 3 17")
 	let ms = performance.now() - start
-	console.log(ms, "ms to", i, "x level", ai_level.value, "=", ms / i, "per move.")
+	console.log("", Math.round(ms), "ms to", i, "x level", ai_level.value, "=", Math.round(ms / i), "per move.")
 }
 
 window.board = new Board()
