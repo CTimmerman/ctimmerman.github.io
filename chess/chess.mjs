@@ -794,7 +794,7 @@ window.get_ai_move = async function get_ai_move(board, color, limit, start_time,
 		}
 		const my_score = new_board.get_score(color)
 		const enemy_score = new_board.get_score(1 - color)
-		let score = my_score - enemy_score - enemy_move_count / 8 //+ get_moves(new_board, color).length / 8
+		let score = my_score - enemy_score //- enemy_move_count / 8 //+ get_moves(new_board, color).length / 8
 
 		moves.push([score, piece, move])
 
