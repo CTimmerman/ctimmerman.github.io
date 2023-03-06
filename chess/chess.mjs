@@ -794,7 +794,7 @@ window.get_ai_move = async function get_ai_move(board, color, limit, start_time,
 		}
 		const my_score = new_board.get_score(color)
 		const enemy_score = new_board.get_score(1 - color)
-		let score = my_score - enemy_score - enemy_move_count / 8 + get_moves(new_board, color).length / 8
+		let score = my_score - enemy_score - enemy_move_count / 8 //+ get_moves(new_board, color).length / 8
 
 		moves.push([score, piece, move])
 
@@ -840,7 +840,7 @@ window.get_ai_move = async function get_ai_move(board, color, limit, start_time,
 
 window.ai_move = async function ai_move(board, color) {
 	//if (typeof color === "undefined") color = board.log.length % 2
-	let rv = await get_ai_move(board.copy(), color)
+	let rv = await get_ai_move(board, color)
 	if (rv) {
 		console.log("got", xy2fr(...rv[1]), i2fr(rv[2]))
 		const [total_moves, best_move, from_i] = rv
