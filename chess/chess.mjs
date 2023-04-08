@@ -826,15 +826,17 @@ window.get_ai_move = async function get_ai_move(board, color, limit, start_time,
 	let from_i = 0
 
 	moves.sort((a, b) => b[0] - a[0])
-	console.log("Depth", depth, "top3", moves.slice(0, 3))
+	//console.log("Depth", depth, "top3", moves.slice(0, 3))
 	if (moves.length > 0) {
 		// XXX: from_i = moves[0][1].x + moves[0][1].y * 8
 		if (depth > 0) moves[0][1].move(moves[0][2])
+	} else {
+		console.log("no moves! depth", depth)
 	}
 
 	if (depth === 0) console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max ${max_think} of ${total_moves} took ${ms2time(performance.now() - start_time)} to ${best_score}`)
 
-	return [total_moves, best_move, best_piece.x + best_piece.y * 8]
+	return [total_moves, best_move, best_piece?.x + best_piece?.y * 8]
 }
 
 
