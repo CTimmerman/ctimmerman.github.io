@@ -1,7 +1,7 @@
 "Autoclicker by Cees Timmerman, 2023-06-13."
 
 import time
-import keyboard, pyautogui  # pip install keyboard pyautogui
+import keyboard, mouse  # pip install keyboard mouse
 
 click = False
 hotkey = "Alt + C"
@@ -17,7 +17,7 @@ keyboard.add_hotkey(hotkey, toggle_clicker)
 
 try:
   while True:
-    if click: pyautogui.click()
-    time.sleep(0.02)
+    if click: mouse.click()
+    time.sleep(0.001)
 except KeyboardInterrupt:
   pass
