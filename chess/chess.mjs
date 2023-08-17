@@ -79,14 +79,14 @@ class Piece {
 window.Rook = class extends Piece {
 	name = "Rook"
 	char = "R"
-	value = 5
+	value = 5.63  // By AlphaZero
 	dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
 }
 
 window.Knight = class extends Piece {
 	name = "Knight"
 	char = "N"
-	value = 3
+	value = 3.05
 
 	get_moves() {
 		const moves = []
@@ -105,14 +105,14 @@ window.Knight = class extends Piece {
 window.Bishop = class extends Piece {
 	name = "Bishop"
 	char = "B"
-	value = 3
+	value = 3.33
 	dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
 }
 
 window.Queen = class extends Piece {
 	name = "Queen"
 	char = "Q"
-	value = 9
+	value = 9.5
 	dirs = [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0], [-1, 0], [0, 1], [0, -1]]
 }
 
@@ -522,9 +522,11 @@ class Board {
 	}
 }
 /*
-window.get_moves = function get_moves() {  // Anonymous functions break stack traces. https://www.sentinelone.com/blog/javascript-stack-trace-understanding-it-and-using-it-to-debug/
+window.get_moves = function get_moves(side) {  // Anonymous functions break stack traces. https://www.sentinelone.com/blog/javascript-stack-trace-understanding-it-and-using-it-to-debug/
 	let m = []
-	for (let p of board.get_pieces(0).concat(board.get_pieces(1))) m = m.concat(p.get_moves())
+	for (let p of board.get_pieces(side)) {
+		m = m.concat(p.get_moves().map(dest => [p.x + p.y * 8, dest[0] + dest[1] * 8]))
+	}
 	return m
 }
 */
@@ -575,10 +577,8 @@ window.render = board => {
 	lines.push(files)
 	caps0.innerHTML = board.captured.filter(e => e.color === BLACK).map(e => icons[e.char + 1]).join('')
 
-	files = ' abcdefgh '
-	if (!MONOSPACE) {
-		files = ' a b c d e f g h '
-	}
+	files = MONOSPACE ? ' abcdefgh ' : ' a b c d e f g h '
+
 	const black_coverage = new Array(64).fill(0)
 	const white_coverage = new Array(64).fill(0)
 	for (let j = 0; j < 64; ++j) {
@@ -715,6 +715,20 @@ function score_move(board, move, color) {
 	new_board.move(move)
 	return new_board.get_score(color)
 }
+
+function rank_moves(board, moves) {
+	for (const move of moves) {
+		const piece = board.grid[move[0]]
+		const color = piece.color
+		const score = score_move(board, move, color)
+		moves.push([score, piece, move])
+	}
+	moves.sort((a, b) => b[0] - a[0])
+	return moves
+}
+// TODO: Merge code.
+// TODO: Start with depth 2 move, then improve.
+// TODO: fix draw due to no moves. 8/3N4/4R3/3kNB2/3B1P2/2K5/8/Q7 b - - 0 49
 
 window.get_ai_move = async function get_ai_move(board, color, limit, start_time, total) {
 	//if (typeof color === "undefined") color = board.log.length % 2
