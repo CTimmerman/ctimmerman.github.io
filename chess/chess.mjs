@@ -16,14 +16,13 @@ class Piece {
 	constructor(x, y, color, board_in) {
 		this.x = x
 		this.y = y
-		this.color = color ? color : WHITE
+		this.color = color || WHITE
 		this.board = board_in || board
 	}
 
 	copy = board => new this.constructor(this.x, this.y, this.color, board)
 
 	get_moves() {
-		const grid = this.board.grid
 		const moves = []
 		for (const dir of this.dirs) {
 			let tx = this.x + dir[0]
@@ -413,7 +412,7 @@ class Board {
 			this.moved -= xy2b(0, 0)
 		}
 		const move_count = (fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0)
-		const hmc = parseInt(halfmove_clock)
+		//const hmc = parseInt(halfmove_clock)
 		for (let i = 0; i < move_count; ++i) this.log.push(i < (move_count - halfmove_clock) ? 'x' : '?')
 		if (ep_target !== '-') {
 			const [file, rank] = ep_target
@@ -573,10 +572,8 @@ window.render = board => {
 	caps0.innerHTML = board.captured.filter(e => e.color === BLACK).map(e => icons[e.char + 1]).join('')
 
 	files = ' abcdefgh '
-	let blank = ' '
 	if (!MONOSPACE) {
 		files = ' a b c d e f g h '
-		blank = '  '
 	}
 	const black_coverage = new Array(64).fill(0)
 	const white_coverage = new Array(64).fill(0)
@@ -634,11 +631,14 @@ window.render = board => {
 
 	show_clock()
 	document.querySelectorAll('.square').forEach(el => {
-		el.onmousedown = function (e) {
+		el.onmousedown =  e => {
+			console.log('md')
 			e.preventDefault()  // Stop doubleclick select.
 		}
-		el.onmouseup = async function (e) {
+		el.onmouseup = async function(e)  {
+			console.log('11111')
 			if (editmode.checked) {
+				console.log('aaaaaa')
 				document.querySelectorAll('.selected').forEach(el => {
 					el.classList.remove('selected')
 					el.classList.remove('nobg')
@@ -662,6 +662,7 @@ window.render = board => {
 					<button onclick="board.grid[${i}] = new Pawn(${x}, ${y}, 0); hide_modal()">♙</button>
 					`
 				show_modal(html)
+				console.log('waiting for modal')
 				while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))
 				render(board)
 				return
@@ -669,7 +670,7 @@ window.render = board => {
 			if (this.classList.contains('selected')) {
 				if (start_fr && start_fr !== this.id) {
 					show_move(start_fr, this.id, true)
-					start_fr = null
+					window.start_fr = null
 					return
 				}
 			}
@@ -956,7 +957,7 @@ function start_clock(color) {
 	clock_ms[1 - color] += performance.now() - clock_start[1 - color]
 	show_clock()
 	clearInterval(timer)
-	timer = setInterval(show_clock, 1000)
+	window.timer = setInterval(show_clock, 1000)
 }
 window.show_clock = function show_clock() {
 	for (const color of [0, 1]) {
@@ -984,16 +985,17 @@ window.replay = async function replay(movetext, instant) {
 	let moves = movetext.split(/\s/)  // e.g. 1. e4 Nf6 2. e5 Ne4 3. d3 Nc5 4. d4 Ne4 5. Qd3 d5 6. exd6 Nxd6
 	let color = BLACK
 	for (let move of moves) {
-		if (move === "0-0") {
-			if (color === WHITE) move = "Ke8g8"
-			else move = "Ke1g1"
-		} else if (move === "0-0-0") {
-			if (color === WHITE) move = "Ke8c8"
-			else move = "Ke1c1"
+		let m = move
+		if (m === "0-0") {
+			if (color === WHITE) m = "Ke8g8"
+			else m = "Ke1g1"
+		} else if (m === "0-0-0") {
+			if (color === WHITE) m = "Ke8c8"
+			else m = "Ke1c1"
 		}
-		if (!re_move.test(move)) continue
+		if (!re_move.test(m)) continue
 		color = 1 - color
-		const mo = move.match(re_move)
+		const mo = m.match(re_move)
 		if (mo) {
 			let from = mo.groups.from
 			const to = mo.groups.to
@@ -1038,7 +1040,7 @@ window.rewind = function rewind(index) {
 
 window.test = async function test() {
 	const start = performance.now()
-	for (var i = 0; i < 5; ++i) {
+	for (let i = 0; i < 5; ++i) {
 		board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 		await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
 		// 17.Rf1f8# 1-0", true)
@@ -1061,6 +1063,39 @@ render(board)
 start_clock(WHITE)
 if (white_ai_box.checked) ai_move(board, WHITE)
 
+
+// Drag & Drop
+
+window.load_file = async (e) => {
+	e.preventDefault()
+	e.stopPropagation()
+	const file = e.dataTransfer ? await e.dataTransfer.files[0] : e.srcElement.files[0]
+	const target = file.name.toUpperCase().endsWith(".FEN") ? fenbox : movetextbox
+	target.innerText = await file.text()
+}
+
+let dropTarget = null
+window.addEventListener("dragenter", e => {
+	console.log("dragenter")
+	dropzone.style.visibility = "visible"
+	dropTarget = e.target
+})
+window.addEventListener("dragleave", e => {
+	console.log("dragleave")
+	if (e.target === dropTarget || e.target === document) {
+		console.log("hiding")
+		dropzone.style.visibility = "hidden"
+	}
+})
+window.addEventListener("dragover", e => e.preventDefault()) // Breaks drop if not present!
+window.addEventListener("drop", e => {
+	console.log("wldrop")
+	e.preventDefault()
+	dropzone.style.visibility = "hidden"
+	load_file(e)
+})
+
+// https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
 		navigator.serviceWorker
