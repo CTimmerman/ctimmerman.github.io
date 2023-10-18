@@ -31,7 +31,8 @@ input[type=number] {
 	width: 2em;
 }
 
-#modal {
+#modal,
+.modal {
 	margin: 0;
 	left: 0;
 	top: 0;
@@ -47,6 +48,7 @@ input[type=number] {
 	/* horizontal */
 	visibility: hidden;
 	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 9000;
 }
 
 .alert {
