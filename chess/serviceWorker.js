@@ -4,6 +4,7 @@ const assets = [
 	"../lib/sleep.mjs",
 	"chess.css",
 	"chess.mjs",
+	"drop.js",
 	"index.html",
 	"rook.png",
 	"think.png",
