@@ -1,21 +1,13 @@
+// Like html manifest, but also installable to mobile.
 const assets = [
+	"../lib/say.mjs",
+	"../lib/sleep.mjs",
+	"chess.css",
+	"chess.mjs",
 	"index.html",
 	"rook.png",
 	"think.png",
 ]
 
-self.addEventListener("fetch", fetchEvent => {
-	fetchEvent.respondWith(
-		caches.match(fetchEvent.request).then(res => {
-			return res || fetch(fetchEvent.request)
-		})
-	)
-})
-
-self.addEventListener("install", installEvent => {
-	installEvent.waitUntil(
-		caches.open("chess").then(cache => {
-			cache.addAll(assets)
-		})
-	)
-})
+self.addEventListener("fetch", e => e.respondWith(caches.match(e.request).then(cached => cached || fetch(e.request))))
+self.addEventListener("install", e => e.waitUntil(caches.open("chess").then(cache => cache.addAll(assets))))
