@@ -1064,38 +1064,6 @@ render(board)
 start_clock(WHITE)
 if (white_ai_box.checked) ai_move(board, WHITE)
 
-
-// Drag & Drop
-
-window.load_file = async (e) => {
-	e.preventDefault()
-	e.stopPropagation()
-	const file = e.dataTransfer ? await e.dataTransfer.files[0] : e.srcElement.files[0]
-	const target = file.name.toUpperCase().endsWith(".FEN") ? fenbox : movetextbox
-	target.innerText = await file.text()
-}
-
-let dropTarget = null
-window.addEventListener("dragenter", e => {
-	console.log("dragenter")
-	dropzone.style.visibility = "visible"
-	dropTarget = e.target
-})
-window.addEventListener("dragleave", e => {
-	console.log("dragleave")
-	if (e.target === dropTarget || e.target === document) {
-		console.log("hiding")
-		dropzone.style.visibility = "hidden"
-	}
-})
-window.addEventListener("dragover", e => e.preventDefault()) // Breaks drop if not present!
-window.addEventListener("drop", e => {
-	console.log("wldrop")
-	e.preventDefault()
-	dropzone.style.visibility = "hidden"
-	load_file(e)
-})
-
 // https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
