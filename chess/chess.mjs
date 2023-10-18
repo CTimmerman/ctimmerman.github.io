@@ -644,8 +644,9 @@ window.render = board => {
 					el.classList.remove('nobg')
 				})
 				this.classList.add('selected')
-				const i = fr2xy(this.id)
+				const i = fr2i(this.id)
 				if (isNaN(i)) return
+				const [x, y] = fr2xy(this.id)
 				let html = `
 					<button onclick="board.grid[${i}] = ' '; hide_modal()"> </button>
 					<button onclick="board.grid[${i}] = new King(${x}, ${y}, 1); hide_modal()">♚</button>
