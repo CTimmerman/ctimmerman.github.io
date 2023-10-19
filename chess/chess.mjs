@@ -520,11 +520,13 @@ class Board {
 		}
 	}
 }
-window.get_moves = () => {
+/*
+window.get_moves = function get_moves() {  // Anonymous functions break stack traces. https://www.sentinelone.com/blog/javascript-stack-trace-understanding-it-and-using-it-to-debug/
 	let m = []
 	for (let p of board.get_pieces(0).concat(board.get_pieces(1))) m = m.concat(p.get_moves())
 	return m
 }
+*/
 window.blog = b => {
 	const s = b.toString(2).padStart(64, '0')
 	let text = ''
@@ -632,13 +634,10 @@ window.render = board => {
 	show_clock()
 	document.querySelectorAll('.square').forEach(el => {
 		el.onmousedown =  e => {
-			console.log('md')
 			e.preventDefault()  // Stop doubleclick select.
 		}
 		el.onmouseup = async function(e)  {
-			console.log('11111')
 			if (editmode.checked) {
-				console.log('aaaaaa')
 				document.querySelectorAll('.selected').forEach(el => {
 					el.classList.remove('selected')
 					el.classList.remove('nobg')
@@ -663,14 +662,13 @@ window.render = board => {
 					<button onclick="board.grid[${i}] = new Pawn(${x}, ${y}, 0); hide_modal()">♙</button>
 					`
 				show_modal(html)
-				console.log('waiting for modal')
 				while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))
 				render(board)
 				return
 			}
 			if (this.classList.contains('selected')) {
 				if (start_fr && start_fr !== this.id) {
-					show_move(start_fr, this.id, true)
+					show_move([fr2i(start_fr), fr2i(this.id)], true)
 					window.start_fr = null
 					return
 				}
@@ -787,25 +785,13 @@ window.get_ai_move = async function get_ai_move(board, color, limit, start_time,
 				break
 			}
 		}
-		// Set response. TODO: pass breadth first to not make dumb moves? 60 at depth 0 is too little.
-		let enemy_move_count = 0
-		let enemy_move = false
-		if (board.depth < limit) {
-			//console.log("Awaiting depth", new_board.depth)
-			[enemy_move_count, enemy_move] = await get_ai_move(new_board, 1 - color, limit, start_time, total)
-		}
+
 		const my_score = new_board.get_score(color)
 		const enemy_score = new_board.get_score(1 - color)
-		let score = my_score - enemy_score //- enemy_move_count / 8 //+ get_moves(new_board, color).length / 8
+		let score = my_score - enemy_score
 
 		moves.push([score, piece, move])
 
-		//console.log("" + depth, piece.name, "move", xy2fr(...move), "score", score, enemy_move)
-		if (!enemy_move) {
-			// Draw or timeout. TODO: check timeout
-			//console.log("Lowering", score)
-			//score -= 0.5  // avoid draw
-		}
 		if (score <= best_score) {
 			prune_move(piece, move)
 			pieces = pieces.filter(p => p.moves.length > 0)
@@ -825,30 +811,27 @@ window.get_ai_move = async function get_ai_move(board, color, limit, start_time,
 		}
 	}
 
-	let from_i = 0
-
 	moves.sort((a, b) => b[0] - a[0])
 	//console.log("Depth", depth, "top3", moves.slice(0, 3))
 	if (moves.length > 0) {
 		// XXX: from_i = moves[0][1].x + moves[0][1].y * 8
 		if (depth > 0) moves[0][1].move(moves[0][2])
 	} else {
-		console.log("no moves! depth", depth)
+		console.log("No moves! Depth", depth)
 	}
 
 	if (depth === 0) console.log(`${new Date().toLocaleTimeString()} Level ${ai_level.value} max ${max_think} of ${total_moves} took ${ms2time(performance.now() - start_time)} to ${best_score}`)
 
-	return [total_moves, best_move, best_piece?.x + best_piece?.y * 8]
+	return [best_piece?.x + best_piece?.y * 8, xy2i(...best_move)]
 }
 
 
 window.ai_move = async function ai_move(board, color) {
 	//if (typeof color === "undefined") color = board.log.length % 2
-	let rv = await get_ai_move(board, color)
-	if (rv) {
-		console.log("got", xy2fr(...rv[1]), i2fr(rv[2]))
-		const [total_moves, best_move, from_i] = rv
-		await show_move(i2fr(from_i), xy2fr(...best_move))
+	let move = await get_ai_move(board, color)
+	if (move) {
+		console.log("got", i2fr(move[0]), i2fr(move[1]))
+		await show_move(move)
 	} else {
 		board.log.push('½–½')
 		say('Stalemate; draw.')
@@ -867,9 +850,11 @@ window.say = msg => {
 	}
 }
 
-async function show_move(start_fr, stop_fr, is_human) {
+async function show_move(move, is_human) {
+	const start_fr = i2fr(move[0])
+	const stop_fr = i2fr(move[1])
 	favicon.href = 'rook.png'
-	const piece = board.fr2p(start_fr)
+	const piece = window.board.fr2p(start_fr)
 	const c = piece.char
 	const color = piece.color
 
@@ -1022,7 +1007,7 @@ window.replay = async function replay(movetext, instant) {
 			}
 			if (instant) {
 				board.fr2p(from).move(fr2xy(to))
-			} else await show_move(from, to)
+			} else await show_move([fr2i(from), fr2i(to)])
 			if (promo) {
 				board.promote(...fr2xy(to), promo, color)
 				board.log_check(board.log.pop() + promo, 1 - color)
