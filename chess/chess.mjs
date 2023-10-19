@@ -846,7 +846,7 @@ import say_it from '/lib/say.mjs'
 window.say = msg => {
 	//console.log(msg)
 	if (speak.checked) {
-		say_it(msg, WINDOWS ? 1.9 : 1, 1, "en-UK")
+		say_it(msg, WINDOWS ? 1.2 : 1, 1, "en-UK")
 	}
 }
 
@@ -859,7 +859,7 @@ async function show_move(move, is_human) {
 	const color = piece.color
 
 	if ((color === BLACK && speak_black.checked) ||
-		(color === WHITE && speak_white.checked)) say(`${start_fr} ${stop_fr}`.toUpperCase())  // Even uppercase fails "a7 a5" on MacOS!
+		(color === WHITE && speak_white.checked)) say(`${start_fr} ${stop_fr}`.toUpperCase())
 
 	//render(board)
 	await sleep(400)
@@ -869,7 +869,7 @@ async function show_move(move, is_human) {
 	style.top = (1 + y) + 'em'
 	await sleep(400)
 
-	piece.move(fr2xy(stop_fr))
+	piece.move([x, y])
 	render(board)
 	document.getElementById(start_fr).classList.add('selected')
 	document.getElementById(stop_fr).classList.add('selected')
