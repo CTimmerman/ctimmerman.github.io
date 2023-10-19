@@ -7,6 +7,7 @@ const COLORS = navigator.userAgent.indexOf('Chrome') > -1
 const MONOSPACE = !WINDOWS
 const WHITE = 0
 const BLACK = 1
+const EMPTY = 0
 
 function clog(msg) {
 	console.log("%c" + msg, "font-family: monospace; color: black; background-color: white")
@@ -29,7 +30,7 @@ class Piece {
 			let ty = this.y + dir[1]
 			while (1) {
 				const piece = this.board.xy2p(tx, ty)
-				if (piece === ' ') moves.push([tx, ty])
+				if (piece === EMPTY) moves.push([tx, ty])
 				else if (piece && piece.color !== this.color) {
 					moves.push([tx, ty])
 					break
@@ -47,7 +48,7 @@ class Piece {
 		const grid = this.board.grid
 		for (let i = 0; i < 64; ++i) {
 			const piece = grid[i]
-			if (piece == ' ' || piece.color === this.color || piece === this) continue
+			if (piece == EMPTY || piece.color === this.color || piece === this) continue
 			if (piece.get_moves(depth).find(xy => xy[0] === this.x && xy[1] === this.y)) return false
 		}
 		return true
@@ -61,12 +62,12 @@ class Piece {
 		this.board.moved |= xy2b(x, y)
 		const board = this.board
 		const capture = board.grid[y * 8 + x]
-		const move = this.char + xy2fr(ox, oy) + (capture === ' ' ? '' : 'x') + xy2fr(x, y)
-		board.grid[oy * 8 + ox] = ' '
+		const move = this.char + xy2fr(ox, oy) + (capture === EMPTY ? '' : 'x') + xy2fr(x, y)
+		board.grid[oy * 8 + ox] = EMPTY
 		board.grid[y * 8 + x] = this
 		this.x = x
 		this.y = y
-		if (this.board.depth === 0 && capture !== ' ') {
+		if (this.board.depth === 0 && capture !== EMPTY) {
 			board.captured.push(capture)
 			say('Took ' + capture.name)
 		}
@@ -93,7 +94,7 @@ window.Knight = class extends Piece {
 			const tx = this.x + dir[0]
 			const ty = this.y + dir[1]
 			const piece = this.board.xy2p(tx, ty)
-			if (piece === ' ' || (piece && piece.color !== this.color)) {
+			if (piece === EMPTY || (piece && piece.color !== this.color)) {
 				moves.push([tx, ty])
 			}
 		}
@@ -129,7 +130,7 @@ window.King = class extends Piece {
 			const tx = this.x + dir[0]
 			const ty = this.y + dir[1]
 			const piece = board.xy2p(tx, ty)
-			if (piece === ' ' || (piece && piece.color !== this.color)) {
+			if (piece === EMPTY || (piece && piece.color !== this.color)) {
 				moves.push([tx, ty])
 			}
 		}
@@ -148,14 +149,14 @@ window.King = class extends Piece {
 			if (!(this.board.moved & xy2b(0, this.y))) {
 				let clear = true
 				for (let i = 1; i < this.x; ++i) {
-					if (grid[this.y * 8 + i] !== ' ') clear = false
+					if (grid[this.y * 8 + i] !== EMPTY) clear = false
 				}
 				if (clear) moves.push([2, this.y])
 			}
 			if (!(this.board.moved & xy2b(7, this.y))) {
 				let clear = true
 				for (let i = 6; i > this.x; --i) {
-					if (grid[this.y * 8 + i] !== ' ') clear = false
+					if (grid[this.y * 8 + i] !== EMPTY) clear = false
 				}
 				if (clear) moves.push([6, this.y])
 			}
@@ -222,10 +223,10 @@ window.Pawn = class extends Piece {
 			const tx = this.x + dir[0]
 			const ty = this.y + dir[1]
 			const piece = board.xy2p(tx, ty)
-			if (piece === ' ') {
+			if (piece === EMPTY) {
 				moves.push([tx, ty])
-				if (this.color && this.y === 1 && grid[(ty + 1) * 8 + tx] === ' ') moves.push([tx, ty + 1])
-				if (!this.color && this.y === 6 && grid[(ty - 1) * 8 + tx] === ' ') moves.push([tx, ty - 1])
+				if (this.color && this.y === 1 && grid[(ty + 1) * 8 + tx] === EMPTY) moves.push([tx, ty + 1])
+				if (!this.color && this.y === 6 && grid[(ty - 1) * 8 + tx] === EMPTY) moves.push([tx, ty - 1])
 			}
 		}
 		// Capture diagonally.
@@ -234,7 +235,7 @@ window.Pawn = class extends Piece {
 			const tx = this.x + dir[0]
 			const ty = this.y + dir[1]
 			const piece = board.xy2p(tx, ty)
-			if ((piece && piece !== ' ' && piece.color !== this.color)) {
+			if ((piece && piece !== EMPTY && piece.color !== this.color)) {
 				moves.push([tx, ty])
 			}
 			// En passant.
@@ -269,7 +270,7 @@ window.Pawn = class extends Piece {
 		if (this.color === WHITE && this.y != 2) return
 		const double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
 		if (log.slice(-2)[0].slice(0, 4) === double_jump) {
-			this.board.grid[(this.y + (this.color ? -1 : 1)) * 8 + this.x] = ' '
+			this.board.grid[(this.y + (this.color ? -1 : 1)) * 8 + this.x] = EMPTY
 			log[log.length - 1] += ' e.p.'
 			if (this.board.depth === 0) say("En passant.")
 		}
@@ -290,10 +291,10 @@ class Board {
 		this.grid = [
 			new Rook(0, 0, BLACK), new Knight(1, 0, BLACK), new Bishop(2, 0, BLACK), new Queen(3, 0, BLACK), new King(4, 0, BLACK), new Bishop(5, 0, BLACK), new Knight(6, 0, BLACK), new Rook(7, 0, BLACK),
 			new Pawn(0, 1, BLACK), new Pawn(1, 1, BLACK), new Pawn(2, 1, BLACK), new Pawn(3, 1, BLACK), new Pawn(4, 1, BLACK), new Pawn(5, 1, BLACK), new Pawn(6, 1, BLACK), new Pawn(7, 1, BLACK),
-			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-			' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+			EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+			EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+			EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+			EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
 			new Pawn(0, 6), new Pawn(1, 6), new Pawn(2, 6), new Pawn(3, 6), new Pawn(4, 6), new Pawn(5, 6), new Pawn(6, 6), new Pawn(7, 6),
 			new Rook(0, 7), new Knight(1, 7), new Bishop(2, 7), new Queen(3, 7), new King(4, 7), new Bishop(5, 7), new Knight(6, 7), new Rook(7, 7),
 		]
@@ -308,7 +309,7 @@ class Board {
 			let spaces = 0
 			for (let col = 0; col < 8; ++col) {
 				const p = this.grid[row * 8 + col]
-				if (p === ' ') {
+				if (p === EMPTY) {
 					++spaces
 					if (col === 7) ppd += spaces
 				} else {
@@ -364,12 +365,12 @@ class Board {
 		this.grid = []
 		this.log = []
 		this.captured = []
-		for (let i = 0; i < 8; ++i) this.grid.push(' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ')
+		for (let i = 0; i < 8; ++i) this.grid.push(EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY)
 		let row = 0
 		let col = 0
 		for (const line of ppd.split('/')) {
 			for (const char of line) {
-				let piece = ' '
+				let piece = EMPTY
 				switch (char) {
 					case 'r': piece = new Rook(col, row, BLACK); break
 					case 'n': piece = new Knight(col, row, BLACK); break
@@ -470,8 +471,8 @@ class Board {
 		new_board.moved = this.moved  // XXX: Forgetting this line leads to random data in fen_export and Qg8 instead of Rf8 in test despite new_board.moved being a 0n bigint here according to Chrome 109.0.5414.120 on Windows 10.0.19044.2486.
 		for (let i = 0; i < 64; ++i) {
 			const piece = this.grid[i]
-			if (piece === ' ') {
-				new_board.grid[i] = ' '
+			if (piece === EMPTY) {
+				new_board.grid[i] = EMPTY
 			} else {
 				new_board.grid[i] = piece.copy(new_board)
 			}
@@ -539,6 +540,7 @@ window.blog = b => {
 	}
 	console.log(text)
 }
+window.i2b = i => 1n << BigInt(i)
 window.i2fr = i => "abcdefgh"[i % 8] + (8 - Math.floor(i / 8))
 window.fr2i = fr => "abcdefgh".indexOf(fr[0]) + 8 * (8 - parseInt(fr[1]))
 window.fr2xy = fr => ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
@@ -581,7 +583,7 @@ window.render = board => {
 	const white_coverage = new Array(64).fill(0)
 	for (let j = 0; j < 64; ++j) {
 		const p = board.grid[j]
-		if (p === ' ') continue
+		if (p === EMPTY) continue
 		p.get_moves().forEach(m => {
 			const i = xy2i(...m)
 			if (p.color) black_coverage[i] = (black_coverage[i] || 0) + 1
@@ -600,7 +602,7 @@ window.render = board => {
 				if (white_coverage[i] + black_coverage[i]) lines.push(`<span id="g${xy2fr(col, row)}" class='pos unsafe' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'><span style="background: linear-gradient(-90deg, rgba(255,255,255,1) ${white_coverage[i] / (black_coverage[i] + white_coverage[i]) * 100}%, rgba(0,0,0,1) ${100 - black_coverage[i] / (black_coverage[i] + white_coverage[i]) * 100}%);">${black_coverage[i]}B ${white_coverage[i]}W</span></span>`)
 			}
 
-			if (p === ' ') {
+			if (p === EMPTY) {
 				text_line += COLORS ? ' ' : ' .'[(row % 2 + col % 2) % 2]
 				if (!MONOSPACE) text_line += ' '
 				continue
@@ -647,7 +649,7 @@ window.render = board => {
 				if (isNaN(i)) return
 				const [x, y] = fr2xy(this.id)
 				let html = `
-					<button onclick="board.grid[${i}] = ' '; hide_modal()"> </button>
+					<button onclick="board.grid[${i}] = EMPTY; hide_modal()"> </button>
 					<button onclick="board.grid[${i}] = new King(${x}, ${y}, 1); hide_modal()">♚</button>
 					<button onclick="board.grid[${i}] = new Queen(${x}, ${y}, 1); hide_modal()">♛</button>
 					<button onclick="board.grid[${i}] = new Bishop(${x}, ${y}, 1); hide_modal()">♝</button>
@@ -678,7 +680,7 @@ window.render = board => {
 				el.classList.remove('nobg')
 			})
 			const piece = board.fr2p(this.id)
-			if (!piece || piece === ' ' || this.id === window.start_fr) {
+			if (!piece || piece === EMPTY || this.id === window.start_fr) {
 				window.start_fr = null
 				return
 			}
@@ -1026,7 +1028,7 @@ window.rewind = function rewind(index) {
 
 window.test = async function test() {
 	const start = performance.now()
-	for (let i = 0; i < 5; ++i) {
+	for (var i = 0; i < 5; ++i) {
 		board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 		await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
 		// 17.Rf1f8# 1-0", true)
