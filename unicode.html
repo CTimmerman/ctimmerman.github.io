@@ -49,13 +49,13 @@
 	</style>
 </head>
 <body onload="run()" onhashchange="run()">
-	Unicode  15 has <a href="https://en.wikipedia.org/wiki/List_of_Unicode_characters">149,186</a> characters.
+	<a href="https://en.wikipedia.org/wiki/Unicode">Unicode</a> <a href="https://www.unicode.org/versions/stats/charcountv15_1.html">15.1 designated 289,460 of 824,652 reserved code points.</a>
 	<input type="checkbox" id="labels" checked onchange="toggle_labels()"><label for="labels">Labels</label><br><br>
 	<div id="chart"></div>
 	<div id="alertcontainer" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
 	<script>
 		'use strict'
-		const MAX = 149186
+		const MAX = Number.MAX_SAFE_INTEGER
 
 		function arg(name){
 			const re = new RegExp(name + '=([^&]*)')
@@ -91,7 +91,7 @@
 
 			let html = ''
 			const prev = Math.max(from - amount, 0)
-			const next = Math.min(from + amount, 150000)
+			const next = Math.min(from + amount, MAX)
 			if(from > 0) html += `<a href="#bg=${bg}&fg=${fg}&base=${base}&from=${prev}&amount=${amount}">&lt; Prev</a>`
 			if(from + amount < MAX) html += ` <a href="#bg=${bg}&fg=${fg}&base=${base}&from=${next}&amount=${amount}">Next &gt;</a>`
 			html += '<br><br>'
