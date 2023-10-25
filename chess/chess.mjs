@@ -649,7 +649,7 @@ window.render = board => {
 				if (isNaN(i)) return
 				const [x, y] = fr2xy(this.id)
 				let html = `
-					<button onclick="board.grid[${i}] = EMPTY; hide_modal()"> </button>
+					<button onclick="board.grid[${i}] = ${EMPTY}; hide_modal()"> </button>
 					<button onclick="board.grid[${i}] = new King(${x}, ${y}, 1); hide_modal()">♚</button>
 					<button onclick="board.grid[${i}] = new Queen(${x}, ${y}, 1); hide_modal()">♛</button>
 					<button onclick="board.grid[${i}] = new Bishop(${x}, ${y}, 1); hide_modal()">♝</button>
