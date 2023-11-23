@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Chess by Cees Timmerman, 2022-12-28</title>
+	<link rel="apple-touch-icon" href="rook.png">
+	<link rel="icon" id="favicon" href="rook.png">
+	<link rel="manifest" href="chess.webmanifest">
+	<link rel="stylesheet" href="chess.css" type="text/css" media="all">
+</head>
+
+<body>
+	<script src="drop.js"></script>
+	<div id="dropzone" class="modal">DROP HERE</div>
+	<table>
+		<tr>
+			<td>
+				<div id="boardtext"></div>
+			</td>
+			<td>
+				<span id="clock1"></span> <span id="caps1" class="wf"></span>
+				<div id="logtext"></div>
+				<span id="clock0"></span> <span id="caps0" class="bf"></span>
+			</td>
+		</tr>
+	</table>
+	<div>
+		<label>Show </label><input id="guides" type="checkbox" checked><label for="guides">potential moves</label>
+		<input id="stats" type="checkbox"><label for="stats">stats</label>
+		<input id="editmode" type="checkbox"><label for="editmode">Edit board</label><br>
+		<label for="ai_level">AI depth </label><input id="ai_level" type="number" value="2" min="1">
+		<label for="ai_time"> max secs </label><input id="ai_time" type="number" value="15" min="1">
+		<input id="black_ai_box" type="checkbox" checked><label for="black_ai_box">black</label>
+		<input id="white_ai_box" type="checkbox"><label for="white_ai_box">white</label><br>
+		<input id="speak" type="checkbox"><label for="speak">Speak</label>
+		<input id="speak_black" type="checkbox"><label for="speak_black">black moves</label>
+		<input id="speak_white" type="checkbox"><label for="speak_white">white moves</label>
+	</div>
+	<div class="flex">
+		<button onclick="replay(movetextbox.value, true)" type="button">Instant</button>
+		<button onclick="replay(movetextbox.value)" type="button">Replay</button>
+		<textarea id="movetextbox" type="text" placeholder="movetext"></textarea>
+	</div>
+	<div class="flex">
+		<button onclick="fenbox.value = board.fen_export()" type="button">Export</button>
+		<button onclick="board.fen_import(fenbox.value)" type="button">Import</button>
+		<textarea id="fenbox" type="text" placeholder="FEN"></textarea>
+	</div>
+	<div id="modal" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
+	<script type="module" src="chessbb.mjs"></script>
+</body>
+
+</html>

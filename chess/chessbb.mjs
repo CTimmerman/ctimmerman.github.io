@@ -496,6 +496,18 @@ window.b2i = function (b) {
 }
 
 window.b2i = b => { for(let i = 0; i < 64; ++i) if (i2b(i) === b) return i }
+window.b2s = b => {
+	const s = b.toString(2).padStart(64, '0')
+	let text = ''
+	for (let row = 0; row < 8; ++row) {
+		for (let col = 0; col < 8; ++col) {
+			let i = xy2i(col, row)
+			text += s.slice(i, i + 1)
+		}
+		text += '\n'
+	}
+	console.log(text)
+}
 window.b2xy = b => i2xy(b2i(b))
 window.i2b = i => 1n << BigInt(i)
 window.i2fr = i => "abcdefgh"[i % 8] + Math.floor(i / 8)
@@ -594,9 +606,11 @@ window.render = board => {
 	show_clock()
 	document.querySelectorAll('.square').forEach(el => {
 		el.onmousedown = function (e) {
+			console.log("md")
 			e.preventDefault()  // Stop doubleclick select.
 		}
 		el.onmouseup = async function (e) {
+			console.log("mu")
 			const [x, y] = fr2xy(this.id)
 			if (isNaN(y)) return
 			if (editmode.checked) {
@@ -609,18 +623,18 @@ window.render = board => {
 				if (isNaN(i)) return
 				let html = `
 					<button onclick="board.grid[${i}] = ${EMPTY}; hide_modal()"> </button>
-					<button onclick="board.grid[${i}] = KING; board.colors |= xy2b(${x}, ${y}); hide_modal()">♚</button>
-					<button onclick="board.grid[${i}] = QUEEN; board.colors |= xy2b(${x}, ${y}); hide_modal()">♛</button>
-					<button onclick="board.grid[${i}] = BISHOP; board.colors |= xy2b(${x}, ${y}); hide_modal()">♝</button>
-					<button onclick="board.grid[${i}] = KNIGHT; board.colors |= xy2b(${x}, ${y}); hide_modal()">♞</button>
-					<button onclick="board.grid[${i}] = ROOK; board.colors |= xy2b(${x}, ${y}); hide_modal()">♜</button>
-					<button onclick="board.grid[${i}] = PAWN; board.colors |= xy2b(${x}, ${y}); hide_modal()">♟︎</button><br>
-					<button onclick="board.grid[${i}] = KING; board.colors &= !xy2b(${x}, ${y}); hide_modal()">♔</button>
-					<button onclick="board.grid[${i}] = QUEEN; board.colors &= !xy2b(${x}, ${y}); hide_modal()">♕</button>
-					<button onclick="board.grid[${i}] = BISHOP; board.colors &= !xy2b(${x}, ${y}); hide_modal()">♗</button>
-					<button onclick="board.grid[${i}] = KNIGHT; board.colors &= !xy2b(${x}, ${y}); hide_modal()">♘</button>
-					<button onclick="board.grid[${i}] = ROOK; board.colors &= !xy2b(${x}, ${y}); hide_modal()">♖</button>
-					<button onclick="board.grid[${i}] = PAWN; board.colors &= !xy2b(${x}, ${y}); hide_modal()">♙</button>
+					<button onclick="board.grid[${i}] = ${KING}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♚</button>
+					<button onclick="board.grid[${i}] = ${QUEEN}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♛</button>
+					<button onclick="board.grid[${i}] = ${BISHOP}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♝</button>
+					<button onclick="board.grid[${i}] = ${KNIGHT}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♞</button>
+					<button onclick="board.grid[${i}] = ${ROOK}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♜</button>
+					<button onclick="board.grid[${i}] = ${PAWN}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♟︎</button><br>
+					<button onclick="board.grid[${i}] = ${KING}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♔</button>
+					<button onclick="board.grid[${i}] = ${QUEEN}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♕</button>
+					<button onclick="board.grid[${i}] = ${BISHOP}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♗</button>
+					<button onclick="board.grid[${i}] = ${KNIGHT}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♘</button>
+					<button onclick="board.grid[${i}] = ${ROOK}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♖</button>
+					<button onclick="board.grid[${i}] = ${PAWN}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♙</button>
 					`
 				show_modal(html)
 				while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))

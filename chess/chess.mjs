@@ -530,11 +530,12 @@ window.get_moves = function get_moves(side) {  // Anonymous functions break stac
 	return m
 }
 */
-window.blog = b => {
+window.b2i = b => { for(let i = 0; i < 64; ++i) if (i2b(i) === b) return i }
+window.b2s = b => {
 	const s = b.toString(2).padStart(64, '0')
 	let text = ''
-	for (let row = 7; row >= 0; --row) {
-		for (let col = 7; col >= 0; --col) {
+	for (let row = 0; row < 8; ++row) {
+		for (let col = 0; col < 8; ++col) {
 			let i = xy2i(col, row)
 			text += s.slice(i, i + 1)
 		}
