@@ -1044,7 +1044,8 @@ window.rewind = function rewind(index) {
 window.test = async function test() {
 	const start = performance.now()
 	const start_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-	for (var i = 0; i < 5; ++i) {
+	var i = 0
+	for (; i < 5; ++i) {
 		board.fen_import(start_fen)
 		let fen = board.fen_export()
 		console.assert(fen === start_fen)
