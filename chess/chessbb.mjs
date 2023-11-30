@@ -46,7 +46,7 @@ class Board {
 		const grid = this.grid
 		const log = this.log
 		const piece = this.i2p(pos)
-		const color = (this.colors & (1n << BigInt(pos)))?1:0
+		const color = (this.colors & (1n << BigInt(pos)))?BLACK:WHITE
 		const x = pos % 8
 		const y = Math.floor(pos / 8)
 		switch (piece) {
@@ -69,7 +69,7 @@ class Board {
 					const tx = x + dir[0]
 					const ty = y + dir[1]
 					const piece = board.xy2p(tx, ty)
-					if ((piece && piece !== EMPTY && piece.color !== color)) {
+					if ((piece && piece !== EMPTY && this.xy2color(tx, ty) !== color)) {  // FIXME: undefined is also !== color
 						moves.push([tx, ty])
 					}
 					// En passant.
@@ -111,7 +111,7 @@ class Board {
 						moves.push([tx, ty])
 					}
 				}
-				if (depth > 2) return moves // Depth 1 needed to cover piece for checkmate on 8/8/8/6N1/P3B3/2K5/8/kQ6 w - - 10 48
+				if (depth > 0) return moves // Depth 1 needed to cover piece for checkmate on 8/8/8/6N1/P3B3/2K5/8/kQ6 w - - 10 48
 				// Castling.
 				/* https://chessily.com/learn-chess/king/
 				The king and rook have not yet been moved in the game.
@@ -121,7 +121,7 @@ class Board {
 				Castle to checkmate by Paul Morphy vs. Alonzo Morphy, 1-0 Rook odds New Orleans 1858:
 				r4b1r/ppp3pp/8/4p3/2Pq4/3P4/PP2QPPP/2k1K2R w K - 0 19
 				*/
-				if (!moved && this.is_safe(depth + 1)) {
+				if (!this.moved && this.is_safe(pos, depth + 1)) {
 					const rank = this.color ? 8 : 1
 					let piece = board.fr2p('a' + rank)
 					if (piece.char === 'R' && !piece.moved) {
@@ -150,8 +150,8 @@ class Board {
 					} else {
 						const new_board = board.copy()
 						const new_piece = new_board.grid[y * 8 + x]
-						new_piece.move(xy)
-						if (new_board.is_safe(x, y, depth + 1)) safe_moves.push(xy)
+						this.move(y * 8 + x, xy2i(...xy))
+						if (new_board.is_safe(xy2i(x, y), depth + 1)) safe_moves.push(xy)
 					}
 				}
 				if (!moved) {
@@ -188,17 +188,21 @@ class Board {
 		return moves
 	}
 
-	xy2color = (x, y) => this.colors & xy2b(x, y) ? 1 : 0
+	b2color = b => this.colors & b ? BLACK : WHITE
+	i2color = i => this.colors & i2b(i) ? BLACK : WHITE
+	xy2color = (x, y) => this.colors & xy2b(x, y) ? BLACK : WHITE
 	xy2p = (x, y) => this.grid[y * 8 + x]
 
-	is_safe(x, y, depth) {
+	is_safe(pos, depth) {
+		const [x, y] = i2xy(pos)
 		const color = this.xy2color(x, y)
 		//const enemies = get_pieces(1 - color)
 		for (let row = 0; row < 8; ++row) {
 			for (let col = 0; col < 8; ++col) {
 				const piece = this.grid[row * 8 + col]
-				if (piece == EMPTY || this.colors === color) continue
-				if (this.get_moves(xy2i(col, row), depth).find(xy => xy[0] === x && xy[1] === y)) return false
+				const target_color = this.i2color(row * 8 + col)
+				if (piece === EMPTY || target_color === color) continue
+				if (this.get_moves(xy2i(col, row), depth + 1).find(from_to => from_to[1] === pos)) return false
 			}
 		}
 		return true
@@ -255,14 +259,14 @@ class Board {
 		}
 		const active_color = 'wb'[this.log.length % 2]
 		let castling_availability = ''
-		if (!(this.moved & 8)) {
-			if (!(this.moved & 1)) castling_availability += 'K'
-			if (!(this.moved & 7)) castling_availability += 'Q'
+		if (!(this.moved & fr2b('e1'))) {
+			if (!(this.moved & fr2b('h1'))) castling_availability += 'K'
+			if (!(this.moved & fr2b('a1'))) castling_availability += 'Q'
 		}
 		//if (!(this.moved & 0b00001000_00000000_00000000_00000000_00000000_00000000_00000000_00000000)) {
-		if (!(this.moved & (1n << 59n))) {
-			if (!(this.moved & (1n << 56n))) castling_availability += 'k'
-			if (!(this.moved & (1n << 63n))) castling_availability += 'q'
+		if (!(this.moved & (1n << fr2b('e8')))) {
+			if (!(this.moved & fr2b('h8'))) castling_availability += 'k'
+			if (!(this.moved & fr2b('a8'))) castling_availability += 'q'
 		}
 		// e.p. square
 		let ep_target = '-'
@@ -288,7 +292,7 @@ class Board {
 		// e.g. "2b5/2p5/4p3/4r1kp/8/5K2/r2q4/8 b KQkq - 0 20" or "8/5k2/3p4/1p1Pp2p/pP2Pp1P/P4P1K/8/8 b - - 99 50"
 		const [ppd, active_color, castling_availability, ep_target, halfmove_clock, fullmove_number] = fen.split(' ')
 		this.bboard = [0n, 0n, 0n, 0n, 0n, 0n, 0n]
-		this.moved = 0n
+		this.moved = FULL64
 		this.log = []
 		this.captured = []
 		let row = 0
@@ -313,22 +317,22 @@ class Board {
 			++row
 		}
 		if (castling_availability.indexOf('K') > -1) {
-			this.moved |= xy2b(4, 7)
-			this.moved |= xy2b(7, 7)
+			this.moved &= ~fr2b('e1')
+			this.moved &= ~fr2b('h1')
 		}
 		if (castling_availability.indexOf('Q') > -1) {
-			this.moved |= xy2b(3, 7)
-			this.moved |= xy2b(0, 7)
+			this.moved &= ~fr2b('e1')
+			this.moved &= ~fr2b('a1')
 		}
 		if (castling_availability.indexOf('k') > -1) {
-			this.moved |= xy2b(4, 0)
-			this.moved |= xy2b(7, 0)
+			this.moved &= ~fr2b('e8')
+			this.moved &= ~fr2b('a8')
 		}
 		if (castling_availability.indexOf('q') > -1) {
-			this.moved |= xy2b(4, 0)
-			this.moved |= xy2b(0, 0)
+			this.moved &= ~fr2b('e8')
+			this.moved &= ~fr2b('a8')
 		}
-		const move_count = (fullmove_number - 1) * 2 + (active_color === 'b' ? 1 : 0)
+		const move_count = (fullmove_number - 1) * 2 + (active_color === 'b' ? BLACK : WHITE)
 		const hmc = parseInt(halfmove_clock)
 		for (let i = 0; i < move_count; ++i) this.log.push(i < (move_count - halfmove_clock) ? 'x' : '?')
 		if (ep_target !== '-') {
@@ -345,7 +349,7 @@ class Board {
 
 	is_check(color) {
 		const king = this.get_king(color)
-		return !!king && !board.is_safe(...b2xy(king), color)
+		return !!king && !board.is_safe(b2i(king), color)
 	}
 
 	is_mate(color) {
@@ -361,7 +365,7 @@ class Board {
 				for (const xy of moves) {
 					const new_board = this.copy()
 					const new_piece = new_board.grid[row * 8 + col]
-					new_piece.move(xy)
+					this.move(row * 8 + col, xy2i(xy))
 					if (!new_board.is_check(color)) return false
 				}
 			}
@@ -371,10 +375,10 @@ class Board {
 
 	copy() {
 		const new_board = new Board(this.depth + 1)
-		new_board.log = [...this.log]
-		new_board.captured = [...this.captured]
-		new_board.grid = [...this.grid]
-		new_board.bboard = this.bboard.copy()
+		new_board.log = this.log.slice()  // 3 times faster than map(x => x); 30+ times faster than [...log]
+		new_board.captured = this.captured.slice()
+		new_board.grid = this.grid.slice()
+		new_board.bboard = this.bboard.slice()
 		new_board.colors = this.colors
 		new_board.moved = this.moved
 		return new_board
@@ -418,7 +422,7 @@ class Board {
 		this.bboard[to_p] |= to_bit
 		// TODO: update
 		//this.colors
-		const color = (this.colors & from_bit) ? 1 : 0
+		const color = (this.colors & from_bit) ? BLACK : WHITE
 		const move = CHARS[from_p] + i2fr(from) + (to_p === EMPTY ? '' : 'x') + i2fr(to)
 
 		//const [ox, oy] = i2xy(from)
@@ -458,19 +462,15 @@ window.b2i = function (b) {
 	while ((b >> i) > 1) ++i
 	return Number(i)
 }
-
 // window.b2i = b => { for(let i = 0; i < 64; ++i) if (i2b(i) === b) return i }
 window.b2s = b => {
-	const s = b.toString(2).padStart(64, '0')
+	const s = [...b.toString(2).padStart(64, '0')].reverse().join("")
 	let text = ''
-	for (let row = 0; row < 8; ++row) {
-		for (let col = 0; col < 8; ++col) {
-			let i = xy2i(col, row)
-			text += s.slice(i, i + 1)
-		}
-		text += '\n'
+	for (let i = 0; i < 8; ++i) {
+		text += s.slice(i*8, i*8+8) + '\n'
 	}
 	console.log(text)
+	return text
 }
 window.b2xy = b => i2xy(b2i(b))
 window.i2b = i => 1n << BigInt(i)
@@ -490,6 +490,8 @@ window.blog = b => {
 	console.log(text)
 }
 
+
+window.fr2b = fr => i2b(fr2i(fr))
 window.fr2i = fr => "abcdefgh".indexOf(fr[0]) + 8 * (8 - parseInt(fr[1]))
 window.fr2xy = fr => ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
 window.xy2fr = (x, y) => "abcdefgh"[x] + (8 - y)
@@ -535,7 +537,7 @@ window.render = board => {
 		for (let col = 0; col < 8; ++col) {
 			if (COLORS) text_line += ['\x1B[47m', '\x1B[100m'][(row % 2 + col % 2) % 2]
 			const p = xy2p(col, row)
-			const color = (board.colors & 1n << BigInt(xy2i(col, row))) ? 1 : 0
+			const color = (board.colors & 1n << BigInt(xy2i(col, row))) ? BLACK : WHITE
 			// const char = CHARS[p]
 			if (p === EMPTY) {
 				text_line += COLORS ? ' ' : ' .'[(row % 2 + col % 2) % 2]
@@ -625,11 +627,13 @@ window.render = board => {
 			this.classList.add('selected')
 			const moves = board.get_moves(xy2i(...fr2xy(start_fr)))
 			const from = xy2i(x, y)
+			const color = board.i2color(from)
 			for (const xy of moves) {
 				// Limit if in check.
 				const new_board = board.copy()
 				new_board.move(from, xy2i(...xy))
-				if (new_board.is_check(piece.color)) continue
+
+				if (new_board.is_check(color)) continue
 
 				const square = document.getElementById(xy2fr(...xy))
 				square.classList.add('selected')
@@ -732,7 +736,7 @@ window.ai_move = async function ai_move(board, color, start_time, start_score, t
 				best_piece = piece
 				if (new_board.is_check(1 - color)) {
 					if (new_board.is_mate(1 - color)) break
-					if (new_board.is_safe(x, y, color)) best_score = score + 0.5
+					if (new_board.is_safe(xy2i(x, y), color)) best_score = score + 0.5
 				} else {
 					console.log("No enemy move, but no check either. Timeout?")
 					best_score = score - 0.5  // avoid draw
@@ -763,7 +767,9 @@ window.ai_move = async function ai_move(board, color, start_time, start_score, t
 	}
 	// Found best move.
 	if (depth > 0) {
-		if (best_piece) best_piece.move(best_move)
+		if (best_piece) {
+			this.move(best_move[0], best_move[1])
+		}
 	} else {
 		if (best_piece) await show_move(xy2fr(best_piece.x, best_piece.y), xy2fr(...best_move))
 		else {
@@ -968,8 +974,9 @@ window.test = async function test() {
 	console.assert(''+i2xy(0) == '0,0')
 	console.assert(''+b2xy(1n) == '0,0')
 	console.assert(''+fr2xy('a8') == '0,0')
+	console.assert(b2s(1n) === '10000000\n00000000\n00000000\n00000000\n00000000\n00000000\n00000000\n00000000\n')
 
-	console.assert(board.fr2p("e2") === PAWN)
+	console.assert(board.fr2p("e1") === KING)
 	const start = performance.now()
 	board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
