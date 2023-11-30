@@ -19,68 +19,34 @@ const KNIGHT = 3
 const BISHOP = 4
 const QUEEN = 5
 const KING = 6
-const names = ['Empty', 'Pawn', 'Rook', 'Knight', 'Bishop', 'Queen', 'King']
-const chars = [' ', '', 'R', 'N', 'B', 'Q', 'K']
+window.EMPTY = EMPTY
+window.PAWN = PAWN
+window.ROOK = ROOK
+window.KNIGHT = KNIGHT
+window.BISHOP = BISHOP
+window.QUEEN = QUEEN
+window.KING = KING
+const NAMES = ['Empty', 'Pawn', 'Rook', 'Knight', 'Bishop', 'Queen', 'King']
+const CHARS = [' ', '', 'R', 'N', 'B', 'Q', 'K']
 
 function clog(msg) {
 	console.log("%c" + msg, "font-family: monospace; color: black; background-color: white")
 }
 
-/*
-window.Pawn = class extends Piece {
-	name = "Pawn"
-	char = ""
-	value = 1
-
-	move(xy) {
-		super.move(xy)
-		const log = this.board.log
-		if ((this.y === 0 && this.color === WHITE && white_ai_box.checked)
-			|| (this.y === 7 && this.color === BLACK && black_ai_box.checked)) {
-			// 8/5KP1/7k/8/6P1/8/8/8 w - - 3 86
-			this.board.promote(...xy, 'N', this.color)
-			if (this.board.get_king(1 - this.color).is_safe()) {
-				this.board.promote(...xy, 'Q', this.color)
-			}
-			if (this.board.depth === 0) {
-				say("Promotion.")
-				this.board.log_check(log.pop() + this.board.xy2p(...xy).char, 1 - this.color)
-			}
-		}
-		// En passant.
-		if (this.color === BLACK && this.y != 5) return
-		if (this.color === WHITE && this.y != 2) return
-		const double_jump = xy2fr(this.x, this.color ? 6 : 1) + xy2fr(this.x, this.color ? 4 : 3)
-		if (log.slice(-2)[0].slice(0, 4) === double_jump) {
-			this.board.grid[this.y + (this.color ? -1 : 1)][this.x] = EMPTY
-			log[log.length - 1] += ' e.p.'
-			if (this.board.depth === 0) say("En passant.")
-		}
-	}
-}
-*/
-
 class Board {
-	colors = 0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_11111111n
-	moved = 0n
-	bboard = [0n, 0n, 0n, 0n, 0n, 0n] // PRNBQK
-
-	grid = []
-	log = []
-	captured = []
-
 	constructor(depth) {
+		this.reset()
 		this.depth = depth || 0
 	}
 
-	get_moves(pos) {
+	get_moves(pos, depth=0) {
 		const moves = []
 		let dirs = []
 		const board = this
 		const grid = this.grid
 		const log = this.log
 		const piece = this.i2p(pos)
-		const color = +(this.colors & (1n << BigInt(pos)))
+		const color = (this.colors & (1n << BigInt(pos)))?1:0
 		const x = pos % 8
 		const y = Math.floor(pos / 8)
 		switch (piece) {
@@ -93,8 +59,8 @@ class Board {
 					const piece = board.xy2p(tx, ty)
 					if (piece === EMPTY) {
 						moves.push([tx, ty])
-						if (color && y === 1 && grid[ty + 1][tx] === EMPTY) moves.push([tx, ty + 1])
-						if (!color && y === 6 && grid[ty - 1][tx] === EMPTY) moves.push([tx, ty - 1])
+						if (color && y === 1 && grid[(ty + 1) * 8 + tx] === EMPTY) moves.push([tx, ty + 1])
+						if (!color && y === 6 && grid[(ty - 1) * 8 + tx] === EMPTY) moves.push([tx, ty - 1])
 					}
 				}
 				// Capture diagonally.
@@ -161,7 +127,7 @@ class Board {
 					if (piece.char === 'R' && !piece.moved) {
 						let clear = true
 						for (let i = 1; i < x; ++i) {
-							if (grid[8 - rank][i] !== EMPTY) clear = false
+							if (grid[(8 - rank) * 8 + i] !== EMPTY) clear = false
 						}
 						if (clear) moves.push([2, 8 - rank])
 					}
@@ -169,7 +135,7 @@ class Board {
 					if (piece.char === 'R' && !piece.moved) {
 						let clear = true
 						for (let i = 6; i > x; --i) {
-							if (grid[8 - rank][i] !== EMPTY) clear = false
+							if (grid[(8 - rank) * 8 + i] !== EMPTY) clear = false
 						}
 						if (clear) moves.push([6, 8 - rank])
 					}
@@ -183,7 +149,7 @@ class Board {
 						safe_moves.push(xy)
 					} else {
 						const new_board = board.copy()
-						const new_piece = new_board.grid[y][x]
+						const new_piece = new_board.grid[y * 8 + x]
 						new_piece.move(xy)
 						if (new_board.is_safe(x, y, depth + 1)) safe_moves.push(xy)
 					}
@@ -223,14 +189,15 @@ class Board {
 	}
 
 	xy2color = (x, y) => this.colors & xy2b(x, y) ? 1 : 0
+	xy2p = (x, y) => this.grid[y * 8 + x]
 
 	is_safe(x, y, depth) {
 		const color = this.xy2color(x, y)
 		//const enemies = get_pieces(1 - color)
 		for (let row = 0; row < 8; ++row) {
 			for (let col = 0; col < 8; ++col) {
-				const piece = this.grid[row][col]
-				if (piece == EMPTY || get_color(col, row) === this.color) continue
+				const piece = this.grid[row * 8 + col]
+				if (piece == EMPTY || this.colors === color) continue
 				if (this.get_moves(xy2i(col, row), depth).find(xy => xy[0] === x && xy[1] === y)) return false
 			}
 		}
@@ -239,15 +206,15 @@ class Board {
 
 	reset() {
 		this.bboard = [
-			0b00000000_00000000_11111111_11111111_11111111_11111111_00000000_00000000n,  // E
-			0b00000000_11111111_00000000_00000000_00000000_00000000_11111111_00000000n,  // P
-			0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001n,  // R
-			0b01000010_00000000_00000000_00000000_00000000_00000000_00000000_01000010n,  // N
-			0b00100100_00000000_00000000_00000000_00000000_00000000_00000000_00100100n,  // B
-			0b00010000_00000000_00000000_00000000_00000000_00000000_00000000_00010000n,  // Q
-			0b00001000_00000000_00000000_00000000_00000000_00000000_00000000_00001000n,  // K
+			0b00000000_00000000_11111111_11111111_11111111_11111111_00000000_00000000n,  // Empty. TODO: Colors
+			0b00000000_11111111_00000000_00000000_00000000_00000000_11111111_00000000n,  // Pawn
+			0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001n,  // Rook
+			0b01000010_00000000_00000000_00000000_00000000_00000000_00000000_01000010n,  // kNight
+			0b00100100_00000000_00000000_00000000_00000000_00000000_00000000_00100100n,  // Bishop
+			0b00010000_00000000_00000000_00000000_00000000_00000000_00000000_00010000n,  // Queen
+			0b00001000_00000000_00000000_00000000_00000000_00000000_00000000_00001000n,  // King
 		]
-		this.colors = 0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_11111111n
+		this.colors = 0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_11111111n // i = 0 = b 0 = fr a8
 		this.moved = 0n
 
 		this.grid = [
@@ -262,6 +229,7 @@ class Board {
 		]
 		this.log = []
 		this.captured = []
+		this.depth = 0
 	}
 
 	fen_export() {
@@ -387,12 +355,12 @@ class Board {
 		if (king.get_moves().length > 0) return false
 		for (const row in this.grid) {
 			for (const col in this.grid) {
-				const piece = this.grid[row][col]
+				const piece = this.grid[row * 8 + col]
 				if (piece.color !== color) continue
 				const moves = piece.get_moves()
 				for (const xy of moves) {
 					const new_board = this.copy()
-					const new_piece = new_board.grid[row][col]
+					const new_piece = new_board.grid[row * 8 + col]
 					new_piece.move(xy)
 					if (!new_board.is_check(color)) return false
 				}
@@ -406,18 +374,14 @@ class Board {
 		new_board.log = [...this.log]
 		new_board.captured = [...this.captured]
 		new_board.grid = [...this.grid]
+		new_board.bboard = this.bboard.copy()
+		new_board.colors = this.colors
+		new_board.moved = this.moved
 		return new_board
 	}
 
-	xy2p(x, y) {
-		if (x < 0 || x > 7 || y < 0 || y > 7) return ''
-		return this.grid[y][x]
-	}
-
 	fr2p(fr) {
-		const xy = fr2xy(fr)
-		if (xy[0] >= 0 && xy[1] >= 0) return this.grid[xy[1]][xy[0]]
-		return ''
+		return this.i2p(fr2i(fr))
 	}
 
 	b2p = bit => {
@@ -455,16 +419,16 @@ class Board {
 		// TODO: update
 		//this.colors
 		const color = (this.colors & from_bit) ? 1 : 0
-		const move = chars[from_p] + i2fr(from) + (to_p === EMPTY ? '' : 'x') + i2fr(to)
+		const move = CHARS[from_p] + i2fr(from) + (to_p === EMPTY ? '' : 'x') + i2fr(to)
 
-		const [ox, oy] = i2xy(from)
+		//const [ox, oy] = i2xy(from)
 		const [x, y] = i2xy(to)
-		board.grid[oy][ox] = EMPTY
-		board.grid[y][x] = to_p
+		board.grid[from] = EMPTY
+		board.grid[to] = to_p
 
 		if (this.depth === 0 && to_p !== EMPTY) {
 			this.captured.push(to_p)
-			say('Took ' + names[to_p])
+			say('Took ' + NAMES[to_p])
 		}
 
 		if (from_p === KING) {
@@ -495,7 +459,7 @@ window.b2i = function (b) {
 	return Number(i)
 }
 
-window.b2i = b => { for(let i = 0; i < 64; ++i) if (i2b(i) === b) return i }
+// window.b2i = b => { for(let i = 0; i < 64; ++i) if (i2b(i) === b) return i }
 window.b2s = b => {
 	const s = b.toString(2).padStart(64, '0')
 	let text = ''
@@ -533,7 +497,7 @@ window.xy2b = (x, y) => 1n << BigInt(xy2i(x, y))
 window.xy2i = (x, y) => y * 8 + x
 window.xy2p = (x, y) => board.grid[y * 8 + x]
 
-const icons = {
+export const ICONS = {
 	'0': '♙', '1': '♟︎',
 	'R0': '♖', 'R1': '♜',
 	'N0': '♘', 'N1': '♞',
@@ -541,14 +505,14 @@ const icons = {
 	'Q0': '♕', 'Q1': '♛',
 	'K0': '♔', 'K1': '♚',
 }
-
+window.p2s = (p, color) => ICONS[CHARS[p] + color]
 
 window.render = board => {
 	const grid = board.grid
 	const log = board.log
 
 	let files = `<span class="square">` + (` abcdefgh`.split('').join('</span><span class="square">')) + `</span>`
-	let lines = [files + `<span id="clock1"></span> <span id="caps1">${board.captured.filter(e => e.color === WHITE).map(e => icons[e.char + e.color]).join('')}</span>`]
+	let lines = [files + `<span id="clock1"></span> <span id="caps1">${board.captured.filter(e => e.color === WHITE).map(e => ICONS[e.char + e.color]).join('')}</span>`]
 	for (let row = 0; row < 8; ++row) {
 		let line = `<span class="square">${8 - row}</span>`
 		for (let col = 0; col < 8; ++col) {
@@ -557,7 +521,7 @@ window.render = board => {
 		line += `<span class="square">${8 - row}</span>`
 		lines.push(line)
 	}
-	lines.push(files + `<span id="clock0"></span> <span id="caps0">${board.captured.filter(e => e.color === BLACK).map(e => icons[e.char + e.color]).join('')}</span>`)
+	lines.push(files + `<span id="clock0"></span> <span id="caps0">${board.captured.filter(e => e.color === BLACK).map(e => ICONS[e.char + e.color]).join('')}</span>`)
 
 	files = ' abcdefgh '
 	let blank = ' '
@@ -571,18 +535,18 @@ window.render = board => {
 		for (let col = 0; col < 8; ++col) {
 			if (COLORS) text_line += ['\x1B[47m', '\x1B[100m'][(row % 2 + col % 2) % 2]
 			const p = xy2p(col, row)
-			const color = board.colors & 1n << BigInt(xy2i(col, row)) ? 1 : 0
-			const char = chars[p]
+			const color = (board.colors & 1n << BigInt(xy2i(col, row))) ? 1 : 0
+			// const char = CHARS[p]
 			if (p === EMPTY) {
 				text_line += COLORS ? ' ' : ' .'[(row % 2 + col % 2) % 2]
 				if (!MONOSPACE) text_line += ' '
 				continue
 			}
-			text_line += icons[char + color]
+			text_line += p2s(p, color)
 			//console.log('index', xy2i(col, row), char + color)
 			let html = ''
-			if (color) html = `<span class="piece bf">${icons[char + '1']}</span>`
-			else html = `<span class="piece wf">${icons[char + '1']}</span><span class="piece bf">${icons[char + '0']}</span>`
+			if (color) html = `<span class="piece bf">${p2s(p, 1)}</span>`
+			else html = `<span class="piece wf">${p2s(p, 1)}</span><span class="piece bf">${p2s(p, 0)}</span>` 
 			lines.push(`<span id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</span>`)
 		}
 		text_lines.push(text_line + (COLORS ? `\x1B[m${8 - row}` : `${8 - row}`))
@@ -599,7 +563,7 @@ window.render = board => {
 	}
 	logtext.innerHTML = `<ol>${html}</ol>`
 
-	clog(board.captured.map(p => icons[chars[p] + e.color]).join(''))
+	clog(board.captured.map(p => ICONS[CHARS[p] + e.color]).join(''))
 	if (txt.length > 77) clog(`...${txt.slice(-77)}`)
 	else clog(txt)
 
@@ -619,22 +583,22 @@ window.render = board => {
 					el.classList.remove('nobg')
 				})
 				this.classList.add('selected')
-				const i = fr2i(this.id)
+				const i = fr2i(this.id)  // TODO: use i
 				if (isNaN(i)) return
 				let html = `
-					<button onclick="board.grid[${i}] = ${EMPTY}; hide_modal()"> </button>
-					<button onclick="board.grid[${i}] = ${KING}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♚</button>
-					<button onclick="board.grid[${i}] = ${QUEEN}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♛</button>
-					<button onclick="board.grid[${i}] = ${BISHOP}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♝</button>
-					<button onclick="board.grid[${i}] = ${KNIGHT}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♞</button>
-					<button onclick="board.grid[${i}] = ${ROOK}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♜</button>
-					<button onclick="board.grid[${i}] = ${PAWN}; board.colors |= xy2b(${x}, ${y}); hide_modal()">♟︎</button><br>
-					<button onclick="board.grid[${i}] = ${KING}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♔</button>
-					<button onclick="board.grid[${i}] = ${QUEEN}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♕</button>
-					<button onclick="board.grid[${i}] = ${BISHOP}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♗</button>
-					<button onclick="board.grid[${i}] = ${KNIGHT}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♘</button>
-					<button onclick="board.grid[${i}] = ${ROOK}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♖</button>
-					<button onclick="board.grid[${i}] = ${PAWN}; board.colors &= ~xy2b(${x}, ${y}); hide_modal()">♙</button>
+					<button onclick="setp(${i}, EMPTY); hide_modal()"> </button>
+					<button onclick="setp(${i}, KING, 1); hide_modal()">♚</button>
+					<button onclick="setp(${i}, QUEEN, 1); hide_modal()">♛</button>
+					<button onclick="setp(${i}, BISHOP, 1); hide_modal()">♝</button>
+					<button onclick="setp(${i}, KNIGHT, 1); hide_modal()">♞</button>
+					<button onclick="setp(${i}, ROOK, 1); hide_modal()">♜</button>
+					<button onclick="setp(${i}, PAWN, 1); hide_modal()">♟︎</button><br>
+					<button onclick="setp(${i}, KING, 0); hide_modal()">♔</button>
+					<button onclick="setp(${i}, QUEEN, 0); hide_modal()">♕</button>
+					<button onclick="setp(${i}, BISHOP, 0); hide_modal()">♗</button>
+					<button onclick="setp(${i}, KNIGHT, 0); hide_modal()">♘</button>
+					<button onclick="setp(${i}, ROOK, 0); hide_modal()">♖</button>
+					<button onclick="setp(${i}, PAWN, 0); hide_modal()">♙</button>
 					`
 				show_modal(html)
 				while (getComputedStyle(modal).visibility === 'visible') await (sleep(1000))
@@ -732,8 +696,8 @@ window.ai_move = async function ai_move(board, color, start_time, start_score, t
 			// Eval move.
 			++total[0]
 			const new_board = board.copy()  // TODO: Rewind instead of copying whole board.
-			const new_piece = new_board.grid[piece.y][piece.x]
-			const capture = new_board.grid[move[1]][move[0]]
+			const new_piece = new_board.grid[piece.y * 8 + piece.x]
+			const capture = new_board.grid[move[1] * 8 + move[0]]
 			if (capture.char === "K") {
 				clog("Capturing king.")
 				say("You are already dead.")
@@ -880,13 +844,13 @@ async function show_move(start_fr, stop_fr, is_human) {
 window.promote = function promote(bit, kind) {
 	modal.style.visibility = 'hidden'
 	board.promote(bit, kind)
-	say('Promote to ' + names[kind])
-	board.log_check(board.log.pop() + chars[kind], 1 - board.colors[bit])
+	say('Promote to ' + NAMES[kind])
+	board.log_check(board.log.pop() + CHARS[kind], 1 - board.colors[bit])
 	render(board)
 }
 
 window.set = (x, y, kind, color) => {
-	board.grid[y][x] = kind
+	board.grid[y * 8 + x] = kind
 	if (color) board.colors |= xy2b(x, y)
 	else board.colors &= !xy2b(x, y)
 	hide_modal()
@@ -998,6 +962,14 @@ window.rewind = function rewind(index) {
 }
 
 window.test = async function test() {
+	console.assert(xy2fr(0, 0) === 'a8')
+    console.assert(xy2i(0, 0) === 0)
+	console.assert(xy2b(0, 0) === 1n)
+	console.assert(''+i2xy(0) == '0,0')
+	console.assert(''+b2xy(1n) == '0,0')
+	console.assert(''+fr2xy('a8') == '0,0')
+
+	console.assert(board.fr2p("e2") === PAWN)
 	const start = performance.now()
 	board.fen_import("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	await replay("1.Nb1a3 Nb8a6 2. d2d4 d7d5 3.Bc1h6 g7xh6 4.Qd1d3 Bf8g7 5. 0-0-0 Ng8f6 6. f2f4 0-0 7. h2h4 Nf6g4 8. f4f5 e7e5 9. f5e6 e.p. f7xe6 10.Qd3g3 Ng4e3 11.Qg3xe3 Qd8xh4 12.Rh1xh4 Rf8xf1 13.Rd1xf1 Bg7xd4 14.Qe3xd4 Na6b4 15.Qd4xb4 a7a5 16.Qb4g4+ Kg8h8", true)
@@ -1016,6 +988,14 @@ window.test = async function test() {
 
 window.board = new Board()
 board.reset()
+window.setp = (pos, p, color=0, board_parm=null) => {
+	let b = board
+	if (board_parm)	b = board_parm
+	b.grid[pos] = p
+	if(color) b.colors |= i2b(pos)
+	else b.colors &= ~i2b(pos)
+}
+
 render(board)
 start_clock(WHITE)
 if (white_ai_box.checked) ai_move(board, WHITE)
