@@ -39,14 +39,14 @@ class Board {
 		this.depth = depth || 0
 	}
 
-	get_moves(pos, depth=0) {
+	get_moves(pos, depth = 0) {
 		const moves = []
 		let dirs = []
 		const board = this
 		const grid = this.grid
 		const log = this.log
 		const piece = this.i2p(pos)
-		const color = (this.colors & (1n << BigInt(pos)))?BLACK:WHITE
+		const color = (this.colors & (1n << BigInt(pos))) ? BLACK : WHITE
 		const x = pos % 8
 		const y = Math.floor(pos / 8)
 		switch (piece) {
@@ -154,7 +154,7 @@ class Board {
 						if (new_board.is_safe(xy2i(x, y), depth + 1)) safe_moves.push(xy)
 					}
 				}
-				if (!moved) {
+				if (!this.moved) {  // TODO: & kingbit
 					// Can't castle over unsafe space.
 					const frs = safe_moves.map(e => xy2fr(...e))
 					for (let i = safe_moves.length - 1; i >= 0; --i) {
@@ -194,16 +194,13 @@ class Board {
 	xy2p = (x, y) => this.grid[y * 8 + x]
 
 	is_safe(pos, depth) {
-		const [x, y] = i2xy(pos)
-		const color = this.xy2color(x, y)
+		const color = this.i2color(pos)
 		//const enemies = get_pieces(1 - color)
-		for (let row = 0; row < 8; ++row) {
-			for (let col = 0; col < 8; ++col) {
-				const piece = this.grid[row * 8 + col]
-				const target_color = this.i2color(row * 8 + col)
-				if (piece === EMPTY || target_color === color) continue
-				if (this.get_moves(xy2i(col, row), depth + 1).find(from_to => from_to[1] === pos)) return false
-			}
+		for (let i = 0; i < 64; ++i) {
+			const piece = this.grid[i]
+			const target_color = this.i2color(i)
+			if (piece === EMPTY || target_color === color) continue
+			if (this.get_moves(i, depth + 1).find(to_xy => xy2i(...to_xy) === pos)) return false
 		}
 		return true
 	}
@@ -354,18 +351,20 @@ class Board {
 
 	is_mate(color) {
 		// start = performance.now(); for (let i = 0; i < 100; ++i) board.is_mate(0); console.log(performance.now() - start)
-		const king = this.get_king(color)
+		const king = b2i(this.get_king(color))
 		if (!this.is_check(color)) return false
-		if (king.get_moves().length > 0) return false
+		if (this.get_moves(king).length > 0) return false
 		for (const row in this.grid) {
 			for (const col in this.grid) {
-				const piece = this.grid[row * 8 + col]
-				if (piece.color !== color) continue
-				const moves = piece.get_moves()
+				const i = row * 8 + col
+				const piece = this.grid[i]
+				const pcolor = this.i2color(i)
+				if (pcolor !== color) continue
+				const moves = this.get_moves(i)
 				for (const xy of moves) {
 					const new_board = this.copy()
-					const new_piece = new_board.grid[row * 8 + col]
-					this.move(row * 8 + col, xy2i(xy))
+					const new_piece = new_board.grid[i]
+					this.move(i, xy2i(xy))
 					if (!new_board.is_check(color)) return false
 				}
 			}
@@ -427,8 +426,8 @@ class Board {
 
 		//const [ox, oy] = i2xy(from)
 		const [x, y] = i2xy(to)
-		board.grid[from] = EMPTY
-		board.grid[to] = to_p
+		this.grid[from] = EMPTY
+		this.grid[to] = to_p
 
 		if (this.depth === 0 && to_p !== EMPTY) {
 			this.captured.push(to_p)
@@ -451,8 +450,7 @@ class Board {
 		if (!partial) this.log_check(move, 1 - color)
 	}
 
-	promote(x, y, kind) {
-		const bit = this.xy2b(x, y)
+	promote(bit, kind) {
 		this.bboard.map((v, i) => (i === kind) ? (v | bit) : (v & !bit))
 	}
 }
@@ -463,41 +461,55 @@ window.b2i = function (b) {
 	return Number(i)
 }
 // window.b2i = b => { for(let i = 0; i < 64; ++i) if (i2b(i) === b) return i }
-window.b2s = b => {
-	const s = [...b.toString(2).padStart(64, '0')].reverse().join("")
-	let text = ''
-	for (let i = 0; i < 8; ++i) {
-		text += s.slice(i*8, i*8+8) + '\n'
-	}
-	console.log(text)
-	return text
-}
 window.b2xy = b => i2xy(b2i(b))
+
 window.i2b = i => 1n << BigInt(i)
-window.i2fr = i => "abcdefgh"[i % 8] + Math.floor(i / 8)
+window.i2fr = i => "abcdefgh"[i % 8] + (8 - (Math.floor(i / 8)))
 window.i2xy = i => [i % 8, Math.floor(i / 8)]
-
-window.blog = b => {
-	const s = b.toString(2).padStart(64, '0')
-	let text = ''
-	for (let row = 7; row >= 0; --row) {
-		for (let col = 7; col >= 0; --col) {
-			let i = xy2i(col, row)
-			text += s.slice(i, i + 1)
-		}
-		text += '\n'
-	}
-	console.log(text)
-}
-
 
 window.fr2b = fr => i2b(fr2i(fr))
 window.fr2i = fr => "abcdefgh".indexOf(fr[0]) + 8 * (8 - parseInt(fr[1]))
 window.fr2xy = fr => ["abcdefgh".indexOf(fr[0]), 8 - parseInt(fr[1])]
-window.xy2fr = (x, y) => "abcdefgh"[x] + (8 - y)
+
 window.xy2b = (x, y) => 1n << BigInt(xy2i(x, y))
+window.xy2fr = (x, y) => "abcdefgh"[x] + (8 - y)
 window.xy2i = (x, y) => y * 8 + x
 window.xy2p = (x, y) => board.grid[y * 8 + x]
+
+window.test_conversions = () => {
+	console.assert(b2i(0n) === 0)
+	console.assert(b2xy(0n).toString() === "0,0")
+
+	console.assert(i2b(0) === 1n)
+	console.assert(i2fr(0) === "a8")
+	console.assert(i2xy(0).toString() === "0,0")
+
+	console.assert(fr2b("a8") === 1n)
+	console.assert(fr2i("a8") === 0)
+	console.assert(fr2xy("a8").toString() === "0,0")
+
+	console.assert(xy2b(0, 0) === 1n)
+	console.assert(xy2fr(0, 0) === "a8")
+	console.assert(xy2i(0, 0) === 0)
+	console.assert(xy2p(0, 0) === ROOK)
+}
+
+window.grid2s = grid => {
+	let res = ''
+	for (let i = 0; i < 8; ++i) res += grid.join('').slice(i * 8, i * 8 + 8) + '\n'
+	console.log(res)
+	return res
+}
+window.b2s = b => {
+	const s = [...b.toString(2).padStart(64, '0')].reverse().join("")
+	let text = ''
+	for (let i = 0; i < 8; ++i) {
+		text += s.slice(i * 8, i * 8 + 8) + '\n'
+	}
+	console.log(text)
+	return text
+}
+window.show_color = color => board.get_pieces(color).map(b => b2s(b)).forEach(x => { console.log(x) })
 
 export const ICONS = {
 	'0': '♙', '1': '♟︎',
@@ -548,7 +560,7 @@ window.render = board => {
 			//console.log('index', xy2i(col, row), char + color)
 			let html = ''
 			if (color) html = `<span class="piece bf">${p2s(p, 1)}</span>`
-			else html = `<span class="piece wf">${p2s(p, 1)}</span><span class="piece bf">${p2s(p, 0)}</span>` 
+			else html = `<span class="piece wf">${p2s(p, 1)}</span><span class="piece bf">${p2s(p, 0)}</span>`
 			lines.push(`<span id="p${xy2fr(col, row)}" class='piece' style='left: ${1 + parseInt(col)}em; top: ${1 + parseInt(row)}em'>${html}</span>`)
 		}
 		text_lines.push(text_line + (COLORS ? `\x1B[m${8 - row}` : `${8 - row}`))
@@ -565,7 +577,7 @@ window.render = board => {
 	}
 	logtext.innerHTML = `<ol>${html}</ol>`
 
-	clog(board.captured.map(p => ICONS[CHARS[p] + e.color]).join(''))
+	clog(board.captured.map(p => ICONS[CHARS[p] + 0]).join(''))
 	if (txt.length > 77) clog(`...${txt.slice(-77)}`)
 	else clog(txt)
 
@@ -578,6 +590,7 @@ window.render = board => {
 		el.onmouseup = async function (e) {
 			console.log("mu")
 			const [x, y] = fr2xy(this.id)
+			const i = xy2i(x, y)
 			if (isNaN(y)) return
 			if (editmode.checked) {
 				document.querySelectorAll('.selected').forEach(el => {
@@ -585,7 +598,6 @@ window.render = board => {
 					el.classList.remove('nobg')
 				})
 				this.classList.add('selected')
-				const i = fr2i(this.id)  // TODO: use i
 				if (isNaN(i)) return
 				let html = `
 					<button onclick="setp(${i}, EMPTY); hide_modal()"> </button>
@@ -619,14 +631,14 @@ window.render = board => {
 				el.classList.remove('nobg')
 			})
 			const piece = board.fr2p(this.id)
-			if (!piece || piece === EMPTY || this.id === window.start_fr) {
+			if (piece === EMPTY || this.id === window.start_fr) {
 				window.start_fr = null
 				return
 			}
 			window.start_fr = this.id
 			this.classList.add('selected')
-			const moves = board.get_moves(xy2i(...fr2xy(start_fr)))
-			const from = xy2i(x, y)
+			const moves = board.get_moves(i)
+			const from = i
 			const color = board.i2color(from)
 			for (const xy of moves) {
 				// Limit if in check.
@@ -690,8 +702,12 @@ window.ai_move = async function ai_move(board, color, start_time, start_score, t
 			}
 		}
 		let total_moves = 0
-		pieces.forEach(p => { p.moves = board.get_moves(p); total_moves += p.moves.length })
-		pieces = pieces.filter(p => p.moves.length > 0)
+		let i_moves = {}
+		for (let i = 0; i < 64; ++i) {
+			let moves = board.get_moves(i2p(i))
+			total_moves += moves.length
+			i_moves[i] = moves
+		}
 
 		for (let i = 0; i < max_think; ++i) {
 			if (pieces.length < 1) break
@@ -792,12 +808,14 @@ window.say = msg => {
 
 async function show_move(start_fr, stop_fr, is_human) {
 	favicon.href = 'rook.png'
-	const piece = board.fr2p(start_fr)
-	const c = piece.char
-	const color = piece.color
+	const from = fr2i(start_fr)
+	const to = fr2i(stop_fr)
+	const piece = board.i2p(from)
+	const color = board.i2color(from)
+	const c = CHARS[piece]
 
 	if ((color === BLACK && speak_black.checked) ||
-		(color === WHITE && speak_white.checked)) say(`${start_fr} ${stop_fr}`.toUpperCase())  // Even uppercase fails "a7 a5" on MacOS!
+		(color === WHITE && speak_white.checked)) say(`${start_fr} ${stop_fr}`.toUpperCase())
 
 	//render(board)
 	await sleep(400)
@@ -807,8 +825,6 @@ async function show_move(start_fr, stop_fr, is_human) {
 	style.top = (1 + y) + 'em'
 	await sleep(400)
 
-	const from = xy2i(...fr2xy(stop_fr))
-	const to = xy2i(...fr2xy(stop_fr))
 	board.move(from, to)
 	render(board)
 	document.getElementById(start_fr).classList.add('selected')
@@ -817,7 +833,7 @@ async function show_move(start_fr, stop_fr, is_human) {
 	if (is_human && c === '' && (
 		(color === BLACK && y === 7) ||
 		(color === WHITE && y === 0))) {
-		const bit = y * 8 + x
+		const i = y * 8 + x
 		let html = `
 			<button onclick="promote(${bit}, 5)">♛</button>
 			<button onclick="promote(${bit}, 4)">♝</button>
@@ -952,7 +968,7 @@ window.replay = async function replay(movetext, instant) {
 				board.move(fr2i(from), fr2i(to))
 			} else await show_move(from, to)
 			if (promo) {
-				board.promote(...fr2xy(to), promo, color)
+				board.promote(fr2b(to), promo)
 				board.log_check(board.log.pop() + promo, 1 - color)
 			}
 		}
@@ -969,11 +985,11 @@ window.rewind = function rewind(index) {
 
 window.test = async function test() {
 	console.assert(xy2fr(0, 0) === 'a8')
-    console.assert(xy2i(0, 0) === 0)
+	console.assert(xy2i(0, 0) === 0)
 	console.assert(xy2b(0, 0) === 1n)
-	console.assert(''+i2xy(0) == '0,0')
-	console.assert(''+b2xy(1n) == '0,0')
-	console.assert(''+fr2xy('a8') == '0,0')
+	console.assert('' + i2xy(0) == '0,0')
+	console.assert('' + b2xy(1n) == '0,0')
+	console.assert('' + fr2xy('a8') == '0,0')
 	console.assert(b2s(1n) === '10000000\n00000000\n00000000\n00000000\n00000000\n00000000\n00000000\n00000000\n')
 
 	console.assert(board.fr2p("e1") === KING)
@@ -995,11 +1011,11 @@ window.test = async function test() {
 
 window.board = new Board()
 board.reset()
-window.setp = (pos, p, color=0, board_parm=null) => {
+window.setp = (pos, p, color = 0, board_parm = null) => {
 	let b = board
-	if (board_parm)	b = board_parm
+	if (board_parm) b = board_parm
 	b.grid[pos] = p
-	if(color) b.colors |= i2b(pos)
+	if (color) b.colors |= i2b(pos)
 	else b.colors &= ~i2b(pos)
 }
 
