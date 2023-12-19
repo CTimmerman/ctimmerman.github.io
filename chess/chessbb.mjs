@@ -19,7 +19,7 @@ const KNIGHT = 3
 const BISHOP = 4
 const QUEEN = 5
 const KING = 6
-window.EMPTY = EMPTY
+window.EMPTY = EMPTY   // TODO: Replace with color?
 window.PAWN = PAWN
 window.ROOK = ROOK
 window.KNIGHT = KNIGHT
@@ -154,7 +154,7 @@ class Board {
 						safe_moves.push(i)
 					} else {
 						const new_board = board.copy()
-						this.move(pos, i)
+						new_board.move(pos, i)
 						if (new_board.is_safe(i, depth + 1)) safe_moves.push(i)
 					}
 				}
@@ -221,8 +221,8 @@ class Board {
 			0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001n,  // Rook
 			0b01000010_00000000_00000000_00000000_00000000_00000000_00000000_01000010n,  // kNight
 			0b00100100_00000000_00000000_00000000_00000000_00000000_00000000_00100100n,  // Bishop
-			0b00010000_00000000_00000000_00000000_00000000_00000000_00000000_00010000n,  // Queen
-			0b00001000_00000000_00000000_00000000_00000000_00000000_00000000_00001000n,  // King
+			0b00001000_00000000_00000000_00000000_00000000_00000000_00000000_00001000n,  // Queen
+			0b00010000_00000000_00000000_00000000_00000000_00000000_00000000_00010000n,  // King
 		]
 		this.colors = 0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_11111111n // i = 0 = b 0 = fr a8
 		this.moved = 0n
@@ -371,7 +371,7 @@ class Board {
 		return total
 	}
 
-	is_check(color) {
+	is_check(color) {  // FIXME
 		const king = this.get_king(color)
 		return !!king && !board.is_safe(b2i(king))
 	}
@@ -381,9 +381,10 @@ class Board {
 		const iking = b2i(this.get_king(color))
 		if (!this.is_check(color)) return false
 		if (this.get_moves(iking).length > 0) return false
+		// Saving move?
 		for (const i in this.grid) {
 			const pcolor = this.i2color(i)
-			if (pcolor === color) continue
+			if (pcolor !== color) continue
 			const moves = this.get_moves(i)
 			for (const j of moves) {
 				const new_board = this.copy()
