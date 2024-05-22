@@ -22,6 +22,7 @@
 // I'd use my lib mjs, but don't feel like figuring out how to serve that as text/javascript or whatever right now.
 const saying = new Set()
 function say(s, rate=1.0, pitch=1.0, lang="en-US", volume=1.0){
+	console.log("Speaking", s)
 	// rate: (0.1,10), pitch: (0,2), lang: BCP 47 language tag
 	// So 0.1 < rate < 10, see https://en.wikipedia.org/wiki/Interval_(mathematics)
 	
@@ -37,6 +38,7 @@ function say(s, rate=1.0, pitch=1.0, lang="en-US", volume=1.0){
 	u.volume = volume
 	saying.add(u)
 	u.onend = e => {
+		console.log("Done.")
 		saying.delete(e.utterance)
 		if(saying.size < 1) [...document.getElementsByClassName("say")].forEach(e => e.disabled = false)
 	}
@@ -46,6 +48,6 @@ function say(s, rate=1.0, pitch=1.0, lang="en-US", volume=1.0){
 <textarea id="text">
 Insert text here.
 </textarea><br>
-<button onclick="say(text.innerHTML)">Read</button>
+<button onclick="say(text.value)">Read</button>
 </body>
 </html>
