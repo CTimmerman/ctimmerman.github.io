@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Reader by Cees Timmerman, 2024-05-22.</title>
+	<link rel="icon"
+	href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 112 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+	<style>
+		* {
+			background-color: black;
+			color: white;
+			font-family: monospace;
+			font-size: 5mm;
+			margin: 0;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+<script>
+// I'd use my lib mjs, but don't feel like figuring out how to serve that as text/javascript or whatever right now.
+const saying = new Set()
+function say(s, rate=1.0, pitch=1.0, lang="en-US", volume=1.0){
+	// rate: (0.1,10), pitch: (0,2), lang: BCP 47 language tag
+	// So 0.1 < rate < 10, see https://en.wikipedia.org/wiki/Interval_(mathematics)
+	
+	// Fix MacOS pronunciation of chess moves.
+	// > 'a7 a5'.replace(/(\d*)a(\d)/gi, '$1eh$2')
+	// 'eh7 eh5'
+	s = s.replace(/(\d*)a(\d)/gi, '$1eh$2')
+
+	const u = new SpeechSynthesisUtterance(s)
+	u.lang = lang
+	u.pitch = pitch
+	u.rate = rate
+	u.volume = volume
+	saying.add(u)
+	u.onend = e => {
+		saying.delete(e.utterance)
+		if(saying.size < 1) [...document.getElementsByClassName("say")].forEach(e => e.disabled = false)
+	}
+	speechSynthesis.speak(u)
+}
+</script>
+<textarea id="text">
+Insert text here.
+</textarea><br>
+<button onclick="say(text.innerHTML)">Read</button>
+</body>
+</html>
