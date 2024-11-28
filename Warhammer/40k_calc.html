@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Warhammer 40,000 10th Edition Combat Calculator</title>
+    <style>
+        html {
+            background-color: black;
+            color: white;
+            text-align: center;
+            font: message-box;
+        }
+
+        input[type=text] {
+            text-align: center;
+            width: 2em
+        }
+    </style>
+    <script>
+        let models = {
+            "Apothecary": {
+                "M": 6,
+                "T": 4,
+                "SV": 3,
+                "W": 4,
+                "LD": 6,
+                "OC": 1,
+                "Ranged Weapons": {
+                    "Absolver Bolt Pistol": {
+                        "R": 18,
+                        "A": 1,
+                        "BS": 3,
+                        "S": 5,
+                        "AP": 1,
+                        "D": 2,
+                        "Keywords": ["Pistol"]
+                    },
+                    "Reductor Pistol": {
+                        "R": 3,
+                        "A": 1,
+                        "BS": 3,
+                        "S": 4,
+                        "AP": 4,
+                        "D": 2,
+                        "Keywords": ["Pistol"]
+                    }
+                },
+                "Melee Weapons": {
+                    "Close Combat Weapon": {
+                        "R": 0,
+                        "A": 4,
+                        "WS": 3,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1,
+                        "Keywords": []
+                    }
+                },
+            }
+        }
+        function add_models() {
+            let html = ""
+            for (let key in models) {
+                html += `<option value="${key}">${key}</option>`
+            }
+            source.innerHTML = html
+            target.innerHTML = html
+        }
+        function set_source(key) {
+            let model = models[key]
+            let html = `<table align="center">
+<tr><th>Weapon</th><th>Range</th><th title="Attacks">A</th><th title="Ballistic Skill">BS</th><th title="Strength">S</th><th title="Armor Piercing">AP</th><th title="Damage">D</th><th>Keywords</th></tr>`
+            let i = 0
+            //let all_weapons = {...model["Ranged Weapons"], ...model["Melee Weapons"]}  // Not iterable?!
+            for (let key in model["Ranged Weapons"]) {
+                i++
+                let weapon = model["Ranged Weapons"][key]
+                html += `<tr><td id="weapon${i}">${key}</td><td><input id="range${i}" type="text" value="${weapon.R}"></td>
+<td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
+<td><input id="skill${i}" type="text" value="${weapon.BS}"></td>
+<td><input id="strength${i}" type="text" value="${weapon.S}"></td>
+<td><input id="piercing${i}" type="text" value="${weapon.AP}"></td>
+<td><input id="damage${i}" type="text" value="${weapon.D}"></td>
+<td><input id="keywords${i}" type="text" value="${weapon.Keywords}" style="width: 10em"></td></tr>`
+            }
+            html += "<th colspan=7>Melee</th>"
+            for (let key in model["Melee Weapons"]) {
+                i++
+                let weapon = model["Melee Weapons"][key]
+                html += `<tr><td>${key}</td><td><input id="range${i}" type="text" value="${weapon.R}"></td>
+<td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
+<td><input id="skill${i}" type="text" value="${weapon.WS}"></td>
+<td><input id="strength${i}" type="text" value="${weapon.S}"></td>
+<td><input id="piercing${i}" type="text" value="${weapon.AP}"></td>
+<td><input id="damage${i}" type="text" value="${weapon.D}"></td></tr>`
+            }
+            weapons.innerHTML = html + "</table>"
+        }
+        function set_target(key) {
+            let model = models[key]
+            movement.value = model.M
+            toughness.value = model.T
+            save.value = model.SV
+            wounds.value = model.W
+            leadership.value = model.LD
+            control.value = model.OC
+        }
+        let d6 = _ => 1 + Math.random() * 6
+        let geti = id => parseInt(document.getElementById(id).value)
+        let gets = id => document.getElementById(id).value
+        function calculate(distance) {
+            let damage = 0
+            let SV = parseInt(save.value)
+            let T = parseInt(toughness.value)
+            let W = parseInt(wounds.value)
+            let inches = parseFloat(distance)
+            let html = ""
+            let times = 1000
+            for (let j = 1; j < times; ++j) {
+                for (let i = 1; i < 100; ++i) {
+                    let weapon = document.getElementById(`weapon${i}`)
+                    if (weapon === null) break;
+                    weapon = weapon.innerText
+                    let R = geti(`range${i}`)
+                    let A = geti(`attacks${i}`)
+                    let WS = geti(`skill${i}`)
+                    let S = geti(`strength${i}`)
+                    let AP = geti(`piercing${i}`)
+                    let D = geti(`damage${i}`)
+                    if (R < inches) {
+                        // console.log(`${weapon} out of range.`)
+                        continue
+                    }
+                    if (inches <= 1) {
+                        console.log("Too close to engage.")
+                        if (R && !gets(`keywords${1}`).includes("Pistol")) continue
+                    }
+                    // console.log(`${weapon} in range. Attacking ${A} times.`)
+                    for (let attack = 0; attack < A; ++attack) {
+                        if (d6() < WS) {
+                            // console.log("Miss.")
+                            continue
+                        }
+                        // console.log("Hit.")
+                        // To wound.
+                        let threshold = 5
+                        if (S >= 2 * T)
+                            threshold = 2
+                        else if (S > T)
+                            threshold = 3
+                        else if (S == T)
+                            threshold = 4
+                        else if (2 * S <= T)
+                            threshold = 6
+
+                        if (d6() < threshold) {
+                            // console.log("No wound.")
+                            continue
+                        }
+                        // console.log("Wound.")
+                        // To save. Armor save (SV+). TODO: invuln save (SV++) and feel no pain (SV+++)
+                        let save_roll = d6()
+                        // Benefit of Cover: https://www.wargamer.com/warhammer-40k/cover
+                        if (R && cover.checked) {
+                            if (SV <= 3 && AP == 0) {
+                                // console.log("No benefit of cover.")
+                            } else {
+                                // console.log("Benefit of cover; +1 armor.")
+                                save_roll += 1
+                            }
+                        }
+                        if (save_roll >= SV) {
+                            // console.log("Saved.")
+                            continue
+                        }
+                        // console.log(`+${D} Damage.`)
+                        damage += D
+                    }
+                }
+            }
+            html += `Average ${damage / times} damage; ${damage / times / W} kills.`
+            result.innerHTML = html
+        }
+    </script>
+</head>
+
+<body onload="add_models()">
+    <h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
+    <div>
+        Source: <select id="source" onclick="set_source(this.value)">
+            <option value="Apothecary">Apothecary</option>
+        </select><br><br>
+        <div id="weapons">
+
+        </div>
+    </div><br>
+    <div>
+        Target: <select id="target" onclick="set_target(this.value)"></select><br><br>
+        <label title="Movement">M <input id="movement" type="text"></label>
+        <label title="Toughness">T <input id="toughness" type="text"></label>
+        <label title="Save">SV <input id="save" type="text"></label>
+        <label title="Wounds">W <input id="wounds" type="text"></label>
+        <label title="Leadership">LD <input id="leadership" type="text"></label>
+        <label title="Objective Control">OC <input id="control" type="text"></label>
+    </div>
+    <br>
+    <div>
+        <label>Distance <input id="distance" type="text">" </label>
+        <label>Cover <input id="cover" type="checkbox"></label>
+        <input type="button" value="Calculate" onclick="calculate(distance.value)">
+    </div>
+    <br>
+    <div id="result">
+
+    </div>
+</body>
+
+</html>
