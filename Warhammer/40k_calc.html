@@ -150,7 +150,47 @@
                         "Keywords": []
                     }
                 }
-            }
+            },
+            "Infernus Squad": {
+                "Keywords": ["Faction: Adeptus Astartes", "Grenades", "Imperium", "Infantry", "Infernus Squad", "Tacticus"],
+                "M": 6,
+                "T": 4,
+                "SV": 3,
+                "W": 2,
+                "LD": 6,
+                "OC": 1,
+                "Ranged Weapons": {
+                    "Bolt Pistol": {
+                        "R": 12,
+                        "A": 1,
+                        "BS": 3,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1,
+                        "Keywords": ["Pistol"]
+                    },
+                    "Pyreblaster": {
+                        "R": 12,
+                        "A": "D6",
+                        "BS": 0,
+                        "S": 5,
+                        "AP": 0,
+                        "D": 1,
+                        "Keywords": ["Ignores Cover", "Torrent"]
+                    }
+                },
+                "Melee Weapons": {
+                    "Close Combat Weapon": {
+                        "R": 0,
+                        "A": 4,
+                        "WS": 3,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1,
+                        "Keywords": []
+                    }
+                },
+            },
         }
         function add_models() {
             let html = ""
@@ -273,10 +313,18 @@
                         log("Skipping pistol.")
                         continue
                     }
+                    // Weapons with [RAPID FIRE X] in their profile are known as Rapid Fire weapons. Each time such a weapon targets a unit within half that weapon’s range, the Attacks characteristic of that weapon is increased by the amount denoted by ‘x’.
+                    for (let kw of weapon_keywords) {
+                        if (kw.indexOf("Rapid Fire") > -1) {
+                            if (distance >= R / 2) break
+                            A += parseInt(/\d+/.exec(kw))
+                            console.log(`${kw} active.`)
+                        }
+                    }
                     log(`${weapon} in range. Attacking ${A} times.`)
                     for (let attack = 0; attack < A; ++attack) {
                         // To hit.
-                        if (d6() < WS) {
+                        if (!source_keywords.includes("Torrent") && d6() < WS) {  // Torrent autohits.
                             log("Miss.")
                             continue
                         }
@@ -314,7 +362,7 @@
                             // To save. Armor save (SV+). TODO: invuln save (SV++) and feel no pain (SV+++)
                             let save_roll = d6()
                             // Benefit of Cover: https://www.wargamer.com/warhammer-40k/cover
-                            if (R && cover.checked) {
+                            if (R > 1 && cover.checked && !source_keywords.includes("Ignores Cover")) {
                                 if (SV <= 3 && AP == 0) {
                                     log("No benefit of cover.")
                                 } else {
