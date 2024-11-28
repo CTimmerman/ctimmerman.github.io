@@ -10,15 +10,20 @@
             text-align: center;
             font: message-box;
         }
-
-        input[type=text] {
+        input {
             text-align: center;
+        }
+        input[type=number] {
+            width: 3em
+        }
+        input[type=text] {
             width: 2em
         }
     </style>
     <script>
         let models = {
             "Apothecary": {
+                "Keywords": ["Character", "Faction: Adeptus Astartes", "Grenades", "Imperium", "Infantry", "Primaris", "Apothecary", "Tacticus"],
                 "M": 6,
                 "T": 4,
                 "SV": 3,
@@ -56,6 +61,95 @@
                         "Keywords": []
                     }
                 },
+            },
+            "Techmarine": {
+                "Keywords": ["Character", "Faction: Adeptus Astartes", "Grenades", "Imperium", "Infantry", "Tacticus", "Techmarine", "Warlord"],
+                "M": 6,
+                "T": 4,
+                "SV": 2,
+                "W": 4,
+                "LD": 6,
+                "OC": 1,
+                "Ranged Weapons": {
+                    "Forge Bolter": {
+                        "R": 24,
+                        "A": 3,
+                        "BS": 2,
+                        "S": 5,
+                        "AP": 1,
+                        "D": 2,
+                        "Keywords": []
+                    },
+                    "Grav-pistol": {
+                        "R": 12,
+                        "A": 1,
+                        "BS": 3,
+                        "S": 4,
+                        "AP": 1,
+                        "D": 2,
+                        "Keywords": ["Anti-vehicle 2+", "Pistol"]  // TODO: Anti-
+                    }
+                },
+                "Melee Weapons": {
+                    "Omnissian Power Axe": {
+                        "R": 0,
+                        "A": 4,
+                        "WS": 3,
+                        "S": 6,
+                        "AP": 2,
+                        "D": 2,
+                        "Keywords": []
+                    },
+                    "Servo-arm": {
+                        "R": 0,
+                        "A": 1,
+                        "WS": 3,
+                        "S": 8,
+                        "AP": 2,
+                        "D": 3,
+                        "Keywords": ["Extra Attacks"]
+                    }
+                },
+            },
+            "Impulsor": {
+                "Keywords": ["Dedicated Transport", "Faction: Adeptus Astartes", "Imperium", "Impulsor", "Transport", "Vehicle"],
+                "M": 12,
+                "T": 9,
+                "SV": 3,
+                "W": 11,
+                "LD": 6,
+                "OC": 2,
+                "Ranged Weapons": {
+                    "Ironhail Heavy Stubber": {
+                        "R": 36,
+                        "A": 3,
+                        "BS": 3,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1,
+                        "Keywords": ["Rapid Fire 3"]
+                    },
+                    "Fragstorm Grenade Launcher (x2)": {
+                        "R": 18,
+                        "A": "D6",
+                        "BS": 3,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1,
+                        "Keywords": ["Blast"]
+                    }
+                },
+                "Melee Weapons": {
+                    "Armoured Tracks": {
+                        "R": 0,
+                        "A": 3,
+                        "WS": 4,
+                        "S": 6,
+                        "AP": 0,
+                        "D": 1,
+                        "Keywords": []
+                    }
+                }
             }
         }
         function add_models() {
@@ -68,6 +162,7 @@
         }
         function set_source(key) {
             let model = models[key]
+            source_keywords.value = model.Keywords.join(", ")
             let html = `<table align="center">
 <tr><th>Weapon</th><th>Range</th><th title="Attacks">A</th><th title="Ballistic Skill">BS</th><th title="Strength">S</th><th title="Armor Piercing">AP</th><th title="Damage">D</th><th>Keywords</th></tr>`
             let i = 0
@@ -77,7 +172,7 @@
                 let weapon = model["Ranged Weapons"][key]
                 html += `<tr><td id="weapon${i}">${key}</td><td><input id="range${i}" type="text" value="${weapon.R}"></td>
 <td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
-<td><input id="skill${i}" type="text" value="${weapon.BS}"></td>
+<td><input id="skill${i}" type="number" value="${weapon.BS}"></td>
 <td><input id="strength${i}" type="text" value="${weapon.S}"></td>
 <td><input id="piercing${i}" type="text" value="${weapon.AP}"></td>
 <td><input id="damage${i}" type="text" value="${weapon.D}"></td>
@@ -87,62 +182,106 @@
             for (let key in model["Melee Weapons"]) {
                 i++
                 let weapon = model["Melee Weapons"][key]
-                html += `<tr><td>${key}</td><td><input id="range${i}" type="text" value="${weapon.R}"></td>
+                html += `<tr><td id="weapon${i}">${key}</td><td><input id="range${i}" type="text" value="${weapon.R}"></td>
 <td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
-<td><input id="skill${i}" type="text" value="${weapon.WS}"></td>
+<td><input id="skill${i}" type="number" value="${weapon.WS}"></td>
 <td><input id="strength${i}" type="text" value="${weapon.S}"></td>
 <td><input id="piercing${i}" type="text" value="${weapon.AP}"></td>
-<td><input id="damage${i}" type="text" value="${weapon.D}"></td></tr>`
+<td><input id="damage${i}" type="text" value="${weapon.D}"></td>
+<td><input id="keywords${i}" type="text" value="${weapon.Keywords}" style="width: 10em"></td></tr>`
             }
             weapons.innerHTML = html + "</table>"
         }
         function set_target(key) {
             let model = models[key]
-            movement.value = model.M
+            target_keywords.value = model.Keywords.join(", ")
+            // movement.value = model.M
             toughness.value = model.T
             save.value = model.SV
             wounds.value = model.W
-            leadership.value = model.LD
-            control.value = model.OC
+            // leadership.value = model.LD
+            // control.value = model.OC
         }
-        let d6 = _ => 1 + Math.random() * 6
-        let geti = id => parseInt(document.getElementById(id).value)
+        let d6 = _ => 1 + Math.floor(Math.random() * 6)
+        function geti(id) {
+            let s = document.getElementById(id).value
+            if (s === "D6") return d6()
+            if (s === "D3") return 1 + Math.floor(d6() / 2)
+            return parseInt(s)
+        }
         let gets = id => document.getElementById(id).value
+        let log_level = 1
+        function log(s) {
+            if (log_level) console.log(s)
+        }
         function calculate(distance) {
+            log("Calculating...")
             let damage = 0
+
+            let source_keywords = gets("source_keywords").toUpperCase().split(/, */)
+            let source_is_vehicle = source_keywords.includes("VEHICLE")
+            let source_is_monster = source_keywords.includes("MONSTER")
+            let target_keywords = gets("target_keywords").toUpperCase().split(/, */)
             let SV = parseInt(save.value)
             let T = parseInt(toughness.value)
             let W = parseInt(wounds.value)
+
             let inches = parseFloat(distance)
             let html = ""
-            let times = 1000
-            for (let j = 1; j < times; ++j) {
-                for (let i = 1; i < 100; ++i) {
+            let times = geti("rounds")
+            let pistols_only = inches < 1 || prefer_pistols.checked  // If in melee only shoot pistols.
+            for (let time = 0; time < times; ++time) {
+                // Use up to 49 weapons.
+                for (let i = 1; i < 50; ++i) {
+                    let melee_done = false
                     let weapon = document.getElementById(`weapon${i}`)
                     if (weapon === null) break;
                     weapon = weapon.innerText
+                    log(`WEAPON: ${weapon}`)
                     let R = geti(`range${i}`)
                     let A = geti(`attacks${i}`)
                     let WS = geti(`skill${i}`)
                     let S = geti(`strength${i}`)
                     let AP = geti(`piercing${i}`)
                     let D = geti(`damage${i}`)
-                    if (R < inches) {
-                        // console.log(`${weapon} out of range.`)
+                    let weapon_keywords = gets(`keywords${i}`).split(/, */)
+                    if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
+                        R = 1
+                        // Melee
+                        if (melee_done && !weapon_keywords.includes("Extra Attacks")) continue
+                        melee_done = true // NOSONAR
+                    }
+                    if (R <= inches) {
+                        log(`${weapon} out of range.`)
                         continue
                     }
-                    if (inches <= 1) {
-                        console.log("Too close to engage.")
-                        if (R && !gets(`keywords${1}`).includes("Pistol")) continue
-                    }
-                    // console.log(`${weapon} in range. Attacking ${A} times.`)
-                    for (let attack = 0; attack < A; ++attack) {
-                        if (d6() < WS) {
-                            // console.log("Miss.")
+                    let is_pistol = weapon_keywords.includes("Pistol")
+                    // Choose either pistols or other ranged weapons!
+                    if (R > 1 && !is_pistol) {
+                        if (pistols_only) {
+                            log("Pistols only.")
                             continue
                         }
-                        // console.log("Hit.")
-                        // To wound.
+                        // If a model is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE model, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a model will shoot with its Pistols or its other ranged weapons before selecting targets.
+                        if (!source_is_monster && !source_is_vehicle) {
+                            pistols_only = is_pistol  // XXX: Assumes first eligible ranged type is best.
+                            if (pistols_only) log("Using pistols only.")
+                            else log("Skipping pistols.")
+                        }
+                    }
+                    if (is_pistol && !pistols_only) {
+                        log("Skipping pistol.")
+                        continue
+                    }
+                    log(`${weapon} in range. Attacking ${A} times.`)
+                    for (let attack = 0; attack < A; ++attack) {
+                        // To hit.
+                        if (d6() < WS) {
+                            log("Miss.")
+                            continue
+                        }
+                        log("Hit.")
+                        // To wound. 1 always fails.
                         let threshold = 5
                         if (S >= 2 * T)
                             threshold = 2
@@ -153,32 +292,47 @@
                         else if (2 * S <= T)
                             threshold = 6
 
-                        if (d6() < threshold) {
-                            // console.log("No wound.")
-                            continue
-                        }
-                        // console.log("Wound.")
-                        // To save. Armor save (SV+). TODO: invuln save (SV++) and feel no pain (SV+++)
-                        let save_roll = d6()
-                        // Benefit of Cover: https://www.wargamer.com/warhammer-40k/cover
-                        if (R && cover.checked) {
-                            if (SV <= 3 && AP == 0) {
-                                // console.log("No benefit of cover.")
-                            } else {
-                                // console.log("Benefit of cover; +1 armor.")
-                                save_roll += 1
+                        let wound_roll = d6()
+                        for (let kw of weapon_keywords) {
+                            if (kw.indexOf("Anti-") > -1) {
+                                let anti_what = /Anti-(\w+)/.exec(kw)[1].toUpperCase()
+                                let anti_how = parseInt(/\d+/.exec(kw))
+                                console.log(`Anti-${anti_what} crits ${anti_how}+. Wound roll: ${wound_roll}`)
+                                if (target_keywords.includes(anti_what) && wound_roll >= anti_how) {
+                                    wound_roll = 6  // Anti- grants crits.
+                                }
                             }
                         }
-                        if (save_roll >= SV) {
-                            // console.log("Saved.")
+                        // TODO: Wound roll bonus pf -1 or +1. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
+                        if (wound_roll < threshold) {
+                            log(`No wound. ${wound_roll} < ${threshold}`)
                             continue
                         }
-                        // console.log(`+${D} Damage.`)
+                        log("Wound.")
+                        // To save. Noncrits only.
+                        if (wound_roll < 6) {
+                            // To save. Armor save (SV+). TODO: invuln save (SV++) and feel no pain (SV+++)
+                            let save_roll = d6()
+                            // Benefit of Cover: https://www.wargamer.com/warhammer-40k/cover
+                            if (R && cover.checked) {
+                                if (SV <= 3 && AP == 0) {
+                                    log("No benefit of cover.")
+                                } else {
+                                    log("Benefit of cover; +1 armor.")
+                                    save_roll += 1
+                                }
+                            }
+                            if (save_roll >= SV) {
+                                log("Saved.")
+                                continue
+                            }
+                        }
+                        log(`+${D} Damage.`)
                         damage += D
                     }
                 }
             }
-            html += `Average ${damage / times} damage; ${damage / times / W} kills.`
+            html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
             result.innerHTML = html
         }
     </script>
@@ -190,23 +344,29 @@
         Source: <select id="source" onclick="set_source(this.value)">
             <option value="Apothecary">Apothecary</option>
         </select><br><br>
+        <label title="Keywords">Keywords <input id="source_keywords" type="text" style="width: 30em"></label><br><br>
         <div id="weapons">
 
         </div>
     </div><br>
     <div>
         Target: <select id="target" onclick="set_target(this.value)"></select><br><br>
-        <label title="Movement">M <input id="movement" type="text"></label>
-        <label title="Toughness">T <input id="toughness" type="text"></label>
-        <label title="Save">SV <input id="save" type="text"></label>
-        <label title="Wounds">W <input id="wounds" type="text"></label>
-        <label title="Leadership">LD <input id="leadership" type="text"></label>
-        <label title="Objective Control">OC <input id="control" type="text"></label>
+        <label title="Keywords">Keywords <input id="target_keywords" type="text" style="width: 30em"></label><br><br>
+        <!-- label title="Movement">M <input id="movement" type="text"></label -->
+        <label title="Toughness">T <input id="toughness" type="number"></label>
+        <label title="Wounds">W <input id="wounds" type="number"></label>
+        <label title="Save">SV <input id="save" type="number"></label>
+        <label title="Invulnerable Save">SV++ <input id="invuln_save" type="text"></label>
+        <label title="Feel No Pain Save">SV+++ <input id="fnp_save" type="text"></label>
+        <!-- label title="Leadership">LD <input id="leadership" type="text"></label>
+        <label title="Objective Control">OC <input id="control" type="text"></label -->
     </div>
     <br>
     <div>
-        <label>Distance <input id="distance" type="text">" </label>
+        <label>Distance <input id="distance" type="number" value="2" min="0" step="0.5">" </label>
         <label>Cover <input id="cover" type="checkbox"></label>
+        <label>Prefer Pistols <input id="prefer_pistols" type="checkbox"> </label>
+        <label>Rounds <input id="rounds" type="number" value="1" min="1"></label>
         <input type="button" value="Calculate" onclick="calculate(distance.value)">
     </div>
     <br>
