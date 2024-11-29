@@ -25,10 +25,7 @@
     </style>
     <script>
         let models = {
-            "-Astartes-": {
-                "unit_size": "",
-                "keywords": []
-            },
+            "- Astartes -": {},
             "Apothecary": {
                 "keywords": ["Character", "Faction: Adeptus Astartes", "Grenades", "Imperium", "Infantry", "Primaris", "Apothecary", "Tacticus"],
                 "M": 6,
@@ -399,10 +396,13 @@
                     }
                 }
             },
-            "-Astra Militarum-": {
-                "unit_size": "",
-                "keywords": []
-            },
+//             `Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+// ➤ Arma Luminis - bolt	12"	4	2+	4	-1	2	Pistol
+// ➤ Arma Luminis - plasma	12"	2	2+	8	-3	2	Pistol
+// Melee Weapons	Range	A	WS	S	AP	D	Keywords
+// ➤ Fealty - strike	Melee	8	2+	12	-4	4	Lethal Hits
+// ➤ Fealty - sweep	Melee	16	2+	6	-3	1	Sustained Hits 1`
+            "- Astra Militarum -": {},
             "Ratling Snipers": {
                 "unit_size": 5,
                 "keywords": ["FACTION: ASTRA MILITARUM", "INFANTRY", "IMPERIUM", "RATLING", "RATLING SNIPERS", "Infiltrators", "Stealth"],
@@ -551,10 +551,7 @@
                     }
                 }
             },
-            "-Necron-": {
-                "unit_size": "",
-                "keywords": []
-            },
+            "- Necron -": {},
             "Skorpekh Destroyers": {
                 "unit_size": 3,
                 "keywords": ["FACTION: NECRON", "INFANTRY", "DESTROYER CULT", "SKORPEKH DESTROYERS", "Whirling Onslaught"],  // XXX: WO is an ability, not a keyword.
@@ -576,10 +573,7 @@
                     },
                 },
             },
-            "-Tyranids-": {
-                "unit_size": "",
-                "keywords": []
-            },
+            "- Tyranids -": {},
             "Termagants": {
                 "unit_size": 10,
                 "keywords": ["FACTION: TYRANIDS", "INFANTRY", "BATTLELINE", "GREAT DEVOURER", "ENDLESS MULTITUDE", "TERMAGANTS"],
@@ -660,10 +654,7 @@
                     },
                 },
             },
-            "-Orks-": {
-                "unit_size": "",
-                "keywords": []
-            },
+            "- Orks -": {},
             "Boyz": {
                 "unit_size": 10,  // XXX: Boss Nob doesn't share loadout.
                 "keywords": ["FACTION: Waaagh!", "INFANTRY", "BATTLELINE", "MOB", "GRENADES", "BOYZ"],  // XXX: May depend on detachment.
@@ -836,7 +827,7 @@
         }
         function set_source(key) {
             let model = models[key]
-            source_keywords.value = model.keywords.join(", ")
+            source_keywords.value = (model.keywords || []).join(", ")
             let html = model["weapons"]? `<table align="center"><tr>
                 <th>Weapon</th>
                 <th>Count</th>
@@ -858,7 +849,7 @@
 <td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
 <td><input id="skill${i}" type="number" value="${weapon.WS}"></td>
 <td><input id="strength${i}" type="text" value="${weapon.S}"></td>
-<td><input id="piercing${i}" type="text" value="${weapon.AP || 0}"></td>
+<td><input id="piercing${i}" type="text" value="${-Math.abs(weapon.AP || 0)}"></td>
 <td><input id="damage${i}" type="text" value="${weapon.D}"></td>
 <td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).toUpperCase().split(/, */).join(", ")}" style="width: 15em"></td></tr>`
             }
@@ -867,7 +858,7 @@
         function set_target(key) {
             let model = models[key]
             target_unit_size.value = model.unit_size || 1
-            target_keywords.value = model.keywords.join(", ")
+            target_keywords.value = (model.keywords || []).join(", ")
             // movement.value = model.M
             toughness.value = model.T || ''
             save.value = model.SV || ''
@@ -978,7 +969,7 @@
                 
                 const WS = geti(`skill${i}`) || 0
                 const S = geti(`strength${i}`)
-                const AP = geti(`piercing${i}`)
+                const AP = Math.abs(geti(`piercing${i}`))
 
                 for (let time = 0; time < times * count; ++time) {
                     let A = geti(`attacks${i}`)
@@ -1152,6 +1143,62 @@
             }
             html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
             result.innerHTML = html
+        }
+        document.onpaste = (event) => {
+            log(`Pasted formats: ${event.formats}`)
+            import_sheet(event.clipboardData.getData("text/plain"))
+        }
+        function import_sheet(s) {
+            /*
+Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Dark Angels Imperium Lion El'Jonson Monster Primarch Warlord
+Models	Options
+1x Lion El'Jonson 	Arma Luminis, Fealty, Warlord
+Unit	M	T	SV	W	LD	OC
+Lion El'Jonson	8"	9	2+	10	5+	4
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Arma Luminis - bolt	12"	4	2+	4	-1	2	Pistol
+➤ Arma Luminis - plasma	12"	2	2+	8	-3	2	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Fealty - strike	Melee	8	2+	12	-4	4	Lethal Hits
+➤ Fealty - sweep	Melee	16	2+	6	-3	1	Sustained Hits 1
+            */
+            let unit = {
+                "keywords": [],
+                "weapons": {}
+            }
+            let name = "PASTED"
+            for (let line of s.split('\n')) {
+                let cols = line.split('\t')
+                if (cols.length === 7) {
+                    if (cols[1] === "M") continue  // Skip header.
+                    log(`Unit stats: ${cols}`)
+                    name = cols[0]
+                    unit.M = cols[1]
+                    unit.T = cols[2]
+                    unit.SV = cols[3]
+                    unit.W = cols[4]
+                    unit.LD = cols[5]
+                    unit.OC = cols[6].trim()
+                }
+                else if (cols.length === 8) {
+                    if (cols[2] === "A") continue  // Skip headers.
+                    log(`Weapon stats: ${cols}`)
+                    let weapon = {
+                        "count": 1,
+                        "keywords": cols[7].trim().split(/, */),
+                        "R": cols[1],
+                        "A": cols[2],
+                        "WS": cols[3],
+                        "S": cols[4],
+                        "AP": cols[5],
+                        "D": cols[6]
+                    }
+                    unit.weapons[cols[0]] = weapon
+                }
+            }
+            models[name] = unit
+            alert(`Imported ${name}.`)
+            add_models()
         }
     </script>
 </head>
