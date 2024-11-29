@@ -37,7 +37,7 @@
                 "W": 4,
                 "LD": 6,
                 "OC": 1,
-                "Weapons": {
+                "weapons": {
                     "Absolver Bolt Pistol": {
                         "count": 1,
                         "R": 18,
@@ -77,7 +77,7 @@
                 "W": 4,
                 "LD": 6,
                 "OC": 1,
-                "Weapons": {
+                "weapons": {
                     "Forge Bolter": {
                         "count": 1,
                         "R": 24,
@@ -126,7 +126,7 @@
                 "W": 11,
                 "LD": 6,
                 "OC": 2,
-                "Weapons": {
+                "weapons": {
                     "Ironhail Heavy Stubber": {
                         "count": 1,
                         "R": 36,
@@ -215,7 +215,7 @@
                 "W": 3,
                 "LD": 6,
                 "OC": 1,
-                "Weapons": {
+                "weapons": {
                     "Bolt Pistol": {
                         "count": 1,
                         "R": 12,
@@ -266,7 +266,7 @@
                 "W": 2,
                 "LD": 6,
                 "OC": 1,
-                "Weapons": {
+                "weapons": {
                     "Bolt Pistol": {
                         "count": 1,
                         "R": 12,
@@ -306,7 +306,7 @@
                 "W": 12,
                 "LD": 6,
                 "OC": 4,
-                "Weapons": {
+                "weapons": {
                     "Icarus rocket pod": {
                         "count": 1,
                         "keywords": ["ANTI-fly 2+"],
@@ -408,7 +408,7 @@
                 "W": 3,
                 "LD": 7,
                 "OC": 2,
-                "Weapons": {
+                "weapons": {
                     "Skorpekh hyperphase weapons": {
                         "count": 1,
                         "R": 0,
@@ -429,7 +429,7 @@
                 "W": 1,
                 "LD": 8,
                 "OC": 2,
-                "Weapons": {
+                "weapons": {
                     "Fleshborer": {
                         "count": 3,
                         "keywords": ["ASSAULT"],
@@ -509,7 +509,7 @@
                 "W": 1,
                 "LD": 8,
                 "OC": 2,
-                "Weapons": {
+                "weapons": {
                     "Grot blasta": {
                         "count": 1,
                         "keywords": ["PISTOL"],
@@ -539,7 +539,7 @@
                 "W": 2,
                 "LD": 7,
                 "OC": 1,
-                "Weapons": {
+                "weapons": {
                     "Slugga": {
                         "count": 1,
                         "keywords": ["PISTOL"],
@@ -569,10 +569,10 @@
                 "W": 5,
                 "LD": 7,
                 "OC": 1,
-                "Weapons": {
+                "weapons": {
                     "Slugga": {
                         "count": 1,
-                        "keywords": ["NATI-MONSTER 4+", "PISTOL"],
+                        "keywords": ["ANTI-MONSTER 4+", "PISTOL"],
                         "R": 12,
                         "A": 1,
                         "WS": 5,
@@ -603,7 +603,7 @@
         function set_source(key) {
             let model = models[key]
             source_keywords.value = model.keywords.join(", ")
-            let html = model["Weapons"]? `<table align="center"><tr>
+            let html = model["weapons"]? `<table align="center"><tr>
                 <th>Weapon</th>
                 <th>Count</th>
                 <th>Range</th>
@@ -615,9 +615,9 @@
                 <th>Keywords</th>
             </tr>` : ''
             let i = 0
-            for (let key in model["Weapons"]) {
+            for (let key in model["weapons"]) {
                 i++
-                let weapon = model["Weapons"][key]
+                let weapon = model["weapons"][key]
                 html += `<tr><td id="weapon${i}">${key}</td>
 <td><input id="count${i}" type="text" value="${weapon.count || 0}"></td>
 <td><input id="range${i}" type="text" value="${weapon.R}"></td>
