@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Warhammer 40,000 10th Edition Combat Calculator</title>
+    <title>Warhammer 40,000 10th Edition Combat Calculator by Cees Timmerman, 2024-11-28.</title>
     <style>
         html {
             background-color: black;
@@ -25,7 +25,7 @@
     </style>
     <script>
         let models = {
-            "-": {
+            "-Astartes-": {
                 "unit_size": "",
                 "keywords": []
             },
@@ -217,7 +217,7 @@
                 "OC": 1,
                 "weapons": {
                     "Bolt Pistol": {
-                        "count": 1,
+                        "count": 3,
                         "R": 12,
                         "A": 1,
                         "WS": 3,
@@ -247,7 +247,7 @@
                         "keywords": ["heavy", "melta 2"]
                     },
                     "Close Combat Weapon": {
-                        "count": 1,
+                        "count": 3,
                         "R": 0,
                         "A": 3,
                         "WS": 3,
@@ -268,7 +268,7 @@
                 "OC": 1,
                 "weapons": {
                     "Bolt Pistol": {
-                        "count": 1,
+                        "count": 5,
                         "R": 12,
                         "A": 1,
                         "WS": 3,
@@ -278,7 +278,7 @@
                         "keywords": ["PISTOL"]
                     },
                     "Pyreblaster": {
-                        "count": 1,
+                        "count": 5,
                         "R": 12,
                         "A": "D6",
                         "WS": 0,
@@ -288,7 +288,7 @@
                         "keywords": ["IGNORES COVER", "TORRENT"]
                     },
                     "Close Combat Weapon": {
-                        "count": 1,
+                        "count": 5,
                         "R": 0,
                         "A": 4,
                         "WS": 3,
@@ -399,6 +399,162 @@
                     }
                 }
             },
+            "-Astra Militarum-": {
+                "unit_size": "",
+                "keywords": []
+            },
+            "Ratling Snipers": {
+                "unit_size": 5,
+                "keywords": ["FACTION: ASTRA MILITARUM", "INFANTRY", "IMPERIUM", "RATLING", "RATLING SNIPERS", "Infiltrators", "Stealth"],
+                "M": 6,
+                "T": 2,
+                "SV": 6,
+                "W": 1,
+                "LD": 8,
+                "OC": 1,
+                "weapons": {
+                    "Sniper rifle": {
+                        "count": 5,
+                        "keywords": ["heavy", "precision"],
+                        "R": 36,
+                        "A": 1,
+                        "WS": 3,
+                        "S": 4,
+                        "AP": 2,
+                        "D": 2,
+                    },
+                    "Close combat weapon": {
+                        "count": 5,
+                        "R": 0,
+                        "A": 1,
+                        "WS": 5,
+                        "S": 2,
+                        "AP": 0,
+                        "D": 1,
+                    },
+                },
+            },
+            "Scout Sentinels": {
+                "keywords": ["VEHICLE", "WALKER", "IMPERIUM", "REGIMENT", "SQUADRON", "SMOKE", "SCOUT SENTINELS"],
+                "R": 10,
+                "T": 7,
+                "SV": 3,
+                "W": 7,
+                "LD": 7,
+                "OC": 2,
+                "weapons": {
+                    "Autocannon": {
+                        "count": 0,
+                        "keywords": ["ANTI-fly 2+"],
+                        "R": 48,
+                        "A": 2,
+                        "WS": 4,
+                        "S": 9,
+                        "AP": 1,
+                        "D": 3
+                    },
+                    "Heavy flamer": {
+                        "count": 0,
+                        "keywords": ["IGNORES COVER", "TORRENT"],
+                        "R": 12,
+                        "A": "D6",
+                        "WS": 0,
+                        "S": 5,
+                        "AP": 1,
+                        "D": 1
+                    },
+                    "Hunter-killer missile": {
+                        "count": 1,
+                        "keywords": ["ONE SHOT"],
+                        "R": 48,
+                        "A": 1,
+                        "WS": 4,
+                        "S": 14,
+                        "AP": 3,
+                        "D": "D6"
+                    },
+                    "Lascannon": {
+                        "count": 0,
+                        "R": 48,
+                        "A": 1,
+                        "WS": 4,
+                        "S": 12,
+                        "AP": 3,
+                        "D": "D6+1"
+                    },
+                    "Militarum multi-laser": {
+                        "count": 1,
+                        "R": 36,
+                        "A": 4,
+                        "WS": 4,
+                        "S": 6,
+                        "AP": 0,
+                        "D": 1,
+                    },
+                    "Missile launcher – frag": {
+                        "count": 0,
+                        "keywords": ["BLAST", "HEAVY"],
+                        "R": 48,
+                        "A": "D6",
+                        "WS": 4,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1
+                    },
+                    "Missile launcher – krak": {
+                        "count": 0,
+                        "keywords": ["HEAVY"],
+                        "R": 48,
+                        "A": 1,
+                        "WS": 4,
+                        "S": 9,
+                        "AP": 2,
+                        "D": 1
+                    },
+                    "Plasma cannon – standard": {
+                        "count": 0,
+                        "keywords": ["BLAST"],
+                        "R": 36,
+                        "A": "D3",
+                        "WS": 4,
+                        "S": 7,
+                        "AP": 2,
+                        "D": 1,
+                    },
+                    "Plasma cannon – supercharge": {
+                        "count": 0,
+                        "keywords": ["BLAST", "HAZARDOUS"],
+                        "R": 36,
+                        "A": "D3",
+                        "WS": 4,
+                        "S": 8,
+                        "AP": 3,
+                        "D": 2,
+                    },
+                    "Close combat weapon": {
+                        "count": 1,
+                        "R": 0,
+                        "A": 2,
+                        "WS": 4,
+                        "S": 6,
+                        "AP": 0,
+                        "D": 1
+                    },
+                    "Sentinel chainsaw": {
+                        "count": 1,
+                        "R": 0,
+                        "A": 3,
+                        "WS": 4,
+                        "S": 6,
+                        "AP": 1,
+                        "D": 1
+                    }
+                }
+            },
+            "-Necron-": {
+                "unit_size": "",
+                "keywords": []
+            },
             "Skorpekh Destroyers": {
                 "unit_size": 3,
                 "keywords": ["FACTION: NECRON", "INFANTRY", "DESTROYER CULT", "SKORPEKH DESTROYERS", "Whirling Onslaught"],  // XXX: WO is an ability, not a keyword.
@@ -410,7 +566,7 @@
                 "OC": 2,
                 "weapons": {
                     "Skorpekh hyperphase weapons": {
-                        "count": 1,
+                        "count": 3,
                         "R": 0,
                         "A": 4,
                         "WS": 3,
@@ -419,6 +575,10 @@
                         "D": 2,
                     },
                 },
+            },
+            "-Tyranids-": {
+                "unit_size": "",
+                "keywords": []
             },
             "Termagants": {
                 "unit_size": 10,
@@ -490,11 +650,85 @@
                         "D": 1,
                     },
                     "Chitinous claws and teeth": {
-                        "count": 1,
+                        "count": 10,
                         "R": 0,
                         "A": 1,
                         "WS": 4,
                         "S": 3,
+                        "AP": 0,
+                        "D": 1,
+                    },
+                },
+            },
+            "-Orks-": {
+                "unit_size": "",
+                "keywords": []
+            },
+            "Boyz": {
+                "unit_size": 10,  // XXX: Boss Nob doesn't share loadout.
+                "keywords": ["FACTION: Waaagh!", "INFANTRY", "BATTLELINE", "MOB", "GRENADES", "BOYZ"],  // XXX: May depend on detachment.
+                "M": 6,
+                "T": 5,
+                "SV": 5,
+                "W": 1,
+                "LD": 7,
+                "OC": 2,
+                "weapons": {
+                    "Big shoota": {
+                        "count": 1,
+                        "keywords": ["rapid fire 2"],
+                        "R": 36,
+                        "A": 3,
+                        "WS": 5,
+                        "S": 5,
+                        "AP": 0,
+                        "D": 1,
+                    },
+                    "Rokkit launcha": {
+                        "count": 0,
+                        "keywords": ["blast"],
+                        "R": 24,
+                        "A": "D3",
+                        "WS": 5,
+                        "S": 9,
+                        "AP": 2,
+                        "D": 3,
+                    },
+                    "Shoota": {
+                        "count": 4,
+                        "keywords": ["rapid fire 1"],
+                        "R": 18,
+                        "A": 2,
+                        "WS": 5,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1,
+                    },
+                    "Slugga": {
+                        "count": 5,
+                        "keywords": ["PISTOL"],
+                        "R": 12,
+                        "A": 1,
+                        "WS": 5,
+                        "S": 4,
+                        "AP": 0,
+                        "D": 1,
+                    },
+                    "Choppa": {
+                        "count": 5,
+                        "R": 0,
+                        "A": 3,
+                        "WS": 3,
+                        "S": 4,
+                        "AP": 1,
+                        "D": 1,
+                    },
+                    "Close combat weapon": {
+                        "count": 5,
+                        "R": 0,
+                        "A": 2,
+                        "WS": 3,
+                        "S": 4,
                         "AP": 0,
                         "D": 1,
                     },
@@ -511,7 +745,7 @@
                 "OC": 2,
                 "weapons": {
                     "Grot blasta": {
-                        "count": 1,
+                        "count": 9,
                         "keywords": ["PISTOL"],
                         "R": 12,
                         "A": 1,
@@ -521,7 +755,7 @@
                         "D": 1,
                     },
                     "Close combat weapon": {
-                        "count": 1,
+                        "count": 9,
                         "R": 0,
                         "A": 1,
                         "WS": 5,
@@ -696,61 +930,65 @@
             }
             let pistols_only = inches < 1 || prefer_pistols.checked || !has_rifle
             log(pistols_only ? "Pistols only!" : "No pistols!")
-            for (let time = 0; time < times; ++time) {
-                // Use up to 49 weapons.
-                for (let i = 1; i < 50; ++i) {
-                    let melee_done = false
-                    let weapon = document.getElementById(`weapon${i}`)
-                    if (weapon === null) break;
-                    weapon = weapon.innerText
+            // Use up to 49 weapons.
+            for (let i = 1; i < 50; ++i) {
+                let weapon = document.getElementById(`weapon${i}`)
+                if (weapon === null) break;
+                weapon = weapon.innerText
+                // Skip unequipped weapons.
+                let count = geti(`count${i}`)
+                if (count < 1) continue
 
-                    // Skip unequipped weapons.
-                    let count = geti(`count${i}`)
-                    if (count < 1) continue
+                log(`WEAPON: ${weapon}`)
+                let melee_done = false
+                let R = geti(`range${i}`)
 
-                    log(`WEAPON: ${weapon}`)
-                    let weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
-                    let R = geti(`range${i}`)
+                const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
+                let is_pistol = weapon_keywords.includes("PISTOL")
+                // Choose either pistols or other ranged weapons!
+                if (R > 1 && !is_pistol) {
+                    if (pistols_only) {
+                        log("Pistols only.")
+                        continue
+                    }
+                    // If a model is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE model, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a model will shoot with its Pistols or its other ranged weapons before selecting targets.
+                    if (!source_is_monster && !source_is_vehicle) {
+                        pistols_only = is_pistol  // XXX: Assumes first eligible ranged type is best.
+                        if (pistols_only) log("Using pistols only.")
+                        else log("Skipping pistols.")
+                    }
+                }
+                if (is_pistol && !pistols_only) {
+                    log("Skipping pistol.")
+                    continue
+                }
+
+                if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
+                    R = 1
+                    // Melee
+                    if (melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
+                    melee_done = true // NOSONAR
+                    // if (target_keywords.includes("FIGHTS FIRST")) {
+                    // TODO: Weapon inputs for target and bidirectional combat simulation.
+                    // }
+                }
+                if (R <= inches) {
+                    log(`${weapon} out of range.`)
+                    continue
+                }
+                if (target_keywords.includes("LONE OPERATIVE") && inches > 12) {
+                    log(`Lone operative hidden.`)
+                    continue
+                }
+
+                
+                const WS = geti(`skill${i}`) || 0
+                const S = geti(`strength${i}`)
+                const AP = geti(`piercing${i}`)
+
+                for (let time = 0; time < times * count; ++time) {
                     let A = geti(`attacks${i}`)
-                    let WS = geti(`skill${i}`) || 0
-                    let S = geti(`strength${i}`)
-                    let AP = geti(`piercing${i}`)
                     let D = geti(`damage${i}`)
-                    if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
-                        R = 1
-                        // Melee
-                        if (melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
-                        melee_done = true // NOSONAR
-                        // if (target_keywords.includes("FIGHTS FIRST")) {
-                        // TODO: Weapon inputs for target and bidirectional combat simulation.
-                        // }
-                    }
-                    if (R <= inches) {
-                        log(`${weapon} out of range.`)
-                        continue
-                    }
-                    if (target_keywords.includes("LONE OPERATIVE") && inches > 12) {
-                        log(`Lone operative hidden.`)
-                        continue
-                    }
-                    let is_pistol = weapon_keywords.includes("PISTOL")
-                    // Choose either pistols or other ranged weapons!
-                    if (R > 1 && !is_pistol) {
-                        if (pistols_only) {
-                            log("Pistols only.")
-                            continue
-                        }
-                        // If a model is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE model, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a model will shoot with its Pistols or its other ranged weapons before selecting targets.
-                        if (!source_is_monster && !source_is_vehicle) {
-                            pistols_only = is_pistol  // XXX: Assumes first eligible ranged type is best.
-                            if (pistols_only) log("Using pistols only.")
-                            else log("Skipping pistols.")
-                        }
-                    }
-                    if (is_pistol && !pistols_only) {
-                        log("Skipping pistol.")
-                        continue
-                    }
                     // Each time a [RAPID FIRE X] weapon targets a unit within half that weapon’s range, the Attacks characteristic of that weapon is increased by the amount denoted by ‘x’.
                     let rf = get_keyword_value(weapon_keywords, "RAPID FIRE")
                     if (rf && inches < R / 2) {
@@ -805,7 +1043,10 @@
                                     hit_roll += 1
                                 }
                                 // If every model (XXX) in a unit has STEALTH, then each time a ranged attack is made against it, subtract 1 from that attack’s Hit roll.
-                                if (target_keywords.includes("STEALTH")) hit_roll -= 1
+                                if (target_keywords.includes("STEALTH")) {
+                                    hit_roll -= 1
+                                    log("Stealthy target. -1 to hit.")
+                                }
 
                                 if (hit_roll < WS) {
                                     log(`Miss. ${hit_roll} < ${WS} WS`)
