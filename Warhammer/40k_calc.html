@@ -816,6 +816,7 @@
                     },
                 },
             },
+            "- Pasted -": {},
         }
         function add_models() {
             let html = ""
@@ -847,7 +848,7 @@
 <td><input id="count${i}" type="text" value="${weapon.count || 0}"></td>
 <td><input id="range${i}" type="text" value="${weapon.R}"></td>
 <td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
-<td><input id="skill${i}" type="number" value="${weapon.WS}"></td>
+<td><input id="skill${i}" type="number" value="${parseInt(weapon.WS)}"></td>
 <td><input id="strength${i}" type="text" value="${weapon.S}"></td>
 <td><input id="piercing${i}" type="text" value="${-Math.abs(weapon.AP || 0)}"></td>
 <td><input id="damage${i}" type="text" value="${weapon.D}"></td>
@@ -1145,11 +1146,14 @@
             result.innerHTML = html
         }
         document.onpaste = (event) => {
-            log(`Pasted formats: ${event.formats}`)
+            log(`Pasted types: ${event.clipboardData.types}`)
+            const html = event.clipboardData.getData("text/html")
+            window.types = event.clipboardData.types
+            window.html = html
             import_sheet(event.clipboardData.getData("text/plain"))
         }
         function import_sheet(s) {
-            /*
+            /* NewRecruit.eu format:
 Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Dark Angels Imperium Lion El'Jonson Monster Primarch Warlord
 Models	Options
 1x Lion El'Jonson 	Arma Luminis, Fealty, Warlord
@@ -1161,6 +1165,67 @@ Ranged Weapons	Range	A	BS	S	AP	D	Keywords
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
 ➤ Fealty - strike	Melee	8	2+	12	-4	4	Lethal Hits
 ➤ Fealty - sweep	Melee	16	2+	6	-3	1	Sustained Hits 1
+
+Wahapedia format:
+Lion El’jonson
+(⌀60mm)
+
+M
+8"
+T
+9
+Sv
+2+
+W
+10
+Ld
+5+
+OC
+4
+INVULNERABLE SAVE
+3+
+RANGED WEAPONS
+RANGE
+A
+BS
+S
+AP
+D
+Arma Luminis – bolt [pistol]	
+12"
+4
+2+
+4
+-1
+2
+Arma Luminis – plasma [pistol]	
+12"
+2
+2+
+8
+-3
+2
+MELEE WEAPONS
+RANGE
+A
+WS
+S
+AP
+D
+Fealty – strike [lethal hits]	
+Melee
+8
+2+
+12
+-4
+4
+Fealty – sweep [sustained hits 1]	
+Melee
+16
+2+
+6
+-3
+1
             */
             let unit = {
                 "keywords": [],
