@@ -22,851 +22,534 @@
         input[type=text] {
             width: 2em
         }
+
+        table {
+            margin: auto
+        }
+
+        .abilities {
+            width: 40em !important
+        }
     </style>
     <script>
-        let models = {
-            "- Astartes -": {},
-            "Apothecary": {
-                "keywords": ["Character", "Faction: Adeptus Astartes", "Grenades", "Imperium", "Infantry", "Primaris", "Apothecary", "Tacticus"],
-                "M": 6,
-                "T": 4,
-                "SV": 3,
-                "W": 4,
-                "LD": 6,
-                "OC": 1,
-                "weapons": {
-                    "Absolver Bolt Pistol": {
-                        "count": 1,
-                        "R": 18,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 5,
-                        "AP": 1,
-                        "D": 2,
-                        "keywords": ["PISTOL"]
-                    },
-                    "Reductor Pistol": {
-                        "count": 1,
-                        "R": 3,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 4,
-                        "D": 2,
-                        "keywords": ["PISTOL"]
-                    },
-                    "Close Combat Weapon": {
-                        "count": 1,
-                        "R": 0,
-                        "A": 4,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    }
-                },
-            },
-            "Techmarine": {
-                "keywords": ["Character", "Faction: Adeptus Astartes", "Grenades", "Imperium", "Infantry", "Tacticus", "Techmarine", "Warlord"],
-                "M": 6,
-                "T": 4,
-                "SV": 2,
-                "W": 4,
-                "LD": 6,
-                "OC": 1,
-                "weapons": {
-                    "Forge Bolter": {
-                        "count": 1,
-                        "R": 24,
-                        "A": 3,
-                        "WS": 2,
-                        "S": 5,
-                        "AP": 1,
-                        "D": 2,
-                    },
-                    "Grav-pistol": {
-                        "count": 1,
-                        "R": 12,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 1,
-                        "D": 2,
-                        "keywords": ["ANTI-vehicle 2+", "PISTOL"]
-                    },
-                    "Omnissian Power Axe": {
-                        "count": 1,
-                        "R": 0,
-                        "A": 4,
-                        "WS": 3,
-                        "S": 6,
-                        "AP": 2,
-                        "D": 2,
-                    },
-                    "Servo-arm": {
-                        "count": 1,
-                        "R": 0,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 8,
-                        "AP": 2,
-                        "D": 3,
-                        "keywords": ["EXTRA ATTACKS"]
-                    }
-                },
-            },
-            "Impulsor": {
-                "keywords": ["Dedicated Transport", "Faction: Adeptus Astartes", "Imperium", "Impulsor", "Transport", "Vehicle"],
-                "M": 12,
-                "T": 9,
-                "SV": 3,
-                "W": 11,
-                "LD": 6,
-                "OC": 2,
-                "weapons": {
-                    "Ironhail Heavy Stubber": {
-                        "count": 1,
-                        "R": 36,
-                        "A": 3,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["RAPID FIRE 3"]
-                    },
-                    "➤ Bellicatus Missile Array - Frag": {
-                        "count": 0,
-                        "R": 48,
-                        "A": "D6",
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["BLAST"]
-                    },
-                    "➤ Bellicatus Missile Array - Icarus": {
-                        "count": 0,
-                        "R": 48,
-                        "A": "D3",
-                        "WS": 3,
-                        "S": 8,
-                        "AP": 1,
-                        "D": 2,
-                        "keywords": ["ANTI-Fly 2+"]
-                    },
-                    "➤ Bellicatus Missile Array - Krak": {
-                        "count": 0,
-                        "R": 48,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 8,
-                        "AP": 2,
-                        "D": "D6",
-                    },
-                    "Ironhail Skytalon Array": {
-                        "count": 0,
-                        "R": 36,
-                        "A": 8,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["ANTI-Fly 4+", "SUSTAINED HITS 1"]
-                    },
-                    "Fragstorm Grenade Launcher": {
-                        "count": 2,
-                        "R": 18,
-                        "A": "D6",
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["BLAST"]
-                    },
-                    "Storm Bolter": {
-                        "count": 0,
-                        "R": 24,
-                        "A": 2,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["RAPID FIRE 2"]
-                    },
-                    "Armoured Tracks": {
-                        "R": 0,
-                        "A": 3,
-                        "WS": 4,
-                        "S": 6,
-                        "AP": 0,
-                        "D": 1,
-                    }
+        let squads = {}
+        let sheets = [
+            "- Adeptus Astartes -",
+            `Apothecary 
+Unit	M	T	SV	W	LD	OC
+Primaris Apothecary	6"	4	3+	4	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Absolvor Bolt Pistol	18"	1	3+	5	-1	2	Pistol
+Reductor Pistol	3"	1	3+	4	-4	2	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon	Melee	4	3+	4	0	1	-
+Abilities Narthecium, Gene Seed Recovery, Leader, Fire Discipline
+Rules Leader, Oath of Moment, Pistol
+Keywords: Character Faction: Adeptus Astartes Grenades Imperium Infantry Primaris Apothecary Tacticus`,
+            `Techmarine 
+Unit	M	T	SV	W	LD	OC
+Techmarine	6"	4	2+	4	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Forge Bolter	24"	3	2+	5	-1	2	-
+Grav-pistol	12"	1	3+	4	-1	2	Anti-vehicle 2+, Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Omnissian Power Axe	Melee	4	3+	6	-2	2	-
+Servo-arm	Melee	1	3+	8	-2	3	Extra Attacks
+Abilities TechmarineBlessing of the OmnissiahVengeance of the OmnissiahLeaderArtificer Armour
+Rules LeaderOath of MomentPistolExtra Attacks
+Keywords: Character Faction: Adeptus Astartes Grenades Imperium Infantry Tacticus Techmarine Warlord`,
+            `Eradicator Squad 
+Models
+ 1x Eradicator: Bolt Pistol, Close Combat Weapon, Melta Rifle
+ 1x Eradicator Sergeant: Bolt Pistol, Close Combat Weapon, Melta Rifle
+ 1x Eradicator with Multi-melta: Bolt Pistol, Close Combat Weapon, Multi-melta
+Unit	M	T	SV	W	LD	OC
+Eradicator Squad	5"	6	3+	3	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Bolt Pistol (x3)	12"	1	3+	4	0	1	Pistol
+Melta Rifle (x2)	18"	1	3+	9	-4	D6	Heavy, Melta 2
+Multi-melta	18"	2	4+	9	-4	D6	Heavy, Melta 2
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x3)	Melee	3	3+	4	0	1	-
+Abilities
+Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
+Rules Oath of MomentPistolHeavyMelta
+Keywords: Eradicator Squad Faction: Adeptus Astartes Gravis Grenades Imperium Infantry`,
+            `Infernus Squad 
+Models
+ 5x Infernus Marines: Bolt Pistol, Close Combat Weapon, Pyreblaster
+ 1x Infernus Sergeant: Bolt Pistol, Close Combat Weapon, Pyreblaster
+Unit	M	T	SV	W	LD	OC
+Infernus Squad	6"	4	3+	2	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Bolt Pistol (x6)	12"	1	3+	4	0	1	Pistol
+Pyreblaster (x6)	12"	D6	N/A	5	0	1	Ignores Cover, Torrent
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x6)	Melee	3	3+	4	0	1	-
+Abilities Purge the Foe
+Rules Oath of MomentPistolIgnores CoverTorrent
+Keywords: Faction: Adeptus Astartes Grenades Imperium Infantry Infernus Squad Tacticus`,
+            `Tactical Squad 
+Models
+ 7x Tactical Marine: Bolt Pistol, Boltgun, Close Combat Weapon
+ 1x Tactical Marine Sergeant: Close Combat Weapon, Bolt Pistol, Astartes Chainsword
+ 1x Tactical Marine w/Heavy or Special Weapon: Bolt Pistol, Close Combat Weapon, Missile Launcher
+ 1x Tactical Marine w/Special Weapon: Bolt Pistol, Close Combat Weapon, Flamer
+Unit	M	T	SV	W	LD	OC
+Tactical Squad	6"	4	3+	2	6+	2
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Bolt Pistol (x10)	12"	1	3+	4	0	1	Pistol
+Boltgun (x7)	24"	2	3+	4	0	1	-
+➤ Missile Launcher - Frag (x0)	48"	D6	4+	4	0	1	Blast, Heavy
+➤ Missile Launcher - Krak	48"	1	4+	9	-2	D6	Heavy
+Flamer	12"	D6	N/A	4	0	1	Ignores Cover, Torrent
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x10)	Melee	2	3+	4	0	1	-
+Astartes Chainsword	Melee	4	3+	4	-1	1	-
+Abilities Combat Squads
+Rules Oath of MomentPistolHeavyBlastTorrentIgnores Cover
+Keywords: Battleline Faction: Adeptus Astartes Grenades Imperium Infantry Tactical Squad`,
+            `Impulsor 
+Unit	M	T	SV	W	LD	OC
+Impulsor	12"	9	3+	11	6+	2
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Bellicatus Missile Array - Frag (x0)	48"	D6	3+	4	0	1	Blast
+➤ Bellicatus Missile Array - Icarus (x0)	48"	D3	3+	8	-1	2	Anti-Fly 2+
+➤ Bellicatus Missile Array - Krak (x0)	48"	1	3+	8	-2	D6	-
+Ironhail Skytalon Array (x0)	36"	8	3+	4	0	1	Anti-Fly 4+, Sustained Hits 1
+Ironhail Heavy Stubber	36"	3	3+	4	0	1	Rapid Fire 3
+Storm Bolter (x2)	24"	2	3+	4	0	1	Rapid Fire 2
+Fragstorm Grenade Launcher (x0)	18"	D6	3+	4	0	1	Blast
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured Tracks	Melee	3	4+	6	0	1	-
+Abilities TransportAssault VehicleShield Dome
+Rules Deadly Demise D3Firing Deck 6Oath of MomentRapid Fire
+Keywords: Dedicated Transport Faction: Adeptus Astartes Imperium Impulsor Transport Vehicle`,
+            `Redemptor Dreadnought 
+Unit	M	T	SV	W	LD	OC
+Redemptor Dreadnought	8"	10	2+	12	6+	4
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Icarus Rocket Pod	24"	D3	3+	8	-1	2	Anti-fly 2+
+Heavy Onslaught Gatling Cannon	24"	12	3+	6	0	1	Devastating Wounds
+➤ Macro Plasma Incinerator - Standard (x0)	36"	D6+1	3+	8	-3	2	Blast
+➤ Macro Plasma Incinerator - Supercharge (x0)	36"	D6+1	3+	9	-4	3	Blast, Hazardous
+Onslaught Gatling Cannon	24"	8	3+	5	0	1	Devastating Wounds
+Heavy Flamer (x0)	12"	D6	N/A	5	-1	1	Ignores Cover, Torrent
+Twin Fragstorm Grenade Launcher (x0)	18"	D6	3+	4	0	1	Blast, Twin-linked
+Twin Storm Bolter	24"	2	3+	4	0	1	Rapid Fire 2, Twin-linked
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Redemptor Fist	Melee	5	3+	12	-2	3	-
+Abilities Duty EternalDamaged: 1-4 Wounds Remaining
+Rules Deadly Demise D3Oath of MomentAnti-HazardousBlastIgnores CoverTorrentTwin-linked
+Keywords: Deathwing Faction: Adeptus Astartes Imperium Redemptor Dreadnought Vehicle Walker`,
+
+            // Space Marines Faction – Includes 12 Armies, based on various Adeptus Astartes Chapters:
+            //"- Black Templars -",
+            //"- Blood Angels -",
+            //"- Dark Angels -",
+            // Are these stats correct? Why ever choose bolt over plasma?
+            `Lion El'Jonson 
+Unit	M	T	SV	W	LD	OC
+Lion El'Jonson	8"	9	2+	10	5+	4
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Arma Luminis - bolt (x0)	12"	4	2+	4	-1	2	Pistol
+➤ Arma Luminis - plasma	12"	2	2+	8	-3	2	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Fealty - strike	Melee	8	2+	12	-4	4	Lethal Hits
+➤ Fealty - sweep (x0)	Melee	16	2+	6	-3	1	Sustained Hits 1
+Abilities Primarch of the First LegionThe Emperor's ShieldDark Angels BodyguardInvulnerable save
+Primarch of the First Legion All Secrets RevealedMartial Exemplar [Aura]No Hiding From the Watchers [Aura]
+Rules Deep StrikeFights FirstOath of MomentPistolLethal HitsSustained Hits
+Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Dark Angels Imperium Lion El'Jonson Monster Primarch Warlord`,
+            //"- Deathwatch -",
+            //"- Grey Knights -",
+            //"- Imperial Fists -",
+            //"- Iron Hands -",
+            //"- Raven Guard -",
+            //"- Salamanders -",
+            //"- Space Wolves -",
+            //"- Ultramarines -",
+            //"- White Scars -",
+            // https://www.adeptusars.com/guides/factions Imperium of Man Faction – Includes 5 Armies:
+            "- Adeptus Custodes -",
+            `Custodian Guard 
+Models
+ 2x Custodian Guard (Guardian Spear): Guardian Spear
+ 1x Custodian Guard (Sentinel Blade & Praesidium Shield): Sentinel blade
+ 1x Custodian Guard (Vexilla, Praesidium Shield & Misericordia): Misericordia, Vexilla
+Unit	M	T	SV	W	LD	OC
+Custodian Guard (x2)	6"	6	2+	3	6+	3
+Custodian Guard (Shield)	6"	6	2+	4	6+	3
+Custodian Guard (Vexilla)	6"	6	2+	4	6+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Guardian Spear (x2)	24"	2	2+	4	-1	2	Assault
+Sentinel Blade	12"	2	2+	4	-1	2	Assault, Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Guardian Spear (x2)	Melee	5	2+	7	-2	2	-
+Sentinel Blade	Melee	5	2+	6	-2	1	-
+Misericordia	Melee	5	2+	5	-2	1	-
+Abilities Stand VigilSentinel StormInvulnerable Save 4Praesidium ShieldVexilla
+Rules Deep StrikeMartial Ka'tahAssaultPistol
+Keywords: Battleline Custodian Guard Faction: Adeptus Custodes Imperium Infantry`,
+            "- Adeptus Mechanicus -",
+            "- Adepta Sororitas -",
+            "- Astra Militarum -",
+            `Ratling Snipers 
+Models
+ 5x Ratling Snipers: Close Combat Weapon, Sniper Rifle
+Unit	M	T	SV	W	LD	OC
+Ratling Snipers (x5)	6"	2	6+	1	8+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Sniper Rifle (x5)	36"	1	3+	4	-2	2	Heavy, Precision
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x5)	Melee	1	5+	2	0	1	-
+Abilities Shoot Sharp and Scarper
+Rules InfiltratorsStealthHeavyPrecision
+Keywords: Faction: Astra Militarum Imperium Infantry Ratling Ratling Snipers`,
+            `Scout Sentinels 
+Unit	M	T	SV	W	LD	OC
+Scout Sentinel	10"	7	3+	7	7+	2
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Hunter-killer Missile	48"	1	4+	14	-3	D6	One Shot
+Autocannon (x0)	48"	2	4+	9	-1	3	-
+Heavy Flamer (x0)	12"	D6	N/A	5	-1	1	Ignores Cover, Torrent
+Lascannon (x0)	48"	1	4+	12	-3	D6+1	-
+Militarum Multi-laser	36"	4	4+	6	0	1	-
+➤ Missile Launcher - Frag (x0)	48"	D6	4+	4	0	1	Blast, Heavy
+➤ Missile Launcher - Krak (x0)	48"	1	4+	9	-2	D6	Heavy
+➤ Plasma Cannon - Standard (x0)	36"	D3	4+	7	-2	1	Blast
+➤ Plasma Cannon - Supercharge (x0)	36"	D3	4+	8	-3	2	Blast, Hazardous
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon	Melee	2	4+	6	0	1	-
+Sentinel Chainsaw	Melee	3	4+	6	-1	1	-
+Abilities Daring Recon
+Rules Deadly Demise 1Scouts 9"One Shot
+Keywords: Faction: Astra Militarum Imperium Regiment Scout Sentinels Smoke Squadron Vehicle Walker`,
+            "- Imperial Knights -",
+            "- Agents of the Imperium -",
+            // Chaos Forces Faction – Includes 6 Armies:
+            "- Chaos -",
+            // XXX: Why ever choose unfocused witchfire?
+            `Be'lakor 
+Unit	M	T	SV	W	LD	OC
+Be'lakor	12"	10	4+	18	6+	5
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Betraying Shades - witchfire (x0)	18"	9	2+	5	-2	1	Devastating Wounds, Ignores Cover, Psychic
+➤ Betraying Shades - focused witchfire	18"	12	2+	6	-3	1	Devastating Wounds, Hazardous, Ignores Cover, Psychic
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ The Blade of Shadows - sweep (x0)	Melee	14	2+	8	-3	1	-
+➤ The Blade of Shadows - strike	Melee	6	2+	14	-4	D6+1	Lethal Hits
+Abilities The Dark Master (Aura)Shadow FormInvulnerable SaveDamaged: 1-6 wounds remaining
+Shadow Form Wreathed in Shadows (Aura, Psychic)Pall of Despair (Aura, Psychic)Shadow Lord (Aura, Psychic)
+Rules Deep StrikeThe Shadow of ChaosWarp RiftsStealthDeadly Demise D6Devastating WoundsPsychicHazardousIgnores CoverLethal Hits
+Keywords: Be'lakor Chaos Character Daemon Epic Hero Faction: Legiones Daemonica Fly Monster Psyker Warlord`,
+            //"- Death Guard -",  // Are these not Chaos Space Marines?
+            "- Dark Mechanicum -",
+            "- The Lost and The Damned -",  // Misc chaos fans.
+            "- Deathwatch -",
+            // Xenos
+            "- Necrons -",
+            `C'tan Shard of the Deceiver 
+Unit	M	T	SV	W	LD	OC
+C'tan Shard of the Deceiver	6"	11	4+	12	6+	6
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Cosmic insanity	18"	6	2+	6	-2	1	Anti-CHARACTER 4+, Devastating Wounds, Precision
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Golden fists	Melee	8	2+	8	-3	3	-
+Abilities Invulnerable SaveGrand IllusionNecrodermisEnslaved Star God
+Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6StealthFeel No Pain 5+Anti-Devastating WoundsPrecision
+Keywords: C'tan Shard of the Deceiver Character Epic Hero Faction: Necrons Fly Monster`,
+            `C'tan Shard of the Nightbringer 
+Unit	M	T	SV	W	LD	OC
+C'tan Shard of the Nightbringer	6"	11	4+	12	6+	4
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Gaze of death	18"	D3	2+	12	-2	D6+3	-
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Scythe of the Nightbringer - strike	Melee	6	2+	14	-4	D6+2	Devastating Wounds
+➤ Scythe of the Nightbringer - sweep (x0)	Melee	14	2+	8	-2	2	-
+Abilities Invulnerable SaveDrain LifeNecrodermisEnslaved Star God
+Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6Feel No Pain 5+
+Keywords: C'tan Shard of the Nightbringer Character Epic Hero Faction: Necrons Fly Monster`,
+            `C'tan Shard of the Void Dragon 
+Unit	M	T	SV	W	LD	OC
+C'tan Shard of the Void Dragon	6"	11	4+	12	6+	4
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Spear of the Void Dragon	12"	1	2+	4	-3	D6+2	Anti-VEHICLE 2+
+Voltaic storm	18"	D6+3	2+	7	-1	2	Blast, Sustained Hits 2
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Canoptek tail blades	Melee	6	2+	6	-1	1	Extra Attacks
+➤ Spear of the Void Dragon - strike	Melee	5	2+	12	-3	D6+2	Anti-VEHICLE 2+
+➤ Spear of the Void Dragon - sweep	Melee (x0)	10	2+	8	-1	2	-
+Abilities Invulnerable SaveMatter AbsorptionNecrodermisEnslaved Star God
+Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6Feel No Pain 5+Extra AttacksAnti-BlastSustained Hits
+Keywords: C'tan Shard of the Void Dragon Character Epic Hero Faction: Necrons Fly Monster`,
+            `C'tan Shard of the Void Dragon 
+Unit	M	T	SV	W	LD	OC
+C'tan Shard of the Void Dragon	6"	11	4+	12	6+	4
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Spear of the Void Dragon	12"	1	2+	4	-3	D6+2	Anti-VEHICLE 2+
+Voltaic storm	18"	D6+3	2+	7	-1	2	Blast, Sustained Hits 2
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Canoptek tail blades	Melee	6	2+	6	-1	1	Extra Attacks
+➤ Spear of the Void Dragon - strike	Melee	5	2+	12	-3	D6+2	Anti-VEHICLE 2+
+➤ Spear of the Void Dragon - sweep	Melee (x0)	10	2+	8	-1	2	-
+Abilities Invulnerable SaveMatter AbsorptionNecrodermisEnslaved Star God
+Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6Feel No Pain 5+Extra AttacksAnti-BlastSustained Hits
+Keywords: C'tan Shard of the Void Dragon Character Epic Hero Faction: Necrons Fly Monster`,
+            `Ghost Ark 
+Unit	M	T	SV	W	LD	OC
+Ghost Ark	10"	9	3+	14	7+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Gauss flayer array (x2)	24"	5	3+	4	0	1	Lethal Hits, Rapid Fire 5
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured bulk	Melee	3	4+	6	0	1	-
+Abilities Invulnerable Save 4, Repair Barge
+Transport Ghost Ark
+Rules Annihilation ProtocolDeadly Demise D3Reanimation ProtocolsLethal HitsRapid Fire
+Keywords: Dedicated Transport Faction: Necrons Fly Ghost Ark Transport Vehicle`,
+            // New Recruit adds (x20) to Gretchin but leaves out (x3) for Unit listing here :(
+            `Skorpekh Destroyers 
+Models
+ 3x Skorpekh Destroyer: Skorpekh hyperphase weapons
+Unit	M	T	SV	W	LD	OC
+Skorpekh Destroyers	8"	6	3+	3	7+	2
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Skorpekh hyperphase weapons (x3)	Melee	4	3+	7	-2	2	-
+Abilities Whirling Onslaught
+Rules Annihilation ProtocolReanimation Protocols
+Keywords: Destroyer Cult Faction: Necrons Infantry Skorpekh Destroyers`,
+            "- Aeldari -",
+            "- Orks -",
+            `Boyz 
+Models
+ 1x Boss Nob: Power klaw and slugga (Power klaw, Slugga)
+ 8x Boy w/ Shoota and close combat weapon: Close combat weapon, Shoota
+ 9x Boy w/ Slugga and choppa: Choppa, Slugga
+ 1x Boy w/ Big shoota and close combat weapon: Big shoota, Close combat weapon
+ 1x Boy w/ Rokkit launcha and close combat weapon: Close combat weapon, Rokkit launcha
+Unit	M	T	SV	W	LD	OC
+Boy	6"	5	5+	1	7+	2
+Boss Nob	6"	5	5+	2	7+	2
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Kombi-weapon (x0)	24"	1	5+	4	0	1	Anti-Infantry 4+, Devastating Wounds, Rapid Fire 1
+Slugga (x10)	12"	1	5+	4	0	1	Pistol
+Shoota (x8)	18"	2	5+	4	0	1	Rapid Fire 1
+Big shoota	36"	3	5+	5	0	1	Rapid Fire 2
+Rokkit launcha	24"	D3	5+	9	-2	3	Blast
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Big choppa (x0)	Melee	3	3+	7	-1	2	-
+Power klaw	Melee	3	4+	9	-2	2	-
+Close combat weapon (x10)	Melee	2	3+	4	0	1	-
+Choppa (x9)	Melee	3	3+	4	-1	1	-
+Abilities Get Da Good BitzBodyguard
+Rules Waaagh!PistolRapid FireBlast
+Keywords: Battleline Boyz Faction: Orks Grenades Infantry Mob`,
+`Big Mek 
+Unit	M	T	SV	W	LD	OC
+Big Mek	6"	5	3+	6	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Kustom mega-blasta (x0)	24"	3	5+	9	-2	D6	Hazardous
+Traktor blasta	36"	1	5+	10	-2	D6+1	Anti-Fly 3+, Devastating Wounds
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Drilla	Melee	2	3+	12	-3	3	-
+Power klaw (x0)	Melee	4	3+	9	-2	2	-
+Abilities More DakkaShokk-boostaGitfinder Gogglez
+Rules Waaagh!LeaderIgnores CoverDevastating WoundsAnti-
+Abilities (Leader) Leader
+Keywords: Big Mek Character Faction: Orks Grenades Infantry Mek`,
+            `Gretchin 
+Models
+ 10x Gretchin: Close combat weapon, Grot blasta
+ 1x Runtherd: Grot-smacka, Slugga
+Unit	M	T	SV	W	LD	OC
+Gretchin (x10)	6"	2	7+	1	8+	2
+Runtherd	6"	5	5+	2	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Grot blasta (x10)	12"	1	4+	3	0	1	Pistol
+Slugga	12"	1	5+	4	0	1	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close combat weapon (x10)	Melee	1	5+	2	0	1	-
+Grot-smacka	Melee	3	3+	5	0	1	-
+Abilities RuntherdThievin’ Scavengers
+Rules Waaagh!Pistol
+Keywords: Battleline Faction: Orks Gretchin Grots Infantry`,
+`Ghazghkull Thraka 
+Models
+ 1x Ghazghkull Thraka: Gork’s Klaw, Mork’s Roar
+ 1x Makari: Makari’s stabba
+Unit	M	T	SV	W	LD	OC
+Ghazghkull Thraka	5"	6	2+	10	6+	4
+Makari	5"	6	7+	1	8+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Mork’s Roar	36"	12	5+	5	0	1	Rapid Fire 4
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Gork’s Klaw - strike	Melee	6	2+	14	-3	4	-
+➤ Gork’s Klaw - sweep (x0)	Melee	12	2+	8	-2	2	-
+Makari’s stabba	Melee	1	4+	3	0	1	Devastating Wounds
+Abilities Supreme CommanderProphet of Da Great Waaagh!Invulnerable Save (4+): GhazghkullInvulnerable Save (2+*): Makari
+Rules Waaagh!LeaderLethal HitsRapid FireDevastating Wounds
+Abilities (Leader) Leader
+Abilities (Ghazghkull’s Waaagh! Banner (Aura)) Ghazghkull’s Waaagh! Banner (Aura)
+Keywords: Character Epic Hero Faction: Orks Ghazghkull Thraka Infantry Warboss Warlord`,
+`Meganobz 
+Models
+ 1x Meganob w/ Killsaw and power klaw: Killsaw, Power klaw
+ 1x Meganob w/ Kombi-weapon and killsaw: Killsaw, Kombi-weapon
+ 1x Meganob w/ Kombi-weapon and power klaw: Kombi-weapon, Power klaw
+ 1x Meganob w/ Kustom shoota and killsaw: Killsaw, Kustom shoota
+ 1x Meganob w/ Kustom shoota and power klaw: Kustom shoota, Power klaw
+ 1x Meganob w/ Twin killsaw: Twin killsaw
+Unit	M	T	SV	W	LD	OC
+Meganobz	5"	6	2+	3	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Kombi-weapon (x2)	24"	1	5+	4	0	1	Anti-Infantry 4+, Devastating Wounds, Rapid Fire 1
+Kustom shoota (x2)	18"	4	5+	4	0	1	Rapid Fire 2
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Killsaw (x3)	Melee	2	4+	12	-3	2	-
+Power klaw (x3)	Melee	3	4+	9	-2	2	-
+Twin killsaw	Melee	2	4+	12	-3	2	Twin-linked
+Rules Waaagh!Feel No PainDevastating WoundsAnti-Rapid FireTwin-linked
+Abilities (Krumpin’ Time) Krumpin’ Time
+Keywords: Faction: Orks Grenades Infantry Mega Armour Meganobz`,
+            `Zodgrod Wortsnagga 
+Unit	M	T	SV	W	LD	OC
+Zodgrod Wortsnagga	6"	5	5+	5	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Squigstoppa	12"	1	5+	4	-1	1	Anti-Monster 4+, Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Da Grabzappa	Melee	5	2+	7	-2	2	-
+Abilities Super RuntsSpecial Dose
+Rules Feel No Pain 6+Waaagh!LeaderPistolAnti-
+Keywords: Character Epic Hero Faction: Orks Infantry Zodgrod Wortsnagga`,
+
+            "- Tyranids -",
+            `Termagants 
+Models
+ 1x Termagant w/ Shardlauncher: Chitinous Claws and Teeth, Shardlauncher
+ 1x Termagant w/ Spike Rifle: Chitinous Claws and Teeth, Spike Rifle
+ 1x Termagant w/ Strangleweb: Chitinous Claws and Teeth, Strangleweb
+ 7x Termagants: Chitinous Claws and Teeth, Fleshborer
+Unit	M	T	SV	W	LD	OC
+Termagants (x10)	6"	3	5+	1	8+	2
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Shardlauncher	18"	D3	4+	5	0	1	Blast, Heavy
+Spike Rifle	24"	1	4+	4	-1	1	Heavy
+Strangleweb	18"	D6	N/A	2	0	1	Assault, Devastating Wounds, Torrent
+Fleshborer (x7)	18"	1	4+	5	0	1	Assault
+Termagant Devourer (x0)	18"	2	4+	4	0	1	-
+Termagant Spinefist (x0)	12"	2	4+	3	0	1	Assault, Pistol, Twin-linked
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Chitinous Claws and Teeth (x10)	Melee	1	4+	3	0	1	-
+Abilities Skulking Horrors
+Rules SynapseHeavyBlastAssaultDevastating WoundsTorrent
+Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry Termagants`,
+
+            "- Leagues of Votann -",
+            `Ûthar the Destined 
+Unit	M	T	SV	W	LD	OC
+Ûthar the Destined	5"	5	3+	5	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Volkanite disintegrator	18"	3	2+	5	0	1	Devastating Wounds
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Blade of the Ancestors	Melee	5	2+	6	-3	2	Devastating Wounds
+Abilities Ancestral FortuneThe DestinedLeaderInvulnerable SaveGrim EfficiencyRampart crest
+Rules LeaderEye of the AncestorsRuthless EfficiencyDevastating Wounds
+Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar the Destined`,
+            "- Pasted -",
+        ]
+
+        function import_sheets() {
+            for (let sheet of sheets) {
+                const new_squads = parse_sheet(sheet)
+                log(`Adding ${Object.keys(new_squads)} from sheets.`)
+                squads = {
+                    ...squads,
+                    ...new_squads
                 }
-            },
-            "Eradicator Squad": {
-                "unit_size": 3,
-                "keywords": ["Faction: Adeptus Astartes", "INFANTRY", "GRENADES", "IMPERIUM", "GRAVIS", "ERADICATOR SQUAD"],
-                "M": 5,
-                "T": 6,
-                "SV": 3,
-                "W": 3,
-                "LD": 6,
-                "OC": 1,
-                "weapons": {
-                    "Bolt Pistol": {
-                        "count": 3,
-                        "R": 12,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["PISTOL"]
-                    },
-                    "Melta rifle": {
-                        "count": 2,
-                        "R": 18,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 9,
-                        "AP": 4,
-                        "D": "D6",
-                        "keywords": ["heavy", "melta 2"]
-                    },
-                    "Multi-melta": {
-                        "count": 1,
-                        "R": 18,
-                        "A": 2,
-                        "WS": 4,
-                        "S": 9,
-                        "AP": 4,
-                        "D": "D6",
-                        "keywords": ["heavy", "melta 2"]
-                    },
-                    "Close Combat Weapon": {
-                        "count": 3,
-                        "R": 0,
-                        "A": 3,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    }
-                },
-            },
-            "Infernus Squad": {
-                "unit_size": 5,
-                "keywords": ["Faction: Adeptus Astartes", "Grenades", "Imperium", "Infantry", "Infernus Squad", "Tacticus"],
-                "M": 6,
-                "T": 4,
-                "SV": 3,
-                "W": 2,
-                "LD": 6,
-                "OC": 1,
-                "weapons": {
-                    "Bolt Pistol": {
-                        "count": 5,
-                        "R": 12,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["PISTOL"]
-                    },
-                    "Pyreblaster": {
-                        "count": 5,
-                        "R": 12,
-                        "A": "D6",
-                        "WS": 0,
-                        "S": 5,
-                        "AP": 0,
-                        "D": 1,
-                        "keywords": ["IGNORES COVER", "TORRENT"]
-                    },
-                    "Close Combat Weapon": {
-                        "count": 5,
-                        "R": 0,
-                        "A": 4,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    }
-                },
-            },
-            "Redemptor Dreadnought": {
-                "keywords": ["Deathwing", "Faction: Adeptus Astartes", "Imperium", "Redemptor Dreadnought", "Vehicle", "Walker"],
-                "R": 8,
-                "T": 10,
-                "SV": 2,
-                "W": 12,
-                "LD": 6,
-                "OC": 4,
-                "weapons": {
-                    "Icarus rocket pod": {
-                        "count": 1,
-                        "keywords": ["ANTI-fly 2+"],
-                        "R": 24,
-                        "A": "D3",
-                        "WS": 3,
-                        "S": 8,
-                        "AP": 1,
-                        "D": 2
-                    },
-                    "Heavy onslaught gatling cannon": {  // Or Macro plasma incinerator.
-                        "count": 0,
-                        "keywords": ["DEVASTATING WOUNDS"],
-                        "R": 24,
-                        "A": 12,
-                        "WS": 3,
-                        "S": 6,
-                        "AP": 0,
-                        "D": 1
-                    },
-                    // Choose either standard or supercharged.
-                    "Macro plasma incinerator – standard": {
-                        "count": 1,
-                        "keywords": ["BLAST"],
-                        "R": 36,
-                        "A": "D6+1",
-                        "WS": 3,
-                        "S": 8,
-                        "AP": 3,
-                        "D": 2
-                    },
-                    "Macro plasma incinerator – supercharge": {
-                        "count": 0,
-                        "keywords": ["BLAST", "hazardous"],
-                        "R": 36,
-                        "A": "D6+1",
-                        "WS": 3,
-                        "S": 9,
-                        "AP": 4,
-                        "D": 3
-                    },
-                    "Heavy flamer": {  // Or regular Onslaught Gatling Cannon.
-                        "count": 1,
-                        "keywords": ["IGNORES COVER", "TORRENT"],
-                        "R": 12,
-                        "A": "D6",
-                        "WS": 0,
-                        "S": 5,
-                        "AP": 1,
-                        "D": 1,
-                    },
-                    "Onslaught gatling cannon": {
-                        "count": 0,
-                        "keywords": ["DEVASTATING WOUNDS"],
-                        "R": 24,
-                        "A": 8,
-                        "WS": 3,
-                        "S": 5,
-                        "AP": 0,
-                        "D": 1
-                    },
-                    "Twin fragstorm grenade launcher": {   // Or bolters.
-                        "count": 1,
-                        "keywords": ["BLAST", "twin-linked"],
-                        "R": 18,
-                        "A": "D6",
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1
-                    },
-                    "Twin storm bolter": {
-                        "count": 0,
-                        "keywords": ["RAPID FIRE 2", "twin-linked"],
-                        "R": 24,
-                        "A": 2,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Redemptor fist": {
-                        "count": 1,
-                        "R": 1,
-                        "A": 5,
-                        "WS": 3,
-                        "S": 12,
-                        "AP": 2,
-                        "D": 3
-                    }
-                }
-            },
-//             `Ranged Weapons	Range	A	BS	S	AP	D	Keywords
-// ➤ Arma Luminis - bolt	12"	4	2+	4	-1	2	Pistol
-// ➤ Arma Luminis - plasma	12"	2	2+	8	-3	2	Pistol
-// Melee Weapons	Range	A	WS	S	AP	D	Keywords
-// ➤ Fealty - strike	Melee	8	2+	12	-4	4	Lethal Hits
-// ➤ Fealty - sweep	Melee	16	2+	6	-3	1	Sustained Hits 1`
-            "- Astra Militarum -": {},
-            "Ratling Snipers": {
-                "unit_size": 5,
-                "keywords": ["FACTION: ASTRA MILITARUM", "INFANTRY", "IMPERIUM", "RATLING", "RATLING SNIPERS", "Infiltrators", "Stealth"],
-                "M": 6,
-                "T": 2,
-                "SV": 6,
-                "W": 1,
-                "LD": 8,
-                "OC": 1,
-                "weapons": {
-                    "Sniper rifle": {
-                        "count": 5,
-                        "keywords": ["heavy", "precision"],
-                        "R": 36,
-                        "A": 1,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 2,
-                        "D": 2,
-                    },
-                    "Close combat weapon": {
-                        "count": 5,
-                        "R": 0,
-                        "A": 1,
-                        "WS": 5,
-                        "S": 2,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                },
-            },
-            "Scout Sentinels": {
-                "keywords": ["VEHICLE", "WALKER", "IMPERIUM", "REGIMENT", "SQUADRON", "SMOKE", "SCOUT SENTINELS"],
-                "R": 10,
-                "T": 7,
-                "SV": 3,
-                "W": 7,
-                "LD": 7,
-                "OC": 2,
-                "weapons": {
-                    "Autocannon": {
-                        "count": 0,
-                        "keywords": ["ANTI-fly 2+"],
-                        "R": 48,
-                        "A": 2,
-                        "WS": 4,
-                        "S": 9,
-                        "AP": 1,
-                        "D": 3
-                    },
-                    "Heavy flamer": {
-                        "count": 0,
-                        "keywords": ["IGNORES COVER", "TORRENT"],
-                        "R": 12,
-                        "A": "D6",
-                        "WS": 0,
-                        "S": 5,
-                        "AP": 1,
-                        "D": 1
-                    },
-                    "Hunter-killer missile": {
-                        "count": 1,
-                        "keywords": ["ONE SHOT"],
-                        "R": 48,
-                        "A": 1,
-                        "WS": 4,
-                        "S": 14,
-                        "AP": 3,
-                        "D": "D6"
-                    },
-                    "Lascannon": {
-                        "count": 0,
-                        "R": 48,
-                        "A": 1,
-                        "WS": 4,
-                        "S": 12,
-                        "AP": 3,
-                        "D": "D6+1"
-                    },
-                    "Militarum multi-laser": {
-                        "count": 1,
-                        "R": 36,
-                        "A": 4,
-                        "WS": 4,
-                        "S": 6,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Missile launcher – frag": {
-                        "count": 0,
-                        "keywords": ["BLAST", "HEAVY"],
-                        "R": 48,
-                        "A": "D6",
-                        "WS": 4,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1
-                    },
-                    "Missile launcher – krak": {
-                        "count": 0,
-                        "keywords": ["HEAVY"],
-                        "R": 48,
-                        "A": 1,
-                        "WS": 4,
-                        "S": 9,
-                        "AP": 2,
-                        "D": 1
-                    },
-                    "Plasma cannon – standard": {
-                        "count": 0,
-                        "keywords": ["BLAST"],
-                        "R": 36,
-                        "A": "D3",
-                        "WS": 4,
-                        "S": 7,
-                        "AP": 2,
-                        "D": 1,
-                    },
-                    "Plasma cannon – supercharge": {
-                        "count": 0,
-                        "keywords": ["BLAST", "HAZARDOUS"],
-                        "R": 36,
-                        "A": "D3",
-                        "WS": 4,
-                        "S": 8,
-                        "AP": 3,
-                        "D": 2,
-                    },
-                    "Close combat weapon": {
-                        "count": 1,
-                        "R": 0,
-                        "A": 2,
-                        "WS": 4,
-                        "S": 6,
-                        "AP": 0,
-                        "D": 1
-                    },
-                    "Sentinel chainsaw": {
-                        "count": 1,
-                        "R": 0,
-                        "A": 3,
-                        "WS": 4,
-                        "S": 6,
-                        "AP": 1,
-                        "D": 1
-                    }
-                }
-            },
-            "- Necron -": {},
-            "Skorpekh Destroyers": {
-                "unit_size": 3,
-                "keywords": ["FACTION: NECRON", "INFANTRY", "DESTROYER CULT", "SKORPEKH DESTROYERS", "Whirling Onslaught"],  // XXX: WO is an ability, not a keyword.
-                "M": 8,
-                "T": 6,
-                "SV": 3,
-                "W": 3,
-                "LD": 7,
-                "OC": 2,
-                "weapons": {
-                    "Skorpekh hyperphase weapons": {
-                        "count": 3,
-                        "R": 0,
-                        "A": 4,
-                        "WS": 3,
-                        "S": 7,
-                        "AP": 2,
-                        "D": 2,
-                    },
-                },
-            },
-            "- Tyranids -": {},
-            "Termagants": {
-                "unit_size": 10,
-                "keywords": ["FACTION: TYRANIDS", "INFANTRY", "BATTLELINE", "GREAT DEVOURER", "ENDLESS MULTITUDE", "TERMAGANTS"],
-                "M": 6,
-                "T": 3,
-                "SV": 5,
-                "W": 1,
-                "LD": 8,
-                "OC": 2,
-                "weapons": {
-                    "Fleshborer": {
-                        "count": 3,
-                        "keywords": ["ASSAULT"],
-                        "R": 18,
-                        "A": 1,
-                        "WS": 4,
-                        "S": 5,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Shardlauncher": {
-                        "count": 1,
-                        "keywords": ["blast", "heavy"],
-                        "R": 18,
-                        "A": "D3",
-                        "WS": 4,
-                        "S": 5,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Spike rifle": {
-                        "count": 1,
-                        "keywords": ["HEAVY"],
-                        "R": 24,
-                        "A": 1,
-                        "WS": 4,
-                        "S": 4,
-                        "AP": 1,
-                        "D": 1,
-                    },
-                    "Strangleweb": {
-                        "count": 1,
-                        "keywords": ["assault", "devastating wounds", "torrent"],
-                        "R": 18,
-                        "A": "D6",
-                        "WS": 0,
-                        "S": 2,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Termagant devourer": {
-                        "count": 2,
-                        "R": 18,
-                        "A": 2,
-                        "WS": 4,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Termagant spinefists": {
-                        "count": 2,
-                        "keywords": ["assault", "pistol", "twin-linked"],
-                        "R": 12,
-                        "A": 2,
-                        "WS": 4,
-                        "S": 3,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Chitinous claws and teeth": {
-                        "count": 10,
-                        "R": 0,
-                        "A": 1,
-                        "WS": 4,
-                        "S": 3,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                },
-            },
-            "- Orks -": {},
-            "Boyz": {
-                "unit_size": 10,  // XXX: Boss Nob doesn't share loadout.
-                "keywords": ["FACTION: Waaagh!", "INFANTRY", "BATTLELINE", "MOB", "GRENADES", "BOYZ"],  // XXX: May depend on detachment.
-                "M": 6,
-                "T": 5,
-                "SV": 5,
-                "W": 1,
-                "LD": 7,
-                "OC": 2,
-                "weapons": {
-                    "Big shoota": {
-                        "count": 1,
-                        "keywords": ["rapid fire 2"],
-                        "R": 36,
-                        "A": 3,
-                        "WS": 5,
-                        "S": 5,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Rokkit launcha": {
-                        "count": 0,
-                        "keywords": ["blast"],
-                        "R": 24,
-                        "A": "D3",
-                        "WS": 5,
-                        "S": 9,
-                        "AP": 2,
-                        "D": 3,
-                    },
-                    "Shoota": {
-                        "count": 4,
-                        "keywords": ["rapid fire 1"],
-                        "R": 18,
-                        "A": 2,
-                        "WS": 5,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Slugga": {
-                        "count": 5,
-                        "keywords": ["PISTOL"],
-                        "R": 12,
-                        "A": 1,
-                        "WS": 5,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Choppa": {
-                        "count": 5,
-                        "R": 0,
-                        "A": 3,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 1,
-                        "D": 1,
-                    },
-                    "Close combat weapon": {
-                        "count": 5,
-                        "R": 0,
-                        "A": 2,
-                        "WS": 3,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                },
-            },
-            "Gretchin": {
-                "unit_size": 10,
-                "keywords": ["FACTION: Waaagh!", "INFANTRY", "GROTS", "GRETCHIN"],
-                "M": 6,
-                "T": 2,
-                "SV": 7,
-                "W": 1,
-                "LD": 8,
-                "OC": 2,
-                "weapons": {
-                    "Grot blasta": {
-                        "count": 9,
-                        "keywords": ["PISTOL"],
-                        "R": 12,
-                        "A": 1,
-                        "WS": 4,
-                        "S": 3,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Close combat weapon": {
-                        "count": 9,
-                        "R": 0,
-                        "A": 1,
-                        "WS": 5,
-                        "S": 2,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                },
-            },
-            "Runtherd": {
-                "keywords": ["FACTION: Waaagh!", "INFANTRY", "GROTS", "GRETCHIN"],
-                "M": 6,
-                "T": 5,
-                "SV": 5,
-                "W": 2,
-                "LD": 7,
-                "OC": 1,
-                "weapons": {
-                    "Slugga": {
-                        "count": 1,
-                        "keywords": ["PISTOL"],
-                        "R": 12,
-                        "A": 1,
-                        "WS": 5,
-                        "S": 4,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                    "Runtherd tools": {
-                        "count": 1,
-                        "R": 0,
-                        "A": 3,
-                        "WS": 3,
-                        "S": 5,
-                        "AP": 0,
-                        "D": 1,
-                    },
-                },
-            },
-            "Zodgrod Wortsnagga": {
-                "keywords": ["FACTION: Waaagh!", "INFANTRY", "CHARACTER", "EPIC HERO", "ZODGROD WORTSNAGGA"],
-                "M": 6,
-                "T": 5,
-                "SV": 5,
-                "W": 5,
-                "LD": 7,
-                "OC": 1,
-                "weapons": {
-                    "Slugga": {
-                        "count": 1,
-                        "keywords": ["ANTI-MONSTER 4+", "PISTOL"],
-                        "R": 12,
-                        "A": 1,
-                        "WS": 5,
-                        "S": 4,
-                        "AP": 1,
-                        "D": 1,
-                    },
-                    "Da Grabzappa": {
-                        "count": 1,
-                        "R": 0,
-                        "A": 5,
-                        "WS": 2,
-                        "S": 7,
-                        "AP": 2,
-                        "D": 2,
-                    },
-                },
-            },
-            "- Pasted -": {},
+            }
         }
-        function add_models() {
+        function add_squads() {
             let html = ""
-            for (let key in models) {
+            for (let key in squads) {
                 html += `<option value="${key}">${key}</option>`
             }
             source.innerHTML = html
             target.innerHTML = html
         }
-        function set_source(key) {
-            let model = models[key]
-            source_keywords.value = (model.keywords || []).join(", ")
-            let html = model["weapons"]? `<table align="center"><tr>
-                <th>Weapon</th>
-                <th>Count</th>
-                <th>Range</th>
-                <th title="Attacks">A</th>
-                <th title="Ballistic/Weapon Skill">BS/WS</th>
-                <th title="Strength">S</th>
-                <th title="Armor Piercing">AP</th>
-                <th title="Damage">D</th>
-                <th>Keywords</th>
-            </tr>` : ''
+        function set_source_squad(key) {
+            let squad = squads[key]
+            if (typeof squad === "string") squad = parse_sheet(squad)
+            let html = squad["weapons"] ? `<table><tr>
+                    <th>Weapon</th>
+                    <th>Count</th>
+                    <th>Range</th>
+                    <th title="Attacks">A</th>
+                    <th title="Ballistic/Weapon Skill">BS/WS</th>
+                    <th title="Strength">S</th>
+                    <th title="Armor Piercing">AP</th>
+                    <th title="Damage">D</th>
+                    <th>Keywords</th>
+                </tr>` : ''
             let i = 0
-            for (let key in model["weapons"]) {
+            log("LOADING squad " + JSON.stringify(squad))
+            source_abilities.value = (squad.abilities || []).join(", ")
+            source_keywords.value = (squad.keywords || []).join(", ")
+
+            source_models.innerHTML = Object.keys(squad.models).join(', ')
+            models.style.display = source_models.innerHTML ? 'block' : 'none'
+            for (let key in squad["weapons"]) {
+                log("Weapon: " + key)
                 i++
-                let weapon = model["weapons"][key]
+                let weapon = squad["weapons"][key]
                 html += `<tr><td id="weapon${i}">${key}</td>
-<td><input id="count${i}" type="text" value="${weapon.count || 0}"></td>
-<td><input id="range${i}" type="text" value="${weapon.R}"></td>
+<td><input id="count${i}" type="number" value="${weapon.count || 0}"></td>
+<td><input id="range${i}" type="number" value="${weapon.R}"></td>
 <td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
 <td><input id="skill${i}" type="number" value="${parseInt(weapon.WS)}"></td>
-<td><input id="strength${i}" type="text" value="${weapon.S}"></td>
-<td><input id="piercing${i}" type="text" value="${-Math.abs(weapon.AP || 0)}"></td>
+<td><input id="strength${i}" type="number" value="${weapon.S}"></td>
+<td><input id="piercing${i}" type="number" value="${-Math.abs(weapon.AP || 0)}"></td>
 <td><input id="damage${i}" type="text" value="${weapon.D}"></td>
-<td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).toUpperCase().split(/, */).join(", ")}" style="width: 15em"></td></tr>`
+<td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).split(/, */).join(", ")}" style="width: 10em"></td></tr>`
             }
             weapons.innerHTML = html + "</table>"
         }
-        function set_target(key) {
-            let model = models[key]
-            target_unit_size.value = model.unit_size || 1
-            target_keywords.value = (model.keywords || []).join(", ")
-            // movement.value = model.M
-            toughness.value = model.T || ''
-            save.value = model.SV || ''
-            wounds.value = model.W || ''
-            // leadership.value = model.LD
-            // control.value = model.OC
+
+        function set_target_squad(key) {
+            let squad = squads[key]
+            if (typeof squad === "string") {
+                log("Dynamic squad string load.")
+                squad = parse_sheet(squad)[key]
+            }
+            target_size.value = squad.size || 1
+            target_abilities.value = (squad.abilities || []).join(", ")
+            target_keywords.value = (squad.keywords || []).join(", ")
+            target_rules.value = (squad.rules || []).join(", ")
+            log("SET RULES TO " + squad.rules)
+            let html = ""
+            for (let k in squad.units) {
+                html += `<option value="${k}">${k}</option>`
+                const unit = squad.units[k]
+                toughness.value = unit.T || ''
+                save.value = parseInt(unit.SV) || ''
+                wounds.value = unit.W || ''
+                leadership.value = parseInt(unit.LD) || 0
+                let mo = /Invulnerable Save (\d+)/.exec(squad.abilities)  // Ghost Ark
+                invuln_save.value = mo && parseInt(mo[1]) || ""
+                mo = /Feel No Pain (\d+)/.exec(squad.abilities)
+                fnp_save.value = mo && parseInt(mo[1]) || ""
+            }
+            target_unit.innerHTML = html
+            target_unit.options[0].selected = true
+            target_unit.onchange()
         }
+
+        function set_target_unit(key) {
+            let unit = squads[target.value].units[key]
+            toughness.value = unit.T || ''
+            save.value = unit.SV || ''
+            wounds.value = unit.W || ''
+        }
+
         let d6 = _ => 1 + Math.floor(Math.random() * 6)
         function geti(id) {
             let rv = 0
@@ -895,21 +578,27 @@
         function calculate(distance) {
             let damage = 0
 
-            let source_keywords = gets("source_keywords").toUpperCase().split(/, */)
+            let source_abilities = gets("source_abilities").toUpperCase().split(/, */).join(", ")
+            let source_keywords = gets("source_keywords").toUpperCase().split(/, */).join(", ")
             let source_is_vehicle = source_keywords.includes("VEHICLE")
             let source_is_monster = source_keywords.includes("MONSTER")
-            let target_keywords = gets("target_keywords").toUpperCase().split(/, */)
+            let target_abilities = gets("target_abilities").toUpperCase().split(/, */).join(", ")
+            let target_keywords = gets("target_keywords").toUpperCase().split(/, */).join(", ")
+            let target_rules = gets("target_rules").toUpperCase().split(/, */).join(", ")
+            const T = parseInt(toughness.value)
             let SV = parseInt(save.value)
-            let T = parseInt(toughness.value)
             let W = parseInt(wounds.value)
+            let LD = parseInt(leadership.value)
 
             let inches = parseFloat(distance)
             let html = ""
             let times = geti("rounds")
             log_enabled = times < 5
+
+            const weapon_spreads = {}
             log("Calculating...")
 
-            // If a model is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE model, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a model will shoot with its Pistols or its other ranged weapons before selecting targets.
+            // If a unit is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE unit, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a unit will shoot with its Pistols or its other ranged weapons before selecting targets.
             let has_rifle = false
             for (let i = 1; i < 50; ++i) {
                 let weapon = document.getElementById(`weapon${i}`)
@@ -918,12 +607,12 @@
                 let weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
                 if (geti(`range${i}`) > 0 && !weapon_keywords.includes("PISTOL")) {
                     has_rifle = true
-                    //log(`${weapon.innerText} is not a PISTOL.`)
+                    log(`${weapon.innerText} is not a PISTOL.`)
                     break
                 }
             }
-            let pistols_only = !source_is_vehicle && !source_is_monster && (inches < 1 || prefer_pistols.checked || !has_rifle)
-            if (pistols_only) log("The only ranged attacks will be using pistols!")
+            let pistols_only = !has_rifle || (!source_is_vehicle && !source_is_monster && inches < 1) || prefer_pistols.checked
+            if (pistols_only) log("The only ranged attacks will be using pistols.")
 
             // Use up to 49 weapons.
             for (let i = 1; i < 50; ++i) {
@@ -936,7 +625,7 @@
 
                 log(`WEAPON: ${weapon}`)
                 let melee_done = false
-                let R = geti(`range${i}`)
+                let R = geti(`range${i}`) || 0
 
                 const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
                 let is_pistol = weapon_keywords.includes("PISTOL")
@@ -959,7 +648,7 @@
                     // }
                 }
                 if (R <= inches) {
-                    log(`${weapon} out of range.`)
+                    log(`${weapon} out of range. ${R} <= ${inches}`)
                     continue
                 }
                 if (target_keywords.includes("LONE OPERATIVE") && inches > 12) {
@@ -967,31 +656,31 @@
                     continue
                 }
 
-                
                 const WS = geti(`skill${i}`) || 0
                 const S = geti(`strength${i}`)
                 const AP = Math.abs(geti(`piercing${i}`))
-
+                const TOTAL_OBLITERATION = source_abilities.includes("TOTAL OBLITERATION") && R > 1 && (target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE"))
+                weapon_spreads[weapon] = {}
                 for (let time = 0; time < times * count; ++time) {
+                    let take_battleshock = false
                     let A = geti(`attacks${i}`)
-                    let D = geti(`damage${i}`)
                     // Each time a [RAPID FIRE X] weapon targets a unit within half that weapon’s range, the Attacks characteristic of that weapon is increased by the amount denoted by ‘x’.
                     let rf = get_keyword_value(weapon_keywords, "RAPID FIRE")
                     if (rf && inches < R / 2) {
                         A += rf
                         log(`+${rf} RAPID FIRE attacks.`)
                     }
-                    // BLAST adds 1 attack per 5 models in the target unit.
+                    // BLAST adds 1 attack per 5 units in the target unit.
                     if (weapon_keywords.includes("BLAST")) {
-                        let blast_attacks = Math.floor(geti("target_unit_size") / 5)
+                        let blast_attacks = Math.floor(geti("target_size") / 5)
                         if (blast_attacks > 0) {
                             A += blast_attacks
                             log(`+${blast_attacks} BLAST attacks.`)
                         }
                     }
 
-                    log(`${weapon} in range. Attacking ${A} times.`)
-                    for (let attack = 0; attack < A; ++attack) {
+                    log(`${weapon} in range; ${R} > ${inches}. Attacking ${A} times.`)
+                    for (let attack = 1; attack <= A; ++attack) {
                         ///////////////
                         // Roll to hit.
                         //
@@ -999,9 +688,15 @@
                         let lethal_hits = false
                         if (!source_keywords.includes("TORRENT")) {  // Torrent autohits.
                             let hit_roll = d6()
+                            log(`Hit roll ${attack}: ${hit_roll}`)
                             // Re-rolls
-                            // Whirling Onslaught: Each time a model in this unit makes a melee attack, re-roll a Hit roll of 1. If this unit made a Charge move this turn, you can re-roll the Hit roll instead.
-                            if (source_keywords.includes("WHIRLING ONSLAUGHT") && R < 2) {
+                            // Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll. TODO
+                            if (TOTAL_OBLITERATION && hit_roll < WS) {
+                                hit_roll = d6()
+                                log(`Total Obliteration re-roll: ${hit_roll}`)
+                            }
+                            // Whirling Onslaught: Each time a unit in this unit makes a melee attack, re-roll a Hit roll of 1. If this unit made a Charge move this turn, you can re-roll the Hit roll instead.
+                            if (source_abilities.includes("WHIRLING ONSLAUGHT") && R < 2) {
                                 if (hit_roll === 1) {
                                     hit_roll = d6()
                                     log(`Whirling Onslaught hit 1 reroll to ${hit_roll}`)
@@ -1013,23 +708,23 @@
                                 continue
                             }
                             if (hit_roll == 6) {
-                                log("Critical hit!")
+                                log("Critical hit.")
                                 let sh_bonus = get_keyword_value(weapon_keywords, "SUSTAINED HITS")
                                 if (sh_bonus) {
                                     hits += sh_bonus
-                                    log(`+${sh_bonus} SUSTAINED HITS.`)
+                                    log(`+${sh_bonus} sustained hits.`)
                                 }
                                 // Each time an attack is made with a LETHAL HITS weapon, a Critical Hit automatically wounds the target.
                                 lethal_hits = weapon_keywords.includes("LETHAL HITS")
-                                if (lethal_hits) log(`${hits} LETHAL HITS.`)
+                                if (lethal_hits) log("Lethal hits.")
                             } else {
                                 // Not crit hit, even if the roll is modified to a 6.
                                 if (weapon_keywords.includes("HEAVY")) {
                                     log(`Assuming HEAVY weapon remained stationary. +1 to Hit of ${hit_roll}.`)
                                     hit_roll += 1
                                 }
-                                // If every model (XXX) in a unit has STEALTH, then each time a ranged attack is made against it, subtract 1 from that attack’s Hit roll.
-                                if (target_keywords.includes("STEALTH")) {
+                                // If every unit (XXX) in a unit has STEALTH, then each time a ranged attack is made against it, subtract 1 from that attack’s Hit roll.
+                                if (target_rules.includes("STEALTH")) {
                                     hit_roll -= 1
                                     log("Stealthy target. -1 to hit.")
                                 }
@@ -1039,6 +734,12 @@
                                     continue
                                 }
                             }
+                        }
+                        log(`${hits} hits.`)
+                        // Purge the Foe: In your Shooting phase, after this unit has shot, you can select one enemy Infantry unit hit by one or more of those attacks made with a Pyreblaster. That enemy unit must take a Battle-shock test.
+                        if (weapon.includes("Pyreblaster") && source_abilities.includes("PURGE THE FOE")) {
+                            log("Target must take battleshock test.")
+                            take_battleshock = true
                         }
 
                         for (let hit = 0; hit < hits; ++hit) {
@@ -1057,9 +758,9 @@
                                     threshold = 6
 
                                 // https://www.wargamer.com/warhammer-40k/abilities#twin-linked
-                                let to_wound_rolls = weapon_keywords.includes("TWIN-LINKED") ? 2 : 1
+                                let to_wound_rolls = TOTAL_OBLITERATION || weapon_keywords.includes("TWIN-LINKED") ? 2 : 1
                                 let wound_roll
-                                for (let wi = 0; wi < to_wound_rolls; ++wi) {
+                                for (let wi = 1; wi <= to_wound_rolls; ++wi) {
                                     wound_roll = d6()
                                     for (let kw of weapon_keywords) {
                                         if (kw.indexOf("ANTI-") > -1) {
@@ -1073,7 +774,7 @@
                                     }
                                     // TODO: Wound roll bonus of -1 or +1. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
                                     if (wound_roll >= threshold) break
-                                    log(`Rerolling to wound. ${wound_roll} < ${threshold}`)
+                                    if (wi < to_wound_rolls) log(`Rerolling ${wi}/${to_wound_rolls} to wound. ${wound_roll} < ${threshold}`)
                                 }
 
                                 if (wound_roll < threshold) {
@@ -1081,9 +782,9 @@
                                     continue
                                 }
                                 // https://www.newrecruit.eu/wiki/wh40k-10e/warhammer-40%2C000-10th-edition/rules/devastating-wounds
-                                // Each time an attack is made a [DEVASTATING WOUNDS] weapon, if that attack scores a Critical Wound, no saving throw of any kind can be made against that attack (including invulnerable saving throws but not Feel No Pain damage negation!?). Such attacks are only allocated to models after all other attacks made by the attacking unit have been allocated and resolved. XXX
+                                // Each time an attack is made a [DEVASTATING WOUNDS] weapon, if that attack scores a Critical Wound, no saving throw of any kind can be made against that attack (including invulnerable saving throws but not Feel No Pain damage negation!?). Such attacks are only allocated to units after all other attacks made by the attacking unit have been allocated and resolved. XXX
                                 let devastating_wounds = (wound_roll === 6 && weapon_keywords.includes("DEVASTATING WOUNDS"))
-                                if (devastating_wounds) log("Devastating wounds (no +/++ save)!")
+                                if (devastating_wounds) log("Devastating wounds (no +/++ save)")
                                 else log('Hit would wound.' + ` ${wound_roll} >= ${threshold}`)
                                 if (!devastating_wounds) {
                                     ////////////
@@ -1103,7 +804,7 @@
                                             save_roll += 1
                                         }
                                     }
-                                    // If a model has an invulnerable save, the player can choose to use that instead of their normal save. Invulnerable saves cannot be modified by an attack’s AP. https://ageofminiatures.com/warhammer-40k-rules-explained/#:~:text=If%20a%20model%20has%20an,AP.
+                                    // If a unit has an invulnerable save, the player can choose to use that instead of their normal save. Invulnerable saves cannot be modified by an attack’s AP. https://ageofminiatures.com/warhammer-40k-rules-explained/#:~:text=If%20a%20unit%20has%20an,AP.
                                     // https://www.newrecruit.eu/wiki/wh40k-10e/warhammer-40%2C000-10th-edition/rules/feel-no-pain in addition to regular armor save or invuln_save. XXX: Using both here to not calc which is best.
                                     if (save_roll - AP >= SV) {
                                         log(`Saved by armor. ${save_roll} - ${AP} >= ${SV}`)
@@ -1116,8 +817,32 @@
                                     }
                                 }
                             }
-                            log(`No +/++ save roll.`)
+                            log(`No save.`)
 
+                            /////////
+                            // Damage
+                            // Re-roll -> division -> multiplication -> subtraction -> addition -> negation per damage.
+                            let D = geti(`damage${i}`)
+                            // re-roll
+                            // Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
+                            let new_D = geti(`damage${i}`)  // TODO: calc average instead.
+                            if (TOTAL_OBLITERATION && D < new_D) {
+                                log(`Damage roll: ${D}`)
+                                D = new_D
+                                log(`Total Obliteration re-roll: ${D}`)
+                            }
+                            // division
+                            if (target_abilities.includes("NECRODERMIS")) {
+                                log(`Necrodermis halves initial ${D} damage (rounded up).`)
+                                D = Math.ceil(D / 2)
+                            }
+                            // subtraction
+                            // Duty Eternal: Each time an attack is allocated to this model, subtract 1 from the Damage characteristic of that attack
+                            if (target_abilities.includes("DUTY ETERNAL") && D > 1) {  // D can't go < 1 unless stated. https://www.reddit.com/r/Warhammer40k/comments/145dc9e/comment/jz822h2/
+                                log(`Duty Eternal -1 D.`)
+                                --D
+                            }
+                            // addition
                             if (inches < R / 2) {
                                 let melta_bonus = get_keyword_value(weapon_keywords, "MELTA")
                                 if (melta_bonus) {
@@ -1125,46 +850,72 @@
                                     log(`MELTA bonus, +${melta_bonus} damage.`)
                                 }
                             }
-
-                            ///////////////
-                            // Damage reduction step (technically might be as good as saving a model from all damage):
-                            //
-                            // Feel No Pain x+: Each time this model would lose a wound, roll one D6: if the result equals or exceeds ‘x’, that wound is not lost. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#:~:text=attack%20is%20lost.-,FEEL%20NO%20PAIN,-Some%20warriors%20refuse - Not prevented by DEVASTATING WOUNDS even though this is thematically also a save (+++) that can prevent devastation.
+                            // negation
+                            // Feel No Pain x+: Each time this unit would lose a wound, roll one D6: if the result equals or exceeds ‘x’, that wound is not lost. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#:~:text=attack%20is%20lost.-,FEEL%20NO%20PAIN,-Some%20warriors%20refuse - Not prevented by DEVASTATING WOUNDS even though this is thematically also a save (+++) that can prevent devastation.
                             for (let d = 0; d < D; ++d) {
                                 if (d6() >= geti("fnp_save")) {
                                     log("Saved 1 mortal wound by Feel No Pain (+++).")
-                                    D -= 1
+                                    D -= 1  // This is a negate; not a modifier which can't normally go below 1 according to "Rules Commentary": https://www.reddit.com/r/Warhammer40k/comments/1eibdkb/comment/lg5nmn5/
+                                    // TODO: Abilities like Refuse To Yield that half damage (rounded up as stated above and not in the fricking ability).
                                 }
                             }
-                            log(`One model takes +${D} damage.`)
-                            damage += D  // Dealt damage causes mortal wounds, not to be confused with presave or preFNP wounds! By anthropomorphing vehicles and bunkers like that, i'm surprised there aren't more evil animated versions of those like by Khorne and Final Fantasy.
-                        }
+                            log(`Target squad takes ${D} damage!`)
+                            damage += D
+                            // Dealt damage causes mortal wounds, not to be confused with presave or preFNP wounds! By anthropomorphing vehicles and bunkers like that, i'm surprised there aren't more evil animated versions of those like by Khorne and Final Fantasy.
+                            weapon_spreads[weapon][D] = (weapon_spreads[weapon][D] || 0) + 1
+                        }  // hits
+                    }  // attacks
+                    // You take a Battle-shock test for a unit by rolling 2D6 and attempting to equal or exceed its Leadership stat. If the test fails, you can’t target the unit with Stratagems, it can’t contest objectives, and you risks losing models when it falls back from combat. https://www.wargamer.com/warhammer-40k/battle-shock#:~:text=You%20take%20a%20Battle%2Dshock,it%20falls%20back%20from%20combat.
+                    if (take_battleshock) {
+                        if (d6() + d6() < LD) log(`Target is battle-shocked!`)
+                        else log("Battle-shock test passed.")
                     }
+                }  // rounds
+            }  // weapons
+            html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
+            html += `<br><table border=1><tr><th>Damage</th><th>Count</th><th>%</th></tr>`
+            for (let weapon in weapon_spreads) {
+                html += `<tr><th colspan=2>${weapon}</th></tr>`
+                for (let k in weapon_spreads[weapon]) {
+                    html += `<tr><td>${k}<td>${weapon_spreads[weapon][k]}</td><td>${(weapon_spreads[weapon][k] / times * 100).toFixed(2)}%</td></tr>`
                 }
             }
-            html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
-            result.innerHTML = html
+            //Object.entries(weapon_spreads).forEach(d => speadhtml += `<tr><td>${d[0]}</td><td>${d[1]}</td></tr>`)
+            //let damages = Object.keys(spread).map(k => [k, spread[k]])
+            //let damages = Object.entries(spread).sort((a, b) => b - a)
+            //damages.sort((a, b) => b - a)
+            //damages.forEach(d => html += `<tr><td>${d[0]}</td><td>${d[1]}</td></tr>`)
+            //}
+            result.innerHTML = html + "</table>"
         }
+
         document.onpaste = (event) => {
             log(`Pasted types: ${event.clipboardData.types}`)
             const html = event.clipboardData.getData("text/html")
             window.types = event.clipboardData.types
             window.html = html
-            import_sheet(event.clipboardData.getData("text/plain"))
+            const new_squads = parse_sheet(event.clipboardData.getData("text/plain"))
+
+            squads = {
+                ...squads,
+                ...new_squads
+            }
+            alert(`Imported ${name}.`)
+            add_squads()
         }
-        function import_sheet(s) {
+        function parse_sheet(s) {
             /* NewRecruit.eu format:
-Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Dark Angels Imperium Lion El'Jonson Monster Primarch Warlord
-Models	Options
-1x Lion El'Jonson 	Arma Luminis, Fealty, Warlord
+Apothecary 
 Unit	M	T	SV	W	LD	OC
-Lion El'Jonson	8"	9	2+	10	5+	4
+Primaris Apothecary	6"	4	3+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
-➤ Arma Luminis - bolt	12"	4	2+	4	-1	2	Pistol
-➤ Arma Luminis - plasma	12"	2	2+	8	-3	2	Pistol
+Absolvor Bolt Pistol	18"	1	3+	5	-1	2	Pistol
+Reductor Pistol	3"	1	3+	4	-4	2	Pistol
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
-➤ Fealty - strike	Melee	8	2+	12	-4	4	Lethal Hits
-➤ Fealty - sweep	Melee	16	2+	6	-3	1	Sustained Hits 1
+Close Combat Weapon	Melee	4	3+	4	0	1	-
+Abilities Narthecium, Gene Seed Recovery, Leader, Fire Discipline
+Rules Leader, Oath of Moment, Pistol
+Keywords: Character Faction: Adeptus Astartes Grenades Imperium Infantry Primaris Apothecary Tacticus
 
 Wahapedia format:
 Lion El’jonson
@@ -1227,68 +978,150 @@ Melee
 -3
 1
             */
-            let unit = {
+            log(`Parsing ${s}`)
+            let squads = {}
+            let squad = {
+                "size": 0,
+                "models": {},
+                "units": {},
+                "weapons": {},
                 "keywords": [],
-                "weapons": {}
+                "abilities": [],
             }
             let name = "PASTED"
+            let mode = ""
+            parse_loop:
             for (let line of s.split('\n')) {
-                let cols = line.split('\t')
-                if (cols.length === 7) {
-                    if (cols[1] === "M") continue  // Skip header.
-                    log(`Unit stats: ${cols}`)
-                    name = cols[0]
-                    unit.M = cols[1]
-                    unit.T = cols[2]
-                    unit.SV = cols[3]
-                    unit.W = cols[4]
-                    unit.LD = cols[5]
-                    unit.OC = cols[6].trim()
+                if (name === "PASTED") {
+                    name = line.trim()
+                    continue
                 }
-                else if (cols.length === 8) {
+                ///////////////////////
+                // NewRecruit.eu format
+                let cols = line.split('\t')
+                if (cols.length === 7) {  // Unit
+                    mode = "unit"
+                    if (cols[1] === "M") continue  // Skip header.
+                    //log(`NewRecruit unit table row: ${cols}`)
+                    // let count = /\(x(\d+)\)/.exec(cols[0])
+                    // count = count && count[1] || 1
+                    // squad.size += count
+                    const unit_name = cols[0].replace(/\(x\d+\)/, '').trim()
+                    const unit = squad.units[unit_name] || { "count": 1 }
+                    unit.name = unit_name
+                    unit.M = parseInt(cols[1])
+                    unit.T = parseInt(cols[2])
+                    unit.SV = parseInt(cols[3])
+                    unit.W = parseInt(cols[4])
+                    unit.LD = parseInt(cols[5])
+                    unit.OC = parseInt(cols[6])
+                    if (name === "PASTED") name = unit.name  // In case user didn't copy sheet name.
+                    squad.units[unit.name] = unit
+                    if (!squad.models) squad.size += unit.count
+                    //log(`Added model to squad: ${JSON.stringify(unit, null, 4)}`)
+                }
+                else if (cols.length === 8) {  // Weapon
+                    mode = "weapon"
                     if (cols[2] === "A") continue  // Skip headers.
-                    log(`Weapon stats: ${cols}`)
+                    let weapon_name = cols[0]
+
+                    //log(`${weapon_name} Weapon stats: ${cols}`)
                     let weapon = {
-                        "count": 1,
-                        "keywords": cols[7].trim().split(/, */),
-                        "R": cols[1],
+                        "count": cols[0].includes("(x0)") ? 0 : (parseInt(/\d+/.exec(cols[0])) || 1),
+                        "R": parseInt(cols[1]) || 0,
                         "A": cols[2],
-                        "WS": cols[3],
-                        "S": cols[4],
-                        "AP": cols[5],
-                        "D": cols[6]
+                        "WS": parseInt(cols[3]) || 0,
+                        "S": parseInt(cols[4]),
+                        "AP": parseInt(cols[5]),
+                        "D": cols[6],
+                        "keywords": cols[7].trim().split(/, */),
                     }
-                    unit.weapons[cols[0]] = weapon
+                    squad.weapons[cols[0]] = weapon
+                }
+                for (let word of ["Abilities", "Keywords", "Rules"]) {
+                    if (line.startsWith(word)) {
+                        mode = word
+                        squad[word.toLowerCase()] = line.slice(word.length + 1).replace(/([^ A-Z])([A-Z])/g, '$1\t$2').split('\t')  // TODO: Use HTML for New Recruit copy? XXX: includes() works well enough for now.
+                        continue parse_loop
+                    }
+                }
+                if (line.trim() === "Models") {
+                    mode = "model"
+                    continue
+                }
+                //log(`Parsing ${mode}: ${line}`)
+                if (mode === "model") {
+                    const mo = /(\d+)x ([^:]+)/.exec(cols[0])
+                    log(`NewRecruit models table row: ${mo}`)
+                    if (mo) {
+                        count = parseInt(mo[1]) || 1
+                        model_name = mo[2]
+                        squad.size += count
+                        squad.models[model_name] = { "count": count }
+                    }
+                } else if (mode === "Abilities") {
+                    const mo = /([^:]+):/.exec(line)
+                    log(`${mode}: ${mo}`)
+                    if (mo) {
+                        log(`${mode}: ${mo}`)
+                        squad[mode.toLowerCase()].push(mo[1])
+                    }
                 }
             }
-            models[name] = unit
-            alert(`Imported ${name}.`)
-            add_models()
+            squads[name] = squad
+            log(`Parsed squads: ${JSON.stringify(squads, null, 4)}`)
+            return squads
+        }
+        function filter(which, what) {
+            what = what.toLowerCase()
+            document.querySelectorAll(`#${which}>option`).forEach(o => o.hidden = !(o.innerText.toLowerCase().includes(what) || squads[o.innerText].keywords.join(",").toLowerCase().includes(what) || squads[o.innerText].abilities.join(",").toLowerCase().includes(what)))
         }
     </script>
 </head>
 
-<body onload="add_models()">
+<body onload="import_sheets(); add_squads()">
     <h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
     <div>
-        Source unit: <select id="source" onchange="set_source(this.value)"></select><br><br>
-        <label title="Keywords">Keywords <input id="source_keywords" type="text" style="width: 35em"></label><br><br>
-        <div id="weapons">
-
-        </div>
+        Source <label>filter <input style="width:5em" onchange="filter('source', this.value)"></label> squad <select
+            id="source" onchange="set_source_squad(this.value)"></select>
+        <div id="models" style="display: none">Models: <span id="source_models"></span></div>
+        <table>
+            <tr>
+                <td><label for="source_keywords">Keywords</label></td>
+                <td><input id="source_keywords" type="text" class="abilities"></td>
+            </tr>
+            <tr>
+                <td><label for="source_abilities">Abilities</label></td>
+                <td><input id="source_abilities" type="text" class="abilities"></td>
+            </tr>
+        </table>
+        <div id="weapons"></div>
     </div><br>
     <div>
-        Target unit: <select id="target" onchange="set_target(this.value)"></select>
-        <label>Size <input id="target_unit_size" type="number"></label><br><br>
-        <label title="Keywords">Keywords <input id="target_keywords" type="text" style="width: 35em"></label><br><br>
-        <!-- label title="Movement">M <input id="movement" type="text"></label -->
+        Target <label>filter <input style="width:5em" onchange="filter('target', this.value)"></label> squad <select
+            id="target" onchange="set_target_squad(this.value)"></select>
+        <label>Size <input id="target_size" type="number"></label>
+        Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select><br><br>
+        <table>
+            <tr>
+                <td><label for="target_keywords">Keywords</label></td>
+                <td><input id="target_keywords" type="text" class="abilities"></td>
+            </tr>
+            <tr>
+                <td><label for="target_abilities">Abilities</label></td>
+                <td><input id="target_abilities" type="text" class="abilities"></td>
+            </tr>
+            <tr>
+                <td><label for="target_rules">Rules</label></td>
+                <td><input id="target_rules" type="text" class="abilities"></td>
+            </tr>
+        </table>
         <label title="Toughness">T <input id="toughness" type="number"></label>
-        <label title="Wounds">W <input id="wounds" type="number"></label>
         <label title="Save">SV <input id="save" type="number"></label>
+        <label title="Wounds">W <input id="wounds" type="number"></label>
+        <label title="Leadership">LD <input id="leadership" type="number"></label>
         <label title="Invulnerable Save">SV++ <input id="invuln_save" type="text"></label>
-        <label title="Feel No Pain Save">SV+++ <input id="fnp_save" type="text"></label>
-        <!-- label title="Leadership">LD <input id="leadership" type="text"></label>
-        <label title="Objective Control">OC <input id="control" type="text"></label -->
+        <label title="Feel No Pain Save">FNP+++ <input id="fnp_save" type="text"></label>
     </div>
     <br>
     <div>
