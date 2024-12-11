@@ -1007,7 +1007,7 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                     }
                     let hit_bonus = 0
                     // Mischief Makers (Aura): While an enemy unit (excluding MONSTERS and VEHICLES) is within 6" of this unit, each time a model in that unit makes a melee attack, subtract 1 from the Hit roll.
-                    if (target_abilities.includes("MISCHIEF MAKERS (AURA)") && R < 2) {
+                    if (target_abilities.includes("MISCHIEF MAKERS (AURA)") && !(source_is_monster || source_is_vehicle) && inches < 6 && R < 2) {
                         log("Mischief Makers -1 to hit.")
                         hit_bonus = -1
                     }
