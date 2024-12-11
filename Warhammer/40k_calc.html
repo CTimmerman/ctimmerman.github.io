@@ -35,7 +35,7 @@
         let squads = {}
         let sheets = [
             "- Adeptus Astartes -",
-            `Apothecary 
+            `Apothecary
 Unit	M	T	SV	W	LD	OC
 Primaris Apothecary	6"	4	3+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -46,7 +46,7 @@ Close Combat Weapon	Melee	4	3+	4	0	1	-
 Abilities Narthecium, Gene Seed Recovery, Leader, Fire Discipline
 Rules Leader, Oath of Moment, Pistol
 Keywords: Character Faction: Adeptus Astartes Grenades Imperium Infantry Primaris Apothecary Tacticus`,
-            `Techmarine 
+            `Techmarine
 Unit	M	T	SV	W	LD	OC
 Techmarine	6"	4	2+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -58,7 +58,7 @@ Servo-arm	Melee	1	3+	8	-2	3	Extra Attacks
 Abilities TechmarineBlessing of the OmnissiahVengeance of the OmnissiahLeaderArtificer Armour
 Rules LeaderOath of MomentPistolExtra Attacks
 Keywords: Character Faction: Adeptus Astartes Grenades Imperium Infantry Tacticus Techmarine Warlord`,
-            `Eradicator Squad 
+            `Eradicator Squad
 Models
  1x Eradicator: Bolt Pistol, Close Combat Weapon, Melta Rifle
  1x Eradicator Sergeant: Bolt Pistol, Close Combat Weapon, Melta Rifle
@@ -75,7 +75,7 @@ Abilities
 Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
 Rules Oath of MomentPistolHeavyMelta
 Keywords: Eradicator Squad Faction: Adeptus Astartes Gravis Grenades Imperium Infantry`,
-            `Infernus Squad 
+            `Infernus Squad
 Models
  5x Infernus Marines: Bolt Pistol, Close Combat Weapon, Pyreblaster
  1x Infernus Sergeant: Bolt Pistol, Close Combat Weapon, Pyreblaster
@@ -89,7 +89,7 @@ Close Combat Weapon (x6)	Melee	3	3+	4	0	1	-
 Abilities Purge the Foe
 Rules Oath of MomentPistolIgnores CoverTorrent
 Keywords: Faction: Adeptus Astartes Grenades Imperium Infantry Infernus Squad Tacticus`,
-            `Tactical Squad 
+            `Tactical Squad
 Models
  7x Tactical Marine: Bolt Pistol, Boltgun, Close Combat Weapon
  1x Tactical Marine Sergeant: Close Combat Weapon, Bolt Pistol, Astartes Chainsword
@@ -109,7 +109,7 @@ Astartes Chainsword	Melee	4	3+	4	-1	1	-
 Abilities Combat Squads
 Rules Oath of MomentPistolHeavyBlastTorrentIgnores Cover
 Keywords: Battleline Faction: Adeptus Astartes Grenades Imperium Infantry Tactical Squad`,
-            `Impulsor 
+            `Impulsor
 Unit	M	T	SV	W	LD	OC
 Impulsor	12"	9	3+	11	6+	2
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -142,13 +142,79 @@ Redemptor Fist	Melee	5	3+	12	-2	3	-
 Abilities Duty EternalDamaged: 1-4 Wounds Remaining
 Rules Deadly Demise D3Oath of MomentAnti-HazardousBlastIgnores CoverTorrentTwin-linked
 Keywords: Deathwing Faction: Adeptus Astartes Imperium Redemptor Dreadnought Vehicle Walker`,
-
+            `Terminator Squad 
+Models
+ 1x Terminator Sergeant: Storm Bolter, Power Weapon
+ 1x Terminator w/ Heavy Weapon: Chainfist, Assault Cannon
+ 0x Terminator w/ Heavy Weapon: Chainfist, Cyclone Missile Launcher & Storm Bolter (Cyclone Missile Launcher, Storm Bolter)
+ 0x Terminator w/ Heavy Weapon: Chainfist, Heavy Flamer
+ 3x Terminator w/ Power Fist: Power Fist, Storm Bolter
+Unit	M	T	SV	W	LD	OC
+Terminator Squad	5"	5	2+	3	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Storm Bolter (x4)	24"	2	3+	4	0	1	Rapid Fire 2
+Assault Cannon	24"	6	3+	6	0	1	Devastating Wounds
+➤ Cyclone Missile Launcher - Frag (x0)	36"	2D6	3+	4	0	1	Blast
+➤ Cyclone Missile Launcher - Krak (x0)	36"	2	3+	9	-2	D6	-
+Heavy Flamer (x0)	12"	D6	N/A	5	-1	1	Ignores Cover, Torrent
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Power Weapon	Melee	4	3+	5	-2	1	-
+Chainfist (x2)	Melee	3	4+	8	-2	2	Anti-Vehicle 3+
+Power Fist (x3)	Melee	3	3+	8	-2	2	-
+Abilities Teleport HomerFury of the FirstInvulnerable Save 4
+Rules Deep StrikeOath of MomentRapid FireAnti-Devastating WoundsIgnores CoverTorrent
+Keywords: Faction: Adeptus Astartes Imperium Infantry Terminator Terminator Squad`,
             // Space Marines Faction – Includes 12 Armies, based on various Adeptus Astartes Chapters:
             //"- Black Templars -",
             //"- Blood Angels -",
-            //"- Dark Angels -",
-            // Are these stats correct? Why ever choose bolt over plasma?
-            `Lion El'Jonson 
+            "- Dark Angels -",
+            `Deathwing Knights 
+Models
+ 4x Deathwing Knight
+ 1x Knight Master: Great Weapon of the Unforgiven
+Unit	M	T	SV	W	LD	OC
+Deathwing Knight (x4)	5"	5	2+	4	6+	1
+Knight Master	5"	5	2+	4	6+	1
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Flail of the Unforgiven	Melee	5	2+	6	-2	2	Devastating Wounds, Sustained Hits 1
+Relic Weapon (x0)	Melee	6	2+	7	-2	2	Lethal Hits
+Mace of absolution (x4)	Melee	4	2+	6	-2	2	Anti-Monster 4+, Anti-Vehicle 4+
+Power Weapon (x0)	Melee	5	2+	6	-2	2	-
+Abilities
+Inner Circle: Each time an attack is allocated to a model in this unit, subtract 1 from the Damage characteristic of that attack.
+Invulnerable Save: 4+
+Attached Unit: If a Character unit from your army with the Leader ability can be attached to a Terminator Squad, it can be attached to this unit instead.
+Teleport Homer: At the start of the battle, you can set up one Teleport Homer token for this unit anywhere on the battlefield that is not in your opponent’s deployment zone. If you do, once per battle, you can target this unit with the Rapid Ingress Stratagem for 0CP, but when resolving that Stratagem, you must set this unit up within 3" horizontally of that token and not within 9" horizontally of any enemy models. That token is then removed.
+Watcher in the Dark: Once per battle, in any phase, this unit can summon a Watcher in the Dark. When it does, until the end of the phase, models in this unit have the Feel No Pain 4+ ability against mortal wounds.
+Rules Deep StrikeOath of MomentDevastating WoundsSustained HitsAnti-
+Keywords: Deathwing Deathwing Knights Faction: Adeptus Astartes Faction: Dark Angels Imperium Infantry Terminator`,
+            `Deathwing Terminator Squad 
+Models
+ 1x Deathwing Sergeant: Power Weapon, Storm Bolter
+ 3x Deathwing Terminator: Power Fist, Storm Bolter
+ 0x Deathwing Terminator w/ Heavy Weapon: Chainfist, Assault Cannon
+ 0x Deathwing Terminator w/ Heavy Weapon: Chainfist, Cyclone Missile Launcher & Storm Bolter
+ 0x Deathwing Terminator w/ Heavy Weapon: Chainfist, Heavy Flamer
+ 1x Deathwing Terminator w/ Heavy Weapon: Chainfist, Plasma Cannon
+Unit	M	T	SV	W	LD	OC
+Deathwing Sergeant	5"	5	2+	3	6+	1
+Deathwing Terminator (x8)	5"	5	2+	3	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Storm Bolter (x6)	24"	2	3+	4	0	1	Rapid Fire 2
+Assault Cannon (x0)	24"	6	3+	6	0	1	Devastating Wounds
+➤ Cyclone Missile Launcher - Frag (x0)	36"	2D6	3+	4	0	1	Blast
+➤ Cyclone Missile Launcher - Krak (x0)	36"	2	3+	9	-2	D6	-
+Heavy Flamer (x0)	12"	D6	N/A	5	-1	1	Ignores Cover, Torrent
+➤ Plasma Cannon - Standard	36"	D3	3+	7	-2	1	Blast
+➤ Plasma Cannon - Supercharge	36"	D3	3+	8	-3	2	Blast, Hazardous
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Power Weapon	Melee	4	3+	5	-2	1	-
+Power Fist (x4)	Melee	3	3+	8	-2	2	-
+Chainfist (x4)	Melee	3	4+	8	-2	2	Anti-Vehicle 3+
+Abilities Invulnerable Save 4DeathwingAttached UnitTeleport Homer
+Rules Deep StrikeOath of MomentAnti-Devastating WoundsBlastIgnores CoverTorrentHazardous
+Keywords: Deathwing Deathwing Terminator Squad Faction: Adeptus Astartes Faction: Dark Angels Imperium Infantry Terminator`,
+            `Lion El'Jonson
 Unit	M	T	SV	W	LD	OC
 Lion El'Jonson	8"	9	2+	10	5+	4
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -161,14 +227,39 @@ Abilities Primarch of the First LegionThe Emperor's ShieldDark Angels BodyguardI
 Primarch of the First Legion All Secrets RevealedMartial Exemplar [Aura]No Hiding From the Watchers [Aura]
 Rules Deep StrikeFights FirstOath of MomentPistolLethal HitsSustained Hits
 Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Dark Angels Imperium Lion El'Jonson Monster Primarch Warlord`,
-            //"- Deathwatch -",
+            "- Deathwatch -",
+            `Corvus Blackstar
+Unit	M	T	SV	W	LD	OC
+Corvus Blackstar	20+"	10	3+	14	6+	0
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Hurricane bolter	24"	6	3+	4	0	1	Rapid Fire 6, Twin-linked
+Twin assault cannon (x0)	24"	6	3+	6	0	1	Devastating Wounds, Twin-linked
+Twin lascannon	48"	1	3+	12	-3	D6+1	Twin-linked
+Blackstar rocket launcher (x0)	30"	D6+1	3+	5	0	1	Blast
+Stormstrike missile launcher (x2)	48"	1	3+	10	-2	3	-
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured hull	Melee	3	4+	6	0	1	-
+Abilities Blackstar Cluster LauncherDamaged: 1-5 Wounds RemainingTransportAuspex Array
+Rules Deadly Demise D6HoverStealthAssigned AgentsRapid FireTwin-linkedIgnores Cover
+Keywords: Aircraft Allied Units Corvus Blackstar Deathwatch Faction: Agents of the Imperium Fly Imperium Ordo Xenos Retinue Transport Vehicle`,
             //"- Grey Knights -",
             //"- Imperial Fists -",
             //"- Iron Hands -",
             //"- Raven Guard -",
             //"- Salamanders -",
             //"- Space Wolves -",
-            //"- Ultramarines -",
+            "- Ultramarines -",
+            `Roboute Guilliman 
+Unit	M	T	SV	W	LD	OC
+Roboute Guilliman	8"	9	2+	10	5+	4
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Hand of Dominion	30"	2	2+	6	-2	2	Rapid Fire 2
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Hand of Dominion	Melee	7	2+	14	-4	4	Lethal Hits
+The Emperor's Sword	Melee	14	2+	8	-3	2	Devastating Wounds
+Abilities Author of the CodexUltramarines BodyguardArmour of FateSupreme CommanderInvulnerable Save 4
+Rules Oath of MomentLethal HitsRapid FireDevastating Wounds
+Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Ultramarines Imperium Monster Primarch Roboute Guilliman Warlord`,
             //"- White Scars -",
             // https://www.adeptusars.com/guides/factions Imperium of Man Faction – Includes 5 Armies:
             "- Adeptus Custodes -",
@@ -344,7 +435,7 @@ Choppa (x9)	Melee	3	3+	4	-1	1	-
 Abilities Get Da Good BitzBodyguard
 Rules Waaagh!PistolRapid FireBlast
 Keywords: Battleline Boyz Faction: Orks Grenades Infantry Mob`,
-`Big Mek 
+            `Big Mek 
 Unit	M	T	SV	W	LD	OC
 Big Mek	6"	5	3+	6	7+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -373,7 +464,7 @@ Grot-smacka	Melee	3	3+	5	0	1	-
 Abilities RuntherdThievin’ Scavengers
 Rules Waaagh!Pistol
 Keywords: Battleline Faction: Orks Gretchin Grots Infantry`,
-`Ghazghkull Thraka 
+            `Ghazghkull Thraka 
 Models
  1x Ghazghkull Thraka: Gork’s Klaw, Mork’s Roar
  1x Makari: Makari’s stabba
@@ -391,7 +482,7 @@ Rules Waaagh!LeaderLethal HitsRapid FireDevastating Wounds
 Abilities (Leader) Leader
 Abilities (Ghazghkull’s Waaagh! Banner (Aura)) Ghazghkull’s Waaagh! Banner (Aura)
 Keywords: Character Epic Hero Faction: Orks Ghazghkull Thraka Infantry Warboss Warlord`,
-`Meganobz 
+            `Meganobz 
 Models
  1x Meganob w/ Killsaw and power klaw: Killsaw, Power klaw
  1x Meganob w/ Kombi-weapon and killsaw: Killsaw, Kombi-weapon
@@ -524,7 +615,6 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
             target_abilities.value = (squad.abilities || []).join(", ")
             target_keywords.value = (squad.keywords || []).join(", ")
             target_rules.value = (squad.rules || []).join(", ")
-            log("SET RULES TO " + squad.rules)
             let html = ""
             for (let k in squad.units) {
                 html += `<option value="${k}">${k}</option>`
@@ -539,8 +629,10 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                 fnp_save.value = mo && parseInt(mo[1]) || ""
             }
             target_unit.innerHTML = html
-            target_unit.options[0].selected = true
-            target_unit.onchange()
+            if (target_unit.options.length) {
+                target_unit.options[0].selected = true
+                target_unit.onchange()
+            }
         }
 
         function set_target_unit(key) {
@@ -646,6 +738,10 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                     // if (target_keywords.includes("FIGHTS FIRST")) {
                     // TODO: Weapon inputs for target and bidirectional combat simulation.
                     // }
+                } else {
+                    // Auspex Array: Ranged weapons equipped by the bearer have the [IGNORES COVER] ability.
+                    log("Auspex Array grants IGNORES COVER to ranged weapons.")
+                    weapon_keywords.push("IGNORES COVER")
                 }
                 if (R <= inches) {
                     log(`${weapon} out of range. ${R} <= ${inches}`)
@@ -785,7 +881,7 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                                 // Each time an attack is made a [DEVASTATING WOUNDS] weapon, if that attack scores a Critical Wound, no saving throw of any kind can be made against that attack (including invulnerable saving throws but not Feel No Pain damage negation!?). Such attacks are only allocated to units after all other attacks made by the attacking unit have been allocated and resolved. XXX
                                 let devastating_wounds = (wound_roll === 6 && weapon_keywords.includes("DEVASTATING WOUNDS"))
                                 if (devastating_wounds) log("Devastating wounds (no +/++ save)")
-                                else log('Hit would wound.' + ` ${wound_roll} >= ${threshold}`)
+                                else log(`Wound roll ${wound_roll} >= ${threshold}`)
                                 if (!devastating_wounds) {
                                     ////////////
                                     // To save.
@@ -807,7 +903,7 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                                     // If a unit has an invulnerable save, the player can choose to use that instead of their normal save. Invulnerable saves cannot be modified by an attack’s AP. https://ageofminiatures.com/warhammer-40k-rules-explained/#:~:text=If%20a%20unit%20has%20an,AP.
                                     // https://www.newrecruit.eu/wiki/wh40k-10e/warhammer-40%2C000-10th-edition/rules/feel-no-pain in addition to regular armor save or invuln_save. XXX: Using both here to not calc which is best.
                                     if (save_roll - AP >= SV) {
-                                        log(`Saved by armor. ${save_roll} - ${AP} >= ${SV}`)
+                                        log(`Saved by armor. ${save_roll} -${AP}AP >= ${SV}SV`)
                                         continue
                                     }
                                     let invuln_save = geti("invuln_save")
@@ -1041,8 +1137,7 @@ Melee
                 for (let word of ["Abilities", "Keywords", "Rules"]) {
                     if (line.startsWith(word)) {
                         mode = word
-                        squad[word.toLowerCase()] = line.slice(word.length + 1).replace(/([^ A-Z])([A-Z])/g, '$1\t$2').split('\t')  // TODO: Use HTML for New Recruit copy? XXX: includes() works well enough for now.
-                        continue parse_loop
+                        squad[word.toLowerCase()] = line.slice(word.length + 1).replace(/([^A-Z (])([A-Z])/g, '$1\t$2').split('\t')  // TODO: Use HTML for New Recruit copy? XXX: includes() works well enough for now.
                     }
                 }
                 if (line.trim() === "Models") {
@@ -1060,16 +1155,19 @@ Melee
                         squad.models[model_name] = { "count": count }
                     }
                 } else if (mode === "Abilities") {
-                    const mo = /([^:]+):/.exec(line)
-                    log(`${mode}: ${mo}`)
+                    const mo = /^([^:]+): (.*)/.exec(line)
                     if (mo) {
-                        log(`${mode}: ${mo}`)
-                        squad[mode.toLowerCase()].push(mo[1])
+                        ability = mo[1]
+                        val = parseInt(mo[2])
+                        if (val) ability += ' ' + val
+                        //log(`Line '''${line}''' has ${mode}: '''${ability}'''`)
+                        squad[mode.toLowerCase()].push(ability)
                     }
                 }
             }
             squads[name] = squad
-            log(`Parsed squads: ${JSON.stringify(squads, null, 4)}`)
+            //log(`Parsed squads: ${JSON.stringify(squads, null, 4)}`)
+            log(`Parsed squads: ${JSON.stringify(squads)}`)
             return squads
         }
         function filter(which, what) {
