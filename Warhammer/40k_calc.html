@@ -878,8 +878,8 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
         function geti(id) {
             let rv = 0
             let s = document.getElementById(id).value
-            let m;
-            if (m = /[+-]\d+/.exec(s)) rv = parseInt(m[0])
+            let m = /[+-]\d+/.exec(s)
+            if (m) rv = parseInt(m[0])
             if (m = /(\d*)D(\d+)/.exec(s)) {
                 for (let i = 0; i < (m[1] || 1); ++i) rv += 1 + Math.floor(parseInt(m[2]) * Math.random())
                 return rv
@@ -991,20 +991,12 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                 const WS = geti(`skill${i}`) || 0
                 const S = geti(`strength${i}`)
                 const AP = Math.abs(geti(`piercing${i}`))
+                // Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
                 const TOTAL_OBLITERATION = source_abilities.includes("TOTAL OBLITERATION") && R > 1 && (target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE"))
                 weapon_spreads[weapon] = {}
                 for (let time = 0; time < times * count; ++time) {
                     ///////////////////////
                     // Shooting/Fight phase
-                    let hit_rerolls = 0
-                    let wound_rerolls = 0
-                    let damage_rerolls = 0
-                    // Aqullon Optics: Each time this model is selected to shoot, you can re-roll one Hit roll, you can re-roll one Wound roll and you can re-roll one Damage roll when resolving its attacks.
-                    if (source_abilities.includes("AQUILON OPTICS")) {
-                        hit_rerolls += 1
-                        wound_rerolls += 1
-                        damage_rerolls += 1
-                    }
                     let hit_bonus = 0
                     // Mischief Makers (Aura): While an enemy unit (excluding MONSTERS and VEHICLES) is within 6" of this unit, each time a model in that unit makes a melee attack, subtract 1 from the Hit roll.
                     if (target_abilities.includes("MISCHIEF MAKERS (AURA)") && !(source_is_monster || source_is_vehicle) && inches < 6 && R < 2) {
@@ -1029,6 +1021,28 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                         }
                     }
 
+                    let hit_rerolls = 0
+                    let wound_rerolls = 0
+                    let damage_rerolls = 0
+                    // Aqullon Optics: Each time this model is selected to shoot, you can re-roll one Hit roll, you can re-roll one Wound roll and you can re-roll one Damage roll when resolving its attacks.
+                    if (source_abilities.includes("AQUILON OPTICS")) {
+                        hit_rerolls += 1
+                        wound_rerolls += 1
+                        damage_rerolls += 1
+                    }
+                    if (TOTAL_OBLITERATION) {
+                        hit_rerolls += A
+                        wound_rerolls += A
+                        damage_rerolls += A
+                    }
+                    // https://www.wargamer.com/warhammer-40k/abilities#twin-linked
+                    if (weapon_keywords.includes("TWIN-LINKED")) wound_rerolls += A
+                    
+                    // Rerolls don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
+                    if (hit_rerolls > A) hit_rerolls = A
+                    if (wound_rerolls > A) wound_rerolls = A
+                    if (damage_rerolls > A) damage_rerolls = A
+
                     log(`${weapon} in range; ${R} > ${inches}. Attacking ${A} times.`)
                     for (let attack = 1; attack <= A; ++attack) {
                         ///////////////
@@ -1039,18 +1053,11 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                         if (!source_keywords.includes("TORRENT")) {  // Torrent autohits.
                             let hit_roll = d6() + hit_bonus
                             log(`Hit roll ${attack}: ${hit_roll}`)
-                            // Re-rolls
-                            // Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll. TODO
-                            if (TOTAL_OBLITERATION && hit_roll < WS) {
-                                hit_roll = d6()
-                                log(`Total Obliteration re-roll: ${hit_roll}`)
-                            }
-                            while (hit_rerolls > 0) {
+                            // Re-roll
+                            if (hit_rerolls > 0 && hit_roll < WS) {
+                                log(`Hit re-roll: ${hit_roll}`)
                                 --hit_rerolls
-                                if (hit_roll < WS) {
-                                    hit_roll = d6() + hit_bonus
-                                    log(`Hit re-roll: ${hit_roll}`)
-                                } else break
+                                hit_roll = d6() + hit_bonus
                             }
                             // Whirling Onslaught: Each time a unit in this unit makes a melee attack, re-roll a Hit roll of 1. If this unit made a Charge move this turn, you can re-roll the Hit roll instead.
                             if (source_abilities.includes("WHIRLING ONSLAUGHT") && R < 2) {
@@ -1115,28 +1122,24 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                                 else if (2 * S <= T)
                                     threshold = 6
 
-                                // https://www.wargamer.com/warhammer-40k/abilities#twin-linked
-                                let to_wound_rolls = TOTAL_OBLITERATION || weapon_keywords.includes("TWIN-LINKED") ? 2 : 1
-                                if (wound_rerolls > 0) {
-                                    to_wound_rolls += wound_rerolls
+                                let wound_roll = d6()
+                                // re, /, *, -, +, 0. XXX: - and + no more than 1? https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
+                                // reroll
+                                if (wound_rerolls > 0 && wound_roll < threshold) {
+                                    log(`Rerolling wound ${wound_roll} < ${treshold}`)
+                                    wound_roll = d6()
                                     --wound_rerolls
                                 }
-                                let wound_roll
-                                for (let wi = 1; wi <= to_wound_rolls; ++wi) {
-                                    wound_roll = d6()
-                                    for (let kw of weapon_keywords) {
-                                        if (kw.indexOf("ANTI-") > -1) {
-                                            let anti_what = /ANTI-(\w+)/.exec(kw)[1].toUpperCase()
-                                            let anti_how = parseInt(/\d+/.exec(kw))
-                                            if (target_keywords.includes(anti_what) && wound_roll >= anti_how) {
-                                                log(`ANTI-${anti_what} crits ${anti_how}+. Wound roll ${wound_roll} -> 6.`)
-                                                wound_roll = 6  // ANTI- grants crits.
-                                            }
+                                
+                                for (let kw of weapon_keywords) {
+                                    if (kw.indexOf("ANTI-") > -1) {
+                                        let anti_what = /ANTI-(\w+)/.exec(kw)[1].toUpperCase()
+                                        let anti_how = parseInt(/\d+/.exec(kw))
+                                        if (target_keywords.includes(anti_what) && wound_roll >= anti_how) {
+                                            log(`ANTI-${anti_what} crits ${anti_how}+. Wound roll ${wound_roll} -> 6.`)
+                                            wound_roll = 6  // ANTI- grants crits.
                                         }
                                     }
-                                    // TODO: Wound roll bonus of -1 or +1. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
-                                    if (wound_roll >= threshold) break
-                                    if (wi < to_wound_rolls) log(`Rerolling ${wi}/${to_wound_rolls} to wound. ${wound_roll} < ${threshold}`)
                                 }
 
                                 if (wound_roll < threshold) {
@@ -1185,20 +1188,17 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                             // Damage
                             // Re-roll -> division -> multiplication -> subtraction -> addition -> negation per damage.
                             let D = geti(`damage${i}`)
-                            // re-roll
-                            // Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
-                            let new_D = geti(`damage${i}`)  // TODO: calc average instead.
-                            if (TOTAL_OBLITERATION && D < new_D) {
-                                log(`Damage roll: ${D}`)
-                                D = new_D
-                                log(`Total Obliteration re-roll: ${D}`)
-                            }
-                            while (damage_rerolls > 0) {
-                                --damage_rerolls
-                                new_D = geti(`damage${i}`)
-                                if (D < new_D) {
-                                    D = new_D
-                                    log(`Damage re-roll: ${D}`)
+                            if (gets(`damage${i}`).includes("D")) {
+                                let total = 0
+                                for (let j = 0; j < 100; ++j) total += geti(`damage${i}`)
+                                let average = total / 100
+                                // re-roll don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
+                                if (damage_rerolls > 0) {
+                                    log(`Damage roll: ${D}`)
+                                    if (D >= average) break
+                                    --damage_rerolls
+                                    D = geti(`damage${i}`)
+                                    log(`Damage reroll: ${D}`)
                                 }
                             }
                             // division
@@ -1253,12 +1253,6 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                     html += `<tr><td>${k}<td>${weapon_spreads[weapon][k]}</td><td>${(weapon_spreads[weapon][k] / times * 100).toFixed(2)}%</td></tr>`
                 }
             }
-            //Object.entries(weapon_spreads).forEach(d => speadhtml += `<tr><td>${d[0]}</td><td>${d[1]}</td></tr>`)
-            //let damages = Object.keys(spread).map(k => [k, spread[k]])
-            //let damages = Object.entries(spread).sort((a, b) => b - a)
-            //damages.sort((a, b) => b - a)
-            //damages.forEach(d => html += `<tr><td>${d[0]}</td><td>${d[1]}</td></tr>`)
-            //}
             result.innerHTML = html + "</table>"
         }
 
@@ -1451,14 +1445,17 @@ Melee
             what = what.toLowerCase()
             document.querySelectorAll(`#${which}>option`).forEach(o => o.hidden = !(o.innerText.toLowerCase().includes(what) || squads[o.innerText].keywords.join(",").toLowerCase().includes(what) || squads[o.innerText].abilities.join(",").toLowerCase().includes(what)))
         }
+        function search(name) {
+            window.open('https://www.google.com/search?q="'+encodeURIComponent(name)+'"+Warhammer+40,000+10th+Edition+miniature&udm=2')
+        }
     </script>
 </head>
 
 <body onload="import_sheets(); add_squads()">
     <h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
     <div>
-        Source <label>filter <input style="width:5em" onchange="filter('source', this.value)"></label> squad <select
-            id="source" onchange="set_source_squad(this.value)"></select>
+        Source <label>filter <input style="width:5em" onchange="filter('source', this.value)"></label> Squad <select
+            id="source" onchange="set_source_squad(this.value)"></select> <a href="javascript:search(source.value)">📷</a>
         <div id="models" style="display: none">Models: <span id="source_models"></span></div>
         <table>
             <tr>
@@ -1473,8 +1470,8 @@ Melee
         <div id="weapons"></div>
     </div><br>
     <div>
-        Target <label>filter <input style="width:5em" onchange="filter('target', this.value)"></label> squad <select
-            id="target" onchange="set_target_squad(this.value)"></select>
+        Target <label>filter <input style="width:5em" onchange="filter('target', this.value)"></label> Squad <select
+            id="target" onchange="set_target_squad(this.value)"></select> <a href="javascript:search(target.value)">📷</a>
         <label>Size <input id="target_size" type="number"></label>
         Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select><br><br>
         <table>
