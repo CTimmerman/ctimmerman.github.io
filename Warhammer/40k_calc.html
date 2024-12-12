@@ -34,6 +34,7 @@
     <script>
         let squads = {}
         let sheets = [
+            "=== Imperium ===",
             "- Adeptus Astartes -",
             `Apothecary
 Unit	M	T	SV	W	LD	OC
@@ -395,6 +396,39 @@ Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Ultramarines Im
             //"- White Scars -",
             // https://www.adeptusars.com/guides/factions Imperium of Man Faction – Includes 5 Armies:
             "- Adeptus Custodes -",
+            `Allarus Custodians 
+Models
+ 1x Allarus Custodian (Castellan Axe): Balistus grenade launcher, Castellan Axe
+ 1x Allarus Custodian (Guardian Spear): Balistus grenade launcher, Guardian Spear
+ 1x Allarus Custodian (Vexilla & Misericordia): Balistus grenade launcher, Misericordia
+Unit	M	T	SV	W	LD	OC
+Allarus Custodian	5"	7	2+	4	6+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Balistus grenade launcher (x3)	18"	D6	2+	4	-1	1	Blast
+Castellan axe bolter	24"	2	2+	4	-1	2	Assault
+Guardian Spear bolter	24"	2	2+	4	-1	2	Assault
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Castellan axe	Melee	4	2+	9	-1	3	-
+Guardian Spear	Melee	5	2+	7	-2	2	-
+Misericordia	Melee	5	2+	5	-2	1	-
+Abilities
+Slayers of Tyrants: Each time a model in this unit makes an attack that targets a CHARACTER, MONSTER or VEHICLE unit, you can re-roll the Wound roll.
+From Golden Light: Once per battle, at the end of your opponent's turn, if this unit is not whithin Engagement Range of one or more enemy units, you can remove it from the battlefield. In the Reinforcements step of your next Movement phase, set it up anywhere on the battlefield that is more than 9" horizontally away from all enemy models.
+Invulnerable Save: 4+
+Vexilla: Add 1 to the Objective Control characteristic of models in the bearer's unit.
+Rules
+Deep Strike: During the Declare Battle Formations step, if every model in a unit has this ability, you can set it up in Reserves instead of setting it up on the battlefield. If you do, in the Reinforcements step of one of your Movement phases you can set up this unit anywhere on the battlefield that is more than 9" horizontally away from all enemy models.
+If a unit with the Deep Strike ability arrives from Strategic Reserves, the controlling player can choose for that unit to be set up either using the rules for Strategic Reserves or using the Deep Strike ability.
+
+Martial Ka'tah: Each time a unit with this ability is selected to fight, select one of the Ka'tah stances below. Until that unit has finished making its attacks, the selected Stance is active for it and it gains the relevant ability.
+■ DACATARAI STANCE
+Melee weapons equipped by models in this unit have the [SUSTAINED HITS 1] ability.
+■ RENDAX STANCE
+Melee weapons equipped by models in this unit have the [LETHAL HITS] ability.
+
+Blast: Weapons with [BLAST] in their profile are known as Blast weapons, and they make a random number of attacks. Each time you determine how many attacks are made with a Blast weapon, add 1 to the result for every five models that were in the target unit when you selected it as the target (rounding down). Blast weapons can never be used to make attacks against a unit that is within Engagement Range of one or more units from the attacking model’s army (including its own unit).
+Assault: Weapons with [ASSAULT] in their profile are known as Assault weapons. If a unit that Advanced this turn contains any models equipped with Assault weapons, it is still eligible to shoot in this turn’s Shooting phase. When such a unit is selected to shoot, you can only resolve attacks using Assault weapons its models are equipped with.
+Keywords: Allarus Custodians Faction: Adeptus Custodes Imperium Infantry Terminator`,
             `Custodian Guard 
 Models
  2x Custodian Guard (Guardian Spear): Guardian Spear
@@ -451,7 +485,7 @@ Keywords: Faction: Astra Militarum Imperium Regiment Scout Sentinels Smoke Squad
             "- Imperial Knights -",
             "- Agents of the Imperium -",
             // Chaos Forces Faction – Includes 6 Armies:
-            "- Chaos -",
+            "=== Chaos ===",
             `Be'lakor
 Unit	M	T	SV	W	LD	OC
 Be'lakor	12"	10	4+	18	6+	5
@@ -558,7 +592,6 @@ The Shadow of Chaos: If your Army Faction is LEGIONES DAEMONICA, certain areas o
 DAEMONIC MANIFESTATION
 While a LEGIONES DAEMONICA unit from your army is within your army’s Shadow of Chaos, each time that unit takes a Battle-shock test, add 1 to that test and, if that test is passed, one model in that unit regains up to D3 lost wounds (if that unit is a BATTLELINE unit and that test is passed, up to D3 destroyed models can be returned to that unit instead).
 
-
 DAEMONIC TERROR
 While an enemy unit is within your army’s Shadow of Chaos and/or it is within 6" of one or more BLOODTHIRSTER, GREAT UNCLEAN ONE, KAIROS FATEWEAVER, KEEPER OF SECRETS, LORD OF CHANGE, ROTIGUS, SHALAXI HELBANE or SKARBRAND units from your army, each time that unit takes a Battle-shock test, subtract 1 from that test and, if that test is failed, that enemy unit suffers D3 mortal wounds.
 
@@ -570,7 +603,157 @@ Keywords: Battleline Chaos Daemon Faction: Legiones Daemonica Nurgle Nurglings S
             "- Dark Mechanicum -",
             "- The Lost and The Damned -",  // Misc chaos fans.
             "- Deathwatch -",
-            // Xenos
+
+            "=== Xenos ===",
+            "- Aeldari -",
+            `Avatar of Khaine
+Unit	M	T	SV	W	LD	OC
+Avatar of Khaine	10"	12	2+	14	6+	5
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+The Wailing Doom	12"	1	2+	16	-4	D6+2	Sustained Hits D3
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ The Wailing Doom - Strike	Melee	6	2+	14	-4	D6+2	-
+➤ The Wailing Doom - Sweep (x0)	Melee	12	2+	7	-2	2	-
+Abilities
+Molten Form: Each time an attack is allocated to this model, halve the Damage characteristic of that attack
+The Bloody Handed (Aura): While a friendly Aeldari unit is within 6" of this model, add 1 to Advance and Charge rolls made for that unit.
+Damaged: 1-5 Wounds Remaining: While this model has 1-5 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
+Invulnerable Save: 4+
+Rules
+Deadly Demise D3: Some models have 'Deadly Demise x' listed in their abilities. When such a model is destroyed, roll one D6 before removing it from play (if such a model is a TRANSPORT, roll before any embarked models disembark). On a 6, each unit within 6" of that model suffers a number of mortal wounds denoted by 'x' (if this is a random number, roll separately for each unit within 6").
+Strands of Fate: If your Army Faction is AELDARI, at the start of the battle, make a Strands of Fate roll by rolling six D6.
+If you wish, you can then re-roll all of these dice, but if you do, roll one less D6. You can continue re-rolling all of the dice in this manner, rolling one less D6 each time you do, until you are satisfied with the results rolled (or until you only have a single D6 remaining).
+
+When you are satisfied with the results rolled, those remaining dice become your Fate dice for the battle. These results cannot be changed or re-rolled further, unless a rule specifically states otherwise. Keep your Fate dice to one side – this is your Fate dice pool.
+
+Once per phase, before making a dice roll for a model or unit from your army with the Strands of Fate ability, if you have one or more dice in your Fate dice pool, you can use one of those Fate dice. To do so, select one of those Fate dice to substitute that dice roll. The dice that is being substituted is not rolled; instead, the value of the selected Fate dice is used as if it had been rolled (this counts as an unmodified dice roll of that value for all rules purposes). Each Fate dice can only be used in this way once. After using a Fate dice, remove it from your Fate dice pool and roll all remaining dice that are part of that dice roll (if any). You can use Fate dice for any of the following types of dice roll:
+■ Advance roll
+■ Battle-shock test
+■ Charge roll
+■ Damage roll
+■ Hit roll
+■ Saving throw
+■ Wound roll
+
+Sustained Hits: Weapons with [SUSTAINED HITS X] in their profile are known as Sustained Hits weapons. Each time an attack is made with such a weapon, if a Critical Hit is rolled, that attack scores a number of additional hits on the target as denoted by ‘x’
+Keywords: Avatar of Khaine Character Daemon Epic Hero Faction: Aeldari Monster Warlord`,
+            `Death Jester 
+Unit	M	T	SV	W	LD	OC
+Death Jester	8"	3	6+	4	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Shrieker Cannon	24"	3	2+	6	-1	2	Devastating Wounds
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Jester's Blade	Melee	4	2+	4	0	1	-
+Abilities
+Death is Not Enough: In your Shooting phase, after this model has shot, if one or more of those attacks destroyed an enemy model, that enemy model’s unit must take a Battle-shock test
+Cruel Amusement: In your Shooting phase, one model from your army with this ability can use it. If they do, until the end of the phase, select one of the following abilities to apply to that model’s Shrieker Cannon:
+■ [IGNORES COVER]
+■ [PRECISION]
+■ [SUSTAINED HITS 3]
+Invulnerable Save: 4+
+Rules Lone OperativeStrands of FateDevastating Wounds
+Keywords: Character Death Jester Faction: Aeldari Harlequins Infantry`,
+            `Night Spinner 
+Unit	M	T	SV	W	LD	OC
+Night Spinner	14"	9	3+	12	6+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Doomweaver	48"	D6+3	3+	7	0	2	Blast, Devastating Wounds, Indirect Fire, Twin Linked
+Shuriken Cannon (x0)	24"	3	3+	6	-1	2	Sustained Hits 1
+Twin Shuriken Catapult	18"	2	3+	4	-1	1	Assault, Twin Linked
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Wraithbone Hull	Melee	3	4+	6	0	1	-
+Abilities
+Damaged: 1-4 Wounds Remaining: While this model has 1-4 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
+Monofilament Web: In your Shooting phase, after this model has shot, if one or more of those attacks made with its Doomweaver scored a hit against an enemy unit, that enemy unit is pinned until the end of your opponent’s next turn. While a unit is pinned, subtract 2" from it's Move characteristic and subtract 2 from Advance and Charge rolls made for it.
+Rules Deadly Demise D3Strands of FateIndirect FireDevastating WoundsBlastTwin-linkedAssault
+Keywords: Faction: Aeldari Fly Night Spinner Vehicle`,
+            `Shadow Spectres
+Models
+ 5x Shadow Spectre: Close combat weapon, Prism Rifle
+Unit	M	T	SV	W	LD	OC
+Shadow Spectre (x5)	12"	3	3+	1	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Prism Rifle - dispersed (x0)	18"	D6	3+	4	-1	1	Blast
+➤ Prism Rifle - focused (x5)	24"	1	3+	6	-2	3	-
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x5)	Melee	2	3+	3	0	1	-
+Abilities Invulnerable Save 5Shade of Twilight
+Rules Deep StrikeStealthStrands of FateBlast
+Keywords: Faction: Aeldari Fly Infantry Shadow Spectres`,
+            `Spiritseer 
+Unit	M	T	SV	W	LD	OC
+Spiritseer	7"	3	6+	3	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Shuriken Pistol	12"	1	2+	4	-1	1	Assault, Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Witch Staff	Melee	2	2+	3	0	D3	Anti-infantry 2+, Psychic
+Abilities
+Invulnerable Save: 4+
+Leader: This model can be attached to the following units:
+■ Wraithblades
+■ Wraithguard
+■ Wraithlord
+Spirit Mark: While this model is leading a unit, weapons in that unit have the [LETHAL HITS] ability and each time a model in that unit makes an attack, add 1 to the Hit roll.
+Tears of Isha (Psychic): While this model is leading a unit, in your Command phase, you can return 1 destroyed Bodyguard model to that unit.
+Rules Strands of FateLeaderPistolAssaultAnti-Psychic
+Keywords: Character Faction: Aeldari Infantry Psyker Spiritseer`,
+            `The Yncarne 
+Unit	M	T	SV	W	LD	OC
+The Yncarne	10"	10	2+	12	6+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Swirling soul energy	12"	D6+3	N/A	7	-1	D3	Ignores Cover, Psychic, Torrent
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Vilith-zhar, the Sword of Souls - Strike	Melee	5	2+	12	-4	D6+1	-
+➤ Vilith-zhar, the Sword of Souls - Sweep (x0)	Melee	10	2+	6	-4	1	-
+Abilities
+Invulnerable Save: 4+
+Inevitable Death: Once in each of your turns, if this model is on the battlefield, when another unit is destroyed, just after removing the last model in that unit, you can remove this model from the battlefield and set it up again as close as possible to where that destroyed model was and not within Engagement Range of any enemy models.
+Deathly Form: Each time an attack is allocated to this model, halve the Damage characteristic of that attack.
+Rules Deadly Demise D3Strands of FateIgnores CoverPsychicTorrent
+Keywords: Character Daemon Epic Hero Faction: Aeldari Fly Monster Psyker The Yncarne Warlord Ynnari`,
+            `Warp Spiders 
+Models
+4x Warp Spider: Close combat weapon, Deathspinner
+1x Warp Spider Exarch: Close combat weapon, 2x Deathspinner, Powerblades
+Unit	M	T	SV	W	LD	OC
+Warp Spider (x4)	12"	3	3+	1	6+	1
+Warp Spider Exarch	12"	3	3+	2	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Deathspinner (x6)	12"	D6	N/A	4	0	1	Devastating Wounds, Torrent
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x5)	Melee	2	3+	3	0	1	-
+Powerblades	Melee	3	3+	4	-2	1	-
+Abilities FlickerjumpInvulnerable Save 5
+Rules Strands of FateDeep StrikeDevastating WoundsTorrent
+Keywords: Faction: Aeldari Fly Infantry Jump Pack Warp Spiders`,
+            `Wraithblades
+Models
+5x Wraithblade: Ghostaxe and Forceshield
+Unit	M	T	SV	W	LD	OC
+Wraithblade (x5)	6"	7	2+	3	6+	1
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Ghostaxe (x5)	Melee	3	4+	7	-2	2	-
+Ghostswords (x0)	Melee	5	4+	6	-2	1	-
+Abilities
+Malevolent Souls: Each time a model in this unit is destroyed by a melee attack, if that model has not fought this phase, roll one D6. On a 4+, do not remove it from play; that destroyed model can fight after the attacking model’s unit has finished making its attacks, and is then removed from play.
+Forceshield: The bearer has a 4+ Invulnerable Save.
+Invulnerable Save: 4+
+Rules Strands of Fate
+Keywords: Faction: Aeldari Infantry Wraith Construct Wraithblades`,
+            `Wraithguard 
+Models
+5x Wraithguard: Close Combat Weapon, Wraithcannon
+Unit	M	T	SV	W	LD	OC
+Wraithguard	6"	7	2+	3	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+D-Scythe (x0)	12"	D6	4+	10	-4	1	-
+Wraithcannon (x5)	18"	1	4+	14	-4	D6	Devastating Wounds
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x5)	Melee	3	4+	5	0	1	-
+Abilities War Construct
+Rules Strands of FateDevastating Wounds
+Keywords: Faction: Aeldari Infantry Wraith Construct Wraithguard`,
+
             "- Necrons -",
             `C'tan Shard of the Deceiver 
 Unit	M	T	SV	W	LD	OC
@@ -641,7 +824,7 @@ Skorpekh hyperphase weapons (x3)	Melee	4	3+	7	-2	2	-
 Abilities Whirling Onslaught
 Rules Annihilation ProtocolReanimation Protocols
 Keywords: Destroyer Cult Faction: Necrons Infantry Skorpekh Destroyers`,
-            "- Aeldari -",
+
             "- Orks -",
             `Boyz 
 Models
@@ -1030,6 +1213,9 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                         wound_rerolls += 1
                         damage_rerolls += 1
                     }
+                    // Slayers of Tyrants: Each time a model in this unit makes an attack that targets a CHARACTER, MONSTER or VEHICLE unit, you can re-roll the Wound roll.
+                    if (target_keywords.includes("CHARACTER") || target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE")) wound_rerolls += 1
+
                     if (TOTAL_OBLITERATION) {
                         hit_rerolls += A
                         wound_rerolls += A
@@ -1037,7 +1223,7 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                     }
                     // https://www.wargamer.com/warhammer-40k/abilities#twin-linked
                     if (weapon_keywords.includes("TWIN-LINKED")) wound_rerolls += A
-                    
+
                     // Rerolls don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
                     if (hit_rerolls > A) hit_rerolls = A
                     if (wound_rerolls > A) wound_rerolls = A
@@ -1126,11 +1312,11 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                                 // re, /, *, -, +, 0. XXX: - and + no more than 1? https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
                                 // reroll
                                 if (wound_rerolls > 0 && wound_roll < threshold) {
-                                    log(`Rerolling wound ${wound_roll} < ${treshold}`)
+                                    log(`Rerolling wound ${wound_roll} < ${threshold}`)
                                     wound_roll = d6()
                                     --wound_rerolls
                                 }
-                                
+
                                 for (let kw of weapon_keywords) {
                                     if (kw.indexOf("ANTI-") > -1) {
                                         let anti_what = /ANTI-(\w+)/.exec(kw)[1].toUpperCase()
@@ -1202,8 +1388,8 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                                 }
                             }
                             // division
-                            if (target_abilities.includes("NECRODERMIS")) {
-                                log(`Necrodermis halves initial ${D} damage (rounded up).`)
+                            for (let kw of ["DEATHLY FORM", "MOLTEN FORM", "NECRODERMIS", "REFUSE TO YIELD"]) if (target_abilities.includes(kw)) {
+                                log(`${kw} halves initial ${D} damage (rounded up).`)
                                 D = Math.ceil(D / 2)
                             }
                             // subtraction
@@ -1226,7 +1412,6 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                                 if (d6() >= geti("fnp_save")) {
                                     log("Saved 1 mortal wound by Feel No Pain (+++).")
                                     D -= 1  // This is a negate; not a modifier which can't normally go below 1 according to "Rules Commentary": https://www.reddit.com/r/Warhammer40k/comments/1eibdkb/comment/lg5nmn5/
-                                    // TODO: Abilities like Refuse To Yield that half damage (rounded up as stated above and not in the fricking ability).
                                 }
                             }
                             log(`Target squad takes ${D} damage!`)
@@ -1425,7 +1610,7 @@ Melee
                         squad.size += count
                         squad.models[model_name] = { "count": count }
                     }
-                } else if (mode === "Abilities") {
+                } else if (["Abilities", "Keywords", "Rules"].includes(mode)) {
                     const mo = /^([^:]+): (.*)/.exec(line)
                     if (mo) {
                         ability = mo[1]
@@ -1446,7 +1631,7 @@ Melee
             document.querySelectorAll(`#${which}>option`).forEach(o => o.hidden = !(o.innerText.toLowerCase().includes(what) || squads[o.innerText].keywords.join(",").toLowerCase().includes(what) || squads[o.innerText].abilities.join(",").toLowerCase().includes(what)))
         }
         function search(name) {
-            window.open('https://www.google.com/search?q="'+encodeURIComponent(name)+'"+Warhammer+40,000+10th+Edition+miniature&udm=2')
+            window.open('https://www.google.com/search?q="' + encodeURIComponent(name) + '"+Warhammer+40,000+10th+Edition+miniature&udm=2')
         }
     </script>
 </head>
@@ -1454,8 +1639,9 @@ Melee
 <body onload="import_sheets(); add_squads()">
     <h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
     <div>
-        Source <label>filter <input style="width:5em" onchange="filter('source', this.value)"></label> Squad <select
-            id="source" onchange="set_source_squad(this.value)"></select> <a href="javascript:search(source.value)">📷</a>
+        Source: <label>Filter <input style="width:5em" onchange="filter('source', this.value)"></label> Squad <select
+            id="source" onchange="set_source_squad(this.value)"></select> <a
+            href="javascript:search(source.value)">📷</a>
         <div id="models" style="display: none">Models: <span id="source_models"></span></div>
         <table>
             <tr>
@@ -1470,8 +1656,9 @@ Melee
         <div id="weapons"></div>
     </div><br>
     <div>
-        Target <label>filter <input style="width:5em" onchange="filter('target', this.value)"></label> Squad <select
-            id="target" onchange="set_target_squad(this.value)"></select> <a href="javascript:search(target.value)">📷</a>
+        Target: <label>Filter <input style="width:5em" onchange="filter('target', this.value)"></label> Squad <select
+            id="target" onchange="set_target_squad(this.value)"></select> <a
+            href="javascript:search(target.value)">📷</a>
         <label>Size <input id="target_size" type="number"></label>
         Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select><br><br>
         <table>
@@ -1493,13 +1680,13 @@ Melee
         <label title="Wounds">W <input id="wounds" type="number"></label>
         <label title="Leadership">LD <input id="leadership" type="number"></label>
         <label title="Invulnerable Save">SV++ <input id="invuln_save" type="text"></label>
-        <label title="Feel No Pain Save">FNP+++ <input id="fnp_save" type="text"></label>
+        <label title="Feel No Pain damage negation (Not a save!)">FNP+++ <input id="fnp_save" type="text"></label>
     </div>
     <br>
     <div>
         <label>Distance <input id="distance" type="number" value="2" min="0" step="0.5">" </label>
         <label>Cover <input id="cover" type="checkbox"></label>
-        <label>Prefer Pistols <input id="prefer_pistols" type="checkbox"> </label>
+        <label>Prefer pistols <input id="prefer_pistols" type="checkbox"> </label>
         <label>Rounds <input id="rounds" type="number" value="1" min="1"></label>
         <input type="button" value="Calculate" onclick="calculate(distance.value)">
     </div>
