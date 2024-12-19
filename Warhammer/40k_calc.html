@@ -35,11 +35,30 @@
         let squads = {}
         let sheets = [
             "=== Imperium ===",
+            "- Adepta Sororitas -",
+            `Aestred Thurga and Agathae Dolan 
+Models
+ 1x Aestred Thurga: Blade of Vigil, Bolt pistol
+ 1x Agathae Dolan: Scribe's staff
+Unit	M	T	SV	W	LD	OC
+Aestred Thurga	6"	3	2+	4	6+	1
+Agathae Dolan	6"	3	6+	3	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Bolt pistol (x2)	12"	1	3+	4	0	1	Pistol, Devastating Wounds
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Blade of Vigil	Melee	4	2+	5	-2	2	Devastating Wounds
+Scribe's staff	Melee	3	4+	4	0	1	Devastating Wounds
+Abilities
+Invulnerable Save: 4
+Auto-Tapestry of the Emperor's Judgement: While this unit is leading a unit and contains an Aestred Thurga model, weapons equipped by models in that unit have the [DEVASTATING WOUNDS] ability
+Recount the Deeds of the Saints: While this unit is leading a unit and contains and Agathae Dolan model, each time that unit destroys an enemy unit, you gain 1 Miracle dice. When that Agathae Dolan model is destroyed, you gain D3 Miracle dice.
+Rules Acts of FaithLeaderPistol
+Keywords: Aestred Thurga and Agathae Dolan Character Epic Hero Faction: Adepta Sororitas Grenades Imperium Infantry Warlord`,
             "- Adeptus Astartes -",
             `Apothecary
-Unit	M	T	SV	W	LD	OC
-Primaris Apothecary	6"	4	3+	4	6+	1
-Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+            Unit	M	T	SV	W	LD	OC
+            Primaris Apothecary	6"	4	3+	4	6+	1
+            Ranged Weapons	Range	A	BS	S	AP	D	Keywords
 Absolvor Bolt Pistol	18"	1	3+	5	-1	2	Pistol
 Reductor Pistol	3"	1	3+	4	-4	2	Pistol
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
@@ -116,6 +135,24 @@ Ferocious Assault: Each time this model makes an attack with its Twin Las-talon 
 Damaged: 1-4 Wounds Remaining: While this model has 1-4 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
 Rules Deadly Demise D3Oath of MomentAnti-Rapid FireMeltaTwin-linked
 Keywords: Faction: Adeptus Astartes Gladiator Valiant Imperium Smoke Vehicle`,
+            `Hellblaster Squad 
+Models
+4x Hellblaster: Bolt Pistol, Close Combat Weapon, Plasma Incinerator
+1x Hellblaster Sergeant: Close Combat Weapon, Plasma Incinerator, Plasma Pistol
+Unit	M	T	SV	W	LD	OC
+Hellblaster Squad	6"	4	3+	2	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Bolt Pistol (x4)	12"	1	3+	4	0	1	Pistol
+➤ Plasma Incinerator - Standard (x0)	24"	2	3+	7	-2	1	Assault, Heavy
+➤ Plasma Incinerator - Supercharge (x5)	24"	2	3+	8	-3	2	Assault, Heavy, Hazardous
+➤ Plasma Pistol - Supercharge (x0)	12"	1	3+	8	-3	2	Hazardous, Pistol
+➤ Plasma Pistol - Standard	12"	1	3+	7	-2	1	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x5)	Melee	3	3+	4	0	1	-
+Abilities
+For the Chapter!: Each time a model in this unit is destroyed, roll one D6: on a 3+, do not remove it from play. The destroyed model can shoot after the attacking model’s unit has finished making its attacks, and is then removed from play. When resolving these attacks, any Hazardous tests taken for that attack are automatically passed.
+Rules Oath of MomentPistolHazardousHeavyAssault
+Keywords: Faction: Adeptus Astartes Grenades Hellblaster Squad Imperium Infantry Tacticus`,
             `Infernus Squad
 Models
  5x Infernus Marines: Bolt Pistol, Close Combat Weapon, Pyreblaster
@@ -146,24 +183,6 @@ Armoured Tracks	Melee	3	4+	6	0	1	-
 Abilities TransportAssault VehicleShield Dome
 Rules Deadly Demise D3Firing Deck 6Oath of MomentRapid Fire
 Keywords: Dedicated Transport Faction: Adeptus Astartes Imperium Impulsor Transport Vehicle`,
-            `Hellblaster Squad 
-Models
- 4x Hellblaster: Bolt Pistol, Close Combat Weapon, Plasma Incinerator
- 1x Hellblaster Sergeant: Close Combat Weapon, Plasma Incinerator, Plasma Pistol
-Unit	M	T	SV	W	LD	OC
-Hellblaster Squad	6"	4	3+	2	6+	1
-Ranged Weapons	Range	A	BS	S	AP	D	Keywords
-Bolt Pistol (x4)	12"	1	3+	4	0	1	Pistol
-➤ Plasma Incinerator - Standard (x0)	24"	2	3+	7	-2	1	Assault, Heavy
-➤ Plasma Incinerator - Supercharge (x5)	24"	2	3+	8	-3	2	Assault, Heavy, Hazardous
-➤ Plasma Pistol - Supercharge (x0)	12"	1	3+	8	-3	2	Hazardous, Pistol
-➤ Plasma Pistol - Standard	12"	1	3+	7	-2	1	Pistol
-Melee Weapons	Range	A	WS	S	AP	D	Keywords
-Close Combat Weapon (x5)	Melee	3	3+	4	0	1	-
-Abilities
-For the Chapter!: Each time a model in this unit is destroyed, roll one D6: on a 3+, do not remove it from play. The destroyed model can shoot after the attacking model’s unit has finished making its attacks, and is then removed from play. When resolving these attacks, any Hazardous tests taken for that attack are automatically passed.
-Rules Oath of MomentPistolHazardousHeavyAssault
-Keywords: Faction: Adeptus Astartes Grenades Hellblaster Squad Imperium Infantry Tacticus`,
             `Land Raider 
 Unit	M	T	SV	W	LD	OC
 Land Raider	10"	12	2+	16	6+	5
@@ -290,9 +309,9 @@ Abilities Teleport HomerFury of the FirstInvulnerable Save 4
 Rules Deep StrikeOath of MomentRapid FireAnti-Devastating WoundsIgnores CoverTorrent
 Keywords: Faction: Adeptus Astartes Imperium Infantry Terminator Terminator Squad`,
             // Space Marines Faction – Includes 12 Armies, based on various Adeptus Astartes Chapters:
-            //"- Black Templars -",
-            //"- Blood Angels -",
-            "- Dark Angels -",
+            //"Black Templars:",
+            //"Blood Angels:",
+            "Dark Angels:",
             `Deathwing Knights 
 Models
  4x Deathwing Knight
@@ -378,7 +397,7 @@ Abilities Primarch of the First LegionThe Emperor's ShieldDark Angels BodyguardI
 Primarch of the First Legion All Secrets RevealedMartial Exemplar [Aura]No Hiding From the Watchers [Aura]
 Rules Deep StrikeFights FirstOath of MomentPistolLethal HitsSustained Hits
 Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Dark Angels Imperium Lion El'Jonson Monster Primarch Warlord`,
-            "- Deathwatch -",
+            "Deathwatch:",
             `Corvus Blackstar
 Unit	M	T	SV	W	LD	OC
 Corvus Blackstar	20+"	10	3+	14	6+	0
@@ -399,7 +418,7 @@ Keywords: Aircraft Allied Units Corvus Blackstar Deathwatch Faction: Agents of t
             //"- Raven Guard -",
             //"- Salamanders -",
             //"- Space Wolves -",
-            "- Ultramarines -",
+            "Ultramarines:",
             `Roboute Guilliman 
 Unit	M	T	SV	W	LD	OC
 Roboute Guilliman	8"	9	2+	10	5+	4
@@ -467,7 +486,18 @@ Abilities Stand VigilSentinel StormInvulnerable Save 4Praesidium ShieldVexilla
 Rules Deep StrikeMartial Ka'tahAssaultPistol
 Keywords: Battleline Custodian Guard Faction: Adeptus Custodes Imperium Infantry`,
             "- Adeptus Mechanicus -",
-            "- Adepta Sororitas -",
+            `Belisarius Cawl 
+Unit	M	T	SV	W	LD	OC
+Belisarius Cawl	8"	8	2+	10	6+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Solar atomiser	18"	D3	2+	14	-4	3	Blast, Melta D3
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Arc Scourge	Melee	4	2+	5	-1	1	Anti-Vehicle 4+, Devastating Wounds, Extra Attacks
+Cawl's Omnissian axe	Melee	4	2+	8	-2	2	-
+Mechadendrite hive	Melee	2D6	3+	4	0	1	Extra Attacks
+Abilities Canticles of the OmnissiahMechanicus BodyguardSelf-repair MechanismsInvulnerable Save 4
+Rules Doctrina ImperativesAnti-Devastating WoundsExtra AttacksBlastMelta
+Keywords: Belisarius Cawl Character Cult Mechanicus Epic Hero Faction: Adeptus Mechanicus Imperium Monster Tech-Priest Warlord`,
             "- Astra Militarum -",
             `Ratling Snipers 
 Models
@@ -501,6 +531,64 @@ Abilities Daring Recon
 Rules Deadly Demise 1Scouts 9"One Shot
 Keywords: Faction: Astra Militarum Imperium Regiment Scout Sentinels Smoke Squadron Vehicle Walker`,
             "- Imperial Knights -",
+            `Canis Rex 
+Models
+ 1x Canis Rex: Chainbreaker las-impulsor, Chainbreaker multi-laser, Freedom's Hand
+ 1x Sir Hekhtur: Close combat weapon, Hekhtur's pistol
+Unit	M	T	SV	W	LD	OC
+Canis Rex	10"	12	3+	22	5+	10
+Sir Hekhtur	6"	3	4+	3	5+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Chainbreaker las-impulsor - high intensity	24"	D6	2+	14	-3	4	Blast, Sustained Hits 1
+➤ Chainbreaker las-impulsor - low intensity (x0)	36"	2D6	2+	7	-1	2	Blast, Sustained Hits 1
+Chainbreaker multi-laser	36"	4	2+	6	0	1	Sustained Hits 1
+Hekhtur's pistol	12"	1	2+	5	-1	2	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Freedom's Hand - strike	Melee	5	2+	20	-3	9	Sustained Hits 1
+➤ Freedom's Hand - sweep (x0)	Melee	10	2+	10	-2	3	Sustained Hits 1
+Close combat weapon	Melee	2	2+	3	0	1	-
+Abilities
+Chainbreaker: Each time this model makes an attack, an unmodified successful Hit roll of 5+ scores a Critical Hit.
+Legendary Freeblade: Once per turn, one unit from your army with this ability can use it when its unit is targeted with a Stratagem. If it does, reduce the CP cost of that use of that Stratagem by 1CP.
+Invulnerable Save: This model has a 5+ Invulnerable Save against ranged attacks.
+Damaged: 1-7 Wounds Remaining: While this model has 1-7 wounds remaining, subtract 5 from this models Objective Control characteristic and each time this model makes an attack, subtract 1 from the Hit roll.
+Using Sir Hekhtur: When your Canis Rex model is destroyed, Sir Hekhtur is treated as a model disembarking from a destroyed TRANSPORT – set him up within 3" of your Canis Rex model before it is removed. Sir Hekhtur then uses the profile, wargear, abilities and keywords shown on this side of the card, but cannot be selected as the target of any of your Stratagems other than Core Stratagems. Your Canis Rex unit is not considered to be destroyed until Sir Hekhtur is also destroyed.
+Rules Deadly Demise D6Sustained HitsSuper-Heavy WalkerBlastCode ChivalricLone Operative
+Keywords: Canis Rex Character Epic Hero Faction: Imperial Knights Imperium Infantry Questoris Sir Hekhtur Titanic Towering Vehicle Walker Warlord`,
+            `Cerastus Knight Acheron 
+Unit	M	T	SV	W	LD	OC
+Cerastus Knight Acheron	12"	12	3+	25	6+	10
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Acheron flame cannon	18"	2D6	N/A	8	-1	2	Torrent, Ignores Cover
+Twin heavy bolter	36"	3	3+	5	-1	2	Sustained Hits 1, Twin-linked
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Reaper chainfist - strike	Melee	4	3+	14	-4	6	-
+➤ Reaper chainfist - sweep (x0)	Melee	12	3+	9	-3	2	-
+Abilities
+Searing Flames: In your Shooting phase, after this model has shot, select one enemy unit hit by one or more of those attacks made with an Acheron flame cannon. Until the end of the phase, that enemy unit cannot have the Benefit of Cover.
+Cerastus Knight Acheron: This model has a 5+ Invulnerable Save against ranged attacks only.
+Damaged: 1-8 Wounds Remaining: While this model has 1-8 wounds remaining, subtract 5 from this models Objective Control characteristic and each time this model makes an attack, subtract 1 from the Hit roll.
+Acheron’s Duty (Bondsman): While a model is affected by this ability, at the start of the Fight phase, each enemy unit within Engagement Range of one or more units with this ability must take a Battle-shock test, subtracting 1 from the result when they do.
+Rules Code ChivalricDeadly Demise D6+2Super-Heavy WalkerBondsman AbilitiesIgnores CoverTorrentSustained HitsTwin-linked
+Keywords: Cerastus Character Faction: Imperial Knights Imperium Knight Acheron Titanic Towering Vehicle Walker`,
+            `Cerastus Knight Atrapos 
+Unit	M	T	SV	W	LD	OC
+Cerastus Knight Atrapos	12"	12	3+	25	6+	10
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Atrapos lascutter - high intensity (ranged)	24"	D6	3+	14	-3	4	Sustained Hits 1
+➤ Atrapos lascutter - low intensity (ranged) (x0)	36"	2D6	3+	7	-1	2	Sustained Hits 1
+➤ Graviton singularity cannon - singularity	24"	D3	3+	16	-4	D6+1	Blast, Devastating Wounds, Hazardous
+➤ Graviton singularity cannon - contained (x0)	24"	D3	3+	16	-4	D6+1	Blast
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Atrapos lascutter - high intensity (melee)	Melee	6	3+	14	-3	4	Sustained Hits 1
+➤ Atrapos lascutter - low intensity (melee) (x0)	Melee	12	3+	7	-1	2	Sustained Hits 1
+Abilities
+Macro-extinction Protocols: Each time this model makes an attack that targets a MONSTER or VEHICLE unit, add 1 to the Hit roll. If that target is TITANIC or TOWERING, add 1 to the Wound roll as well.
+Invulnerable Save: 5+
+Damaged: 1-8 Wounds Remaining: While this model has 1-8 wounds remaining, subtract 5 from this models Objective Control characteristic and each time this model makes an attack, subtract 1 from the Hit roll.
+Atrapos’ Duty (Bondsman): While a model is affected by this ability, each time that model makes an attack that targets a TITANIC or TOWERING model, you can re-roll the Hit roll and you can re-roll the Wound roll.
+Rules Code ChivalricDeadly Demise D6+2Super-Heavy WalkerBondsman AbilitiesSustained HitsBlastDevastating WoundsHazardous
+Keywords: Cerastus Character Faction: Imperial Knights Imperium Knight Atrapos Titanic Towering Vehicle Walker`,
             "- Agents of the Imperium -",
             // Chaos Forces Faction – Includes 6 Armies:
             "=== Chaos ===",
@@ -591,7 +679,7 @@ Rules Super-Heavy WalkerDeadly Demise D6+2MeltaTwin-linkedAnti-Devastating Wound
 Keywords: Allied Units Chaos Character Faction: Chaos Knights Knight Tyrant Titanic Towering Vehicle Walker`,
             `Nurglings 
 Models
- 3x Nurgling Swarm: Diseased claws and teeth
+3x Nurgling Swarm: Diseased claws and teeth
 Unit	M	T	SV	W	LD	OC
 Nurglings	5"	3	7+	4	8+	0
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
@@ -618,9 +706,8 @@ Infiltrators: During deployment, if every model in a unit has this ability, then
 Lethal Hits: Weapons with [LETHAL HITS] in their profile are known as Lethal Hits weapons. Each time an attack is made with such a weapon, a Critical Hit automatically wounds the target.
 Keywords: Battleline Chaos Daemon Faction: Legiones Daemonica Nurgle Nurglings Swarm`,
             //"- Death Guard -",  // Are these not Chaos Space Marines?
-            "- Dark Mechanicum -",
-            "- The Lost and The Damned -",  // Misc chaos fans.
-            "- Deathwatch -",
+            //"- Dark Mechanicum -",
+            //"- The Lost and The Damned -",  // Misc chaos fans.
 
             "=== Xenos ===",
             "- Aeldari -",
@@ -716,7 +803,7 @@ Tears of Isha (Psychic): While this model is leading a unit, in your Command pha
 Rules Strands of FateLeaderPistolAssaultAnti-Psychic
 Keywords: Character Faction: Aeldari Infantry Psyker Spiritseer`,
             `The Yncarne 
-Unit	M	T	SV	W	LD	OC
+            Unit	M	T	SV	W	LD	OC
 The Yncarne	10"	10	2+	12	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
 Swirling soul energy	12"	D6+3	N/A	7	-1	D3	Ignores Cover, Psychic, Torrent
@@ -730,9 +817,9 @@ Deathly Form: Each time an attack is allocated to this model, halve the Damage c
 Rules Deadly Demise D3Strands of FateIgnores CoverPsychicTorrent
 Keywords: Character Daemon Epic Hero Faction: Aeldari Fly Monster Psyker The Yncarne Warlord Ynnari`,
             `Warp Spiders 
-Models
-4x Warp Spider: Close combat weapon, Deathspinner
-1x Warp Spider Exarch: Close combat weapon, 2x Deathspinner, Powerblades
+            Models
+            4x Warp Spider: Close combat weapon, Deathspinner
+            1x Warp Spider Exarch: Close combat weapon, 2x Deathspinner, Powerblades
 Unit	M	T	SV	W	LD	OC
 Warp Spider (x4)	12"	3	3+	1	6+	1
 Warp Spider Exarch	12"	3	3+	2	6+	1
@@ -771,6 +858,18 @@ Close Combat Weapon (x5)	Melee	3	4+	5	0	1	-
 Abilities War Construct
 Rules Strands of FateDevastating Wounds
 Keywords: Faction: Aeldari Infantry Wraith Construct Wraithguard`,
+
+            "- Leagues of Votann -",
+            `Ûthar the Destined 
+Unit	M	T	SV	W	LD	OC
+Ûthar the Destined	5"	5	3+	5	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Volkanite disintegrator	18"	3	2+	5	0	1	Devastating Wounds
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Blade of the Ancestors	Melee	5	2+	6	-3	2	Devastating Wounds
+Abilities Ancestral FortuneThe DestinedLeaderInvulnerable SaveGrim EfficiencyRampart crest
+Rules LeaderEye of the AncestorsRuthless EfficiencyDevastating Wounds
+Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar the Destined`,
 
             "- Necrons -",
             `C'tan Shard of the Deceiver 
@@ -844,6 +943,19 @@ Rules Annihilation ProtocolReanimation Protocols
 Keywords: Destroyer Cult Faction: Necrons Infantry Skorpekh Destroyers`,
 
             "- Orks -",
+            `Big Mek 
+Unit	M	T	SV	W	LD	OC
+Big Mek	6"	5	3+	6	7+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Kustom mega-blasta (x0)	24"	3	5+	9	-2	D6	Hazardous
+Traktor blasta	36"	1	5+	10	-2	D6+1	Anti-Fly 3+, Devastating Wounds
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Drilla	Melee	2	3+	12	-3	3	-
+Power klaw (x0)	Melee	4	3+	9	-2	2	-
+Abilities More DakkaShokk-boostaGitfinder Gogglez
+Rules Waaagh!LeaderIgnores CoverDevastating WoundsAnti-
+Abilities (Leader) Leader
+Keywords: Big Mek Character Faction: Orks Grenades Infantry Mek`,
             `Boyz 
 Models
  1x Boss Nob: Power klaw and slugga (Power klaw, Slugga)
@@ -868,19 +980,6 @@ Choppa (x9)	Melee	3	3+	4	-1	1	-
 Abilities Get Da Good BitzBodyguard
 Rules Waaagh!PistolRapid FireBlast
 Keywords: Battleline Boyz Faction: Orks Grenades Infantry Mob`,
-            `Big Mek 
-Unit	M	T	SV	W	LD	OC
-Big Mek	6"	5	3+	6	7+	1
-Ranged Weapons	Range	A	BS	S	AP	D	Keywords
-Kustom mega-blasta (x0)	24"	3	5+	9	-2	D6	Hazardous
-Traktor blasta	36"	1	5+	10	-2	D6+1	Anti-Fly 3+, Devastating Wounds
-Melee Weapons	Range	A	WS	S	AP	D	Keywords
-Drilla	Melee	2	3+	12	-3	3	-
-Power klaw (x0)	Melee	4	3+	9	-2	2	-
-Abilities More DakkaShokk-boostaGitfinder Gogglez
-Rules Waaagh!LeaderIgnores CoverDevastating WoundsAnti-
-Abilities (Leader) Leader
-Keywords: Big Mek Character Faction: Orks Grenades Infantry Mek`,
             `Gretchin 
 Models
  10x Gretchin: Close combat weapon, Grot blasta
@@ -968,17 +1067,6 @@ Abilities Skulking Horrors
 Rules SynapseHeavyBlastAssaultDevastating WoundsTorrent
 Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry Termagants`,
 
-            "- Leagues of Votann -",
-            `Ûthar the Destined 
-Unit	M	T	SV	W	LD	OC
-Ûthar the Destined	5"	5	3+	5	7+	1
-Ranged Weapons	Range	A	BS	S	AP	D	Keywords
-Volkanite disintegrator	18"	3	2+	5	0	1	Devastating Wounds
-Melee Weapons	Range	A	WS	S	AP	D	Keywords
-Blade of the Ancestors	Melee	5	2+	6	-3	2	Devastating Wounds
-Abilities Ancestral FortuneThe DestinedLeaderInvulnerable SaveGrim EfficiencyRampart crest
-Rules LeaderEye of the AncestorsRuthless EfficiencyDevastating Wounds
-Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar the Destined`,
             "- Pasted -",
         ]
 
@@ -1255,15 +1343,22 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                         let hits = 1
                         let lethal_hits = false
                         if (!source_keywords.includes("TORRENT")) {  // Torrent autohits.
-                            let hit_roll = d6() + hit_bonus
-                            log(`Hit roll ${attack}: ${hit_roll}`)
+                            let hit_roll = d6()
+                            if (source_abilities.includes("CHAINBREAKER") && hit_roll == 5) {
+                                log("Chainbreaker: Each time this model makes an attack, an unmodified successful (XXX: ?) Hit roll of 5+ scores a Critical Hit.")
+                                hit_roll = 6
+                            }
+
+                            log(`Hit roll ${attack}: ${hit_roll} + ${hit_bonus} = ${hit_roll + hit_bonus}`)
+                            hit_roll += hit_bonus
+
                             // Re-roll
                             if (hit_rerolls > 0 && hit_roll < WS) {
                                 log(`Hit re-roll: ${hit_roll}`)
                                 --hit_rerolls
                                 hit_roll = d6() + hit_bonus
                             }
-                            // Whirling Onslaught: Each time a unit in this unit makes a melee attack, re-roll a Hit roll of 1. If this unit made a Charge move this turn, you can re-roll the Hit roll instead.
+                            // Whirling Onslaught: Each time a unit in this unit makes a melee attack, re-roll a Hit roll of 1. (DOESN'T SAY "UNMODIFIED") If this unit made a Charge move this turn, you can re-roll the Hit roll instead.
                             if (source_abilities.includes("WHIRLING ONSLAUGHT") && R < 2) {
                                 if (hit_roll === 1) {
                                     hit_roll = d6()
@@ -1432,10 +1527,11 @@ Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar
                                     D -= 1  // This is a negate; not a modifier which can't normally go below 1 according to "Rules Commentary": https://www.reddit.com/r/Warhammer40k/comments/1eibdkb/comment/lg5nmn5/
                                 }
                             }
-                            // Only "mortal Wounds" from for example DEADLY DEMISE carry over: https://spikeybits.com/warhammer-40k/mortal-wounds-rules/
+                            // Only "mortal wounds" from for example DEADLY DEMISE carry over: https://spikeybits.com/warhammer-40k/mortal-wounds-rules/
                             let overkill = (D - W) > 0 ? D - W : 0
                             log(`Target squad takes ${D} - ${overkill} overkill = ${D - overkill} damage!`)
-                            damage += D - overkill
+                            D -= overkill
+                            damage += D
                             // Dealt damage causes mortal wounds, not to be confused with presave or preFNP wounds! By anthropomorphing vehicles and bunkers like that, i'm surprised there aren't more evil animated versions of those like by Khorne and Final Fantasy.
                             weapon_spreads[weapon][D] = (weapon_spreads[weapon][D] || 0) + 1
                         }  // hits
