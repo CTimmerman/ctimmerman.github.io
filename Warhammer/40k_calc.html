@@ -23,6 +23,10 @@
             width: 2em
         }
 
+        label {
+            white-space: nowrap;
+        }
+
         table {
             margin: auto
         }
@@ -54,6 +58,18 @@ Auto-Tapestry of the Emperor's Judgement: While this unit is leading a unit and 
 Recount the Deeds of the Saints: While this unit is leading a unit and contains and Agathae Dolan model, each time that unit destroys an enemy unit, you gain 1 Miracle dice. When that Agathae Dolan model is destroyed, you gain D3 Miracle dice.
 Rules Acts of FaithLeaderPistol
 Keywords: Aestred Thurga and Agathae Dolan Character Epic Hero Faction: Adepta Sororitas Grenades Imperium Infantry Warlord`,
+            // pg 38: "A model with an Aura ability is always within range of its own Aura ability." - https://www.reddit.com/r/sistersofbattle/comments/144z0rq/comment/jnibjuc/
+            `Triumph of Saint Katherine 
+Unit	M	T	SV	W	LD	OC
+Triumph of Saint Katherine	8"	3	3+	18	6+	6
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Bolt Pistols	12"	6	2+	4	0	1	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Relic Weapons	Melee	18	2+	5	-3	1	-
+Abilities Damaged: 1-6 Wounds RemainingRelics of the MatriarchsRelic of the Matriarch - The Fiery Heart (Aura)Relic of the Matriarch - Censer of the Sacred Rose (Aura)Relic of the Matriarch - Simulacrum of the Ebon Chalice (Aura)Relic of the Matriarch - Simulacrum of the Argent Shroud (Aura)Relic of the Matriarch - Icon of the Valorous Heart (Aura)Relic of the Matriarch - Petals of the Bloody Rose (Aura)Solemn ProcessionInvulnerable Save 4 Feel No Pain 6+
+Rules Acts of FaithLeaderPistol
+Keywords: Character Epic Hero Faction: Adepta Sororitas Grenades Imperium Infantry Triumph of Saint Katherine`,
+
             "- Adeptus Astartes -",
             `Apothecary
             Unit	M	T	SV	W	LD	OC
@@ -1009,10 +1025,8 @@ Melee Weapons	Range	A	WS	S	AP	D	Keywords
 ➤ Gork’s Klaw - strike	Melee	6	2+	14	-3	4	-
 ➤ Gork’s Klaw - sweep (x0)	Melee	12	2+	8	-2	2	-
 Makari’s stabba	Melee	1	4+	3	0	1	Devastating Wounds
-Abilities Supreme CommanderProphet of Da Great Waaagh!Invulnerable Save (4+): GhazghkullInvulnerable Save (2+*): Makari
-Rules Waaagh!LeaderLethal HitsRapid FireDevastating Wounds
-Abilities (Leader) Leader
-Abilities (Ghazghkull’s Waaagh! Banner (Aura)) Ghazghkull’s Waaagh! Banner (Aura)
+Abilities Supreme CommanderProphet of Da Great Waaagh!Invulnerable Save 4Invulnerable Save 2 for MakariGhazghkull’s Waaagh! Banner (Aura)
+Rules Waaagh!LeaderLethal HitsRapid FireDevastating WoundsLeader
 Keywords: Character Epic Hero Faction: Orks Ghazghkull Thraka Infantry Warboss Warlord`,
             `Meganobz 
 Models
@@ -1424,6 +1438,11 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
                                 let wound_roll = d6()
                                 // re, /, *, -, +, 0. XXX: - and + no more than 1? https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
                                 // reroll
+                                if (wound_roll === 1 && R > 2 && target_abilities.includes("RELIC OF THE MATRIARCH - SIMULACRUM OF THE ARGENT SHROUD (AURA)")) {
+                                    log('Relic of the Matriarch - Simulacrum of the Argent Shroud (Aura) reroll wound 1.')
+                                    wound_rerolls = (wound_rerolls + 1) % A
+                                }
+                                
                                 if (wound_rerolls > 0 && wound_roll < threshold) {
                                     log(`Rerolling wound ${wound_roll} < ${threshold}`)
                                     wound_roll = d6()
@@ -1541,8 +1560,17 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
                     // You take a Battle-shock test for a unit by rolling 2D6 and attempting to equal or exceed its Leadership stat. If the test fails, you can’t target the unit with Stratagems, it can’t contest objectives, and you risks losing models when it falls back from combat. https://www.wargamer.com/warhammer-40k/battle-shock#:~:text=You%20take%20a%20Battle%2Dshock,it%20falls%20back%20from%20combat.
                     if (source_abilities.includes("ENGULFING FEAR [PSYCHIC]") && inches < 18) take_battleshock = true
                     if (take_battleshock) {
-                        if (d6() + d6() + battleshock_bonus < LD) log(`Target is battle-shocked!`)
-                        else log("Battle-shock test passed.")
+                        let shock_rerolls = target_abilities.includes("RELIC OF THE MATRIARCH - CENSER OF THE SACRED ROSE (AURA)") ? 1 : 0
+                        while (1) {
+                            if (d6() + d6() + battleshock_bonus < LD) {
+                                log(`Target is battle-shocked!`)
+                                if (--shock_rerolls < 0) break
+                            }
+                            else {
+                                log("Battle-shock test passed.")
+                                break
+                            }
+                        }
                     }
                 }  // rounds
             }  // weapons
@@ -1755,9 +1783,9 @@ Melee
 <body onload="import_sheets(); add_squads()">
     <h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
     <div>
-        Source: <label>Filter <input style="width:5em" onchange="filter('source', this.value)"></label> Squad <select
-            id="source" onchange="set_source_squad(this.value)"></select> <a
-            href="javascript:search(source.value)">📷</a>
+        Source: <label>Filter <input style="width:5em" onchange="filter('source', this.value)"></label>
+        Squad <select id="source" onchange="set_source_squad(this.value)"></select>
+        <a href="javascript:search(source.value)">📷</a>
         <div id="models" style="display: none">Models: <span id="source_models"></span></div>
         <table>
             <tr>
@@ -1772,11 +1800,11 @@ Melee
         <div id="weapons"></div>
     </div><br>
     <div>
-        Target: <label>Filter <input style="width:5em" onchange="filter('target', this.value)"></label> Squad <select
-            id="target" onchange="set_target_squad(this.value)"></select> <a
-            href="javascript:search(target.value)">📷</a>
+        Target: <label>Filter <input style="width:5em" onchange="filter('target', this.value)"></label>
+        Squad <select id="target" onchange="set_target_squad(this.value)"></select>
+        <a href="javascript:search(target.value)">📷</a>
         <label>Size <input id="target_size" type="number"></label>
-        Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select><br><br>
+        <label>Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select></label><br>
         <table>
             <tr>
                 <td><label for="target_keywords">Keywords</label></td>
