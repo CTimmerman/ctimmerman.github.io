@@ -20,7 +20,7 @@
         }
 
         input[type=text] {
-            width: 2em
+            width: 3em
         }
 
         label {
@@ -1152,9 +1152,8 @@ Traktor blasta	36"	1	5+	10	-2	D6+1	Anti-Fly 3+, Devastating Wounds
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
 Drilla	Melee	2	3+	12	-3	3	-
 Power klaw (x0)	Melee	4	3+	9	-2	2	-
-Abilities More DakkaShokk-boostaGitfinder Gogglez
+Abilities More DakkaShokk-boostaGitfinder GogglezLeader
 Rules Waaagh!LeaderIgnores CoverDevastating WoundsAnti-
-Abilities (Leader) Leader
 Keywords: Big Mek Character Faction: Orks Grenades Infantry Mek`,
             `Boyz 
 Models
@@ -1230,7 +1229,6 @@ Killsaw (x3)	Melee	2	4+	12	-3	2	-
 Power klaw (x3)	Melee	3	4+	9	-2	2	-
 Twin killsaw	Melee	2	4+	12	-3	2	Twin-linked
 Rules Waaagh!Feel No PainDevastating WoundsAnti-Rapid FireTwin-linked
-Abilities (Krumpin’ Time) Krumpin’ Time
 Keywords: Faction: Orks Grenades Infantry Mega Armour Meganobz`,
             `Zodgrod Wortsnagga 
 Unit	M	T	SV	W	LD	OC
@@ -1275,12 +1273,18 @@ Abilities
 Alpha Leader: While this model is leading a unit, each time a model in that unit makes an attack, you can re-roll the Hit roll.
 Unstoppable Monster: At the start of each player’s Command phase, this model regains up to D3 lost wounds.
 Rules Feel No Pain 5+SynapseLeader
-Abilities (Leader)	Description
-Leader	This model can be attached to the following unit:
-
-CARNIFEXES
-
 Keywords: Character Epic Hero Faction: Tyranids Great Devourer Monster Old One Eye Warlord`,
+            `Ripper Swarms 
+Unit	M	T	SV	W	LD	OC
+Ripper Swarm	6"	2	6+	4	8+	0
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Spinemaw	6"	4	5+	3	0	1	Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Xenos Claws and Teeth	Melee	6	5+	2	0	1	Sustained Hits 1
+Abilities
+Chitinous Horrors (Aura): While an enemy unit is within Engagement Range of this unit, halve the Objective Control characteristic of models in that enemy unit.
+Rules Deep StrikeSynapseSustained Hits 1Pistol
+Keywords: Faction: Tyranids Great Devourer Harvester Ripper Swarm Swarm`,
             `Termagants 
 Models
  1x Termagant w/ Shardlauncher: Chitinous Claws and Teeth, Shardlauncher
@@ -1301,6 +1305,20 @@ Chitinous Claws and Teeth (x10)	Melee	1	4+	3	0	1	-
 Abilities Skulking Horrors
 Rules SynapseHeavyBlastAssaultDevastating WoundsTorrent
 Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry Termagants`,
+            `The Swarmlord 
+Unit	M	T	SV	W	LD	OC
+The Swarmlord	8"	10	2+	10	7+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Synaptic Pulse	18"	D6+3	N/A	5	-1	2	Psychic, Torrent
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Bone Sabres	Melee	8	2+	9	-2	3	Twin-linked
+Abilities
+Hive Commander: At the start of your Command phase, if this model is on the battlefield, you gain 1CP
+Malign Presence (Aura): If this model is your Warlord, each time your opponent targets a unit from their army with a Stratagem, if that unit is within 12" of this model, increase the cost of that use of that Stratagem by 1CP.
+Domination of the Hive Mind (Aura): While a friendly TYRANIDS unit is within 9" of this model, that unit is within your army’s Synapse Range.
+Invulnerable Save (4+): This model has a 4+ Invulnerable Save.
+Rules Deadly Demise D3Shadow in the WarpSynapseLeaderTwin-linkedTorrent
+Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monster Psyker Synapse The Swarmlord Warlord`,
 
             "=== NewRecruit.eu paste ===",
         ]
@@ -1308,7 +1326,6 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
         function import_sheets() {
             for (let sheet of sheets) {
                 const new_squads = parse_sheet(sheet)
-                log(`Adding ${Object.keys(new_squads)} from sheets.`)
                 squads = {
                     ...squads,
                     ...new_squads
@@ -1404,7 +1421,7 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
             let s = document.getElementById(id).value
             let m = /[+-]\d+/.exec(s)
             if (m) rv = parseInt(m[0])
-            if (m = /(\d*)D(\d+)/.exec(s)) {
+            if (m = /(\d*)D(\d+)/.exec(s)) {  //NOSONAR
                 for (let i = 0; i < (m[1] || 1); ++i) rv += 1 + Math.floor(parseInt(m[2]) * Math.random())
                 return rv
             }
@@ -1474,6 +1491,7 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
                 log(`WEAPON: ${weapon}`)
                 let melee_done = false
                 let R = geti(`range${i}`) || 0
+                let S = geti(`strength${i}`)
 
                 const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
                 let is_pistol = weapon_keywords.includes("PISTOL")
@@ -1485,15 +1503,15 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
                     log("Skipping pistol.")
                     continue
                 }
-
                 if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
                     R = 1
                     // Melee
                     if (melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
-                    melee_done = true // NOSONAR
+                    melee_done = true  // NOSONAR
                     // if (target_keywords.includes("FIGHTS FIRST")) {
                     // TODO: Weapon inputs for target and bidirectional combat simulation.
                     // }
+                    if (source_keywords.includes("SYNAPSE")) S += 1
                 } else {  // Ranged weapon.
                     if (source_abilities.includes("ARCH NEGATOR")) {
                         log("Arch Negator gives anti-vehicle 4+.")
@@ -1527,7 +1545,6 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
                     weapon_keywords.push("SUSTAINED HITS 2")
                 }
                 const WS = geti(`skill${i}`) || 0
-                const S = geti(`strength${i}`)
                 const AP = Math.abs(geti(`piercing${i}`))
                 // Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
                 const TOTAL_OBLITERATION = source_abilities.includes("TOTAL OBLITERATION") && R > 1 && (target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE"))
@@ -1800,8 +1817,10 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
                     if (take_battleshock) {
                         let shock_rerolls = target_abilities.includes("RELIC OF THE MATRIARCH - CENSER OF THE SACRED ROSE (AURA)") ? 1 : 0
                         while (1) {
-                            if (d6() + d6() + battleshock_bonus < LD) {
-                                log(`Target is battle-shocked!`)
+                            let shock_roll = d6() + d6() + battleshock_bonus
+                            if (target_keywords.includes("SYNAPSE")) shock_roll += d6()
+                            if (shock_roll < LD) {
+                                log(`Target is battle-shocked! ${shock_roll} < ${LD} LD`)
                                 if (--shock_rerolls < 0) break
                             }
                             else {
@@ -1812,12 +1831,21 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
                     }
                 }  // rounds
             }  // weapons
+
+            let max_hits = 0
+            for (let weapon in weapon_spreads) {
+                const spread = weapon_spreads[weapon]
+                for (let mw in spread) if (spread[mw] > max_hits) max_hits = spread[mw]
+            }
+            log(`Max hits ${max_hits}`)
             html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
             html += `<br><table border=1><tr><th>Damage</th><th>Count</th><th>%</th></tr>`
             for (let weapon in weapon_spreads) {
-                html += `<tr><th colspan=2>${weapon}</th></tr>`
-                for (let k in weapon_spreads[weapon]) {
-                    html += `<tr><td>${k}<td>${weapon_spreads[weapon][k]}</td><td>${(weapon_spreads[weapon][k] / times * 100).toFixed(2)}%</td></tr>`
+                html += `<tr><th colspan=4>${weapon}</th></tr>`
+                const spread = weapon_spreads[weapon]
+                for (let mw in spread) {
+                    let hit_ratio = spread[mw] / times
+                    html += `<tr><td>${mw}<td>${spread[mw]}</td><td>${(hit_ratio * 100).toFixed(2)}%</td><td><div style="width: ${hit_ratio / max_hits * 200}px; background-color: red; border: 0.5em solid green"> </div></td></tr>`
                 }
             }
             result.innerHTML = html + "</table>"
@@ -1825,10 +1853,12 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
 
         document.onpaste = (event) => {
             log(`Pasted types: ${event.clipboardData.types}`)
-            const html = event.clipboardData.getData("text/html")
-            window.types = event.clipboardData.types
-            window.html = html
             const new_squads = parse_sheet(event.clipboardData.getData("text/plain"))
+            log(`Parsed squads: ${JSON.stringify(new_squads, null, 4)}`)
+            //log(`Parsed squads: ${JSON.stringify(new_squads)}`)
+            //log(`Parsing ${html}`)
+            const html = event.clipboardData.getData("text/html")
+            new_squads[Object.keys(new_squads)[0]].keywords = parse_newrecruit_html(html)
 
             squads = {
                 ...squads,
@@ -1837,6 +1867,20 @@ Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry
             alert(`Imported ${name}.`)
             add_squads()
         }
+
+        function parse_newrecruit_html(html){
+            const parser = new DOMParser()
+            const doc = parser.parseFromString(html, "text/html")
+            let keywords = []
+            doc.querySelectorAll('span').forEach(el => {
+                if (el.innerHTML.startsWith("Faction")) el.parentNode.querySelectorAll('span').forEach(el2 => {
+                    if (el2.innerText.trim()) keywords.push(el2.innerHTML)
+                })
+            })
+            log("Keywords:" + keywords.join(', '))
+            return keywords
+        }
+
         function parse_sheet(s) {
             /* NewRecruit.eu format:
 Apothecary 
@@ -1912,7 +1956,6 @@ Melee
 -3
 1
             */
-            log(`Parsing ${s}`)
             let squads = {}
             let squad = {
                 "size": 0,
@@ -1921,10 +1964,10 @@ Melee
                 "weapons": {},
                 "keywords": [],
                 "abilities": [],
+                "rules": [],
             }
             let name = "PASTED"
             let mode = ""
-            parse_loop:
             for (let line of s.split('\n')) {
                 if (name === "PASTED") {
                     name = line.trim()
@@ -1952,14 +1995,10 @@ Melee
                     if (name === "PASTED") name = unit.name  // In case user didn't copy sheet name.
                     squad.units[unit.name] = unit
                     if (!squad.models) squad.size += unit.count
-                    //log(`Added model to squad: ${JSON.stringify(unit, null, 4)}`)
                 }
                 else if (cols.length === 8) {  // Weapon
                     mode = "weapon"
                     if (cols[2] === "A") continue  // Skip headers.
-                    let weapon_name = cols[0]
-
-                    //log(`${weapon_name} Weapon stats: ${cols}`)
                     let weapon = {
                         "count": cols[0].includes("(x0)") ? 0 : (parseInt(/\d+/.exec(cols[0])) || 1),
                         "R": parseInt(cols[1]) || 0,
@@ -1972,10 +2011,14 @@ Melee
                     }
                     squad.weapons[cols[0]] = weapon
                 }
+                // TODO: Use HTML for New Recruit pasted keywords? includes() works well enough for now.
                 for (let word of ["Abilities", "Keywords", "Rules"]) {
                     if (line.startsWith(word)) {
                         mode = word
-                        squad[word.toLowerCase()] = line.slice(word.length + 1).replace(/([^A-Z (])([A-Z])/g, '$1\t$2').split('\t')  // TODO: Use HTML for New Recruit copy? XXX: includes() works well enough for now.
+                        let list = line.slice(word.length + 1).trim().replace(/([^A-Z (])([A-Z])/g, '$1\t$2').split('\t')
+                        if (list == "") list = []
+                        //log(`Adding ${word}: ${list} to ${squad[word.toLowerCase()]}`)
+                        squad[word.toLowerCase()].push(...list)
                     }
                 }
                 if (line.trim() === "Models") {
@@ -1985,18 +2028,19 @@ Melee
                 //log(`Parsing ${mode}: ${line}`)
                 if (mode === "model") {
                     const mo = /(\d+)x ([^:]+)/.exec(cols[0])
-                    log(`NewRecruit models table row: ${mo}`)
+                    //log(`NewRecruit models table row: ${mo}`)
                     if (mo) {
-                        count = parseInt(mo[1]) || 1
-                        model_name = mo[2]
+                        const count = parseInt(mo[1]) || 1
+                        const model_name = mo[2]
                         squad.size += count
                         squad.models[model_name] = { "count": count }
                     }
                 } else if (["Abilities", "Keywords", "Rules"].includes(mode)) {
                     const mo = /^([^:]+): (.*)/.exec(line)
                     if (mo) {
-                        ability = mo[1]
-                        val = parseInt(mo[2])
+                        let ability = mo[1]
+                        if (ability === "Keywords") continue
+                        let val = parseInt(mo[2])
                         let inv_mo = /^Invulnerable Save \((\d)\+\)$/.exec(ability.trim())
                         if (inv_mo) {
                             val = parseInt(inv_mo[1])
@@ -2012,8 +2056,6 @@ Melee
                 }
             }
             squads[name] = squad
-            //log(`Parsed squads: ${JSON.stringify(squads, null, 4)}`)
-            log(`Parsed squads: ${JSON.stringify(squads)}`)
             return squads
         }
         function filter(which, what) {
@@ -2035,11 +2077,11 @@ Melee
         <div id="models" style="display: none">Models: <span id="source_models"></span></div>
         <table>
             <tr>
-                <td><label for="source_keywords">Keywords</label></td>
+                <th><label for="source_keywords">Keywords</label></th>
                 <td><input id="source_keywords" type="text" class="abilities"></td>
             </tr>
             <tr>
-                <td><label for="source_abilities">Abilities</label></td>
+                <th><label for="source_abilities">Abilities</label></th>
                 <td><input id="source_abilities" type="text" class="abilities"></td>
             </tr>
         </table>
@@ -2053,15 +2095,15 @@ Melee
         <label>Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select></label><br>
         <table>
             <tr>
-                <td><label for="target_keywords">Keywords</label></td>
+                <th><label for="target_keywords">Keywords</label></th>
                 <td><input id="target_keywords" type="text" class="abilities"></td>
             </tr>
             <tr>
-                <td><label for="target_abilities">Abilities</label></td>
+                <th><label for="target_abilities">Abilities</label></th>
                 <td><input id="target_abilities" type="text" class="abilities"></td>
             </tr>
             <tr>
-                <td><label for="target_rules">Rules</label></td>
+                <th><label for="target_rules">Rules</label></th>
                 <td><input id="target_rules" type="text" class="abilities"></td>
             </tr>
         </table>
