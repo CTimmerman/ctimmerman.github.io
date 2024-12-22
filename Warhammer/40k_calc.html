@@ -2,45 +2,45 @@
 <html lang="en">
 
 <head>
-    <title>Warhammer 40,000 10th Edition Combat Calculator by Cees Timmerman, 2024-11-28.</title>
-    <style>
-        html {
-            background-color: black;
-            color: white;
-            text-align: center;
-            font: message-box;
-        }
+	<title>Warhammer 40,000 10th Edition Combat Calculator by Cees Timmerman, 2024-11-28.</title>
+	<style>
+		html {
+			background-color: black;
+			color: white;
+			text-align: center;
+			font: message-box;
+		}
 
-        input {
-            text-align: center;
-        }
+		input {
+			text-align: center;
+		}
 
-        input[type=number] {
-            width: 3em
-        }
+		input[type=number] {
+			width: 3em
+		}
 
-        input[type=text] {
-            width: 3em
-        }
+		input[type=text] {
+			width: 3em
+		}
 
-        label {
-            white-space: nowrap;
-        }
+		label {
+			white-space: nowrap;
+		}
 
-        table {
-            margin: auto
-        }
+		table {
+			margin: auto
+		}
 
-        .abilities {
-            width: 40em !important
-        }
-    </style>
-    <script>
-        let squads = {}
-        let sheets = [
-            "=== Imperium ===",
-            "- Adepta Sororitas -",
-            `Aestred Thurga and Agathae Dolan 
+		.abilities {
+			width: 40em !important
+		}
+	</style>
+	<script>
+		let squads = {}
+		let sheets = [
+			"=== Imperium ===",
+			"- Adepta Sororitas -",
+			`Aestred Thurga and Agathae Dolan 
 Models
  1x Aestred Thurga: Blade of Vigil, Bolt pistol
  1x Agathae Dolan: Scribe's staff
@@ -58,8 +58,8 @@ Auto-Tapestry of the Emperor's Judgement: While this unit is leading a unit and 
 Recount the Deeds of the Saints: While this unit is leading a unit and contains and Agathae Dolan model, each time that unit destroys an enemy unit, you gain 1 Miracle dice. When that Agathae Dolan model is destroyed, you gain D3 Miracle dice.
 Rules Acts of FaithLeaderPistol
 Keywords: Aestred Thurga and Agathae Dolan Character Epic Hero Faction: Adepta Sororitas Grenades Imperium Infantry Warlord`,
-            // pg 38: "A model with an Aura ability is always within range of its own Aura ability." - https://www.reddit.com/r/sistersofbattle/comments/144z0rq/comment/jnibjuc/
-            `Triumph of Saint Katherine 
+			// pg 38: "A model with an Aura ability is always within range of its own Aura ability." - https://www.reddit.com/r/sistersofbattle/comments/144z0rq/comment/jnibjuc/
+			`Triumph of Saint Katherine 
 Unit	M	T	SV	W	LD	OC
 Triumph of Saint Katherine	8"	3	3+	18	6+	6
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -70,11 +70,11 @@ Abilities Damaged: 1-6 Wounds RemainingRelics of the MatriarchsRelic of the Matr
 Rules Acts of FaithLeaderPistol
 Keywords: Character Epic Hero Faction: Adepta Sororitas Grenades Imperium Infantry Triumph of Saint Katherine`,
 
-            "- Adeptus Astartes -",
-            `Apothecary
-            Unit	M	T	SV	W	LD	OC
-            Primaris Apothecary	6"	4	3+	4	6+	1
-            Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+			"- Adeptus Astartes -",
+			`Apothecary
+			Unit	M	T	SV	W	LD	OC
+			Primaris Apothecary	6"	4	3+	4	6+	1
+			Ranged Weapons	Range	A	BS	S	AP	D	Keywords
 Absolvor Bolt Pistol	18"	1	3+	5	-1	2	Pistol
 Reductor Pistol	3"	1	3+	4	-4	2	Pistol
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
@@ -82,7 +82,7 @@ Close Combat Weapon	Melee	4	3+	4	0	1	-
 Abilities Narthecium, Gene Seed Recovery, Leader, Fire Discipline
 Rules Leader, Oath of Moment, Pistol
 Keywords: Character Faction: Adeptus Astartes Grenades Imperium Infantry Primaris Apothecary Tacticus`,
-            `Apothecary Biologis 
+			`Apothecary Biologis 
 Unit	M	T	SV	W	LD	OC
 Apothecary Biologis	5"	6	3+	5	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -92,7 +92,7 @@ Close Combat Weapon	Melee	4	3+	4	0	1	-
 Abilities Surgical PrecisionVivispectrumLeader
 Rules LeaderOath of MomentPistol
 Keywords: Apothecary Biologis Character Faction: Adeptus Astartes Gravis Imperium Infantry`,
-            `Eradicator Squad
+			`Eradicator Squad
 Models
  1x Eradicator: Bolt Pistol, Close Combat Weapon, Melta Rifle
  1x Eradicator Sergeant: Bolt Pistol, Close Combat Weapon, Melta Rifle
@@ -109,7 +109,7 @@ Abilities
 Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
 Rules Oath of MomentPistolHeavyMelta
 Keywords: Eradicator Squad Faction: Adeptus Astartes Gravis Grenades Imperium Infantry`,
-            `Gladiator Lancer 
+			`Gladiator Lancer 
 Unit	M	T	SV	W	LD	OC
 Gladiator Lancer	10"	10	3+	12	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -123,7 +123,7 @@ Armoured Tracks	Melee	3	4+	6	0	1	-
 Abilities Aqullon OpticsDamaged: 1-4 Wounds Remaining
 Rules Deadly Demise D3Oath of MomentAnti-Rapid FireHeavy
 Keywords: Faction: Adeptus Astartes Gladiator Lancer Imperium Smoke Vehicle`,
-            `Gladiator Reaper 
+			`Gladiator Reaper 
 Unit	M	T	SV	W	LD	OC
 Gladiator Reaper	10"	10	3+	12	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -136,7 +136,7 @@ Armoured Tracks	Melee	3	4+	6	0	1	-
 Abilities Rotating DeathDamaged: 1-4 Wounds Remaining
 Rules Deadly Demise D3Oath of MomentAnti-Rapid FireDevastating WoundsTwin-linked
 Keywords: Faction: Adeptus Astartes Gladiator Reaper Imperium Smoke Vehicle`,
-            `Gladiator Valiant 
+			`Gladiator Valiant 
 Unit	M	T	SV	W	LD	OC
 Gladiator Valiant	10"	10	3+	12	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -151,7 +151,7 @@ Ferocious Assault: Each time this model makes an attack with its Twin Las-talon 
 Damaged: 1-4 Wounds Remaining: While this model has 1-4 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
 Rules Deadly Demise D3Oath of MomentAnti-Rapid FireMeltaTwin-linked
 Keywords: Faction: Adeptus Astartes Gladiator Valiant Imperium Smoke Vehicle`,
-            `Hellblaster Squad 
+			`Hellblaster Squad 
 Models
 4x Hellblaster: Bolt Pistol, Close Combat Weapon, Plasma Incinerator
 1x Hellblaster Sergeant: Close Combat Weapon, Plasma Incinerator, Plasma Pistol
@@ -169,7 +169,7 @@ Abilities
 For the Chapter!: Each time a model in this unit is destroyed, roll one D6: on a 3+, do not remove it from play. The destroyed model can shoot after the attacking model’s unit has finished making its attacks, and is then removed from play. When resolving these attacks, any Hazardous tests taken for that attack are automatically passed.
 Rules Oath of MomentPistolHazardousHeavyAssault
 Keywords: Faction: Adeptus Astartes Grenades Hellblaster Squad Imperium Infantry Tacticus`,
-            `Infernus Squad
+			`Infernus Squad
 Models
  5x Infernus Marines: Bolt Pistol, Close Combat Weapon, Pyreblaster
  1x Infernus Sergeant: Bolt Pistol, Close Combat Weapon, Pyreblaster
@@ -183,7 +183,7 @@ Close Combat Weapon (x6)	Melee	3	3+	4	0	1	-
 Abilities Purge the Foe
 Rules Oath of MomentPistolIgnores CoverTorrent
 Keywords: Faction: Adeptus Astartes Grenades Imperium Infantry Infernus Squad Tacticus`,
-            `Impulsor
+			`Impulsor
 Unit	M	T	SV	W	LD	OC
 Impulsor	12"	9	3+	11	6+	2
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -199,7 +199,7 @@ Armoured Tracks	Melee	3	4+	6	0	1	-
 Abilities TransportAssault VehicleShield DomeInvulnerable Save 5
 Rules Deadly Demise D3Firing Deck 6Oath of MomentRapid Fire
 Keywords: Dedicated Transport, Faction: Adeptus Astartes, Imperium, Impulsor, Transport, Vehicle`,
-            `Land Raider 
+			`Land Raider 
 Unit	M	T	SV	W	LD	OC
 Land Raider	10"	12	2+	16	6+	5
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -213,7 +213,7 @@ Armoured Hull	Melee	6	4+	8	0	1	-
 Abilities Assault RampTransportDamaged: 1-5 Wounds Remaining
 Rules Deadly Demise D6Oath of MomentOne ShotMeltaRapid FireSustained HitsTwin-linked
 Keywords: Faction: Adeptus Astartes Imperium Land Raider Smoke Transport Vehicle`,
-            `Land Raider Crusader 
+			`Land Raider Crusader 
 Unit	M	T	SV	W	LD	OC
 Land Raider Crusader	12"	12	2+	16	6+	5
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -227,7 +227,7 @@ Armoured Hull	Melee	6	4+	8	0	1	-
 Abilities TransportAssault RampDamaged: 1-5 Wounds Remaining
 Rules Deadly Demise D6Oath of MomentOne ShotTwin-linkedRapid FireMeltaDevastating Wounds
 Keywords: Faction: Adeptus Astartes Grenades Imperium Land Raider Crusader Smoke Transport Vehicle`,
-            `Redemptor Dreadnought
+			`Redemptor Dreadnought
 Unit	M	T	SV	W	LD	OC
 Redemptor Dreadnought	8"	10	2+	12	6+	4
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -244,7 +244,57 @@ Redemptor Fist	Melee	5	3+	12	-2	3	-
 Abilities Duty EternalDamaged: 1-4 Wounds Remaining
 Rules Deadly Demise D3Oath of MomentAnti-HazardousBlastIgnores CoverTorrentTwin-linked
 Keywords: Faction: Adeptus Astartes Imperium Redemptor Dreadnought Vehicle Walker`,
-            `Rhino 
+			`Repulsor 
+Unit	M	T	SV	W	LD	OC
+Repulsor	10"	12	3+	16	6+	5
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Hunter-slayer Missile	48"	1	2+	14	-3	D6	Indirect Fire, One Shot
+Repulsor Defensive Array	24"	18	3+	4	0	1	-
+Twin Heavy Bolter (x0)	36"	3	3+	5	-1	2	Sustained Hits 1, Twin-linked
+Twin Lascannon	48"	1	3+	12	-3	D6+1	Twin-linked
+Heavy Onslaught Gatling Cannon (x0)	24"	12	3+	6	0	1	Devastating Wounds
+Las-talon	36"	2	3+	10	-3	D6+1	-
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured Hull	Melee	6	4+	8	0	1	-
+Abilities
+Transport: This model has a transport capacity of 14 ADEPTUS ASTARTES INFANTRY models. Each JUMP PACK, WULFEN, GRAVIS or TERMINATOR model takes up the space of 2 models and each CENTURION model takes up the space of 3 models.
+Emergency Combat Embarkation: Once per turn, in your opponent’s Charge phase, after an enemy unit has selected targets for its charge but before it makes a Charge move, you can select one Adeptus Astartes unit from your army that was selected as a target of that charge. Provided that unit is not within Engagement Range of any enemy units and every model in that unit is within 3" of this Transport, it can embark within this Transport. The charging unit can then select new targets for its charge.
+Damaged: 1-5 Wounds Remaining: While this model has 1-5 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
+Rules
+Deadly Demise D6: Some models have 'Deadly Demise x' listed in their abilities. When such a model is destroyed, roll one D6 before removing it from play (if such a model is a TRANSPORT, roll before any embarked models disembark). On a 6, each unit within 6" of that model suffers a number of mortal wounds denoted by 'x' (if this is a random number, roll separately for each unit within 6").
+Oath of Moment: If your Army Faction is Adeptus Astartes, at the start of your Command phase, select one unit from your opponent’s army. Until the start of your next Command phase, that enemy unit is your Oath of Moment target. Each time a model with this ability makes an attack that targets your Oath of Moment target:
+■ You can reroll the Hit roll
+■ If your army does not include one or more units with the Black Templars, Blood Angels, Dark Angels, Deathwatch or Space Wolves keywords, add 1 to the Wound roll as well.
+Indirect Fire: Weapons with [INDIRECT FIRE] in their profile are known as Indirect Fire weapons, and attacks can be made with them even if the target is not visible to the attacking model. These attacks can destroy enemy models in a target unit even though none may have been visible to the attacking unit when you selected that target.
+If no models in a target unit are visible to the attacking unit when you select that target, then each time a model in the attacking unit makes an attack against that target using an Indirect Fire weapon, subtract 1 from that attack’s Hit roll, an unmodified Hit roll of 1-3 always fails, and the target has the Benefit of Cover against that attack. Weapons with the [TORRENT] ability cannot be fired using the [INDIRECT FIRE] ability.
+
+One Shot: The bearer can only shoot with this weapon once per battle.
+Sustained Hits: Weapons with [SUSTAINED HITS X] in their profile are known as Sustained Hits weapons. Each time an attack is made with such a weapon, if a Critical Hit is rolled, that attack scores a number of additional hits on the target as denoted by ‘x’
+Twin-linked: Weapons with [TWIN-LINKED] in their profile are known as Twin-linked weapons. Each time an attack is made with such a weapon, you can re-roll that attack’s Wound roll.
+Devastating Wounds: Weapons with [DEVASTATING WOUNDS] in their profile are known as Devastating Wounds weapons. Each time an attack is made with such a weapon, if that attack scores a Critical Wound, no saving throw of any kind can be made against that attack (including invulnerable saving throws). Such attacks are only allocated to models after all other attacks made by the attacking unit have been allocated and resolved. After that attack is allocated and after any modifiers are applied, it inflicts a number of mortal wounds on the target equal to the Damage characteristic of that attack, instead of inflicting damage normally.
+Keywords: Deathwing Faction: Adeptus Astartes Imperium Repulsor Smoke Transport Vehicle`,
+			`Repulsor Executioner 
+Unit	M	T	SV	W	LD	OC
+Repulsor Executioner	10"	12	3+	16	6+	5
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Heavy Onslaught Gatling Cannon	24"	12	3+	6	0	1	Devastating Wounds
+Icarus Rocket Pod	24"	D3	3+	8	-1	2	Anti-fly 2+
+Ironhail Heavy Stubber	36"	3	3+	4	0	1	Rapid Fire 3
+Repulsor Executioner Defensive Array	24"	10	3+	4	0	1	-
+Twin Heavy Bolter	36"	3	3+	5	-1	2	Sustained Hits 1, Twin-linked
+Twin Icarus Ironhail Heavy Stubber	36"	3	3+	4	0	1	Anti-FLY 4+, Rapid Fire 3, Twin-linked
+Heavy Laser Destroyer (x0)	72"	2	3+	16	-4	D6+4	Heavy
+➤ Macro Plasma Incinerator - Standard (x0)	36"	D6+1	3+	8	-3	2	Blast
+➤ Macro Plasma Incinerator - Supercharge	36"	D6+1	3+	9	-4	3	Blast, Hazardous
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured Hull	Melee	6	4+	8	0	1	-
+Abilities
+Transport: This model has a transport capacity of 7 Adeptus Astartes Infantry models. Each Jump Pack, Wulfen, Gravis or Terminator model takes up the space of 2 models and each Centurion model takes up the space of 3 models.
+Executioner: Each time this model makes an attack that targets a unit that is Below Half-strength, add 1 to the Hit roll.
+Damaged: 1-5 Wounds Remaining: While this model has 1-5 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
+Rules Deadly Demise D6Oath of MomentDevastating WoundsAnti-Rapid FireSustained HitsTwin-linkedHazardousBlast
+Keywords: Deathwing, Faction: Adeptus Astartes, Imperium, Repulsor Executioner, Smoke, Transport, Vehicle`,
+			`Rhino 
 Unit	M	T	SV	W	LD	OC
 Rhino	12"	9	3+	10	6+	2
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -255,7 +305,7 @@ Armoured Tracks	Melee	3	4+	6	0	1	-
 Abilities Self RepairTransport
 Rules Firing Deck 2Deadly Demise D3Oath of MomentOne ShotRapid Fire
 Keywords: Dedicated Transport Faction: Adeptus Astartes Imperium Rhino Smoke Transport Vehicle`,
-            `Tactical Squad
+			`Tactical Squad
 Models
  7x Tactical Marine: Bolt Pistol, Boltgun, Close Combat Weapon
  1x Tactical Marine Sergeant: Close Combat Weapon, Bolt Pistol, Astartes Chainsword
@@ -275,7 +325,7 @@ Astartes Chainsword	Melee	4	3+	4	-1	1	-
 Abilities Combat Squads
 Rules Oath of MomentPistolHeavyBlastTorrentIgnores Cover
 Keywords: Battleline Faction: Adeptus Astartes Grenades Imperium Infantry Tactical Squad`,
-            `Techmarine
+			`Techmarine
 Unit	M	T	SV	W	LD	OC
 Techmarine	6"	4	2+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -287,7 +337,7 @@ Servo-arm	Melee	1	3+	8	-2	3	Extra Attacks
 Abilities TechmarineBlessing of the OmnissiahVengeance of the OmnissiahLeaderArtificer Armour
 Rules LeaderOath of MomentPistolExtra Attacks
 Keywords: Character Faction: Adeptus Astartes Grenades Imperium Infantry Tacticus Techmarine Warlord`,
-            `Terminator Assault Squad
+			`Terminator Assault Squad
 Models
  1x Assault Terminator Sergeant: Thunder Hammer & Storm Shield (Storm Shield, Thunder Hammer)
  3x Assault Terminator w/ Thunder Hammer & Storm Shield: Storm Shield, Thunder Hammer
@@ -302,7 +352,7 @@ Twin Lightning Claws	Melee	5	3+	5	-2	1	Twin-linked
 Abilities Teleport HomerTerminatus AssaultInvulnerable SaveStorm Shield
 Rules Deep StrikeOath of MomentDevastating WoundsTwin-linked
 Keywords: Faction: Adeptus Astartes Imperium Infantry Terminator Terminator Assault Squad`,
-            `Terminator Squad
+			`Terminator Squad
 Models
  1x Terminator Sergeant: Storm Bolter, Power Weapon
  1x Terminator w/ Heavy Weapon: Chainfist, Assault Cannon
@@ -324,11 +374,55 @@ Power Fist (x3)	Melee	3	3+	8	-2	2	-
 Abilities Teleport HomerFury of the FirstInvulnerable Save 4
 Rules Deep StrikeOath of MomentRapid FireAnti-Devastating WoundsIgnores CoverTorrent
 Keywords: Faction: Adeptus Astartes Imperium Infantry Terminator Terminator Squad`,
-            // Space Marines Faction – Includes 12 Armies, based on various Adeptus Astartes Chapters:
-            //"Black Templars:",
-            //"Blood Angels:",
-            "Dark Angels:",
-            `Deathwing Knights 
+			// Space Marines Faction – Includes 12 Armies, based on various Adeptus Astartes Chapters:
+			//"Black Templars:",
+			"Blood Angels:",
+			`Baal Predator 
+Unit	M	T	SV	W	LD	OC
+Baal Predator	12"	10	3+	11	6+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Hunter Killer Missile	48"	1	2+	14	-3	D6	One Shot
+Storm Bolter	24"	2	3+	4	0	1	Rapid Fire 2
+Heavy Bolter	36"	3	3+	5	-1	2	Assault, Sustained Hits 1
+Heavy Flamer (x0)	12"	D6	N/A	5	-1	1	Assault, Ignores Cover, Torrent
+Baal Flamestorm Cannon	18"	D6+3	N/A	6	-2	2	Assault, Ignores Cover, Torrent
+Twin Assault Cannon (x0)	24"	6	3+	6	0	1	Assault, Devastating Wounds, Twin-linked
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured Tracks	Melee	3	4+	6	0	1	-
+Abilities
+Overcharged Engines: You can re-roll Advance rolls made for this model.
+Damaged: 1-4 Wounds Remaining: While this model has 1-4 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
+Rules Oath of MomentDeadly Demise D3One ShotRapid FireAssaultSustained HitsIgnores CoverTorrentAssaultDevastating WoundsTwin-linked
+Keywords: Baal Predator, Faction: Adeptus Astartes, Faction: Blood Angels, Imperium, Smoke, Vehicle`,
+			`Chief Librarian Mephiston 
+Unit	M	T	SV	W	LD	OC
+Chief Librarian Mephiston	7"	5	2+	6	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+➤ Fury of the Ancients - Witchfire	12"	3	2+	4	-1	D3	Pistol, Psychic, Sustained Hits 1
+➤ Fury of the Ancients - Focused Witchfire	18"	3	2+	5	-2	D3	Hazardous, Pistol, Psychic, Sustained Hits 3
+➤ Plasma Pistol - Standard	12"	1	2+	7	-2	1	Pistol
+➤ Plasma Pistol - Supercharge	12"	1	2+	8	-2	2	Hazardous, Pistol
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Vitarus	Melee	6	2+	9	-3	D3	Lethal Hits, Psychic
+Abilities
+The Quickening [Psychic]: This model is eligible to declare a charge in a turn which it Advanced.
+Transfixing Gaze [Aura, Psychic]: While an enemy unit is within 6" of this model, each time that unit is selected to Fall Back, it must take a Leadership test. If that test is failed, that unit must Remain Stationary this phase instead.
+Invulnerable Save 5+: This model has a 5+ Invulnerable Save
+Rules Lone OperativeFights FirstFeel No Pain 4+Oath of MomentHazardousSustained HitsPistolPsychicLethal Hits
+Keywords: Character, Chief Librarian Mephiston, Epic Hero, Faction: Adeptus Astartes, Faction: Blood Angels, Grenades, Infantry, Psyker, Tacticus`,
+			`The Sanguinor 
+Unit	M	T	SV	W	LD	OC
+The Sanguinor	12"	4	2+	7	6+	1
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Encarmine Broadsword	Melee	8	2+	6	-3	2	Devastating Wounds
+Abilities
+Aura of Fervour (Aura): While a friendly Adeptus Astartes unit is within 6" of this model, you can re-roll Battle-shock and Leadership tests taken for that unit
+Miraculous Savior: Once per battle, at the end of your opponent’s Charge phase, if this model is still in Reserves, you can select one enemy unit that made a Charge move this phase. Set this model up on the battlefield within Engagement Range of that enemy unit.
+Invulnerable Save: 4+
+Rules Lone OperativeDeep StrikeFights FirstOath of MomentDevastating Wounds
+Keywords: Character, Epic Hero, Faction: Adeptus Astartes, Faction: Blood Angels, Fly, Imperium, Infantry, Jump Pack, The Sanguinor, Warlord`,
+			"Dark Angels:",
+			`Deathwing Knights 
 Models
  4x Deathwing Knight
  1x Knight Master: Great Weapon of the Unforgiven
@@ -348,7 +442,7 @@ Teleport Homer: At the start of the battle, you can set up one Teleport Homer to
 Watcher in the Dark: Once per battle, in any phase, this unit can summon a Watcher in the Dark. When it does, until the end of the phase, models in this unit have the Feel No Pain 4+ ability against mortal wounds.
 Rules Deep StrikeOath of MomentDevastating WoundsSustained HitsAnti-
 Keywords: Deathwing Deathwing Knights Faction: Adeptus Astartes Faction: Dark Angels Imperium Infantry Terminator`,
-            `Deathwing Terminator Squad 
+			`Deathwing Terminator Squad 
 Models
  1x Deathwing Sergeant: Power Weapon, Storm Bolter
  1x Deathwing Terminator: Power Fist, Storm Bolter
@@ -375,7 +469,7 @@ Chainfist (x3)	Melee	3	4+	8	-2	2	Anti-Vehicle 3+
 Abilities Invulnerable Save 4DeathwingAttached UnitTeleport Homer
 Rules Deep StrikeOath of MomentAnti-Devastating WoundsBlastIgnores CoverTorrentHazardous
 Keywords: Deathwing Deathwing Terminator Squad Faction: Adeptus Astartes Faction: Dark Angels Imperium Infantry Terminator`,
-            `Ezekiel 
+			`Ezekiel 
 Unit	M	T	SV	W	LD	OC
 Ezekiel	6"	4	2+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -400,7 +494,7 @@ Leader: This model can be attached to the following units:
 Psychic Hood: While this model is leading a unit, models in that unit have the Feel No Pain 4+ ability against Psychic Attacks.
 Rules Oath of MomentDevastating WoundsPrecisionPsychicHazardousPistolAnti-
 Keywords: Character Deathwing Epic Hero Ezekiel Faction: Adeptus Astartes Faction: Dark Angels Grenades Imperium Infantry Librarian Psyker`,
-            `Lion El'Jonson
+			`Lion El'Jonson
 Unit	M	T	SV	W	LD	OC
 Lion El'Jonson	8"	9	2+	10	5+	4
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -413,14 +507,14 @@ Abilities Primarch of the First LegionThe Emperor's ShieldDark Angels BodyguardI
 Primarch of the First Legion All Secrets RevealedMartial Exemplar [Aura]No Hiding From the Watchers [Aura]
 Rules Deep StrikeFights FirstOath of MomentPistolLethal HitsSustained Hits
 Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Dark Angels Imperium Lion El'Jonson Monster Primarch Warlord`,
-            //"- Grey Knights -",
-            //"- Imperial Fists -",
-            //"- Iron Hands -",
-            //"- Raven Guard -",
-            //"- Salamanders -",
-            //"- Space Wolves -",
-            "Ultramarines:",
-            `Roboute Guilliman 
+			//"- Grey Knights -",
+			//"- Imperial Fists -",
+			//"- Iron Hands -",
+			//"- Raven Guard -",
+			//"- Salamanders -",
+			//"- Space Wolves -",
+			"Ultramarines:",
+			`Roboute Guilliman 
 Unit	M	T	SV	W	LD	OC
 Roboute Guilliman	8"	9	2+	10	5+	4
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -431,10 +525,10 @@ The Emperor's Sword	Melee	14	2+	8	-3	2	Devastating Wounds
 Abilities Author of the CodexUltramarines BodyguardArmour of FateSupreme CommanderInvulnerable Save 4
 Rules Oath of MomentLethal HitsRapid FireDevastating Wounds
 Keywords: Character Epic Hero Faction: Adeptus Astartes Faction: Ultramarines Imperium Monster Primarch Roboute Guilliman Warlord`,
-            //"- White Scars -",
-            // https://www.adeptusars.com/guides/factions Imperium of Man Faction – Includes 5 Armies:
-            "- Adeptus Custodes -",
-            `Allarus Custodians 
+			//"- White Scars -",
+			// https://www.adeptusars.com/guides/factions Imperium of Man Faction – Includes 5 Armies:
+			"- Adeptus Custodes -",
+			`Allarus Custodians 
 Models
  1x Allarus Custodian (Castellan Axe): Balistus grenade launcher, Castellan Axe
  1x Allarus Custodian (Guardian Spear): Balistus grenade launcher, Guardian Spear
@@ -467,7 +561,7 @@ Melee weapons equipped by models in this unit have the [LETHAL HITS] ability.
 Blast: Weapons with [BLAST] in their profile are known as Blast weapons, and they make a random number of attacks. Each time you determine how many attacks are made with a Blast weapon, add 1 to the result for every five models that were in the target unit when you selected it as the target (rounding down). Blast weapons can never be used to make attacks against a unit that is within Engagement Range of one or more units from the attacking model’s army (including its own unit).
 Assault: Weapons with [ASSAULT] in their profile are known as Assault weapons. If a unit that Advanced this turn contains any models equipped with Assault weapons, it is still eligible to shoot in this turn’s Shooting phase. When such a unit is selected to shoot, you can only resolve attacks using Assault weapons its models are equipped with.
 Keywords: Allarus Custodians Faction: Adeptus Custodes Imperium Infantry Terminator`,
-            `Custodian Guard 
+			`Custodian Guard 
 Models
  2x Custodian Guard (Guardian Spear): Guardian Spear
  1x Custodian Guard (Sentinel Blade & Praesidium Shield): Sentinel blade
@@ -486,8 +580,8 @@ Misericordia	Melee	5	2+	5	-2	1	-
 Abilities Stand VigilSentinel StormInvulnerable Save 4Praesidium ShieldVexilla
 Rules Deep StrikeMartial Ka'tahAssaultPistol
 Keywords: Battleline Custodian Guard Faction: Adeptus Custodes Imperium Infantry`,
-            "- Adeptus Mechanicus -",
-            `Belisarius Cawl 
+			"- Adeptus Mechanicus -",
+			`Belisarius Cawl 
 Unit	M	T	SV	W	LD	OC
 Belisarius Cawl	8"	8	2+	10	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -499,7 +593,7 @@ Mechadendrite hive	Melee	2D6	3+	4	0	1	Extra Attacks
 Abilities Canticles of the OmnissiahMechanicus BodyguardSelf-repair MechanismsInvulnerable Save 4
 Rules Doctrina ImperativesAnti-Devastating WoundsExtra AttacksBlastMelta
 Keywords: Belisarius Cawl Character Cult Mechanicus Epic Hero Faction: Adeptus Mechanicus Imperium Monster Tech-Priest Warlord`,
-            `Cybernetica Datasmith 
+			`Cybernetica Datasmith 
 Unit	M	T	SV	W	LD	OC
 Cybernetica Datasmith	6"	4	2+	3	7+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -517,7 +611,7 @@ Battle Protocols: At the start of the battle, if this model is leading a Kastela
 ■ Aegis Protocol: Add 1 to the Toughness characteristic of Kastelan Robot models in that unit.
 Invulnerable Save: 5+
 Arch Negator: Ranged weapons equipped by the bearer have the [ANTI-VEHICLE 4+] ability.`,
-            `Kastelan Robots 
+			`Kastelan Robots 
 Models
  1x Kastelan Robot: Kastelan phosphor blaster & Kastelan fist (Kastelan fist, Kastelan phosphor blaster), Heavy phosphor blaster
  1x Kastelan Robot: Twin Kastelan fist, Incendine combustor
@@ -539,7 +633,7 @@ Repulsor Grid: Each time a ranged attack is allocated to a Kastelan Robot model 
 Invulnerable Save: 5+
 Rules Deadly Demise 1Ignores CoverTwin-linkedTorrent
 Keywords: Faction: Adeptus Mechanicus Imperium Kastelan Robots Legio Cybernetica Vehicle Walker`,
-            `Skitarii Rangers 
+			`Skitarii Rangers 
 Models
  1x Skitarii Ranger Alpha: Alpha combat weapon, Close combat weapon, Galvanic rifle
  1x Skitarii Ranger w/ arc rifle: Arc rifle, Close combat weapon
@@ -565,7 +659,7 @@ Invulnerable Save: 5+
 Omnispex: Ranged weapons equipped by models in the bearer’s unit have the IGNORES COVER ability.
 Rules Scouts 6"Doctrina ImperativesRapid FireAnti-Devastating WoundsHazardousHeavyPrecision
 Keywords: Battleline Faction: Adeptus Mechanicus Imperium Infantry Rangers Skitarii`,
-            `Skitarii Vanguard 
+			`Skitarii Vanguard 
 Models
  1x Skitarii Vanguard Alpha: Alpha combat weapon, Close combat weapon, Mechanicus pistol
  1x Skitarii Vanguard w/ arc rifle: Arc rifle, Close combat weapon
@@ -591,7 +685,7 @@ Invulnerable Save: 5+
 Omnispex: Ranged weapons equipped by models in the bearer’s unit have the IGNORES COVER ability.
 Rules Doctrina ImperativesAnti-Rapid FireDevastating WoundsHazardousHeavyPrecision
 Keywords: Battleline Faction: Adeptus Mechanicus Imperium Infantry Skitarii Vanguard`,
-            `Skorpius Dunerider 
+			`Skorpius Dunerider 
 Unit	M	T	SV	W	LD	OC
 Skorpius Dunerider	12"	9	3+	11	7+	2
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -605,8 +699,8 @@ Transport Skorpius Dunerider
 Rules Deadly Demise D3Doctrina ImperativesFiring Deck 2Rapid FireSustained HitsTwin-linked
 Keywords: Dedicated Transport Faction: Adeptus Mechanicus Imperium Skitarii Skorpius Dunerider Smoke Transport Vehicle`,
 
-            "- Agents of the Imperium -",
-            `Callidus Assassin 
+			"- Agents of the Imperium -",
+			`Callidus Assassin 
 Unit	M	T	SV	W	LD	OC
 Callidus Assassin	7"	4	6+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -620,7 +714,7 @@ Shadow Assignment: This model cannot be selected as your WARLORD. If your army f
 Lord of Deceit (Aura): Each time your opponent targets a unit from their army with a Stratagem, if that unit is within 12" of this model, increase the cost of that use of that Stratagem by 1CP.
 Rules Deep StrikeLone OperativeFights FirstInfiltratorsAnti-PrecisionTorrentLethal Hits
 Keywords: Callidus Assassin Character Epic Hero Faction: Agents of the Imperium Imperium Infantry`,
-            `Corvus Blackstar
+			`Corvus Blackstar
 Unit	M	T	SV	W	LD	OC
 Corvus Blackstar	20+"	10	3+	14	6+	0
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -634,7 +728,7 @@ Armoured hull	Melee	3	4+	6	0	1	-
 Abilities Blackstar Cluster LauncherDamaged: 1-5 Wounds RemainingTransportAuspex Array
 Rules Deadly Demise D6HoverStealthAssigned AgentsRapid FireTwin-linkedIgnores Cover
 Keywords: Aircraft Allied Units Corvus Blackstar Deathwatch Faction: Agents of the Imperium Fly Imperium Ordo Xenos Retinue Transport Vehicle`,
-            `Culexus Assassin 
+			`Culexus Assassin 
 Unit	M	T	SV	W	LD	OC
 Culexus Assassin	7"	4	6+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -649,7 +743,7 @@ Etheric Emergence: In your Movement phase, when this model is set up on the batt
 Shadow Assignment: This model cannot be selected as your WARLORD. If your army faction is AGENTS OF THE IMPERIUM, then during the Declare Battle Formations step, you can replace this model with a different OFFICIO ASSASSINORUM model, provided that the points value of the new model does not exceed the points value of the model it replaced. Your army cannot include duplicates of the same model (i.e. after replacing this model with this rule, your army cannot have more than 1 VINDICARE ASSASSIN, it cannot have more than 1 CULEXUS ASSASSIN, it cannot have more than 1 EVERSOR ASSASSIN and it cannot have more than 1 CALLIDUS ASSASSIN).
 Rules Lone OperativeStealthDeep StrikePsychic AssassinAnti-PrecisionAssaultDevastating Wounds
 Keywords: Character Culexus Assassin Epic Hero Faction: Agents of the Imperium Grenades Imperium Infantry`,
-            `Eversor Assassin 
+			`Eversor Assassin 
 Unit	M	T	SV	W	LD	OC
 Eversor Assassin	9"	4	6+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -663,7 +757,7 @@ Overkill: Once per battle, in your Movement phase, this model can use this abili
 Shadow Assignment: This model cannot be selected as your WARLORD. If your army faction is AGENTS OF THE IMPERIUM, then during the Declare Battle Formations step, you can replace this model with a different OFFICIO ASSASSINORUM model, provided that the points value of the new model does not exceed the points value of the model it replaced. Your army cannot include duplicates of the same model (i.e. after replacing this model with this rule, your army cannot have more than 1 VINDICARE ASSASSIN, it cannot have more than 1 CULEXUS ASSASSIN, it cannot have more than 1 EVERSOR ASSASSIN and it cannot have more than 1 CALLIDUS ASSASSIN).
 Rules Lone OperativeDeadly Demise D3Scouts 9"PrecisionPistolSustained HitsAnti-
 Keywords: Character Epic Hero Eversor Assassin Faction: Agents of the Imperium Grenades Imperium Infantry`,
-            `Inquisitor Coteaz 
+			`Inquisitor Coteaz 
 Unit	M	T	SV	W	LD	OC
 Inquisitor Coteaz	6"	3	2+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -680,7 +774,7 @@ Authority of the Inquisition: While this model is leading a unit, it can embark 
 Glovodan Psyber-eagle: In your Command phase, you can select one enemy unit within 18" of the bearer. Until the start of your next Command phase, that unit cannot have the Benefit of Cover.
 Rules LeaderPistolPsychicAnti-Devastating Wounds
 Keywords: Character Coteaz Epic Hero Faction: Agents of the Imperium Imperium Infantry Inquisitor Ordo Malleus Psyker Warlord`,
-            `Sisters of Battle Immolator 
+			`Sisters of Battle Immolator 
 Unit	M	T	SV	W	LD	OC
 Immolator	12"	10	3+	11	7+	2
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -697,8 +791,8 @@ Invulnerable Save: This model has a 6+ invulnerable save.
 Rules Deadly Demise D3Sustained HitsTorrentIgnores Cover
 Keywords: Allied Units Dedicated Transport Faction: Agents of the Imperium Imperium Ordo Hereticus Sisters of Battle Immolator Smoke Transport Vehicle`,
 
-            "- Astra Militarum -",
-            `Ratling Snipers 
+			"- Astra Militarum -",
+			`Ratling Snipers 
 Models
  5x Ratling Snipers: Close Combat Weapon, Sniper Rifle
 Unit	M	T	SV	W	LD	OC
@@ -710,7 +804,7 @@ Close Combat Weapon (x5)	Melee	1	5+	2	0	1	-
 Abilities Shoot Sharp and Scarper
 Rules InfiltratorsStealthHeavyPrecision
 Keywords: Faction: Astra Militarum Imperium Infantry Ratling Ratling Snipers`,
-            `Scout Sentinels 
+			`Scout Sentinels 
 Unit	M	T	SV	W	LD	OC
 Scout Sentinel	10"	7	3+	7	7+	2
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -729,8 +823,8 @@ Sentinel Chainsaw	Melee	3	4+	6	-1	1	-
 Abilities Daring Recon
 Rules Deadly Demise 1Scouts 9"One Shot
 Keywords: Faction: Astra Militarum Imperium Regiment Scout Sentinels Smoke Squadron Vehicle Walker`,
-            "- Imperial Knights -",
-            `Canis Rex 
+			"- Imperial Knights -",
+			`Canis Rex 
 Models
  1x Canis Rex: Chainbreaker las-impulsor, Chainbreaker multi-laser, Freedom's Hand
  1x Sir Hekhtur: Close combat weapon, Hekhtur's pistol
@@ -754,7 +848,7 @@ Damaged: 1-7 Wounds Remaining: While this model has 1-7 wounds remaining, subtra
 Using Sir Hekhtur: When your Canis Rex model is destroyed, Sir Hekhtur is treated as a model disembarking from a destroyed TRANSPORT – set him up within 3" of your Canis Rex model before it is removed. Sir Hekhtur then uses the profile, wargear, abilities and keywords shown on this side of the card, but cannot be selected as the target of any of your Stratagems other than Core Stratagems. Your Canis Rex unit is not considered to be destroyed until Sir Hekhtur is also destroyed.
 Rules Deadly Demise D6Sustained HitsSuper-Heavy WalkerBlastCode ChivalricLone Operative
 Keywords: Canis Rex Character Epic Hero Faction: Imperial Knights Imperium Infantry Questoris Sir Hekhtur Titanic Towering Vehicle Walker Warlord`,
-            `Cerastus Knight Acheron 
+			`Cerastus Knight Acheron 
 Unit	M	T	SV	W	LD	OC
 Cerastus Knight Acheron	12"	12	3+	25	6+	10
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -770,7 +864,7 @@ Damaged: 1-8 Wounds Remaining: While this model has 1-8 wounds remaining, subtra
 Acheron’s Duty (Bondsman): While a model is affected by this ability, at the start of the Fight phase, each enemy unit within Engagement Range of one or more units with this ability must take a Battle-shock test, subtracting 1 from the result when they do.
 Rules Code ChivalricDeadly Demise D6+2Super-Heavy WalkerBondsman AbilitiesIgnores CoverTorrentSustained HitsTwin-linked
 Keywords: Cerastus Character Faction: Imperial Knights Imperium Knight Acheron Titanic Towering Vehicle Walker`,
-            `Cerastus Knight Atrapos 
+			`Cerastus Knight Atrapos 
 Unit	M	T	SV	W	LD	OC
 Cerastus Knight Atrapos	12"	12	3+	25	6+	10
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -790,9 +884,9 @@ Rules Code ChivalricDeadly Demise D6+2Super-Heavy WalkerBondsman AbilitiesSustai
 Keywords: Cerastus Character Faction: Imperial Knights Imperium Knight Atrapos Titanic Towering Vehicle Walker`,
 
 
-            // Chaos Forces Faction – Includes 6 Armies:
-            "=== Chaos ===",
-            `Be'lakor
+			// Chaos Forces Faction – Includes 6 Armies:
+			"=== Chaos ===",
+			`Be'lakor
 Unit	M	T	SV	W	LD	OC
 Be'lakor	12"	10	4+	18	6+	5
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -805,7 +899,28 @@ Abilities The Dark Master (Aura)Shadow FormInvulnerable Save 4Damaged: 1-6 wound
 Shadow Form Wreathed in Shadows (Aura, Psychic)Pall of Despair (Aura, Psychic)Shadow Lord (Aura, Psychic)
 Rules Deep StrikeThe Shadow of ChaosWarp RiftsStealthDeadly Demise D6Devastating WoundsPsychicHazardousIgnores CoverLethal Hits
 Keywords: Be'lakor Chaos Character Daemon Epic Hero Faction: Legiones Daemonica Fly Monster Psyker Warlord`,
-            `Knight Abominant 
+			`Bloodthirster 
+Unit	M	T	SV	W	LD	OC
+Bloodthirster	12"	11	4+	18	6+	5
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Hellfire breath	12"	D6	N/A	5	-1	1	Ignores Cover, Torrent
+Bloodflail (x0)	12"	1	2+	16	-3	D6+1	Devastating Wounds
+Lash of Khorne (x0)	12"	6	2+	8	0	2	-
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+➤ Axe of Khorne (x0) - strike	Melee	8	2+	14	-4	D6	-
+➤ Axe of Khorne (x0) - sweep	Melee	16	2+	8	-2	1	-
+➤ Great axe of Khorne - strike	Melee	7	2+	16	-4	D6+2	-
+➤ Great axe of Khorne - sweep (x0)	Melee	14	2+	10	-2	2	-
+Relentless Carnage	1	8D6	5	0	0	1	ANTI-F 1, Devastating Wounds
+Abilities
+Daemon Lord of Khorne (Aura): While a friendly KHORNE LEGIONES DAEMONICA unit is within 6" of this model, each time a model in that unit makes a melee attack, add 1 to the Hit roll.
+Relentless Carnage: At the end of the Fight phase, you can select one enemy unit within Engagement Range of this model and roll eight D6: for each 4+, that enemy unit suffers 1 mortal wound.
+Invulnerable Save: This model has a 4+ invulnerable save.
+Damaged: 1-6 wounds remaining: While this model has 1-6 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
+Greater Daemon of Khorne (Aura): While a friendly KHORNE LEGIONES DAEMONICA unit is within 6" of this model, that unit is within your army’s Shadow of Chaos.
+Rules Deadly Demise D6Deep StrikeThe Shadow of ChaosWarp RiftsIgnores CoverTorrent
+Keywords: Bloodthirster Chaos Character Daemon Faction: Legiones Daemonica Fly Khorne Monster Warlord`,
+			`Knight Abominant 
 Unit	M	T	SV	W	LD	OC
 Knight Abominant	10"	12	3+	22	6+	10
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -821,7 +936,7 @@ Warp Storms (Psychic): At the end of your Movement phase, roll one D6 for each e
 Damaged: 1-7 wounds remaining: While this model has 1-7 wounds remaining, subtract 5 from this model’s Objective Control characteristic and each time this model makes an attack, subtract 1 from the Hit roll.
 Rules Super-Heavy WalkerDeadly Demise D6Extra AttacksRapid FireSustained HitsDevastating Wounds
 Keywords: Abhorrent Allied Units Chaos Character Faction: Chaos Knights Knight Abominant Psyker Titanic Towering Vehicle Walker`,
-            `Knight Desecrator 
+			`Knight Desecrator 
 Unit	M	T	SV	W	LD	OC
 Knight Desecrator	10"	12	3+	22	6+	10
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -839,7 +954,7 @@ Obsessive Ruthlessness: Each time this model makes a ranged attack against a MON
 Damaged: 1-7 wounds remaining: While this model has 1-7 wounds remaining, subtract 5 from this model’s Objective Control characteristic and each time this model makes an attack, subtract 1 from the Hit roll.
 Rules Super-Heavy WalkerDeadly Demise D6Rapid Fire
 Keywords: Abhorrent Allied Units Chaos Character Faction: Chaos Knights Knight Desecrator Titanic Towering Vehicle Walker`,
-            `Knight Rampager 
+			`Knight Rampager 
 Unit	M	T	SV	W	LD	OC
 Knight Rampager	12"	12	3+	22	6+	10
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -856,7 +971,7 @@ Bloodlust: Each time this model makes a Charge move, until the end of the turn, 
 Damaged: 1-7 wounds remaining: While this model has 1-7 wounds remaining, subtract 5 from this model’s Objective Control characteristic and each time this model makes an attack, subtract 1 from the Hit roll.
 Rules Super-Heavy WalkerDeadly Demise D6Sustained HitsRapid Fire
 Keywords: Abhorrent Allied Units Chaos Character Faction: Chaos Knights Knight Rampager Titanic Towering Vehicle Walker`,
-            `Knight Tyrant 
+			`Knight Tyrant 
 Unit	M	T	SV	W	LD	OC
 Knight Tyrant	8"	13	2+	24	6+	10
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -877,7 +992,7 @@ Invulnerable Save: This model has a 5+ invulnerable save against ranged attacks.
 Damaged: 1-8 wounds remaining: While this model has 1-8 wounds remaining, subtract 5 from this model’s Objective Control characteristic and each time this model makes an attack, subtract 1 from the Hit roll.
 Rules Super-Heavy WalkerDeadly Demise D6+2MeltaTwin-linkedAnti-Devastating WoundsBlastHazardous
 Keywords: Allied Units Chaos Character Faction: Chaos Knights Knight Tyrant Titanic Towering Vehicle Walker`,
-            `Nurglings 
+			`Nurglings 
 Models
 3x Nurgling Swarm: Diseased claws and teeth
 Unit	M	T	SV	W	LD	OC
@@ -905,13 +1020,13 @@ Warp Rifts: Each time a LEGIONES DAEMONICA unit from your army is set up on the 
 Infiltrators: During deployment, if every model in a unit has this ability, then when you set it up, it can be set up anywhere on the battlefield that is more than 9" horizontally away from the enemy deployment zone and all enemy models.
 Lethal Hits: Weapons with [LETHAL HITS] in their profile are known as Lethal Hits weapons. Each time an attack is made with such a weapon, a Critical Hit automatically wounds the target.
 Keywords: Battleline Chaos Daemon Faction: Legiones Daemonica Nurgle Nurglings Swarm`,
-            //"- Death Guard -",  // Are these not Chaos Space Marines?
-            //"- Dark Mechanicum -",
-            //"- The Lost and The Damned -",  // Misc chaos fans.
+			//"- Death Guard -",  // Are these not Chaos Space Marines?
+			//"- Dark Mechanicum -",
+			//"- The Lost and The Damned -",  // Misc chaos fans.
 
-            "=== Xenos ===",
-            "- Aeldari -",
-            `Avatar of Khaine
+			"=== Xenos ===",
+			"- Aeldari -",
+			`Avatar of Khaine
 Unit	M	T	SV	W	LD	OC
 Avatar of Khaine	10"	12	2+	14	6+	5
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -942,7 +1057,7 @@ Once per phase, before making a dice roll for a model or unit from your army wit
 
 Sustained Hits: Weapons with [SUSTAINED HITS X] in their profile are known as Sustained Hits weapons. Each time an attack is made with such a weapon, if a Critical Hit is rolled, that attack scores a number of additional hits on the target as denoted by ‘x’
 Keywords: Avatar of Khaine Character Daemon Epic Hero Faction: Aeldari Monster Warlord`,
-            `Death Jester 
+			`Death Jester 
 Unit	M	T	SV	W	LD	OC
 Death Jester	8"	3	6+	4	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -958,7 +1073,7 @@ Cruel Amusement: In your Shooting phase, one model from your army with this abil
 Invulnerable Save: 4+
 Rules Lone OperativeStrands of FateDevastating Wounds
 Keywords: Character Death Jester Faction: Aeldari Harlequins Infantry`,
-            `Night Spinner 
+			`Night Spinner 
 Unit	M	T	SV	W	LD	OC
 Night Spinner	14"	9	3+	12	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -972,7 +1087,7 @@ Damaged: 1-4 Wounds Remaining: While this model has 1-4 wounds remaining, each t
 Monofilament Web: In your Shooting phase, after this model has shot, if one or more of those attacks made with its Doomweaver scored a hit against an enemy unit, that enemy unit is pinned until the end of your opponent’s next turn. While a unit is pinned, subtract 2" from it's Move characteristic and subtract 2 from Advance and Charge rolls made for it.
 Rules Deadly Demise D3Strands of FateIndirect FireDevastating WoundsBlastTwin-linkedAssault
 Keywords: Faction: Aeldari Fly Night Spinner Vehicle`,
-            `Shadow Spectres
+			`Shadow Spectres
 Models
  5x Shadow Spectre: Close combat weapon, Prism Rifle
 Unit	M	T	SV	W	LD	OC
@@ -985,7 +1100,7 @@ Close Combat Weapon (x5)	Melee	2	3+	3	0	1	-
 Abilities Invulnerable Save 5Shade of Twilight
 Rules Deep StrikeStealthStrands of FateBlast
 Keywords: Faction: Aeldari Fly Infantry Shadow Spectres`,
-            `Spiritseer 
+			`Spiritseer 
 Unit	M	T	SV	W	LD	OC
 Spiritseer	7"	3	6+	3	6+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1002,8 +1117,8 @@ Spirit Mark: While this model is leading a unit, weapons in that unit have the [
 Tears of Isha (Psychic): While this model is leading a unit, in your Command phase, you can return 1 destroyed Bodyguard model to that unit.
 Rules Strands of FateLeaderPistolAssaultAnti-Psychic
 Keywords: Character Faction: Aeldari Infantry Psyker Spiritseer`,
-            `The Yncarne 
-            Unit	M	T	SV	W	LD	OC
+			`The Yncarne 
+			Unit	M	T	SV	W	LD	OC
 The Yncarne	10"	10	2+	12	6+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
 Swirling soul energy	12"	D6+3	N/A	7	-1	D3	Ignores Cover, Psychic, Torrent
@@ -1016,10 +1131,10 @@ Inevitable Death: Once in each of your turns, if this model is on the battlefiel
 Deathly Form: Each time an attack is allocated to this model, halve the Damage characteristic of that attack.
 Rules Deadly Demise D3Strands of FateIgnores CoverPsychicTorrent
 Keywords: Character Daemon Epic Hero Faction: Aeldari Fly Monster Psyker The Yncarne Warlord Ynnari`,
-            `Warp Spiders 
-            Models
-            4x Warp Spider: Close combat weapon, Deathspinner
-            1x Warp Spider Exarch: Close combat weapon, 2x Deathspinner, Powerblades
+			`Warp Spiders 
+			Models
+			4x Warp Spider: Close combat weapon, Deathspinner
+			1x Warp Spider Exarch: Close combat weapon, 2x Deathspinner, Powerblades
 Unit	M	T	SV	W	LD	OC
 Warp Spider (x4)	12"	3	3+	1	6+	1
 Warp Spider Exarch	12"	3	3+	2	6+	1
@@ -1031,7 +1146,7 @@ Powerblades	Melee	3	3+	4	-2	1	-
 Abilities FlickerjumpInvulnerable Save 5
 Rules Strands of FateDeep StrikeDevastating WoundsTorrent
 Keywords: Faction: Aeldari Fly Infantry Jump Pack Warp Spiders`,
-            `Wraithblades
+			`Wraithblades
 Models
 5x Wraithblade: Ghostaxe and Forceshield
 Unit	M	T	SV	W	LD	OC
@@ -1045,7 +1160,7 @@ Forceshield: The bearer has a 4+ Invulnerable Save.
 Invulnerable Save: 4+
 Rules Strands of Fate
 Keywords: Faction: Aeldari Infantry Wraith Construct Wraithblades`,
-            `Wraithguard 
+			`Wraithguard 
 Models
 5x Wraithguard: Close Combat Weapon, Wraithcannon
 Unit	M	T	SV	W	LD	OC
@@ -1059,8 +1174,28 @@ Abilities War Construct
 Rules Strands of FateDevastating Wounds
 Keywords: Faction: Aeldari Infantry Wraith Construct Wraithguard`,
 
-            "- Leagues of Votann -",
-            `Ûthar the Destined 
+			"- Leagues of Votann -",
+			`Hekaton Land Fortress 
+Unit	M	T	SV	W	LD	OC
+Hekaton Land Fortress	10"	12	2+	16	7+	5
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+MATR autocannon	24"	6	4+	7	-1	2	-
+Cyclic ion cannon (x0)	24"	D6+3	4+	9	-2	2	Blast
+Heavy magna-rail cannon	30"	1	4+	18	-4	D6+6	Devastating Wounds, Heavy
+SP heavy conversion beamer (x0)	24"	2	4+	10	-2	4	Conversion, Sustained Hits D3
+Twin bolt cannon (x2)	36"	3	4+	6	-1	2	Sustained Hits 1, Twin-linked
+Twin ion beamer (x0)	18"	3	4+	7	-2	1	Sustained Hits D3, Twin-linked
+Hekaton warhead	36" (x0)	D6+3	4+	7	-2	2	Blast, Indirect Fire, One Shot
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured wheels	Melee	6	4+	8	0	1	-
+Abilities
+Fire Support: In your Shooting phase, after this model has shot, select one enemy unit it scored one or more hits against this phase. Until the end of the phase, each time a friendly model that disembarked from this Transport this turn makes an attack that targets that enemy unit, you can re-roll the Wound roll.
+Damaged: 1-5 wounds remaining: While this model has 1-5 wounds remaining, each time this model makes an attack, subtract 1 from the Hit roll.
+Pan spectral scanner: Ranged weapons equipped by the bearer have the [IGNORES COVER] ability.
+Transport Hekaton Land Fortress
+Rules Eye of the AncestorsRuthless EfficiencyDeadly Demise D6BlastSustained HitsTwin-linked
+Keywords: Faction: Leagues of Votann Hekaton Land Fortress Transport Vehicle`,
+			`Ûthar the Destined 
 Unit	M	T	SV	W	LD	OC
 Ûthar the Destined	5"	5	3+	5	7+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1071,8 +1206,8 @@ Abilities Ancestral FortuneThe DestinedLeaderInvulnerable SaveGrim EfficiencyRam
 Rules LeaderEye of the AncestorsRuthless EfficiencyDevastating Wounds
 Keywords: Character Epic Hero Faction: Leagues of Votann Infantry Warlord Ûthar the Destined`,
 
-            "- Necrons -",
-            `C'tan Shard of the Deceiver 
+			"- Necrons -",
+			`C'tan Shard of the Deceiver 
 Unit	M	T	SV	W	LD	OC
 C'tan Shard of the Deceiver	6"	11	4+	12	6+	6
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1082,7 +1217,7 @@ Golden fists	Melee	8	2+	8	-3	3	-
 Abilities Invulnerable SaveGrand IllusionNecrodermisEnslaved Star God
 Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6StealthFeel No Pain 5+Anti-Devastating WoundsPrecision
 Keywords: C'tan Shard of the Deceiver Character Epic Hero Faction: Necrons Fly Monster`,
-            `C'tan Shard of the Nightbringer 
+			`C'tan Shard of the Nightbringer 
 Unit	M	T	SV	W	LD	OC
 C'tan Shard of the Nightbringer	6"	11	4+	12	6+	4
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1093,7 +1228,7 @@ Melee Weapons	Range	A	WS	S	AP	D	Keywords
 Abilities Invulnerable SaveDrain LifeNecrodermisEnslaved Star God
 Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6Feel No Pain 5+
 Keywords: C'tan Shard of the Nightbringer Character Epic Hero Faction: Necrons Fly Monster`,
-            `C'tan Shard of the Void Dragon 
+			`C'tan Shard of the Void Dragon 
 Unit	M	T	SV	W	LD	OC
 C'tan Shard of the Void Dragon	6"	11	4+	12	6+	4
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1106,7 +1241,7 @@ Canoptek tail blades	Melee	6	2+	6	-1	1	Extra Attacks
 Abilities Invulnerable SaveMatter AbsorptionNecrodermisEnslaved Star God
 Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6Feel No Pain 5+Extra AttacksAnti-BlastSustained Hits
 Keywords: C'tan Shard of the Void Dragon Character Epic Hero Faction: Necrons Fly Monster`,
-            `C'tan Shard of the Void Dragon 
+			`C'tan Shard of the Void Dragon 
 Unit	M	T	SV	W	LD	OC
 C'tan Shard of the Void Dragon	6"	11	4+	12	6+	4
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1119,7 +1254,7 @@ Canoptek tail blades	Melee	6	2+	6	-1	1	Extra Attacks
 Abilities Invulnerable SaveMatter AbsorptionNecrodermisEnslaved Star God
 Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D6Feel No Pain 5+Extra AttacksAnti-BlastSustained Hits
 Keywords: C'tan Shard of the Void Dragon Character Epic Hero Faction: Necrons Fly Monster`,
-            `Ghost Ark 
+			`Ghost Ark 
 Unit	M	T	SV	W	LD	OC
 Ghost Ark	10"	9	3+	14	7+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1130,8 +1265,8 @@ Abilities Invulnerable Save 4, Repair Barge
 Transport Ghost Ark
 Rules Annihilation ProtocolDeadly Demise D3Reanimation ProtocolsLethal HitsRapid Fire
 Keywords: Dedicated Transport Faction: Necrons Fly Ghost Ark Transport Vehicle`,
-            // New Recruit adds (x20) to Gretchin but leaves out (x3) for Unit listing here :(
-            `Skorpekh Destroyers 
+			// New Recruit adds (x20) to Gretchin but leaves out (x3) for Unit listing here :(
+			`Skorpekh Destroyers 
 Models
  3x Skorpekh Destroyer: Skorpekh hyperphase weapons
 Unit	M	T	SV	W	LD	OC
@@ -1142,8 +1277,8 @@ Abilities Whirling Onslaught
 Rules Annihilation ProtocolReanimation Protocols
 Keywords: Destroyer Cult Faction: Necrons Infantry Skorpekh Destroyers`,
 
-            "- Orks -",
-            `Big Mek 
+			"- Orks -",
+			`Big Mek 
 Unit	M	T	SV	W	LD	OC
 Big Mek	6"	5	3+	6	7+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1155,7 +1290,7 @@ Power klaw (x0)	Melee	4	3+	9	-2	2	-
 Abilities More DakkaShokk-boostaGitfinder GogglezLeader
 Rules Waaagh!LeaderIgnores CoverDevastating WoundsAnti-
 Keywords: Big Mek Character Faction: Orks Grenades Infantry Mek`,
-            `Boyz 
+			`Boyz 
 Models
  1x Boss Nob: Power klaw and slugga (Power klaw, Slugga)
  8x Boy w/ Shoota and close combat weapon: Close combat weapon, Shoota
@@ -1179,7 +1314,7 @@ Choppa (x9)	Melee	3	3+	4	-1	1	-
 Abilities Get Da Good BitzBodyguard
 Rules Waaagh!PistolRapid FireBlast
 Keywords: Battleline Boyz Faction: Orks Grenades Infantry Mob`,
-            `Gretchin 
+			`Gretchin 
 Models
  10x Gretchin: Close combat weapon, Grot blasta
  1x Runtherd: Grot-smacka, Slugga
@@ -1195,7 +1330,7 @@ Grot-smacka	Melee	3	3+	5	0	1	-
 Abilities RuntherdThievin’ Scavengers
 Rules Waaagh!Pistol
 Keywords: Battleline Faction: Orks Gretchin Grots Infantry`,
-            `Ghazghkull Thraka 
+			`Ghazghkull Thraka 
 Models
  1x Ghazghkull Thraka: Gork’s Klaw, Mork’s Roar
  1x Makari: Makari’s stabba
@@ -1211,7 +1346,7 @@ Makari’s stabba	Melee	1	4+	3	0	1	Devastating Wounds
 Abilities Supreme CommanderProphet of Da Great Waaagh!Invulnerable Save 4Invulnerable Save 2 for MakariGhazghkull’s Waaagh! Banner (Aura)
 Rules Waaagh!LeaderLethal HitsRapid FireDevastating WoundsLeader
 Keywords: Character Epic Hero Faction: Orks Ghazghkull Thraka Infantry Warboss Warlord`,
-            `Meganobz 
+			`Meganobz 
 Models
  1x Meganob w/ Killsaw and power klaw: Killsaw, Power klaw
  1x Meganob w/ Kombi-weapon and killsaw: Killsaw, Kombi-weapon
@@ -1230,7 +1365,7 @@ Power klaw (x3)	Melee	3	4+	9	-2	2	-
 Twin killsaw	Melee	2	4+	12	-3	2	Twin-linked
 Rules Waaagh!Feel No PainDevastating WoundsAnti-Rapid FireTwin-linked
 Keywords: Faction: Orks Grenades Infantry Mega Armour Meganobz`,
-            `Zodgrod Wortsnagga 
+			`Zodgrod Wortsnagga 
 Unit	M	T	SV	W	LD	OC
 Zodgrod Wortsnagga	6"	5	5+	5	7+	1
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1241,8 +1376,8 @@ Abilities Super RuntsSpecial Dose
 Rules Feel No Pain 6+Waaagh!LeaderPistolAnti-
 Keywords: Character Epic Hero Faction: Orks Infantry Zodgrod Wortsnagga`,
 
-            "- Tyranids -",
-            `Deathleaper 
+			"- Tyranids -",
+			`Deathleaper 
 Unit	M	T	SV	W	LD	OC
 Deathleaper	8"	6	3+	7	7+	1
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
@@ -1263,7 +1398,7 @@ Synapse: If your Army Faction is TYRANIDS, while a TYRANIDS unit from your army 
 
 Precision: Weapons with [PRECISION] in their profile are known as Precision weapons. Each time an attack made with such a weapon successfully wounds an Attached Unit, if a Character model in that unit is visible to the attacking model, the attacking model’s player can choose to have that attack allocated to that Character model instead of following the normal attack sequence.
 Keywords: Character Deathleaper Epic Hero Faction: Tyranids Great Devourer Infantry Vanguard Invader`,
-            `Old One Eye 
+			`Old One Eye 
 Unit	M	T	SV	W	LD	OC
 Old One Eye	8"	9	2+	9	8+	3
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
@@ -1274,7 +1409,7 @@ Alpha Leader: While this model is leading a unit, each time a model in that unit
 Unstoppable Monster: At the start of each player’s Command phase, this model regains up to D3 lost wounds.
 Rules Feel No Pain 5+SynapseLeader
 Keywords: Character Epic Hero Faction: Tyranids Great Devourer Monster Old One Eye Warlord`,
-            `Ripper Swarms 
+			`Ripper Swarms 
 Unit	M	T	SV	W	LD	OC
 Ripper Swarm	6"	2	6+	4	8+	0
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1285,7 +1420,7 @@ Abilities
 Chitinous Horrors (Aura): While an enemy unit is within Engagement Range of this unit, halve the Objective Control characteristic of models in that enemy unit.
 Rules Deep StrikeSynapseSustained Hits 1Pistol
 Keywords: Faction: Tyranids Great Devourer Harvester Ripper Swarm Swarm`,
-            `Termagants 
+			`Termagants 
 Models
  1x Termagant w/ Shardlauncher: Chitinous Claws and Teeth, Shardlauncher
  1x Termagant w/ Spike Rifle: Chitinous Claws and Teeth, Spike Rifle
@@ -1305,7 +1440,7 @@ Chitinous Claws and Teeth (x10)	Melee	1	4+	3	0	1	-
 Abilities Skulking Horrors
 Rules SynapseHeavyBlastAssaultDevastating WoundsTorrent
 Keywords: Battleline Endless Multitude Faction: Tyranids Great Devourer Infantry Termagants`,
-            `The Swarmlord 
+			`The Swarmlord 
 Unit	M	T	SV	W	LD	OC
 The Swarmlord	8"	10	2+	10	7+	3
 Ranged Weapons	Range	A	BS	S	AP	D	Keywords
@@ -1320,569 +1455,575 @@ Invulnerable Save (4+): This model has a 4+ Invulnerable Save.
 Rules Deadly Demise D3Shadow in the WarpSynapseLeaderTwin-linkedTorrent
 Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monster Psyker Synapse The Swarmlord Warlord`,
 
-            "=== NewRecruit.eu paste ===",
-        ]
+			"=== NewRecruit.eu paste ===",
+		]
 
-        function import_sheets() {
-            for (let sheet of sheets) {
-                const new_squads = parse_sheet(sheet)
-                squads = {
-                    ...squads,
-                    ...new_squads
-                }
-            }
-        }
-        function add_squads() {
-            let html = ""
-            for (let key in squads) {
-                html += `<option value="${key}">${key}</option>`
-            }
-            source.innerHTML = html
-            target.innerHTML = html
-        }
-        function set_source_squad(key) {
-            let squad = squads[key]
-            if (typeof squad === "string") squad = parse_sheet(squad)
-            let html = squad["weapons"] ? `<table><tr>
-                    <th>Weapon</th>
-                    <th>Count</th>
-                    <th>Range</th>
-                    <th title="Attacks">A</th>
-                    <th title="Ballistic/Weapon Skill">BS/WS</th>
-                    <th title="Strength">S</th>
-                    <th title="Armor Piercing">AP</th>
-                    <th title="Damage">D</th>
-                    <th>Keywords</th>
-                </tr>` : ''
-            let i = 0
-            log("LOADING squad " + JSON.stringify(squad))
-            source_abilities.value = (squad.abilities || []).join(", ")
-            source_keywords.value = (squad.keywords || []).join(", ")
+		function import_sheets() {
+			for (let sheet of sheets) {
+				const new_squads = parse_sheet(sheet)
+				squads = {
+					...squads,
+					...new_squads
+				}
+			}
+		}
+		function add_squads() {
+			let html = ""
+			for (let key in squads) {
+				html += `<option value="${key}">${key}</option>`
+			}
+			source.innerHTML = html
+			target.innerHTML = html
+		}
+		function set_source_squad(key) {
+			let squad = squads[key]
+			if (typeof squad === "string") squad = parse_sheet(squad)
+			let html = squad["weapons"] ? `<table><tr>
+					<th>Weapon</th>
+					<th>Count</th>
+					<th>Range</th>
+					<th title="Attacks">A</th>
+					<th title="Ballistic/Weapon Skill">BS/WS</th>
+					<th title="Strength">S</th>
+					<th title="Armor Piercing">AP</th>
+					<th title="Damage">D</th>
+					<th>Keywords</th>
+				</tr>` : ''
+			let i = 0
+			log("LOADING squad " + JSON.stringify(squad))
+			source_abilities.value = (squad.abilities || []).join(", ")
+			source_keywords.value = (squad.keywords || []).join(", ")
 
-            source_models.innerHTML = Object.keys(squad.models).join(', ')
-            models.style.display = source_models.innerHTML ? 'block' : 'none'
-            for (let key in squad["weapons"]) {
-                log("Weapon: " + key)
-                i++
-                let weapon = squad["weapons"][key]
-                html += `<tr><td id="weapon${i}">${key}</td>
-<td><input id="count${i}" type="number" value="${weapon.count || 0}"></td>
-<td><input id="range${i}" type="number" value="${weapon.R}"></td>
+			source_models.innerHTML = Object.keys(squad.models).join(', ')
+			models.style.display = source_models.innerHTML ? 'block' : 'none'
+			for (let key in squad["weapons"]) {
+				log("Weapon: " + key)
+				i++
+				let weapon = squad["weapons"][key]
+				html += `<tr><td id="weapon${i}">${key}</td>
+<td><input id="count${i}" type="number" min="0" value="${weapon.count || 0}"></td>
+<td><input id="range${i}" type="number" min="0" value="${weapon.R}"></td>
 <td><input id="attacks${i}" type="text" value="${weapon.A}"></td>
-<td><input id="skill${i}" type="number" value="${parseInt(weapon.WS)}"></td>
-<td><input id="strength${i}" type="number" value="${weapon.S}"></td>
+<td><input id="skill${i}" type="number" min="0" value="${parseInt(weapon.WS)}"></td>
+<td><input id="strength${i}" type="number" min="0" value="${weapon.S}"></td>
 <td><input id="piercing${i}" type="number" value="${-Math.abs(weapon.AP || 0)}"></td>
 <td><input id="damage${i}" type="text" value="${weapon.D}"></td>
 <td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).split(/, */).join(", ")}" style="width: 10em"></td></tr>`
-            }
-            weapons.innerHTML = html + "</table>"
-        }
+			}
+			weapons.innerHTML = html + "</table>"
+		}
 
-        function set_target_squad(key) {
-            let squad = squads[key]
-            if (typeof squad === "string") {
-                log("Dynamic squad string load.")
-                squad = parse_sheet(squad)[key]
-            }
-            target_size.value = squad.size || 1
-            target_abilities.value = (squad.abilities || []).join(", ")
-            target_keywords.value = (squad.keywords || []).join(", ")
-            target_rules.value = (squad.rules || []).join(", ")
-            let html = ""
-            for (let k in squad.units) {
-                html += `<option value="${k}">${k}</option>`
-                const unit = squad.units[k]
-                toughness.value = unit.T || ''
-                save.value = parseInt(unit.SV) || ''
-                wounds.value = unit.W || ''
-                leadership.value = parseInt(unit.LD) || 0
-                let mo = /Invulnerable Save (\d+)/.exec(squad.abilities)  // Ghost Ark
-                invuln_save.value = mo && parseInt(mo[1]) || ""
-                mo = /Feel No Pain (\d+)/.exec(squad.abilities)
-                fnp_save.value = mo && parseInt(mo[1]) || ""
-            }
-            target_unit.innerHTML = html
-            if (target_unit.options.length) {
-                target_unit.options[0].selected = true
-                target_unit.onchange()
-            }
-        }
+		function set_target_squad(key) {
+			let squad = squads[key]
+			if (typeof squad === "string") {
+				log("Dynamic squad string load.")
+				squad = parse_sheet(squad)[key]
+			}
+			target_size.value = squad.size || 1
+			target_abilities.value = (squad.abilities || []).join(", ")
+			target_keywords.value = (squad.keywords || []).join(", ")
+			target_rules.value = (squad.rules || []).join(", ")
+			let html = ""
+			for (let k in squad.units) {
+				html += `<option value="${k}">${k}</option>`
+				const unit = squad.units[k]
+				toughness.value = unit.T || ''
+				save.value = parseInt(unit.SV) || ''
+				wounds.value = unit.W || ''
+				leadership.value = parseInt(unit.LD) || 0
+				let mo = /Invulnerable Save (\d+)/.exec(squad.abilities)  // Ghost Ark
+				invuln_save.value = mo && parseInt(mo[1]) || ""
+				mo = /Feel No Pain (\d+)/.exec(squad.abilities)
+				fnp_save.value = mo && parseInt(mo[1]) || ""
+			}
+			target_unit.innerHTML = html
+			if (target_unit.options.length) {
+				target_unit.options[0].selected = true
+				target_unit.onchange()
+			}
+		}
 
-        function set_target_unit(key) {
-            let unit = squads[target.value].units[key]
-            toughness.value = unit.T || ''
-            save.value = unit.SV || ''
-            wounds.value = unit.W || ''
-        }
+		function set_target_unit(key) {
+			let unit = squads[target.value].units[key]
+			toughness.value = unit.T || ''
+			save.value = unit.SV || ''
+			wounds.value = unit.W || ''
+		}
 
-        let d6 = _ => 1 + Math.floor(Math.random() * 6)
-        function geti(id) {
-            let rv = 0
-            let s = document.getElementById(id).value
-            let m = /[+-]\d+/.exec(s)
-            if (m) rv = parseInt(m[0])
-            if (m = /(\d*)D(\d+)/.exec(s)) {  //NOSONAR
-                for (let i = 0; i < (m[1] || 1); ++i) rv += 1 + Math.floor(parseInt(m[2]) * Math.random())
-                return rv
-            }
-            return parseInt(s)
-        }
-        let gets = id => document.getElementById(id).value
-        let log_enabled = true
-        function log(s) {
-            if (log_enabled) console.log(s)
-        }
-        function get_keyword_value(keywords, id) {
-            for (let kw of keywords) {
-                if (kw.indexOf(id) > -1) {
-                    return parseInt(/\d+/.exec(kw))
-                }
-            }
-            return 0
-        }
-        function calculate(distance) {
-            let damage = 0
+		let d6 = _ => 1 + Math.floor(Math.random() * 6)
+		function geti(id) {
+			let rv = 0
+			let s = document.getElementById(id).value
+			let m = /[+-]\d+/.exec(s)
+			if (m) rv = parseInt(m[0])
+			if (m = /(\d*)D(\d+)/.exec(s)) {  //NOSONAR
+				for (let i = 0; i < (m[1] || 1); ++i) rv += 1 + Math.floor(parseInt(m[2]) * Math.random())
+				return rv
+			}
+			return parseInt(s)
+		}
+		let gets = id => document.getElementById(id).value
+		let log_enabled = true
+		function log(s) {
+			if (log_enabled) console.log(s)
+		}
+		function get_keyword_value(keywords, id) {
+			for (let kw of keywords) {
+				if (kw.indexOf(id) > -1) {
+					return parseInt(/\d+/.exec(kw))
+				}
+			}
+			return 0
+		}
+		function calculate(distance) {
+			let damage = 0
 
-            let source_abilities = gets("source_abilities").toUpperCase().split(/, */).join(", ")
-            let source_keywords = gets("source_keywords").toUpperCase().split(/, */).join(", ")
-            let source_is_vehicle = source_keywords.includes("VEHICLE")
-            let source_is_monster = source_keywords.includes("MONSTER")
-            let target_abilities = gets("target_abilities").toUpperCase().split(/, */).join(", ")
-            let target_keywords = gets("target_keywords").toUpperCase().split(/, */).join(", ")
-            let target_rules = gets("target_rules").toUpperCase().split(/, */).join(", ")
-            const T = parseInt(toughness.value)
-            let SV = parseInt(save.value)
-            let W = parseInt(wounds.value)
-            let LD = parseInt(leadership.value)
+			let source_abilities = gets("source_abilities").toUpperCase().split(/, */).join(", ")
+			let source_keywords = gets("source_keywords").toUpperCase().split(/, */).join(", ")
+			let source_is_vehicle = source_keywords.includes("VEHICLE")
+			let source_is_monster = source_keywords.includes("MONSTER")
+			let target_abilities = gets("target_abilities").toUpperCase().split(/, */).join(", ")
+			let target_keywords = gets("target_keywords").toUpperCase().split(/, */).join(", ")
+			let target_rules = gets("target_rules").toUpperCase().split(/, */).join(", ")
+			const T = parseInt(toughness.value)
+			let SV = parseInt(save.value)
+			let W = parseInt(wounds.value)
+			let LD = parseInt(leadership.value)
 
-            let inches = parseFloat(distance)
-            let html = ""
-            let times = geti("rounds")
-            log_enabled = times < 5
+			let inches = parseFloat(distance)
+			let html = ""
+			let times = geti("rounds")
+			log_enabled = times < 5
 
-            const weapon_spreads = {}
-            log("Calculating...")
+			const weapon_spreads = {}
+			log(`\n=== ${source.value} vs ${target.value} ===`)
 
-            // If a unit is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE unit, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a unit will shoot with its Pistols or its other ranged weapons before selecting targets.
-            let has_rifle = false
-            for (let i = 1; i < 50; ++i) {
-                let weapon = document.getElementById(`weapon${i}`)
-                if (weapon === null) break
+			// If a unit is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE unit, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a unit will shoot with its Pistols or its other ranged weapons before selecting targets.
+			let has_rifle = false
+			for (let i = 1; i < 50; ++i) {
+				let weapon = document.getElementById(`weapon${i}`)
+				if (weapon === null) break
 
-                let weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
-                if (geti(`range${i}`) > 0 && !weapon_keywords.includes("PISTOL")) {
-                    has_rifle = true
-                    log(`${weapon.innerText} is not a PISTOL.`)
-                    break
-                }
-            }
-            let pistols_only = !has_rifle || (!source_is_vehicle && !source_is_monster && inches < 1) || prefer_pistols.checked
-            if (pistols_only) log("The only ranged attacks will be using pistols.")
+				let weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
+				if (geti(`range${i}`) > 0 && !weapon_keywords.includes("PISTOL")) {
+					has_rifle = true
+					break
+				}
+			}
+			let pistols_only = !has_rifle || (!source_is_vehicle && !source_is_monster && inches < 1) || prefer_pistols.checked
+			if (pistols_only) log("The only ranged attacks will be using pistols.")
 
-            // Use up to 49 weapons.
-            for (let i = 1; i < 50; ++i) {
-                let weapon = document.getElementById(`weapon${i}`)
-                if (weapon === null) break;
-                weapon = weapon.innerText
-                // Skip unequipped weapons.
-                let count = geti(`count${i}`)
-                if (count < 1) continue
+			// Use up to 49 weapons.
+			for (let i = 1; i < 50; ++i) {
+				let weapon = document.getElementById(`weapon${i}`)
+				if (weapon === null) break;
+				weapon = weapon.innerText
+				// Skip unequipped weapons.
+				let count = geti(`count${i}`)
+				if (count < 1) continue
 
-                log(`WEAPON: ${weapon}`)
-                let melee_done = false
-                let R = geti(`range${i}`) || 0
-                let S = geti(`strength${i}`)
+				log(`WEAPON: ${weapon}`)
+				let melee_done = false
+				let R = geti(`range${i}`) || 0
+				let S = geti(`strength${i}`)
 
-                const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
-                let is_pistol = weapon_keywords.includes("PISTOL")
-                if (pistols_only && R > 0 && !is_pistol) {
-                    log("Pistols only.")
-                    continue
-                }
-                if (is_pistol && !pistols_only) {
-                    log("Skipping pistol.")
-                    continue
-                }
-                if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
-                    R = 1
-                    // Melee
-                    if (melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
-                    melee_done = true  // NOSONAR
-                    // if (target_keywords.includes("FIGHTS FIRST")) {
-                    // TODO: Weapon inputs for target and bidirectional combat simulation.
-                    // }
-                    if (source_keywords.includes("SYNAPSE")) S += 1
-                } else {  // Ranged weapon.
-                    if (source_abilities.includes("ARCH NEGATOR")) {
-                        log("Arch Negator gives anti-vehicle 4+.")
-                        weapon_keywords.push("ANTI-VEHICLE 4")
-                    }
-                    for (let kw of ["AUSPEX ARRAY", "OMNISPEX"]) if (source_abilities.includes(kw)) {
-                        log(`${kw} grants IGNORES COVER to ranged weapons.`)
-                        weapon_keywords.push("IGNORES COVER")
-                    }
-                }
-                if (inches < 18 && source_abilities.includes("GLOVODAN PSYBER-EAGLE")) {
-                    log("Glovodan Psyber-eagle ignoring cover < 18\"")
-                    weapon_keywords.push("IGNORES COVER")
-                }
-                if (source_abilities.includes("PURGE AND CLEANSE")) {
-                    log("PURGE AND CLEANSE ignoring cover")
-                    weapon_keywords.push("IGNORES COVER")
-                }
+				const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
+				let is_pistol = weapon_keywords.includes("PISTOL")
+				if (pistols_only && R > 0 && !is_pistol) {
+					log("Pistols only.")
+					continue
+				}
+				if (is_pistol && !pistols_only) {
+					log("Skipping pistol.")
+					continue
+				}
+				if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
+					R = 1
+					// Melee
+					if (melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
+					melee_done = true  // NOSONAR
+					// if (target_keywords.includes("FIGHTS FIRST")) {
+					// TODO: Weapon inputs for target and bidirectional combat simulation.
+					// }
+					if (source_keywords.includes("SYNAPSE")) S += 1
+				} else {  // Ranged weapon.
+					if (source_abilities.includes("ARCH NEGATOR")) {
+						log("Arch Negator gives anti-vehicle 4+.")
+						weapon_keywords.push("ANTI-VEHICLE 4")
+					}
+					for (let kw of ["AUSPEX ARRAY", "OMNISPEX", "PAN SPECTRAL SCANNER"]) if (source_abilities.includes(kw)) {
+						log(`${kw} grants IGNORES COVER to ranged weapons.`)
+						weapon_keywords.push("IGNORES COVER")
+					}
+				}
+				if (inches < 18 && source_abilities.includes("GLOVODAN PSYBER-EAGLE")) {
+					log("Glovodan Psyber-eagle ignoring cover < 18\"")
+					weapon_keywords.push("IGNORES COVER")
+				}
+				if (source_abilities.includes("PURGE AND CLEANSE")) {
+					log("PURGE AND CLEANSE ignoring cover")
+					weapon_keywords.push("IGNORES COVER")
+				}
 
-                if (R <= inches) {
-                    log(`${weapon} out of range. ${R} <= ${inches}`)
-                    continue
-                }
-                if (target_rules.includes("LONE OPERATIVE") && inches > 12) {
-                    log(`Lone operative hidden.`)
-                    continue
-                }
-                // Rotating Death: This model’s Twin Heavy Onslaught Gatling Cannon has the [SUSTAINED HITS 2] ability when targeting Infantry units.
-                if (source_abilities.includes("ROTATING DEATH") && weapon === "Twin Heavy Onslaught Gatling Cannon" && target_keywords.includes("INFANTRY")) {
-                    log("Rotating Death: This model’s Twin Heavy Onslaught Gatling Cannon has the [SUSTAINED HITS 2] ability when targeting Infantry units.")
-                    weapon_keywords.push("SUSTAINED HITS 2")
-                }
-                const WS = geti(`skill${i}`) || 0
-                const AP = Math.abs(geti(`piercing${i}`))
-                // Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
-                const TOTAL_OBLITERATION = source_abilities.includes("TOTAL OBLITERATION") && R > 1 && (target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE"))
-                weapon_spreads[weapon] = {}
-                for (let time = 0; time < times * count; ++time) {
-                    ///////////////////////
-                    // Shooting/Fight phase
-                    let hit_bonus = 0
-                    // Mischief Makers (Aura): While an enemy unit (excluding MONSTERS and VEHICLES) is within 6" of this unit, each time a model in that unit makes a melee attack, subtract 1 from the Hit roll.
-                    if (target_abilities.includes("MISCHIEF MAKERS (AURA)") && !(source_is_monster || source_is_vehicle) && inches < 6 && R < 2) {
-                        log("Mischief Makers -1 to hit.")
-                        hit_bonus = -1
-                    }
-                    let take_battleshock = false
-                    let battleshock_bonus = 0
-                    let A = geti(`attacks${i}`)
-                    // Each time a [RAPID FIRE X] weapon targets a unit within half that weapon’s range, the Attacks characteristic of that weapon is increased by the amount denoted by ‘x’.
-                    let rf = get_keyword_value(weapon_keywords, "RAPID FIRE")
-                    if (rf && inches < R / 2) {
-                        A += rf
-                        log(`+${rf} RAPID FIRE attacks.`)
-                    }
-                    // BLAST adds 1 attack per 5 units in the target unit.
-                    if (weapon_keywords.includes("BLAST")) {
-                        let blast_attacks = Math.floor(geti("target_size") / 5)
-                        if (blast_attacks > 0) {
-                            A += blast_attacks
-                            log(`+${blast_attacks} BLAST attacks.`)
-                        }
-                    }
+				if (R <= inches) {
+					log(`${weapon} out of range. ${R} <= ${inches}`)
+					continue
+				}
+				if (target_rules.includes("LONE OPERATIVE") && inches > 12) {
+					log(`Lone operative hidden.`)
+					continue
+				}
+				// Rotating Death: This model’s Twin Heavy Onslaught Gatling Cannon has the [SUSTAINED HITS 2] ability when targeting Infantry units.
+				if (source_abilities.includes("ROTATING DEATH") && weapon === "Twin Heavy Onslaught Gatling Cannon" && target_keywords.includes("INFANTRY")) {
+					log("Rotating Death: This model’s Twin Heavy Onslaught Gatling Cannon has the [SUSTAINED HITS 2] ability when targeting Infantry units.")
+					weapon_keywords.push("SUSTAINED HITS 2")
+				}
+				const WS = geti(`skill${i}`) || 0
+				const AP = Math.abs(geti(`piercing${i}`))
+				// Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
+				const TOTAL_OBLITERATION = source_abilities.includes("TOTAL OBLITERATION") && R > 1 && (target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE"))
+				weapon_spreads[weapon] = {}
+				for (let time = 0; time < times * count; ++time) {
+					///////////////////////
+					// Shooting/Fight phase
+					let take_battleshock = false
+					let battleshock_bonus = 0
+					let A = geti(`attacks${i}`)
+					// Each time a [RAPID FIRE X] weapon targets a unit within half that weapon’s range, the Attacks characteristic of that weapon is increased by the amount denoted by ‘x’.
+					let rf = get_keyword_value(weapon_keywords, "RAPID FIRE")
+					if (rf && inches < R / 2) {
+						A += rf
+						log(`+${rf} RAPID FIRE attacks.`)
+					}
+					// BLAST adds 1 attack per 5 units in the target unit.
+					if (weapon_keywords.includes("BLAST")) {
+						let blast_attacks = Math.floor(geti("target_size") / 5)
+						if (blast_attacks > 0) {
+							A += blast_attacks
+							log(`+${blast_attacks} BLAST attacks.`)
+						}
+					}
 
-                    let hit_rerolls = 0
-                    let wound_rerolls = 0
-                    let damage_rerolls = 0
-                    // Aqullon Optics: Each time this model is selected to shoot, you can re-roll one Hit roll, you can re-roll one Wound roll and you can re-roll one Damage roll when resolving its attacks.
-                    if (source_abilities.includes("AQUILON OPTICS")) {
-                        hit_rerolls += 1
-                        wound_rerolls += 1
-                        damage_rerolls += 1
-                    }
-                    // Slayers of Tyrants: Each time a model in this unit makes an attack that targets a CHARACTER, MONSTER or VEHICLE unit, you can re-roll the Wound roll.
-                    if (target_keywords.includes("CHARACTER") || target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE")) wound_rerolls += 1
+					let hit_rerolls = 0
+					let wound_rerolls = 0
+					let damage_rerolls = 0
+					// Aqullon Optics: Each time this model is selected to shoot, you can re-roll one Hit roll, you can re-roll one Wound roll and you can re-roll one Damage roll when resolving its attacks.
+					if (source_abilities.includes("AQUILON OPTICS")) {
+						hit_rerolls += 1
+						wound_rerolls += 1
+						damage_rerolls += 1
+					}
+					// Slayers of Tyrants: Each time a model in this unit makes an attack that targets a CHARACTER, MONSTER or VEHICLE unit, you can re-roll the Wound roll.
+					if (target_keywords.includes("CHARACTER") || target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE")) wound_rerolls += 1
 
-                    if (TOTAL_OBLITERATION) {
-                        hit_rerolls += A
-                        wound_rerolls += A
-                        damage_rerolls += A
-                    }
-                    // https://www.wargamer.com/warhammer-40k/abilities#twin-linked
-                    if (weapon_keywords.includes("TWIN-LINKED")) wound_rerolls += A
+					if (TOTAL_OBLITERATION) {
+						hit_rerolls += A
+						wound_rerolls += A
+						damage_rerolls += A
+					}
+					// https://www.wargamer.com/warhammer-40k/abilities#twin-linked
+					if (weapon_keywords.includes("TWIN-LINKED")) wound_rerolls += A
 
-                    // Rerolls don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
-                    if (hit_rerolls > A) hit_rerolls = A
-                    if (wound_rerolls > A) wound_rerolls = A
-                    if (damage_rerolls > A) damage_rerolls = A
+					// Rerolls don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
+					if (hit_rerolls > A) hit_rerolls = A
+					if (wound_rerolls > A) wound_rerolls = A
+					if (damage_rerolls > A) damage_rerolls = A
 
-                    log(`${weapon} in range; ${R} > ${inches}. Attacking ${A} times.`)
-                    for (let attack = 1; attack <= A; ++attack) {
-                        ///////////////
-                        // Roll to hit.
-                        //
-                        let hits = 1
-                        let lethal_hits = false
-                        if (!source_keywords.includes("TORRENT")) {  // Torrent autohits.
-                            let hit_roll = d6()
-                            if (source_abilities.includes("CHAINBREAKER") && hit_roll == 5) {
-                                log("Chainbreaker: Each time this model makes an attack, an unmodified successful (XXX: ?) Hit roll of 5+ scores a Critical Hit.")
-                                hit_roll = 6
-                            }
+					log(`${weapon} in range; ${R} > ${inches}. Attacking ${A} times.`)
+					for (let attack = 1; attack <= A; ++attack) {
+						///////////////
+						// Roll to hit.
+						//
+						let hits = 1
+						let lethal_hits = false
+						if (!source_keywords.includes("TORRENT")) {  // Torrent autohits.
+							let hit_roll = d6()
+							if (source_abilities.includes("CHAINBREAKER") && hit_roll == 5) {
+								log("Chainbreaker: Each time this model makes an attack, an unmodified successful (XXX: ?) Hit roll of 5+ scores a Critical Hit: " + hit_roll)
+								hit_roll = 6
+							}
+							else if (weapon_keywords.includes("CONVERSION") && inches > 12 && hit_roll >= 4) {
+								log("CONVERSION: Range > 12\" and hit roll 4+ grant Critical Hit: " + hit_roll)
+								hit_roll = 6
+							}
 
-                            log(`Hit roll ${attack}: ${hit_roll} + ${hit_bonus} = ${hit_roll + hit_bonus}`)
-                            hit_roll += hit_bonus
+							// Re-roll
+							if (hit_rerolls > 0 && hit_roll < WS) {
+								log(`Hit re-rolling ${hit_roll}`)
+								--hit_rerolls
+								hit_roll = d6()
+							}
+							// Whirling Onslaught: Each time a unit in this unit makes a melee attack, re-roll a Hit roll of 1. (DOESN'T SAY "UNMODIFIED") If this unit made a Charge move this turn, you can re-roll the Hit roll instead.
+							if (source_abilities.includes("WHIRLING ONSLAUGHT") && R < 2) {
+								if (hit_roll === 1) {
+									hit_roll = d6()
+									log(`Whirling Onslaught hit 1 reroll to ${hit_roll}`)
+								}
+							}
+							log(`Hit roll ${attack}: ${hit_roll}`)
+							// Only natural/unmodified rolls are critical.
+							if (hit_roll === 1) {
+								log("Critical miss.")
+								continue
+							}
+							if (hit_roll == 6) {
+								log("Critical hit.")
+								let sh_bonus = get_keyword_value(weapon_keywords, "SUSTAINED HITS")
+								if (sh_bonus) {
+									hits += sh_bonus
+									log(`+${sh_bonus} sustained hits.`)
+								}
+								// Each time an attack is made with a LETHAL HITS weapon, a Critical Hit automatically wounds the target.
+								lethal_hits = weapon_keywords.includes("LETHAL HITS")
+								if (lethal_hits) log("Lethal hits.")
+							} else {
+								// Not crit hit, even if the roll is modified to a 6.
+								let hit_bonus = 0
+								if (source_abilities.includes("DAEMON LORD OF KHORNE (AURA)") && source_keywords.includes("KHORNE") && R < 2) {
+									log("Daemon Lord of Khorne (Aura) melee +1 to hit.")
+									hit_bonus += 1
+								}
+								if (weapon_keywords.includes("HEAVY")) {
+									log(`Assuming HEAVY weapon remained stationary. +1 to Hit of ${hit_roll}.`)
+									hit_bonus += 1
+								}
+								// Mischief Makers (Aura): While an enemy unit (excluding MONSTERS and VEHICLES) is within 6" of this unit, each time a model in that unit makes a melee attack, subtract 1 from the Hit roll.
+								if (target_abilities.includes("MISCHIEF MAKERS (AURA)") && !(source_is_monster || source_is_vehicle) && inches < 6 && R < 2) {
+									log("Mischief Makers -1 to hit.")
+									hit_bonus -= 1
+								}
+								// If every unit (XXX) in a unit has STEALTH, then each time a ranged attack is made against it, subtract 1 from that attack’s Hit roll.
+								if (target_rules.includes("STEALTH")) {
+									log("Stealthy target. -1 to hit.")
+									hit_bonus -= 1
+								}
+								// A hit roll can never be modified by more than -1 or +1. (Core Rules, Section "Making attacks")
+								if (hit_bonus > 1) hit_bonus = 1
+								else if (hit_bonus < -1) hit_bonus = -1
+								log(`+ ${hit_bonus} = ${hit_roll + hit_bonus}`)
+								hit_roll += hit_bonus
 
-                            // Re-roll
-                            if (hit_rerolls > 0 && hit_roll < WS) {
-                                log(`Hit re-roll: ${hit_roll}`)
-                                --hit_rerolls
-                                hit_roll = d6() + hit_bonus
-                            }
-                            // Whirling Onslaught: Each time a unit in this unit makes a melee attack, re-roll a Hit roll of 1. (DOESN'T SAY "UNMODIFIED") If this unit made a Charge move this turn, you can re-roll the Hit roll instead.
-                            if (source_abilities.includes("WHIRLING ONSLAUGHT") && R < 2) {
-                                if (hit_roll === 1) {
-                                    hit_roll = d6()
-                                    log(`Whirling Onslaught hit 1 reroll to ${hit_roll}`)
-                                }
-                            }
-                            // Only natural/unmodified rolls are critical.
-                            if (hit_roll === 1) {
-                                log("Critical miss.")
-                                continue
-                            }
-                            if (hit_roll == 6) {
-                                log("Critical hit.")
-                                let sh_bonus = get_keyword_value(weapon_keywords, "SUSTAINED HITS")
-                                if (sh_bonus) {
-                                    hits += sh_bonus
-                                    log(`+${sh_bonus} sustained hits.`)
-                                }
-                                // Each time an attack is made with a LETHAL HITS weapon, a Critical Hit automatically wounds the target.
-                                lethal_hits = weapon_keywords.includes("LETHAL HITS")
-                                if (lethal_hits) log("Lethal hits.")
-                            } else {
-                                // Not crit hit, even if the roll is modified to a 6.
-                                if (weapon_keywords.includes("HEAVY")) {
-                                    log(`Assuming HEAVY weapon remained stationary. +1 to Hit of ${hit_roll}.`)
-                                    hit_roll += 1
-                                }
-                                // If every unit (XXX) in a unit has STEALTH, then each time a ranged attack is made against it, subtract 1 from that attack’s Hit roll.
-                                if (target_rules.includes("STEALTH")) {
-                                    hit_roll -= 1
-                                    log("Stealthy target. -1 to hit.")
-                                }
+								if (hit_roll < WS) {
+									log(`Miss. ${hit_roll} < ${WS} WS`)
+									continue
+								}
+							}
+						}
+						log(`${hits} hits.`)
+						// Purge the Foe: In your Shooting phase, after this unit has shot, you can select one enemy Infantry unit hit by one or more of those attacks made with a Pyreblaster. That enemy unit must take a Battle-shock test.
+						if (weapon.includes("Pyreblaster") && source_abilities.includes("PURGE THE FOE")) {
+							log("Target must take battleshock test.")
+							take_battleshock = true
+							battleshock_bonus -= 1
+						}
 
-                                if (hit_roll < WS) {
-                                    log(`Miss. ${hit_roll} < ${WS} WS`)
-                                    continue
-                                }
-                            }
-                        }
-                        log(`${hits} hits.`)
-                        // Purge the Foe: In your Shooting phase, after this unit has shot, you can select one enemy Infantry unit hit by one or more of those attacks made with a Pyreblaster. That enemy unit must take a Battle-shock test.
-                        if (weapon.includes("Pyreblaster") && source_abilities.includes("PURGE THE FOE")) {
-                            log("Target must take battleshock test.")
-                            take_battleshock = true
-                            battleshock_bonus -= 1
-                        }
+						for (let hit = 0; hit < hits; ++hit) {
+							if (!lethal_hits) {
+								/////////////////
+								// Roll to wound.
+								//
+								let threshold = 5
+								if (S >= 2 * T)
+									threshold = 2
+								else if (S > T)
+									threshold = 3
+								else if (S == T)
+									threshold = 4
+								else if (2 * S <= T)
+									threshold = 6
 
-                        for (let hit = 0; hit < hits; ++hit) {
-                            if (!lethal_hits) {
-                                /////////////////
-                                // Roll to wound.
-                                //
-                                let threshold = 5
-                                if (S >= 2 * T)
-                                    threshold = 2
-                                else if (S > T)
-                                    threshold = 3
-                                else if (S == T)
-                                    threshold = 4
-                                else if (2 * S <= T)
-                                    threshold = 6
+								let wound_roll = d6()
+								for (let kw of weapon_keywords) {
+									if (kw.indexOf("ANTI-") > -1) {
+										let anti_what = /ANTI-(\w+)/.exec(kw)[1].toUpperCase()
+										let anti_how = parseInt(/\d+/.exec(kw))
+										if (target_keywords.includes(anti_what) && wound_roll >= anti_how) {
+											log(`ANTI-${anti_what} crits ${anti_how}+. Wound roll ${wound_roll} -> 6.`)
+											wound_roll = 6  // ANTI- grants crits.
+										}
+									}
+								}
+								// re, /, *, -, +, 0. XXX: - and + no more than 1? https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
+								// reroll
+								if (wound_roll === 1 && R > 2 && target_abilities.includes("RELIC OF THE MATRIARCH - SIMULACRUM OF THE ARGENT SHROUD (AURA)")) {
+									log('Relic of the Matriarch - Simulacrum of the Argent Shroud (Aura) reroll wound 1.')
+									wound_rerolls = (wound_rerolls + 1) % A
+								}
+								if (wound_rerolls > 0 && wound_roll < threshold) {
+									log(`Rerolling wound ${wound_roll} < ${threshold}`)
+									wound_roll = d6()
+									--wound_rerolls
+								}
+								if (wound_roll < threshold) {
+									log(`No wound. ${wound_roll} < ${threshold}`)
+									continue
+								}
+								// https://www.newrecruit.eu/wiki/wh40k-10e/warhammer-40%2C000-10th-edition/rules/devastating-wounds
+								// Each time an attack is made a [DEVASTATING WOUNDS] weapon, if that attack scores a Critical Wound, no saving throw of any kind can be made against that attack (including invulnerable saving throws but not Feel No Pain damage negation!?). Such attacks are only allocated to units after all other attacks made by the attacking unit have been allocated and resolved. XXX
+								let devastating_wounds = (wound_roll === 6 && weapon_keywords.includes("DEVASTATING WOUNDS"))
+								if (devastating_wounds) log("Devastating wounds (no +/++ save)")
+								else log(`Wound roll ${wound_roll} >= ${threshold}`)
+								if (!devastating_wounds) {
+									////////////
+									// To save.
+									//
+									let save_roll = d6()
+									if (save_roll === 6) {
+										log("Critical armor save.")  // XXX: https://www.reddit.com/r/killteam/comments/phzrr6/6_save_normal_save_always_critical_save_too/ says yes but AP guards said 7+ to save?
+										continue
+									}
+									// Benefit of Cover: https://www.wargamer.com/warhammer-40k/cover
+									if (R > 1 && cover.checked && !source_keywords.includes("IGNORES COVER")) {
+										if (SV <= 3 && AP == 0) {
+											log(`No benefit of cover for armor save. ${save_roll}`)
+										} else {
+											log(`Benefit of cover; +1 to armor save roll ${save_roll}.`)
+											save_roll += 1
+										}
+									}
+									// If a unit has an invulnerable save, the player can choose to use that instead of their normal save. Invulnerable saves cannot be modified by an attack’s AP. https://ageofminiatures.com/warhammer-40k-rules-explained/#:~:text=If%20a%20unit%20has%20an,AP.
+									// https://www.newrecruit.eu/wiki/wh40k-10e/warhammer-40%2C000-10th-edition/rules/feel-no-pain in addition to regular armor save or invuln_save. XXX: Using both here to not calc which is best.
+									if (save_roll - AP >= SV) {
+										log(`Saved by armor. ${save_roll} -${AP}AP >= ${SV}SV`)
+										continue
+									}
+									let invuln_save = geti("invuln_save")
+									if (save_roll >= invuln_save) {
+										log(`Saved by invulnerable. ${save_roll} >= ${invuln_save}`)
+										continue
+									}
+								}
+							}
+							log(`No save.`)
 
-                                let wound_roll = d6()
-                                // re, /, *, -, +, 0. XXX: - and + no more than 1? https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#2.-Wound-Roll
-                                // reroll
-                                if (wound_roll === 1 && R > 2 && target_abilities.includes("RELIC OF THE MATRIARCH - SIMULACRUM OF THE ARGENT SHROUD (AURA)")) {
-                                    log('Relic of the Matriarch - Simulacrum of the Argent Shroud (Aura) reroll wound 1.')
-                                    wound_rerolls = (wound_rerolls + 1) % A
-                                }
+							/////////
+							// Damage
+							// Re-roll -> division -> multiplication -> subtraction -> addition -> negation per damage.
+							let D = geti(`damage${i}`)
+							if (gets(`damage${i}`).includes("D")) {
+								let total = 0
+								for (let j = 0; j < 100; ++j) total += geti(`damage${i}`)
+								let average = total / 100
+								// re-roll don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
+								if (damage_rerolls > 0) {
+									log(`Damage roll: ${D}`)
+									if (D >= average) break
+									--damage_rerolls
+									D = geti(`damage${i}`)
+									log(`Damage reroll: ${D}`)
+								}
+							}
+							// division
+							for (let kw of ["DEATHLY FORM", "MOLTEN FORM", "NECRODERMIS", "REFUSE TO YIELD"]) if (target_abilities.includes(kw)) {
+								log(`${kw} halves initial ${D} damage (rounded up).`)
+								D = Math.ceil(D / 2)
+							}
+							// subtraction
+							// Duty Eternal: Each time an attack is allocated to this model, subtract 1 from the Damage characteristic of that attack
+							if (target_abilities.includes("DUTY ETERNAL") && D > 1) {  // D can't go < 1 unless stated. https://www.reddit.com/r/Warhammer40k/comments/145dc9e/comment/jz822h2/
+								log(`Duty Eternal -1 D.`)
+								--D
+							}
+							// addition
+							if (inches < R / 2) {
+								let melta_bonus = get_keyword_value(weapon_keywords, "MELTA")
+								if (melta_bonus) {
+									D += melta_bonus
+									log(`MELTA bonus, +${melta_bonus} damage.`)
+								}
+							}
+							// negation
+							// Feel No Pain x+: Each time this unit would lose a wound, roll one D6: if the result equals or exceeds ‘x’, that wound is not lost. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#:~:text=attack%20is%20lost.-,FEEL%20NO%20PAIN,-Some%20warriors%20refuse - Not prevented by DEVASTATING WOUNDS even though this is thematically also a save (+++) that can prevent devastation.
+							let fnp = geti("fnp_save") || 99  // Doesn't stack; choose one.
+							// Abomination: This model has the Feel No Pain 2+ ability against Psychic Attacks.
+							if (target_abilities.includes("ABOMINATION") && weapon_keywords.includes("PSYCHIC") && fnp > 2) fnp = 2
+							for (let d = 0; d < D; ++d) {
+								if (d6() >= fnp) {
+									log(`Saved 1 mortal wound by Feel No Pain ${fnp}+++`)
+									D -= 1  // This is a negate; not a modifier which can't normally go below 1 according to "Rules Commentary": https://www.reddit.com/r/Warhammer40k/comments/1eibdkb/comment/lg5nmn5/
+								}
+							}
+							// Only "mortal wounds" from for example DEADLY DEMISE carry over: https://spikeybits.com/warhammer-40k/mortal-wounds-rules/
+							let overkill = (D - W) > 0 ? D - W : 0
+							log(`Target squad takes ${D} - ${overkill} overkill = ${D - overkill} damage!`)
+							D -= overkill
+							damage += D
+							// Dealt damage causes mortal wounds, not to be confused with presave or preFNP wounds! By anthropomorphing vehicles and bunkers like that, i'm surprised there aren't more evil animated versions of those like by Khorne and Final Fantasy.
+							weapon_spreads[weapon][D] = (weapon_spreads[weapon][D] || 0) + 1
+						}  // hits
+					}  // attacks
+					//////////////
+					// Battleshock
+					// You take a Battle-shock test for a unit by rolling 2D6 and attempting to equal or exceed its Leadership stat. If the test fails, you can’t target the unit with Stratagems, it can’t contest objectives, and you risks losing models when it falls back from combat. https://www.wargamer.com/warhammer-40k/battle-shock#:~:text=You%20take%20a%20Battle%2Dshock,it%20falls%20back%20from%20combat.
+					if (source_abilities.includes("ENGULFING FEAR [PSYCHIC]") && inches < 18) take_battleshock = true
+					if (take_battleshock) {
+						let shock_rerolls = target_abilities.includes("RELIC OF THE MATRIARCH - CENSER OF THE SACRED ROSE (AURA)") ? 1 : 0
+						while (1) {
+							let shock_roll = d6() + d6() + battleshock_bonus
+							if (target_keywords.includes("SYNAPSE")) shock_roll += d6()
+							if (shock_roll < LD) {
+								log(`Target is battle-shocked! ${shock_roll} < ${LD} LD`)
+								if (--shock_rerolls < 0) break
+							}
+							else {
+								log("Battle-shock test passed.")
+								break
+							}
+						}
+					}
+				}  // rounds
+			}  // weapons
 
-                                if (wound_rerolls > 0 && wound_roll < threshold) {
-                                    log(`Rerolling wound ${wound_roll} < ${threshold}`)
-                                    wound_roll = d6()
-                                    --wound_rerolls
-                                }
+			let max_hits = 0
+			for (let weapon in weapon_spreads) {
+				const spread = weapon_spreads[weapon]
+				for (let mw in spread) if (spread[mw] > max_hits) max_hits = spread[mw]
+			}
+			html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
+			html += `<br><table border=1><tr><th>Wounds</th><th>Hits</th><th>%</th></tr>`
+			for (let weapon in weapon_spreads) {
+				html += `<tr><th colspan=4>${weapon}</th></tr>`
+				const spread = weapon_spreads[weapon]
+				for (let mw in spread) {
+					const hits = spread[mw]
+					html += `<tr><td>${mw}<td>${hits}</td><td>${(hits / times * 100).toFixed(2)}%</td><td><div style="width: ${hits / max_hits * 200}px; height: 10px;background-color: green"> </div></td></tr>`
+				}
+			}
+			result.innerHTML = html + "</table>"
+		}
 
-                                for (let kw of weapon_keywords) {
-                                    if (kw.indexOf("ANTI-") > -1) {
-                                        let anti_what = /ANTI-(\w+)/.exec(kw)[1].toUpperCase()
-                                        let anti_how = parseInt(/\d+/.exec(kw))
-                                        if (target_keywords.includes(anti_what) && wound_roll >= anti_how) {
-                                            log(`ANTI-${anti_what} crits ${anti_how}+. Wound roll ${wound_roll} -> 6.`)
-                                            wound_roll = 6  // ANTI- grants crits.
-                                        }
-                                    }
-                                }
+		document.onpaste = (event) => {
+			log(`Pasted types: ${event.clipboardData.types}`)
+			const new_squads = parse_sheet(event.clipboardData.getData("text/plain"))
+			log(`Parsed squads: ${JSON.stringify(new_squads, null, 4)}`)
+			//log(`Parsed squads: ${JSON.stringify(new_squads)}`)
+			//log(`Parsing ${html}`)
+			const html = event.clipboardData.getData("text/html")
+			new_squads[Object.keys(new_squads)[0]].keywords = parse_newrecruit_html(html)
 
-                                if (wound_roll < threshold) {
-                                    log(`No wound. ${wound_roll} < ${threshold}`)
-                                    continue
-                                }
-                                // https://www.newrecruit.eu/wiki/wh40k-10e/warhammer-40%2C000-10th-edition/rules/devastating-wounds
-                                // Each time an attack is made a [DEVASTATING WOUNDS] weapon, if that attack scores a Critical Wound, no saving throw of any kind can be made against that attack (including invulnerable saving throws but not Feel No Pain damage negation!?). Such attacks are only allocated to units after all other attacks made by the attacking unit have been allocated and resolved. XXX
-                                let devastating_wounds = (wound_roll === 6 && weapon_keywords.includes("DEVASTATING WOUNDS"))
-                                if (devastating_wounds) log("Devastating wounds (no +/++ save)")
-                                else log(`Wound roll ${wound_roll} >= ${threshold}`)
-                                if (!devastating_wounds) {
-                                    ////////////
-                                    // To save.
-                                    //
-                                    let save_roll = d6()
-                                    if (save_roll === 6) {
-                                        log("Critical armor save.")  // XXX: https://www.reddit.com/r/killteam/comments/phzrr6/6_save_normal_save_always_critical_save_too/ says yes but AP guards said 7+ to save?
-                                        continue
-                                    }
-                                    // Benefit of Cover: https://www.wargamer.com/warhammer-40k/cover
-                                    if (R > 1 && cover.checked && !source_keywords.includes("IGNORES COVER")) {
-                                        if (SV <= 3 && AP == 0) {
-                                            log(`No benefit of cover for armor save. ${save_roll}`)
-                                        } else {
-                                            log(`Benefit of cover; +1 to armor save roll ${save_roll}.`)
-                                            save_roll += 1
-                                        }
-                                    }
-                                    // If a unit has an invulnerable save, the player can choose to use that instead of their normal save. Invulnerable saves cannot be modified by an attack’s AP. https://ageofminiatures.com/warhammer-40k-rules-explained/#:~:text=If%20a%20unit%20has%20an,AP.
-                                    // https://www.newrecruit.eu/wiki/wh40k-10e/warhammer-40%2C000-10th-edition/rules/feel-no-pain in addition to regular armor save or invuln_save. XXX: Using both here to not calc which is best.
-                                    if (save_roll - AP >= SV) {
-                                        log(`Saved by armor. ${save_roll} -${AP}AP >= ${SV}SV`)
-                                        continue
-                                    }
-                                    let invuln_save = geti("invuln_save")
-                                    if (save_roll >= invuln_save) {
-                                        log(`Saved by invulnerable. ${save_roll} >= ${invuln_save}`)
-                                        continue
-                                    }
-                                }
-                            }
-                            log(`No save.`)
+			squads = {
+				...squads,
+				...new_squads
+			}
+			alert(`Imported ${name}.`)
+			add_squads()
+		}
 
-                            /////////
-                            // Damage
-                            // Re-roll -> division -> multiplication -> subtraction -> addition -> negation per damage.
-                            let D = geti(`damage${i}`)
-                            if (gets(`damage${i}`).includes("D")) {
-                                let total = 0
-                                for (let j = 0; j < 100; ++j) total += geti(`damage${i}`)
-                                let average = total / 100
-                                // re-roll don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
-                                if (damage_rerolls > 0) {
-                                    log(`Damage roll: ${D}`)
-                                    if (D >= average) break
-                                    --damage_rerolls
-                                    D = geti(`damage${i}`)
-                                    log(`Damage reroll: ${D}`)
-                                }
-                            }
-                            // division
-                            for (let kw of ["DEATHLY FORM", "MOLTEN FORM", "NECRODERMIS", "REFUSE TO YIELD"]) if (target_abilities.includes(kw)) {
-                                log(`${kw} halves initial ${D} damage (rounded up).`)
-                                D = Math.ceil(D / 2)
-                            }
-                            // subtraction
-                            // Duty Eternal: Each time an attack is allocated to this model, subtract 1 from the Damage characteristic of that attack
-                            if (target_abilities.includes("DUTY ETERNAL") && D > 1) {  // D can't go < 1 unless stated. https://www.reddit.com/r/Warhammer40k/comments/145dc9e/comment/jz822h2/
-                                log(`Duty Eternal -1 D.`)
-                                --D
-                            }
-                            // addition
-                            if (inches < R / 2) {
-                                let melta_bonus = get_keyword_value(weapon_keywords, "MELTA")
-                                if (melta_bonus) {
-                                    D += melta_bonus
-                                    log(`MELTA bonus, +${melta_bonus} damage.`)
-                                }
-                            }
-                            // negation
-                            // Feel No Pain x+: Each time this unit would lose a wound, roll one D6: if the result equals or exceeds ‘x’, that wound is not lost. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#:~:text=attack%20is%20lost.-,FEEL%20NO%20PAIN,-Some%20warriors%20refuse - Not prevented by DEVASTATING WOUNDS even though this is thematically also a save (+++) that can prevent devastation.
-                            let fnp = geti("fnp_save") || 99  // Doesn't stack; choose one.
-                            // Abomination: This model has the Feel No Pain 2+ ability against Psychic Attacks.
-                            if (target_abilities.includes("ABOMINATION") && weapon_keywords.includes("PSYCHIC") && fnp > 2) fnp = 2
-                            for (let d = 0; d < D; ++d) {
-                                if (d6() >= fnp) {
-                                    log(`Saved 1 mortal wound by Feel No Pain ${fnp}+++`)
-                                    D -= 1  // This is a negate; not a modifier which can't normally go below 1 according to "Rules Commentary": https://www.reddit.com/r/Warhammer40k/comments/1eibdkb/comment/lg5nmn5/
-                                }
-                            }
-                            // Only "mortal wounds" from for example DEADLY DEMISE carry over: https://spikeybits.com/warhammer-40k/mortal-wounds-rules/
-                            let overkill = (D - W) > 0 ? D - W : 0
-                            log(`Target squad takes ${D} - ${overkill} overkill = ${D - overkill} damage!`)
-                            D -= overkill
-                            damage += D
-                            // Dealt damage causes mortal wounds, not to be confused with presave or preFNP wounds! By anthropomorphing vehicles and bunkers like that, i'm surprised there aren't more evil animated versions of those like by Khorne and Final Fantasy.
-                            weapon_spreads[weapon][D] = (weapon_spreads[weapon][D] || 0) + 1
-                        }  // hits
-                    }  // attacks
-                    //////////////
-                    // Battleshock
-                    // You take a Battle-shock test for a unit by rolling 2D6 and attempting to equal or exceed its Leadership stat. If the test fails, you can’t target the unit with Stratagems, it can’t contest objectives, and you risks losing models when it falls back from combat. https://www.wargamer.com/warhammer-40k/battle-shock#:~:text=You%20take%20a%20Battle%2Dshock,it%20falls%20back%20from%20combat.
-                    if (source_abilities.includes("ENGULFING FEAR [PSYCHIC]") && inches < 18) take_battleshock = true
-                    if (take_battleshock) {
-                        let shock_rerolls = target_abilities.includes("RELIC OF THE MATRIARCH - CENSER OF THE SACRED ROSE (AURA)") ? 1 : 0
-                        while (1) {
-                            let shock_roll = d6() + d6() + battleshock_bonus
-                            if (target_keywords.includes("SYNAPSE")) shock_roll += d6()
-                            if (shock_roll < LD) {
-                                log(`Target is battle-shocked! ${shock_roll} < ${LD} LD`)
-                                if (--shock_rerolls < 0) break
-                            }
-                            else {
-                                log("Battle-shock test passed.")
-                                break
-                            }
-                        }
-                    }
-                }  // rounds
-            }  // weapons
+		function parse_newrecruit_html(html) {
+			const parser = new DOMParser()
+			const doc = parser.parseFromString(html, "text/html")
+			let keywords = []
+			doc.querySelectorAll('span').forEach(el => {
+				if (el.innerHTML.startsWith("Faction")) el.parentNode.querySelectorAll('span').forEach(el2 => {
+					if (el2.innerText.trim()) keywords.push(el2.innerHTML)
+				})
+			})
+			log("Keywords:" + keywords.join(', '))
+			return keywords
+		}
 
-            let max_hits = 0
-            for (let weapon in weapon_spreads) {
-                const spread = weapon_spreads[weapon]
-                for (let mw in spread) if (spread[mw] > max_hits) max_hits = spread[mw]
-            }
-            log(`Max hits ${max_hits}`)
-            html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
-            html += `<br><table border=1><tr><th>Wounds</th><th>Hits</th><th>%</th></tr>`
-            for (let weapon in weapon_spreads) {
-                html += `<tr><th colspan=4>${weapon}</th></tr>`
-                const spread = weapon_spreads[weapon]
-                for (let mw in spread) {
-                    const hits = spread[mw]
-                    html += `<tr><td>${mw}<td>${hits}</td><td>${(hits / times * 100).toFixed(2)}%</td><td><div style="width: ${hits / max_hits * 200}px; background-color: red; border: 0.5em solid green"> </div></td></tr>`
-                }
-            }
-            result.innerHTML = html + "</table>"
-        }
-
-        document.onpaste = (event) => {
-            log(`Pasted types: ${event.clipboardData.types}`)
-            const new_squads = parse_sheet(event.clipboardData.getData("text/plain"))
-            log(`Parsed squads: ${JSON.stringify(new_squads, null, 4)}`)
-            //log(`Parsed squads: ${JSON.stringify(new_squads)}`)
-            //log(`Parsing ${html}`)
-            const html = event.clipboardData.getData("text/html")
-            new_squads[Object.keys(new_squads)[0]].keywords = parse_newrecruit_html(html)
-
-            squads = {
-                ...squads,
-                ...new_squads
-            }
-            alert(`Imported ${name}.`)
-            add_squads()
-        }
-
-        function parse_newrecruit_html(html){
-            const parser = new DOMParser()
-            const doc = parser.parseFromString(html, "text/html")
-            let keywords = []
-            doc.querySelectorAll('span').forEach(el => {
-                if (el.innerHTML.startsWith("Faction")) el.parentNode.querySelectorAll('span').forEach(el2 => {
-                    if (el2.innerText.trim()) keywords.push(el2.innerHTML)
-                })
-            })
-            log("Keywords:" + keywords.join(', '))
-            return keywords
-        }
-
-        function parse_sheet(s) {
-            /* NewRecruit.eu format:
+		function parse_sheet(s) {
+			/* NewRecruit.eu format:
 Apothecary 
 Unit	M	T	SV	W	LD	OC
 Primaris Apothecary	6"	4	3+	4	6+	1
@@ -1955,177 +2096,177 @@ Melee
 6
 -3
 1
-            */
-            let squads = {}
-            let squad = {
-                "size": 0,
-                "models": {},
-                "units": {},
-                "weapons": {},
-                "keywords": [],
-                "abilities": [],
-                "rules": [],
-            }
-            let name = "PASTED"
-            let mode = ""
-            for (let line of s.split('\n')) {
-                if (name === "PASTED") {
-                    name = line.trim()
-                    continue
-                }
-                ///////////////////////
-                // NewRecruit.eu format
-                let cols = line.split('\t')
-                if (cols.length === 7) {  // Unit
-                    mode = "unit"
-                    if (cols[1] === "M") continue  // Skip header.
-                    //log(`NewRecruit unit table row: ${cols}`)
-                    // let count = /\(x(\d+)\)/.exec(cols[0])
-                    // count = count && count[1] || 1
-                    // squad.size += count
-                    const unit_name = cols[0].replace(/\(x\d+\)/, '').trim()
-                    const unit = squad.units[unit_name] || { "count": 1 }
-                    unit.name = unit_name
-                    unit.M = parseInt(cols[1])
-                    unit.T = parseInt(cols[2])
-                    unit.SV = parseInt(cols[3])
-                    unit.W = parseInt(cols[4])
-                    unit.LD = parseInt(cols[5])
-                    unit.OC = parseInt(cols[6])
-                    if (name === "PASTED") name = unit.name  // In case user didn't copy sheet name.
-                    squad.units[unit.name] = unit
-                    if (!squad.models) squad.size += unit.count
-                }
-                else if (cols.length === 8) {  // Weapon
-                    mode = "weapon"
-                    if (cols[2] === "A") continue  // Skip headers.
-                    let weapon = {
-                        "count": cols[0].includes("(x0)") ? 0 : (parseInt(/\d+/.exec(cols[0])) || 1),
-                        "R": parseInt(cols[1]) || 0,
-                        "A": cols[2],
-                        "WS": parseInt(cols[3]) || 0,
-                        "S": parseInt(cols[4]),
-                        "AP": parseInt(cols[5]),
-                        "D": cols[6],
-                        "keywords": cols[7].trim().split(/, */),
-                    }
-                    squad.weapons[cols[0]] = weapon
-                }
-                // TODO: Use HTML for New Recruit pasted keywords? includes() works well enough for now.
-                for (let word of ["Abilities", "Keywords", "Rules"]) {
-                    if (line.startsWith(word)) {
-                        mode = word
-                        let list = line.slice(word.length + 1).trim().replace(/([^A-Z (])([A-Z])/g, '$1\t$2').split('\t')
-                        if (list == "") list = []
-                        //log(`Adding ${word}: ${list} to ${squad[word.toLowerCase()]}`)
-                        squad[word.toLowerCase()].push(...list)
-                    }
-                }
-                if (line.trim() === "Models") {
-                    mode = "model"
-                    continue
-                }
-                //log(`Parsing ${mode}: ${line}`)
-                if (mode === "model") {
-                    const mo = /(\d+)x ([^:]+)/.exec(cols[0])
-                    //log(`NewRecruit models table row: ${mo}`)
-                    if (mo) {
-                        const count = parseInt(mo[1]) || 1
-                        const model_name = mo[2]
-                        squad.size += count
-                        squad.models[model_name] = { "count": count }
-                    }
-                } else if (["Abilities", "Keywords", "Rules"].includes(mode)) {
-                    const mo = /^([^:]+): (.*)/.exec(line)
-                    if (mo) {
-                        let ability = mo[1]
-                        if (ability === "Keywords") continue
-                        let val = parseInt(mo[2])
-                        let inv_mo = /^Invulnerable Save \((\d)\+\)$/.exec(ability.trim())
-                        if (inv_mo) {
-                            val = parseInt(inv_mo[1])
-                            ability = `Invulnerable Save ${val}`
-                        } else {
-                            inv_mo = /^This model has a (\d)\+ invulnerable save.$/.exec(mo[2].trim())
-                            if (inv_mo) val = parseInt(inv_mo[1])
-                            if (val) ability += ' ' + val
-                        }
-                        //log(`Line '''${line}''' has ${mode}: '''${ability}'''`)
-                        squad[mode.toLowerCase()].push(ability)
-                    }
-                }
-            }
-            squads[name] = squad
-            return squads
-        }
-        function filter(which, what) {
-            what = what.toLowerCase()
-            document.querySelectorAll(`#${which}>option`).forEach(o => o.hidden = !(o.innerText.toLowerCase().includes(what) || squads[o.innerText].keywords.join(",").toLowerCase().includes(what) || squads[o.innerText].abilities.join(",").toLowerCase().includes(what)))
-        }
-        function search(name) {
-            window.open('https://www.google.com/search?q="' + encodeURIComponent(name) + '"+Warhammer+40,000+10th+Edition+miniature&udm=2')
-        }
-    </script>
+			*/
+			let squads = {}
+			let squad = {
+				"size": 0,
+				"models": {},
+				"units": {},
+				"weapons": {},
+				"keywords": [],
+				"abilities": [],
+				"rules": [],
+			}
+			let name = "PASTED"
+			let mode = ""
+			for (let line of s.split('\n')) {
+				if (name === "PASTED") {
+					name = line.trim()
+					continue
+				}
+				///////////////////////
+				// NewRecruit.eu format
+				let cols = line.split('\t')
+				if (cols.length === 7) {  // Unit
+					mode = "unit"
+					if (cols[1] === "M") continue  // Skip header.
+					//log(`NewRecruit unit table row: ${cols}`)
+					// let count = /\(x(\d+)\)/.exec(cols[0])
+					// count = count && count[1] || 1
+					// squad.size += count
+					const unit_name = cols[0].replace(/\(x\d+\)/, '').trim()
+					const unit = squad.units[unit_name] || { "count": 1 }
+					unit.name = unit_name
+					unit.M = parseInt(cols[1])
+					unit.T = parseInt(cols[2])
+					unit.SV = parseInt(cols[3])
+					unit.W = parseInt(cols[4])
+					unit.LD = parseInt(cols[5])
+					unit.OC = parseInt(cols[6])
+					if (name === "PASTED") name = unit.name  // In case user didn't copy sheet name.
+					squad.units[unit.name] = unit
+					if (!squad.models) squad.size += unit.count
+				}
+				else if (cols.length === 8) {  // Weapon
+					mode = "weapon"
+					if (cols[2] === "A") continue  // Skip headers.
+					let weapon = {
+						"count": cols[0].includes("(x0)") ? 0 : (parseInt(/\d+/.exec(cols[0])) || 1),
+						"R": parseInt(cols[1]) || 0,
+						"A": cols[2],
+						"WS": parseInt(cols[3]) || 0,
+						"S": parseInt(cols[4]),
+						"AP": parseInt(cols[5]),
+						"D": cols[6],
+						"keywords": cols[7].trim().split(/, */),
+					}
+					squad.weapons[cols[0]] = weapon
+				}
+				// TODO: Use HTML for New Recruit pasted keywords? includes() works well enough for now.
+				for (let word of ["Abilities", "Keywords", "Rules"]) {
+					if (line.startsWith(word)) {
+						mode = word
+						let list = line.slice(word.length + 1).trim().replace(/([^A-Z (])([A-Z])/g, '$1\t$2').split('\t')
+						if (list == "") list = []
+						//log(`Adding ${word}: ${list} to ${squad[word.toLowerCase()]}`)
+						squad[word.toLowerCase()].push(...list)
+					}
+				}
+				if (line.trim() === "Models") {
+					mode = "model"
+					continue
+				}
+				//log(`Parsing ${mode}: ${line}`)
+				if (mode === "model") {
+					const mo = /(\d+)x ([^:]+)/.exec(cols[0])
+					//log(`NewRecruit models table row: ${mo}`)
+					if (mo) {
+						const count = parseInt(mo[1]) || 1
+						const model_name = mo[2]
+						squad.size += count
+						squad.models[model_name] = { "count": count }
+					}
+				} else if (["Abilities", "Keywords", "Rules"].includes(mode)) {
+					const mo = /^([^:]+): (.*)/.exec(line)
+					if (mo) {
+						let ability = mo[1]
+						if (ability === "Keywords") continue
+						let val = parseInt(mo[2])
+						let inv_mo = /^Invulnerable Save \((\d)\+\)$/.exec(ability.trim())
+						if (inv_mo) {
+							val = parseInt(inv_mo[1])
+							ability = `Invulnerable Save ${val}`
+						} else {
+							inv_mo = /^This model has a (\d)\+ invulnerable save.$/.exec(mo[2].trim())
+							if (inv_mo) val = parseInt(inv_mo[1])
+							if (val) ability += ' ' + val
+						}
+						//log(`Line '''${line}''' has ${mode}: '''${ability}'''`)
+						squad[mode.toLowerCase()].push(ability)
+					}
+				}
+			}
+			squads[name] = squad
+			return squads
+		}
+		function filter(which, what) {
+			what = what.toLowerCase()
+			document.querySelectorAll(`#${which}>option`).forEach(o => o.hidden = !(o.innerText.toLowerCase().includes(what) || squads[o.innerText].keywords.join(",").toLowerCase().includes(what) || squads[o.innerText].abilities.join(",").toLowerCase().includes(what)))
+		}
+		function search(name) {
+			window.open('https://www.google.com/search?q="' + encodeURIComponent(name) + '"+Warhammer+40,000+10th+Edition+miniature&udm=2')
+		}
+	</script>
 </head>
 
 <body onload="import_sheets(); add_squads()">
-    <h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
-    <div>
-        Source: <label>Filter <input style="width:5em" onchange="filter('source', this.value)"></label>
-        Squad <select id="source" onchange="set_source_squad(this.value)"></select>
-        <a href="javascript:search(source.value)">📷</a>
-        <div id="models" style="display: none">Models: <span id="source_models"></span></div>
-        <table>
-            <tr>
-                <th><label for="source_keywords">Keywords</label></th>
-                <td><input id="source_keywords" type="text" class="abilities"></td>
-            </tr>
-            <tr>
-                <th><label for="source_abilities">Abilities</label></th>
-                <td><input id="source_abilities" type="text" class="abilities"></td>
-            </tr>
-        </table>
-        <div id="weapons"></div>
-    </div><br>
-    <div>
-        Target: <label>Filter <input style="width:5em" onchange="filter('target', this.value)"></label>
-        Squad <select id="target" onchange="set_target_squad(this.value)"></select>
-        <a href="javascript:search(target.value)">📷</a>
-        <label>Size <input id="target_size" type="number"></label>
-        <label>Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select></label><br>
-        <table>
-            <tr>
-                <th><label for="target_keywords">Keywords</label></th>
-                <td><input id="target_keywords" type="text" class="abilities"></td>
-            </tr>
-            <tr>
-                <th><label for="target_abilities">Abilities</label></th>
-                <td><input id="target_abilities" type="text" class="abilities"></td>
-            </tr>
-            <tr>
-                <th><label for="target_rules">Rules</label></th>
-                <td><input id="target_rules" type="text" class="abilities"></td>
-            </tr>
-        </table>
-        <label title="Toughness">T <input id="toughness" type="number"></label>
-        <label title="Save">SV <input id="save" type="number"></label>
-        <label title="Wounds">W <input id="wounds" type="number"></label>
-        <label title="Leadership">LD <input id="leadership" type="number"></label>
-        <label title="Invulnerable Save">SV++ <input id="invuln_save" type="text"></label>
-        <label title="Feel No Pain damage negation (Not a save!)">FNP+++ <input id="fnp_save" type="text"></label>
-    </div>
-    <br>
-    <div>
-        <label>Distance <input id="distance" type="number" value="2" min="0" step="0.5">" </label>
-        <label>Cover <input id="cover" type="checkbox"></label>
-        <label>Prefer pistols <input id="prefer_pistols" type="checkbox"> </label>
-        <label>Rounds <input id="rounds" type="number" value="1" min="1"></label>
-        <input type="button" value="Calculate" onclick="calculate(distance.value)">
-    </div>
-    <br>
-    <div id="result">
+	<h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
+	<div>
+		Source: <label>Filter <input style="width:5em" onchange="filter('source', this.value)"></label>
+		Squad <select id="source" onchange="set_source_squad(this.value)"></select>
+		<a href="javascript:search(source.value)">📷</a>
+		<div id="models" style="display: none">Models: <span id="source_models"></span></div>
+		<table>
+			<tr>
+				<th><label for="source_keywords">Keywords</label></th>
+				<td><input id="source_keywords" type="text" class="abilities"></td>
+			</tr>
+			<tr>
+				<th><label for="source_abilities">Abilities</label></th>
+				<td><input id="source_abilities" type="text" class="abilities"></td>
+			</tr>
+		</table>
+		<div id="weapons"></div>
+	</div><br>
+	<div>
+		Target: <label>Filter <input style="width:5em" onchange="filter('target', this.value)"></label>
+		Squad <select id="target" onchange="set_target_squad(this.value)"></select>
+		<a href="javascript:search(target.value)">📷</a>
+		<label>Size <input id="target_size" type="number"></label>
+		<label>Unit <select id="target_unit" onchange="set_target_unit(this.value)"></select></label><br>
+		<table>
+			<tr>
+				<th><label for="target_keywords">Keywords</label></th>
+				<td><input id="target_keywords" type="text" class="abilities"></td>
+			</tr>
+			<tr>
+				<th><label for="target_abilities">Abilities</label></th>
+				<td><input id="target_abilities" type="text" class="abilities"></td>
+			</tr>
+			<tr>
+				<th><label for="target_rules">Rules</label></th>
+				<td><input id="target_rules" type="text" class="abilities"></td>
+			</tr>
+		</table>
+		<label title="Toughness">T <input id="toughness" type="number"></label>
+		<label title="Save">SV <input id="save" type="number"></label>
+		<label title="Wounds">W <input id="wounds" type="number"></label>
+		<label title="Leadership">LD <input id="leadership" type="number"></label>
+		<label title="Invulnerable Save">SV++ <input id="invuln_save" type="text"></label>
+		<label title="Feel No Pain damage negation (Not a save!)">FNP+++ <input id="fnp_save" type="text"></label>
+	</div>
+	<br>
+	<div>
+		<label>Distance <input id="distance" type="number" value="2" min="0" step="0.5">" </label>
+		<label>Cover <input id="cover" type="checkbox"></label>
+		<label>Prefer pistols <input id="prefer_pistols" type="checkbox"> </label>
+		<label>Rounds <input id="rounds" type="number" value="1" min="1"></label>
+		<input type="button" value="Calculate" onclick="calculate(distance.value)">
+	</div>
+	<br>
+	<div id="result">
 
-    </div>
+	</div>
 </body>
 
 </html>
