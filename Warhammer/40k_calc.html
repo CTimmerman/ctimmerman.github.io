@@ -36,6 +36,8 @@
 		}
 	</style>
 	<script>
+		const SEP = "; "
+		const SPLIT = /[;,] */
 		let squads = {}
 		let sheets = [
 			"=== Imperium ===",
@@ -1175,6 +1177,36 @@ Rules Strands of FateDevastating Wounds
 Keywords: Faction: Aeldari Infantry Wraith Construct Wraithguard`,
 
 			"- Leagues of Votann -",
+			`Hearthkyn Warriors 
+Models
+ 8x Hearthkyn Warrior: Autoch-pattern bolt pistol, Close combat weapon, Autoch-pattern bolter
+ 1x Hearthkyn Warrior: Autoch-pattern bolt pistol, Close combat weapon, Autoch-pattern bolter, Pan spectral scanner
+ 1x Hearthkyn Warrior w/ heavy weapon: Autoch-pattern bolt pistol, Close combat weapon, Etacarn plasma beamer*
+ 1x Hearthkyn Warrior w/ heavy weapon: Autoch-pattern bolt pistol, Close combat weapon, HYLas auto rifle*
+ 1x Theyn: Close combat weapon, Weavefield crest, Ion pistol, Kin melee weapon
+Unit	M	T	SV	W	LD	OC
+Hearthkyn Warriors	5"	5	4+	1	7+	2
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Autoch-pattern bolt pistol (x9)	12"	1	4+	4	0	1	Pistol
+Autoch-pattern bolter (x7)	24"	2	4+	4	0	1	-
+Etacarn plasma beamer	18"	1	4+	8	-3	2	Sustained Hits D3
+Etacarn plasma pistol (x0)	6"	1	4+	8	-3	2	Pistol
+HYLas auto rifle	24"	3	4+	6	-1	1	Assault, Rapid Fire 3
+HYLas rotary cannon (x0)	24"	6	5+	6	-1	1	Heavy, Sustained Hits 1
+Ion blaster (x0)	18"	1	4+	5	-2	1	-
+Ion pistol (x1)	12"	1	4+	5	-2	1	Pistol
+➤ L7 missile launcher - blast (x0)	24"	D6	4+	4	0	1	Blast
+➤ L7 missile launcher - focused (x0)	24"	1	4+	9	-2	D6	-
+Magna-rail rifle (x0)	18"	1	5+	12	-3	D3+3	Devastating Wounds, Heavy
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close combat weapon (x10)	Melee	1	4+	4	0	1	-
+Kin melee weapon (x0)	Melee	2	4+	5	-2	2	-
+Abilities
+Luck Has, Need Keeps, Toil Earns: At the end of your Command phase, if this unit is within range of an objective marker you control, that objective marker remains under your control, even if you have no models within range of it, until your opponent controls it at the start or end of any turn.
+Weavefield crest: The bearer has a 4+ Invulnerable Save.
+Pan spectral scanner: Ranged weapons equipped by models in the bearer’s unit have the [IGNORES COVER] ability.
+Rules Eye of the AncestorsRuthless EfficiencyPistolIgnores Cover
+Keywords: Battleline Faction: Leagues of Votann Grenades Hearthkyn Warriors Infantry`,
 			`Hekaton Land Fortress 
 Unit	M	T	SV	W	LD	OC
 Hekaton Land Fortress	10"	12	2+	16	7+	5
@@ -1195,6 +1227,22 @@ Pan spectral scanner: Ranged weapons equipped by the bearer have the [IGNORES CO
 Transport Hekaton Land Fortress
 Rules Eye of the AncestorsRuthless EfficiencyDeadly Demise D6BlastSustained HitsTwin-linked
 Keywords: Faction: Leagues of Votann Hekaton Land Fortress Transport Vehicle`,
+			`Sagitaur 
+Unit	M	T	SV	W	LD	OC
+Sagitaur	12"	10	3+	9	7+	3
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Twin bolt cannon	36"	3	4+	6	-1	2	Sustained Hits 1, Twin-linked
+HYLas beam cannon (x0)	24"	2	4+	12	-3	D6	Sustained Hits D3
+Sagitaur missile launcher	36"	2	4+	12	-3	3	-
+➤ L7 missile launcher - blast (x0)	24"	D6	4+	4	0	1	Blast
+➤ L7 missile launcher - focused	24"	1	4+	9	-2	D6	-
+MATR autocannon (x0)	24"	6	4+	7	-1	2	-
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Armoured wheels	Melee	3	4+	6	0	1	-
+Abilities Blistering Advance
+Transport Sagitaur
+Rules Eye of the AncestorsRuthless EfficiencyScouts 6"Deadly Demise 1Sustained HitsTwin-linked
+Keywords: Dedicated Transport, Faction: Leagues of Votann, Sagitaur, Transport, Vehicle`,
 			`Ûthar the Destined 
 Unit	M	T	SV	W	LD	OC
 Ûthar the Destined	5"	5	3+	5	7+	1
@@ -1491,10 +1539,10 @@ Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monst
 				</tr>` : ''
 			let i = 0
 			log("LOADING squad " + JSON.stringify(squad))
-			source_abilities.value = (squad.abilities || []).join(", ")
-			source_keywords.value = (squad.keywords || []).join(", ")
+			source_abilities.value = (squad.abilities || []).join(SEP)
+			source_keywords.value = (squad.keywords || []).join(SEP)
 
-			source_models.innerHTML = Object.keys(squad.models).join(', ')
+			source_models.innerHTML = Object.keys(squad.models).join(SEP)
 			models.style.display = source_models.innerHTML ? 'block' : 'none'
 			for (let key in squad["weapons"]) {
 				log("Weapon: " + key)
@@ -1508,7 +1556,7 @@ Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monst
 <td><input id="strength${i}" type="number" min="0" value="${weapon.S}"></td>
 <td><input id="piercing${i}" type="number" value="${-Math.abs(weapon.AP || 0)}"></td>
 <td><input id="damage${i}" type="text" value="${weapon.D}"></td>
-<td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).split(/, */).join(", ")}" style="width: 10em"></td></tr>`
+<td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).split(SPLIT).join(SEP)}" style="width: 10em"></td></tr>`
 			}
 			weapons.innerHTML = html + "</table>"
 		}
@@ -1520,9 +1568,9 @@ Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monst
 				squad = parse_sheet(squad)[key]
 			}
 			target_size.value = squad.size || 1
-			target_abilities.value = (squad.abilities || []).join(", ")
-			target_keywords.value = (squad.keywords || []).join(", ")
-			target_rules.value = (squad.rules || []).join(", ")
+			target_abilities.value = (squad.abilities || []).join(SEP)
+			target_keywords.value = (squad.keywords || []).join(SEP)
+			target_rules.value = (squad.rules || []).join(SEP)
 			let html = ""
 			for (let k in squad.units) {
 				html += `<option value="${k}">${k}</option>`
@@ -1578,13 +1626,13 @@ Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monst
 		function calculate(distance) {
 			let damage = 0
 
-			let source_abilities = gets("source_abilities").toUpperCase().split(/, */).join(", ")
-			let source_keywords = gets("source_keywords").toUpperCase().split(/, */).join(", ")
+			let source_abilities = gets("source_abilities").toUpperCase().split(SPLIT).join(SEP)
+			let source_keywords = gets("source_keywords").toUpperCase().split(SPLIT).join(SEP)
 			let source_is_vehicle = source_keywords.includes("VEHICLE")
 			let source_is_monster = source_keywords.includes("MONSTER")
-			let target_abilities = gets("target_abilities").toUpperCase().split(/, */).join(", ")
-			let target_keywords = gets("target_keywords").toUpperCase().split(/, */).join(", ")
-			let target_rules = gets("target_rules").toUpperCase().split(/, */).join(", ")
+			let target_abilities = gets("target_abilities").toUpperCase().split(SPLIT).join(SEP)
+			let target_keywords = gets("target_keywords").toUpperCase().split(SPLIT).join(SEP)
+			let target_rules = gets("target_rules").toUpperCase().split(SPLIT).join(SEP)
 			const T = parseInt(toughness.value)
 			let SV = parseInt(save.value)
 			let W = parseInt(wounds.value)
@@ -1604,7 +1652,7 @@ Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monst
 				let weapon = document.getElementById(`weapon${i}`)
 				if (weapon === null) break
 
-				let weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
+				let weapon_keywords = gets(`keywords${i}`).toUpperCase().split(SPLIT)
 				if (geti(`range${i}`) > 0 && !weapon_keywords.includes("PISTOL")) {
 					has_rifle = true
 					break
@@ -1627,7 +1675,7 @@ Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monst
 				let R = geti(`range${i}`) || 0
 				let S = geti(`strength${i}`)
 
-				const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(/, */)
+				const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(SPLIT)
 				let is_pistol = weapon_keywords.includes("PISTOL")
 				if (pistols_only && R > 0 && !is_pistol) {
 					log("Pistols only.")
@@ -2018,7 +2066,7 @@ Keywords: Character Epic Hero Faction: Tyranids Great Devourer Hive Tyrant Monst
 					if (el2.innerText.trim()) keywords.push(el2.innerHTML)
 				})
 			})
-			log("Keywords:" + keywords.join(', '))
+			log("Keywords:" + keywords.join(SEP))
 			return keywords
 		}
 
@@ -2148,7 +2196,7 @@ Melee
 						"S": parseInt(cols[4]),
 						"AP": parseInt(cols[5]),
 						"D": cols[6],
-						"keywords": cols[7].trim().split(/, */),
+						"keywords": cols[7].trim().split(SPLIT),
 					}
 					squad.weapons[cols[0]] = weapon
 				}
@@ -2187,9 +2235,8 @@ Melee
 							val = parseInt(inv_mo[1])
 							ability = `Invulnerable Save ${val}`
 						} else {
-							inv_mo = /^This model has a (\d)\+ invulnerable save.$/.exec(mo[2].trim())
-							if (inv_mo) val = parseInt(inv_mo[1])
-							if (val) ability += ' ' + val
+							inv_mo = /^(This model|The bearer) has a (\d)\+ invulnerable save.$/i.exec(mo[2].trim())
+							if (inv_mo) squad[mode.toLowerCase()].push(`Invulnerable Save ${inv_mo[2]}`)
 						}
 						//log(`Line '''${line}''' has ${mode}: '''${ability}'''`)
 						squad[mode.toLowerCase()].push(ability)
@@ -2212,7 +2259,7 @@ Melee
 <body onload="import_sheets(); add_squads()">
 	<h1>Warhammer 40,000 10th Edition Combat Calculator</h1>
 	<div>
-		Source: <label>Filter <input style="width:5em" onchange="filter('source', this.value)"></label>
+		<b>Source</b>: <label>Filter <input style="width:5em" onchange="filter('source', this.value)"></label>
 		Squad <select id="source" onchange="set_source_squad(this.value)"></select>
 		<a href="javascript:search(source.value)">📷</a>
 		<div id="models" style="display: none">Models: <span id="source_models"></span></div>
@@ -2229,7 +2276,7 @@ Melee
 		<div id="weapons"></div>
 	</div><br>
 	<div>
-		Target: <label>Filter <input style="width:5em" onchange="filter('target', this.value)"></label>
+		<b>Target</b>: <label>Filter <input style="width:5em" onchange="filter('target', this.value)"></label>
 		Squad <select id="target" onchange="set_target_squad(this.value)"></select>
 		<a href="javascript:search(target.value)">📷</a>
 		<label>Size <input id="target_size" type="number"></label>
