@@ -1656,6 +1656,12 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 			let target_rules = gets("target_rules").toUpperCase().split(SPLIT).join(SEP)
 			const T = parseInt(toughness.value)
 			let SV = parseInt(save.value)
+			if (source_abilities.includes("ARTIFICER ARMOUR")) {
+				log("Artificer Armour: Adeptus Astartes model only. The bearer has a Save characteristic of 2+ and the Feel No Pain 5+ ability.")
+				SV = 2
+				source_abilities.push("FEEL NO PAIN 5")
+				fnp_save.value = 5  // XXX: redundant?
+			}
 			let W = parseInt(wounds.value)
 			let LD = parseInt(leadership.value)
 
@@ -1725,6 +1731,11 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 						weapon_keywords.push("IGNORES COVER")
 					}
 				}
+				if (source_abilities.includes("FIRE DISCIPLINE") && R > 2) {
+					weapon_keywords.push("SUSTAINED HITS 1")
+					log(`FIRE DISCIPLINE: Adeptus Astartes model only. While the bearer is leading a unit, ranged weapons equipped by models in that unit have the [SUSTAINED HITS 1] ability. In addition, while the bearer’s unit is under the effects of the Devastator Doctrine, you can reroll Advance rolls made for that unit.`)
+					}
+				}
 				if (inches < 18 && source_abilities.includes("GLOVODAN PSYBER-EAGLE")) {
 					log("Glovodan Psyber-eagle ignoring cover < 18\"")
 					weapon_keywords.push("IGNORES COVER")
@@ -1758,12 +1769,6 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 					let take_battleshock = false
 					let battleshock_bonus = 0
 					let A = geti(`attacks${i}`)
-					// Each time a [RAPID FIRE X] weapon targets a unit within half that weapon’s range, the Attacks characteristic of that weapon is increased by the amount denoted by ‘x’.
-					let rf = get_keyword_value(weapon_keywords, "RAPID FIRE")
-					if (rf && inches < R / 2) {
-						A += rf
-						log(`+${rf} RAPID FIRE attacks.`)
-					}
 					// BLAST adds 1 attack per 5 units in the target unit.
 					if (weapon_keywords.includes("BLAST")) {
 						let blast_attacks = Math.floor(geti("target_size") / 5)
@@ -1771,6 +1776,19 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 							A += blast_attacks
 							log(`+${blast_attacks} BLAST attacks.`)
 						}
+					}
+					// Each time a [RAPID FIRE X] weapon targets a unit within half that weapon’s range, the Attacks characteristic of that weapon is increased by the amount denoted by ‘x’.
+					let rf = get_keyword_value(weapon_keywords, "RAPID FIRE")
+					if (rf && inches < R / 2) {
+						A += rf
+						log(`+${rf} RAPID FIRE attacks.`)
+					}
+					// The Honour Vehement: Adeptus Astartes model only. Add 1 to the Attacks and Strength characteristics of the bearer’s melee weapons. While the bearer is under the effects of the Assault Doctrine, add 2 to the Attacks and Strength characteristics of the bearer’s melee weapons instead.
+					if (source_abilities.includes("THE HONOUR VEHEMENT") && R <= 2) {
+						let n = doctrine === "ASSAULT" ? 2 : 1
+						A += n
+						S += n
+						log(`THE HONOUR VEHEMENT +${n} Attacks. +${n} Strength.`)
 					}
 
 					let hit_rerolls = 0
