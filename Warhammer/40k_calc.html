@@ -74,9 +74,9 @@ Keywords: Character; Epic Hero; Faction: Adepta Sororitas; Grenades; Imperium; I
 
 			"- Adeptus Astartes -",
 			`Apothecary
-			Unit	M	T	SV	W	LD	OC
-			Primaris Apothecary	6"	4	3+	4	6+	1
-			Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Unit	M	T	SV	W	LD	OC
+Primaris Apothecary	6"	4	3+	4	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
 Absolvor Bolt Pistol	18"	1	3+	5	-1	2	Pistol
 Reductor Pistol	3"	1	3+	4	-4	2	Pistol
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
@@ -1645,15 +1645,17 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 			return 0
 		}
 		function calculate(distance) {
-			let damage = 0
-
-			let source_abilities = gets("source_abilities").toUpperCase().split(SPLIT).join(SEP)
-			let source_keywords = gets("source_keywords").toUpperCase().split(SPLIT).join(SEP)
+			let inches = parseFloat(distance)
+			let times = geti("rounds")
+			log_enabled = times < 5
+			log(`\n=== ${source.value} vs ${target.value} ===`)
+			let source_abilities = gets("source_abilities").toUpperCase().split(SPLIT)
+			let source_keywords = gets("source_keywords").toUpperCase().split(SPLIT)
 			let source_is_vehicle = source_keywords.includes("VEHICLE")
 			let source_is_monster = source_keywords.includes("MONSTER")
-			let target_abilities = gets("target_abilities").toUpperCase().split(SPLIT).join(SEP)
-			let target_keywords = gets("target_keywords").toUpperCase().split(SPLIT).join(SEP)
-			let target_rules = gets("target_rules").toUpperCase().split(SPLIT).join(SEP)
+			let target_abilities = gets("target_abilities").toUpperCase().split(SPLIT)
+			let target_keywords = gets("target_keywords").toUpperCase().split(SPLIT)
+			let target_rules = gets("target_rules").toUpperCase().split(SPLIT)
 			const T = parseInt(toughness.value)
 			let SV = parseInt(save.value)
 			if (target_abilities.includes("ARTIFICER ARMOUR")) {
@@ -1665,13 +1667,9 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 			let W = parseInt(wounds.value)
 			let LD = parseInt(leadership.value)
 
-			let inches = parseFloat(distance)
-			let html = ""
-			let times = geti("rounds")
-			log_enabled = times < 5
-
+			let damage = 0
 			const weapon_spreads = {}
-			log(`\n=== ${source.value} vs ${target.value} ===`)
+			let html = ""
 
 			// If a unit is equipped with one or more Pistols, unless it is a MONSTER or VEHICLE unit, it can either shoot with its Pistols or with all of its other ranged weapons. Declare whether such a unit will shoot with its Pistols or its other ranged weapons before selecting targets.
 			let has_rifle = false
@@ -1733,7 +1731,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 				}
 				if (source_abilities.includes("FIRE DISCIPLINE") && R > 2) {
 					weapon_keywords.push("SUSTAINED HITS 1")
-					log(`FIRE DISCIPLINE: Adeptus Astartes model only. While the bearer is leading a unit, ranged weapons equipped by models in that unit have the [SUSTAINED HITS 1] ability. In addition, while the bearer’s unit is under the effects of the Devastator Doctrine, you can reroll Advance rolls made for that unit.`)
+					log(`FIRE DISCIPLINE: While the bearer is leading a unit, ranged weapons have SUSTAINED HITS 1.`)
 				}
 				if (inches < 18 && source_abilities.includes("GLOVODAN PSYBER-EAGLE")) {
 					log("Glovodan Psyber-eagle ignoring cover < 18\"")
@@ -2084,14 +2082,18 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 			log(`Parsed squads: ${JSON.stringify(new_squads, null, 4)}`)
 			//log(`Parsed squads: ${JSON.stringify(new_squads)}`)
 			//log(`Parsing ${html}`)
+			if (new_squads[Object.keys(new_squads)[0]].size < 1) {
+				log("No squad found. Really NewRecruit.eu format?")
+				return
+			}
 			const html = event.clipboardData.getData("text/html")
-			new_squads[Object.keys(new_squads)[0]].keywords = parse_newrecruit_html(html)
+			new_squads[Object.keys(new_squads)[0]].keywords = parse_newrecruit_html(html)  // TODO? Multiple squads?
 
 			squads = {
 				...squads,
 				...new_squads
 			}
-			alert(`Imported ${name}.`)
+			alert(`Imported ${Object.keys(new_squads)}.`)
 			add_squads()
 		}
 
@@ -2238,13 +2240,12 @@ Melee
 					}
 					squad.weapons[cols[0]] = weapon
 				}
-				// TODO: Use HTML for New Recruit pasted keywords? includes() works well enough for now.
 				for (let word of ["Abilities", "Keywords", "Rules"]) {
 					if (line.startsWith(word)) {
 						mode = word
 						let list = line.slice(word.length + 1).replace("Description", "").trim().replace(/([^A-Z (])([A-Z])/g, '$1\t$2').split('\t')
-						if (list == "") list = []
-						//log(`Adding ${word}: ${list} to ${squad[word.toLowerCase()]}`)
+						if (list == "") continue
+						log(`Adding ${word}: ${list} to ${squad[word.toLowerCase()]}`)
 						squad[word.toLowerCase()].push(...list)
 					}
 				}
@@ -2262,8 +2263,9 @@ Melee
 						squad.size += count
 						squad.models[model_name] = { "count": count }
 					}
-				} else if (["Abilities", "Keywords", "Rules"].includes(mode)) {
-					const mo = /^([^:\t]+)[: \t]+(.*)/.exec(line)
+				} else if (["Abilities", "Keywords", "Rules"].includes(mode) && !/^Abilities|Keywords|Rules/.exec(line)) {
+					let mo = /^([^:]+): (.*)/.exec(line)
+					if (!mo) mo = /^([^:\t]+)[: \t]+(.*)/.exec(line)
 					if (mo) {
 						let ability = mo[1]
 						if (["Abilities", "Description", "Keywords", "Rules"].includes(ability)) continue
@@ -2276,8 +2278,8 @@ Melee
 							inv_mo = /^(This model|The bearer) has a (\d)\+ invulnerable save.$/i.exec(mo[2].trim())
 							if (inv_mo) squad[mode.toLowerCase()].push(`Invulnerable Save ${inv_mo[2]}`)
 						}
-						//log(`Line '''${line}''' has ${mode}: '''${ability}'''`)
-						squad[mode.toLowerCase()].push(ability)
+						log(`Line "${line}" has ${mode}: "${ability}"`)
+						squad[mode.toLowerCase()].push(ability.split(SPLIT))
 					}
 				}
 			}
