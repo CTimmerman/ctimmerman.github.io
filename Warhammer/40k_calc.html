@@ -913,7 +913,7 @@ Melee Weapons	Range	A	WS	S	AP	D	Keywords
 ➤ Axe of Khorne (x0) - sweep	Melee	16	2+	8	-2	1	-
 ➤ Great axe of Khorne - strike	Melee	7	2+	16	-4	D6+2	-
 ➤ Great axe of Khorne - sweep (x0)	Melee	14	2+	10	-2	2	-
-Relentless Carnage	1	8D6	5	0	0	1	ANTI-F 1, Devastating Wounds
+Relentless Carnage	1	8D6	5	0	0	1	ANTI-ALL 1, Devastating Wounds
 Abilities
 Daemon Lord of Khorne (Aura): While a friendly KHORNE LEGIONES DAEMONICA unit is within 6" of this model, each time a model in that unit makes a melee attack, add 1 to the Hit roll.
 Relentless Carnage: At the end of the Fight phase, you can select one enemy unit within Engagement Range of this model and roll eight D6: for each 4+, that enemy unit suffers 1 mortal wound.
@@ -1303,6 +1303,19 @@ Sentinel Construct: Each time you target this unit with the Fire Overwatch Strat
 Invulnerable Save: This model has a 4+ invulnerable save.
 Rules Annihilation ProtocolReanimation ProtocolsDeadly Demise D3BlastHeavyLethal HitsTwin-linkedRapid Fire
 Keywords: Canoptek Doomstalker; Faction: Necrons; Vehicle; Walker`,
+			`Canoptek Scarab Swarms 
+Models
+ 3x Canoptek Scarab Swarm: Feeder mandibles
+Unit	M	T	SV	W	LD	OC
+Canoptek Scarab Swarms	10"	2	6+	4	8+	0
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+SELF-DESTRUCTION (x3)	Melee	1	0	0	0	0	Once, Torrent, Anti-all 1, Devastating Wounds
+Feeder mandibles (x3)	Melee	6	5+	2	0	1	Lethal Hits
+Abilities
+Self-destruction: At the start of the Fight phase, if this unit is within Engagement Range of one or more enemy units, you can select one model in this unit to destroy. If you do, select one enemy unit within Engagement Range of that model and roll one D6, adding 1 to the result if that unit is a VEHICLE. On a 2-5, that unit suffers D3 mortal wounds; on a 6+, that unit suffers 3 mortal wounds.
+Chittering Swarm: While an enemy unit is within Engagement Range of this unit, subtract 1 from the Objective Control characteristic of models in that enemy unit (to a minimum of 1). While this unit is within 6" of one or more friendly CRYPTEK models, the Objective Control characteristic of models in this unit is 1.
+Rules Annihilation ProtocolReanimation ProtocolsLethal Hits
+Keywords: Canoptek; Faction: Necrons; Fly; Scarab Swarms; Swarm`,  // TODO: Melee one weapon only.
 			`Ghost Ark 
 Unit	M	T	SV	W	LD	OC
 Ghost Ark	10"	9	3+	14	7+	3
@@ -1715,7 +1728,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 		}
 		function calculate(distance) {
 			let inches = parseFloat(distance)
-			let times = geti("rounds")
+			let times = geti("battles")
 			log_enabled = times < 5
 			log(`\n=== ${source.value} vs ${target.value} ===`)
 			let source_abilities = gets("source_abilities").toUpperCase().split(SPLIT)
@@ -1758,13 +1771,15 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 			// Use up to 49 weapons.
 			for (let i = 1; i < 50; ++i) {
 				let weapon = document.getElementById(`weapon${i}`)
-				if (weapon === null) break;
+				if (weapon === null) break
 				weapon = weapon.innerText
+				weapon = weapon.replace(/\s*\(x\d+\)/, "")
+
 				// Skip unequipped weapons.
 				let count = geti(`count${i}`)
 				if (count < 1) continue
 
-				log(`WEAPON: ${weapon}`)
+				log(`WEAPON: ${count} ${weapon}`)
 				let melee_done = false
 				let R = geti(`range${i}`) || 0
 				let S = geti(`strength${i}`)
@@ -1888,7 +1903,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 						//
 						let hits = 1
 						let lethal_hits = false
-						if (!source_keywords.includes("TORRENT")) {  // Torrent autohits.
+						if (!weapon_keywords.includes("TORRENT")) {  // Torrent autohits.
 							let hit_roll = d6()
 							if (source_abilities.includes("CHAINBREAKER") && hit_roll == 5) {
 								log("Chainbreaker: Each time this model makes an attack, an unmodified successful (XXX: ?) Hit roll of 5+ scores a Critical Hit: " + hit_roll)
@@ -1952,7 +1967,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 								// A hit roll can never be modified by more than -1 or +1. (Core Rules, Section "Making attacks")
 								if (hit_bonus > 1) hit_bonus = 1
 								else if (hit_bonus < -1) hit_bonus = -1
-								log(`+ ${hit_bonus} = ${hit_roll + hit_bonus}`)
+								if (hit_bonus) log(`+ ${hit_bonus} = ${hit_roll + hit_bonus}`)
 								hit_roll += hit_bonus
 
 								if (hit_roll < WS) {
@@ -1989,9 +2004,11 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 									if (kw.indexOf("ANTI-") > -1) {
 										let anti_what = /ANTI-(\w+)/.exec(kw)[1].toUpperCase()
 										let anti_how = parseInt(/\d+/.exec(kw))
-										if (target_keywords.includes(anti_what) && wound_roll >= anti_how) {
+										if ((anti_what === "ALL" || target_keywords.includes(anti_what)) && wound_roll >= anti_how) {
 											log(`ANTI-${anti_what} crits ${anti_how}+. Wound roll ${wound_roll} -> 6.`)
 											wound_roll = 6  // ANTI- grants crits.
+										} else {
+											log(`ANTI-${anti_what} crits ${anti_how}+. Does not apply to ${target_keywords.join(SEP)}`)
 										}
 									}
 								}
@@ -2038,7 +2055,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 										continue
 									}
 									// Benefit of Cover: https://www.wargamer.com/warhammer-40k/cover
-									if (R > 1 && cover.checked && !source_keywords.includes("IGNORES COVER")) {
+									if (R > 1 && cover.checked && !weapon_keywords.includes("IGNORES COVER")) {
 										if (SV <= 3 && AP == 0) {
 											log(`No benefit of cover for armor save. ${save_roll}`)
 										} else {
@@ -2059,7 +2076,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 									}
 								}
 							}
-							log(`No save.`)
+							//log(`No save.`)
 
 							/////////
 							// Damage
@@ -2097,6 +2114,20 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 									log(`MELTA bonus, +${melta_bonus} damage.`)
 								}
 							}
+							// Self-destruction: At the start of the Fight phase, if this unit is within Engagement Range of one or more enemy units, you can select one model in this unit to destroy. If you do, select one enemy unit within Engagement Range of that model and roll one D6, adding 1 to the result if that unit is a VEHICLE. On a 2-5, that unit suffers D3 mortal wounds; on a 6+, that unit suffers 3 mortal wounds.
+							let mortal_wounds = false
+							if (weapon.startsWith("SELF-DESTRUCTION") && inches < 1) {
+								let x = d6() + (target_keywords.includes("VEHICLE") ? 1 : 0)
+								if (x === 1) {
+									log("Self-destruction missed.")
+									continue
+								}
+								if (x >= 2 && x <= 5) x = Math.ceil(d6() / 2)
+								else if (x >= 6) x = 3
+								log(`Melee is SELF-DESTRUCT! ${x} MW.`)
+								D = x
+								mortal_wounds = true
+							}
 							// negation
 							// Feel No Pain x+: Each time this unit would lose a wound, roll one D6: if the result equals or exceeds ‘x’, that wound is not lost. https://wahapedia.ru/wh40k10ed/the-rules/core-rules/#:~:text=attack%20is%20lost.-,FEEL%20NO%20PAIN,-Some%20warriors%20refuse - Not prevented by DEVASTATING WOUNDS even though this is thematically also a save (+++) that can prevent devastation.
 							let fnp = geti("fnp_save") || 99  // Doesn't stack; choose one.
@@ -2110,6 +2141,10 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 							}
 							// Only "mortal wounds" from for example DEADLY DEMISE carry over: https://spikeybits.com/warhammer-40k/mortal-wounds-rules/
 							let overkill = (D - W) > 0 ? D - W : 0
+							if (mortal_wounds) {
+								log("Mortal wounds carry over.")
+								overkill = 0
+							}
 							log(`Target squad takes ${D} - ${overkill} overkill = ${D - overkill} damage!`)
 							D -= overkill
 							damage += D
@@ -2136,7 +2171,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 							}
 						}
 					}
-				}  // rounds
+				}  // battles
 			}  // weapons
 
 			let max_hits = 0
@@ -2429,7 +2464,7 @@ Melee
 		<label>Distance <input id="distance" type="number" value="2" min="0" step="0.5">" </label>
 		<label>Cover <input id="cover" type="checkbox"></label>
 		<label>Prefer pistols <input id="prefer_pistols" type="checkbox"> </label>
-		<label>Rounds <input id="rounds" type="number" value="1" min="1"></label>
+		<label>Battles <input id="battles" type="number" value="1" min="1"></label>
 		<input type="button" value="Calculate" onclick="calculate(distance.value)">
 	</div>
 	<br>
