@@ -307,6 +307,30 @@ Armoured Tracks	Melee	3	4+	6	0	1	-
 Abilities Self RepairTransport
 Rules Firing Deck 2Deadly Demise D3Oath of MomentOne ShotRapid Fire
 Keywords: Dedicated Transport; Faction: Adeptus Astartes; Imperium; Rhino; Smoke; Transport; Vehicle`,
+			`Sternguard Veteran Squad 
+Models
+ 1x Sternguard Veteran Sergeant: Close Combat Weapon, Sternguard Bolt Pistol, Astartes Chainsword, Sternguard Bolt Rifle
+ 4x Sternguard Veteran w/ Bolt Rifle: Close Combat Weapon, Sternguard Bolt Pistol, Sternguard Bolt Rifle
+ 3x Sternguard Veteran w/ Combi-weapon: Close Combat Weapon, Combi-weapon, Sternguard Bolt Pistol
+ 1x Sternguard Veteran w/ Special Weapon: Close Combat Weapon, Sternguard Bolt Pistol, Pyrecannon
+ 1x Sternguard Veteran w/ Special Weapon: Close Combat Weapon, Sternguard Bolt Pistol, Sternguard Heavy Bolter
+Unit	M	T	SV	W	LD	OC
+Sternguard Veteran Squad	6"	4	3+	2	6+	1
+Ranged Weapons	Range	A	BS	S	AP	D	Keywords
+Sternguard Bolt Pistol (x10)	12"	1	3+	4	0	1	Devastating Wounds, Pistol
+Sternguard Bolt Rifle (x5)	24"	2	3+	4	-1	1	Assault, Devastating Wounds, Heavy, Rapid Fire 1
+Combi-weapon (x3)	24"	1	4+	4	0	1	Anti-infantry 4+, Devastating Wounds, Rapid Fire 1
+Pyrecannon	12"	D6+1	N/A	6	-1	1	Ignores Cover, Torrent
+Sternguard Heavy Bolter	36"	3	4+	5	-1	2	Devastating Wounds, Heavy, Sustained Hits 1
+Melee Weapons	Range	A	WS	S	AP	D	Keywords
+Close Combat Weapon (x10)	Melee	4	3+	4	0	1	-
+Astartes Chainsword	Melee	6	3+	4	-1	1	-
+Power Fist (x0)	Melee	4	3+	8	-2	2	-
+Power Weapon (x0)	Melee	5	3+	5	-2	1	-
+Abilities
+Sternguard Focus: Each time a model in this unit makes an attack that targets your Oath of Moment Target, you can re-roll the wound roll
+Rules Oath of MomentDevastating WoundsPistolAssaultRapid FireHeavyAnti-Ignores CoverTorrentSustained Hits
+Keywords: Deathwing; Grenades; Imperium; Infantry; Sternguard Veteran Squad; Tacticus`,
 			`Tactical Squad
 Models
  7x Tactical Marine: Bolt Pistol, Boltgun, Close Combat Weapon
@@ -1659,7 +1683,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 <td><input id="strength${i}" type="number" min="0" value="${weapon.S}"></td>
 <td><input id="piercing${i}" type="number" value="${-Math.abs(weapon.AP || 0)}"></td>
 <td><input id="damage${i}" type="text" value="${weapon.D}"></td>
-<td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).split(SPLIT).join(SEP)}" style="width: 10em"></td></tr>`
+<td><input id="keywords${i}" type="text" value="${('' + (weapon.keywords || '')).split(SPLIT).join(SEP)}" style="width: 16em"></td></tr>`
 			}
 			weapons.innerHTML = html + "</table>"
 		}
@@ -1782,8 +1806,13 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 				let count = geti(`count${i}`)
 				if (count < 1) continue
 
-				// Skip extra melee without EXTRA ATTACKS.
 				let R = geti(`range${i}`) || 0
+				if (R <= inches) {
+					//log(`${weapon} out of range. ${R} <= ${inches}`)
+					continue
+				}
+
+				// Skip extra melee without EXTRA ATTACKS.
 				const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(SPLIT)
 				if (R < 2 && melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
 
@@ -1792,7 +1821,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 				if (pistols_only && R > 0 && !is_pistol) continue
 				if (is_pistol && !pistols_only) continue
 
-				log(`WEAPON: ${count} ${weapon}`)
+				log(`WEAPON: ${count}x ${weapon}`)
 				let S = geti(`strength${i}`)
 
 				if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
@@ -1826,10 +1855,6 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 					weapon_keywords.push("IGNORES COVER")
 				}
 
-				if (R <= inches) {
-					log(`${weapon} out of range. ${R} <= ${inches}`)
-					continue
-				}
 				if (target_rules.includes("LONE OPERATIVE") && inches > 12) {
 					log(`Lone operative hidden.`)
 					continue
@@ -1871,8 +1896,8 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 						log(`THE HONOUR VEHEMENT +${n} Attacks. +${n} Strength.`)
 					}
 
-					let hit_rerolls = 0
-					let wound_rerolls = 0
+					let hit_rerolls = reroll_hits.checked ? A : 0
+					let wound_rerolls = reroll_wounds.checked ? A : 0
 					let damage_rerolls = 0
 					// Aqullon Optics: Each time this model is selected to shoot, you can re-roll one Hit roll, you can re-roll one Wound roll and you can re-roll one Damage roll when resolving its attacks.
 					if (source_abilities.includes("AQUILON OPTICS")) {
@@ -1941,6 +1966,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 								log("Critical miss.")
 								continue
 							}
+							// The rule commentary says auto-hits count as hits, but not critical hits. Nothing is triggered by them. https://www.reddit.com/r/Warhammer40k/comments/14cohnl/10th_edition_sustained_hits_torrent/
 							if (hit_roll == 6) {
 								log("Critical hit.")
 								let sh_bonus = get_keyword_value(weapon_keywords, "SUSTAINED HITS")
@@ -1981,13 +2007,14 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 								if (hit_roll < WS) {
 									log(`Miss. ${hit_roll} < ${WS} WS`)
 									continue
+								} else {
+									log(`${hits} hit(s). ${hit_roll} >= ${WS} WS`)
 								}
 							}
 						}
-						log(`${hits} hit(s).`)
 						// Purge the Foe: In your Shooting phase, after this unit has shot, you can select one enemy Infantry unit hit by one or more of those attacks made with a Pyreblaster. That enemy unit must take a Battle-shock test.
 						if (weapon.includes("Pyreblaster") && source_abilities.includes("PURGE THE FOE")) {
-							log("Target must take battleshock test.")
+							// log("Target must take battleshock test.")
 							take_battleshock = true
 							battleshock_bonus -= 1
 						}
@@ -2468,9 +2495,11 @@ Melee
 	</div>
 	<br>
 	<div>
+		<label>Cover<input id="cover" type="checkbox"></label>
+		<label>Prefer pistols<input id="prefer_pistols" type="checkbox"></label>
+		<label>Reroll hits<input id="reroll_hits" type="checkbox"></label>
+		<label>Reroll wounds<input id="reroll_wounds" type="checkbox"></label><br>
 		<label>Distance <input id="distance" type="number" value="2" min="0" step="0.5">" </label>
-		<label>Cover <input id="cover" type="checkbox"></label>
-		<label>Prefer pistols <input id="prefer_pistols" type="checkbox"> </label>
 		<label>Battles <input id="battles" type="number" value="1" min="1"></label>
 		<input type="button" value="Calculate" onclick="calculate(distance.value)">
 	</div>
