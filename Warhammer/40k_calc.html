@@ -1309,13 +1309,13 @@ Models
 Unit	M	T	SV	W	LD	OC
 Canoptek Scarab Swarms	10"	2	6+	4	8+	0
 Melee Weapons	Range	A	WS	S	AP	D	Keywords
-SELF-DESTRUCTION (x3)	Melee	1	0	0	0	0	Once, Torrent, Anti-all 1, Devastating Wounds
+SELF-DESTRUCTION (x0)	Melee	1	0	0	0	0	Once, Torrent, Anti-all 1, Devastating Wounds
 Feeder mandibles (x3)	Melee	6	5+	2	0	1	Lethal Hits
 Abilities
 Self-destruction: At the start of the Fight phase, if this unit is within Engagement Range of one or more enemy units, you can select one model in this unit to destroy. If you do, select one enemy unit within Engagement Range of that model and roll one D6, adding 1 to the result if that unit is a VEHICLE. On a 2-5, that unit suffers D3 mortal wounds; on a 6+, that unit suffers 3 mortal wounds.
 Chittering Swarm: While an enemy unit is within Engagement Range of this unit, subtract 1 from the Objective Control characteristic of models in that enemy unit (to a minimum of 1). While this unit is within 6" of one or more friendly CRYPTEK models, the Objective Control characteristic of models in this unit is 1.
 Rules Annihilation ProtocolReanimation ProtocolsLethal Hits
-Keywords: Canoptek; Faction: Necrons; Fly; Scarab Swarms; Swarm`,  // TODO: Melee one weapon only.
+Keywords: Canoptek; Faction: Necrons; Fly; Scarab Swarms; Swarm`,
 			`Ghost Ark 
 Unit	M	T	SV	W	LD	OC
 Ghost Ark	10"	9	3+	14	7+	3
@@ -1768,6 +1768,9 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 			let pistols_only = !has_rifle || (!source_is_vehicle && !source_is_monster && inches < 1) || prefer_pistols.checked
 			if (pistols_only) log("The only ranged attacks will be using pistols.")
 
+			// Only one melee weapon plus ones with EXTRA ATTACKS.
+			let melee_done = false
+
 			// Use up to 49 weapons.
 			for (let i = 1; i < 50; ++i) {
 				let weapon = document.getElementById(`weapon${i}`)
@@ -1779,26 +1782,23 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 				let count = geti(`count${i}`)
 				if (count < 1) continue
 
-				log(`WEAPON: ${count} ${weapon}`)
-				let melee_done = false
+				// Skip extra melee without EXTRA ATTACKS.
 				let R = geti(`range${i}`) || 0
+				const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(SPLIT)
+				if (R < 2 && melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
+
+				// Skip rifles or guns depending on melee and not monster/vehicle etc.
+				let is_pistol = weapon_keywords.includes("PISTOL")
+				if (pistols_only && R > 0 && !is_pistol) continue
+				if (is_pistol && !pistols_only) continue
+
+				log(`WEAPON: ${count} ${weapon}`)
 				let S = geti(`strength${i}`)
 
-				const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(SPLIT)
-				let is_pistol = weapon_keywords.includes("PISTOL")
-				if (pistols_only && R > 0 && !is_pistol) {
-					log("Pistols only.")
-					continue
-				}
-				if (is_pistol && !pistols_only) {
-					log("Skipping pistol.")
-					continue
-				}
 				if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
 					R = 1
 					// Melee
-					if (melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
-					melee_done = true  // NOSONAR
+					melee_done = true
 					// if (target_keywords.includes("FIGHTS FIRST")) {
 					// TODO: Weapon inputs for target and bidirectional combat simulation.
 					// }
@@ -1876,20 +1876,28 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 					let damage_rerolls = 0
 					// Aqullon Optics: Each time this model is selected to shoot, you can re-roll one Hit roll, you can re-roll one Wound roll and you can re-roll one Damage roll when resolving its attacks.
 					if (source_abilities.includes("AQUILON OPTICS")) {
+						log('AQUILON OPTICS H W D reroll.')
 						hit_rerolls += 1
 						wound_rerolls += 1
 						damage_rerolls += 1
 					}
 					// Slayers of Tyrants: Each time a model in this unit makes an attack that targets a CHARACTER, MONSTER or VEHICLE unit, you can re-roll the Wound roll.
-					if (target_keywords.includes("CHARACTER") || target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE")) wound_rerolls += 1
+					if (source_abilities.includes("SLAYERS OF TYRANTS") && (target_keywords.includes("CHARACTER") || target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE"))) {
+						log('Slayers of Tyrants wound reroll.')
+						wound_rerolls += 1
+					}
 
 					if (TOTAL_OBLITERATION) {
+						log('TOTAL OBLITERATION rerolls.')
 						hit_rerolls += A
 						wound_rerolls += A
 						damage_rerolls += A
 					}
 					// https://www.wargamer.com/warhammer-40k/abilities#twin-linked
-					if (weapon_keywords.includes("TWIN-LINKED")) wound_rerolls += A
+					if (weapon_keywords.includes("TWIN-LINKED")) {
+						log('TWIN-LINKED wound rerolls.')
+						wound_rerolls += A
+					}
 
 					// Rerolls don't stack: https://www.youtube.com/watch?v=QwtQX1iGcSw
 					if (hit_rerolls > A) hit_rerolls = A
@@ -1976,7 +1984,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 								}
 							}
 						}
-						log(`${hits} hits.`)
+						log(`${hits} hit(s).`)
 						// Purge the Foe: In your Shooting phase, after this unit has shot, you can select one enemy Infantry unit hit by one or more of those attacks made with a Pyreblaster. That enemy unit must take a Battle-shock test.
 						if (weapon.includes("Pyreblaster") && source_abilities.includes("PURGE THE FOE")) {
 							log("Target must take battleshock test.")
@@ -2007,8 +2015,6 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 										if ((anti_what === "ALL" || target_keywords.includes(anti_what)) && wound_roll >= anti_how) {
 											log(`ANTI-${anti_what} crits ${anti_how}+. Wound roll ${wound_roll} -> 6.`)
 											wound_roll = 6  // ANTI- grants crits.
-										} else {
-											log(`ANTI-${anti_what} crits ${anti_how}+. Does not apply to ${target_keywords.join(SEP)}`)
 										}
 									}
 								}
@@ -2117,6 +2123,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 							// Self-destruction: At the start of the Fight phase, if this unit is within Engagement Range of one or more enemy units, you can select one model in this unit to destroy. If you do, select one enemy unit within Engagement Range of that model and roll one D6, adding 1 to the result if that unit is a VEHICLE. On a 2-5, that unit suffers D3 mortal wounds; on a 6+, that unit suffers 3 mortal wounds.
 							let mortal_wounds = false
 							if (weapon.startsWith("SELF-DESTRUCTION") && inches < 1) {
+								melee_done = true
 								let x = d6() + (target_keywords.includes("VEHICLE") ? 1 : 0)
 								if (x === 1) {
 									log("Self-destruction missed.")
@@ -2380,7 +2387,7 @@ Melee
 						squad.size += count
 						squad.models[model_name] = { "count": count }
 					}
-				} else if (["Abilities", "Keywords", "Rules"].includes(mode) && !/^Abilities|Keywords|Rules/.exec(line)) {
+				} else if (["Abilities", "Keywords", "Rules"].includes(mode) && !/^(Abilities|Keywords|Rules)/.exec(line)) {
 					let mo = /^([^:]+): (.*)/.exec(line)
 					if (!mo) mo = /^([^:\t]+)[: \t]+(.*)/.exec(line)
 					if (mo) {
