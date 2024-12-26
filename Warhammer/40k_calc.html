@@ -1665,14 +1665,12 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 					<th>Keywords</th>
 				</tr>` : ''
 			let i = 0
-			log("LOADING squad " + JSON.stringify(squad))
 			source_abilities.value = (squad.abilities || []).join(SEP)
 			source_keywords.value = (squad.keywords || []).join(SEP)
 
 			source_models.innerHTML = Object.keys(squad.models).join(SEP)
 			models.style.display = source_models.innerHTML ? 'block' : 'none'
 			for (let key in squad["weapons"]) {
-				log("Weapon: " + key)
 				i++
 				let weapon = squad["weapons"][key]
 				html += `<tr><td id="weapon${i}">${key}</td>
@@ -1820,8 +1818,9 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 				let is_pistol = weapon_keywords.includes("PISTOL")
 				if (pistols_only && R > 0 && !is_pistol) continue
 				if (is_pistol && !pistols_only) continue
-
-				log(`WEAPON: ${count}x ${weapon}`)
+				
+				const spread_key = `${count}x ${weapon}`
+				log(`WEAPON: ${spread_key}`)
 				let S = geti(`strength${i}`)
 
 				if (R < 2) {  // Fight within 2" over barricade: https://www.wargamer.com/warhammer-40k/cover
@@ -1867,7 +1866,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 				const WS = geti(`skill${i}`) || 0
 				// Total Obliteration: Each time a ranged attack made by a model in this unit targets a Monster or Vehicle model, you can re-roll the Hit roll, you can re-roll the Wound roll and you can re-roll the Damage roll.
 				const TOTAL_OBLITERATION = source_abilities.includes("TOTAL OBLITERATION") && R > 1 && (target_keywords.includes("MONSTER") || target_keywords.includes("VEHICLE"))
-				weapon_spreads[weapon] = {}
+				weapon_spreads[spread_key] = {}
 				for (let time = 0; time < times * count; ++time) {
 					///////////////////////
 					// Shooting/Fight phase
@@ -2183,7 +2182,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 							D -= overkill
 							damage += D
 							// Dealt damage causes mortal wounds, not to be confused with presave or preFNP wounds! By anthropomorphing vehicles and bunkers like that, i'm surprised there aren't more evil animated versions of those like by Khorne and Final Fantasy.
-							weapon_spreads[weapon][D] = (weapon_spreads[weapon][D] || 0) + 1
+							weapon_spreads[spread_key][D] = (weapon_spreads[spread_key][D] || 0) + 1
 						}  // hits
 					}  // attacks
 					//////////////
@@ -2396,7 +2395,7 @@ Melee
 						mode = word
 						let list = line.slice(word.length + 1).replace("Description", "").trim().replace(/([^A-Z (])([A-Z])/g, '$1\t$2').split('\t')
 						if (list == "") continue
-						log(`Adding ${word}: ${list} to ${squad[word.toLowerCase()]}`)
+						// log(`Adding ${word}: ${list} to ${squad[word.toLowerCase()]}`)
 						squad[word.toLowerCase()].push(...list)
 					}
 				}
@@ -2429,7 +2428,7 @@ Melee
 							inv_mo = /^(This model|The bearer) has a (\d)\+ invulnerable save.$/i.exec(mo[2].trim())
 							if (inv_mo) squad[mode.toLowerCase()].push(`Invulnerable Save ${inv_mo[2]}`)
 						}
-						log(`Line "${line}" has ${mode}: "${ability}"`)
+						// log(`Line "${line}" has ${mode}: "${ability}"`)
 						squad[mode.toLowerCase()].push(ability.split(SPLIT))
 					}
 				}
