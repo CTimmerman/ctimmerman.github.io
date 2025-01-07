@@ -1986,20 +1986,20 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 
 				// Skip extra melee without EXTRA ATTACKS.
 				const weapon_keywords = gets(`keywords${i}`).toUpperCase().split(SPLIT)
-				
+
 				// Skip rifles or guns depending on melee and not monster/vehicle etc.
 				let is_pistol = weapon_keywords.includes("PISTOL")
 				if (pistols_only && !MELEE && !is_pistol) continue
 				if (is_pistol && !pistols_only) continue
-				
+
 				const spread_key = `${count}x ${weapon}`
 				log(`WEAPON: ${spread_key}`)
 				let S = geti(`strength${i}`)
 				let WS = geti(`skill${i}`) || 0
-				
+
 				let invuln_save = geti("invuln_save")
 				let fnp = feel_no_pain.value || 99
-				
+
 				if (MELEE) {
 					if (melee_done && !weapon_keywords.includes("EXTRA ATTACKS")) continue
 					melee_done = true
@@ -2298,7 +2298,7 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 								else if (wound_bonus > 1) wound_bonus = 1
 
 								if (wound_rerolls > 0 && wound_roll + wound_bonus < threshold) {
-									log(`Rerolling wound ${wound_roll} < ${threshold}`)
+									log(`Rerolling wound ${wound_roll} + ${wound_bonus} < ${threshold}`)
 									wound_roll = d6()
 									--wound_rerolls
 								}
@@ -2456,19 +2456,33 @@ Keywords: Character; Epic Hero; Faction: Tyranids; Great Devourer; Hive Tyrant; 
 			}  // weapons
 
 			let max_hits = 0
+			let max_dmg = 0
 			for (let weapon in weapon_spreads) {
-				const spread = weapon_spreads[weapon]
-				for (let mw in spread) if (spread[mw] > max_hits) max_hits = spread[mw]
-			}
-			html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
-			html += `<br><table border=1><tr><th>Wounds</th><th>Hits</th><th colspan=2>%</th></tr>`
-			for (let weapon in weapon_spreads) {
-				html += `<tr><th colspan=4>${weapon}</th></tr>`
 				const spread = weapon_spreads[weapon]
 				for (let mw in spread) {
 					const hits = spread[mw]
-					html += `<tr><td>${mw}<td>${hits}</td><td>${(hits / times * 100).toFixed(2)}%</td><td><div style="width: ${hits / max_hits * 200}px; height: 10px;background-color: green"> </div></td></tr>`
+					if (hits > max_hits) max_hits = hits
+					if (hits * mw > max_dmg) max_dmg = hits * mw
 				}
+			}
+			html += `Average ${(damage / times).toFixed(2)} damage; ${(damage / times / W).toFixed(2)} kills.`
+			html += `<br><table border=1>`
+			for (let weapon in weapon_spreads) {
+				let total_hits = 0
+				let total_wounds = 0
+				let spread_html = ""
+				const spread = weapon_spreads[weapon]
+				for (let mw in spread) {
+					const hits = spread[mw]
+					total_hits += hits
+					total_wounds += mw * hits
+					spread_html += `<tr><td>${mw}<td>${(hits / times * 100).toFixed(2)}%</td>
+						<td>${(mw * hits / damage * 100).toFixed(2)}%</td>
+						<td><div style="width: ${mw * hits / max_dmg * 200}px; height: 10px;background-color: green"> </div></td></tr>`
+				}
+				html += `<tr><th colspan=5>${weapon}</th></tr>
+						<tr><th>Wounds</th><th>Hits ${(total_hits / times * 100).toFixed(2)}%</th>
+							<th colspan=2>Damage ${(total_wounds / damage * 100).toFixed(2)}%</th></tr>` + spread_html
 			}
 			result.innerHTML = html + "</table><br>"
 		}
