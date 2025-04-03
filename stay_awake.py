@@ -1,4 +1,4 @@
-"""Stop messing up my LLM interence by nodding off, Windows 11. CT 2024-12-19."""
+"""Stop messing up my LLM inference by nodding off, Windows 11. CT 2024-12-19."""
 
 import time
 
