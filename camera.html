@@ -72,13 +72,15 @@
 </head>
 <body>
 	<div>
+		Remember to turn off your display if possible to conserve the battery.<br>
+		<button onclick="setSource()">Start camera</button>
 		<label for="audioSource">Audio: </label><select id="audioSource"></select>
 		<label for="videoSource">Video: </label><select id="videoSource"></select>
 		<button onclick="snap('Manual')">Snapshot</button>
 		<label for="vu-trigger">Autosnap at audio </label><input id="vu-trigger"
 			onchange="vu_trigger = parseInt(this.value)" type="number" size="4" max="120" min="-1" value="69">
 		<label for="vid-trigger"> or video </label><input id="vid-trigger" onchange="vid_trigger = parseInt(this.value)"
-			type="number" size="4" max="120" min="-1" value="420"> of <span id="vid-level"></span>.
+			type="number" size="4" max="120" min="-1" value="120"> of <span id="vid-level"></span>.
 	</div>
 	<div id="log"></div>
 	<canvas id="vu" width="50" height="100"></canvas><!-- Don't render whitespace!
@@ -95,7 +97,7 @@
 		const logEl = el('log')
 		const vu = el('vu').getContext('2d')
 		vu.fillStyle = 'white'
-		const vid = el('vid').getContext('2d')
+		const vid = el('vid').getContext('2d', {willReadFrequently: true})
 		const vidEl = document.querySelector('video')
 		const overlay = el('overlay')
 		const audSel = document.querySelector('select#audioSource')
@@ -223,27 +225,24 @@
 			return barcodes
 		}
 
-		// https://codepen.io/travisholliday/pen/AxmyVd
+		// AudioWorkletNode cannot load modules from Blob URLs or local files in Chrome when using . Use a local server and serve your files over HTTP/HTTPS.
 		function listen(stream) {
 			const audioContext = new AudioContext()
 			const analyser = audioContext.createAnalyser()
 			const microphone = audioContext.createMediaStreamSource(stream)
-			const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1)
 
 			analyser.smoothingTimeConstant = 0.5
 			analyser.fftSize = 1024
 
 			microphone.connect(analyser)
-			analyser.connect(javascriptNode)
-			javascriptNode.connect(audioContext.destination)
-			javascriptNode.onaudioprocess = () => {
+
+			function processLevel() {
 				const array = new Uint8Array(analyser.frequencyBinCount)
 				analyser.getByteFrequencyData(array)
 				let sum = 0
 				const length = array.length
 				for (let i = 0; i < length; ++i) sum += array[i]
 				const level = sum / length * 2
-				const percentage = level / 100
 				const h = vu.canvas.height
 				vu.clearRect(0, 0, 50, h)
 				vu.fillStyle = '#444'
@@ -252,6 +251,35 @@
 				vu.font = '32px impact'
 				vu.fillText(Math.round(level), 0, h / 2)
 				if (level >= vu_trigger) snap('Audio')
+			}
+
+			// Try AudioWorkletNode
+			if (window.AudioWorkletNode) {
+				audioContext.audioWorklet.addModule(URL.createObjectURL(new Blob([`
+					class Processor extends AudioWorkletProcessor {
+						process(inputs, outputs, parameters) {
+							this.port.postMessage(inputs[0][0])
+							return true
+						}
+					}
+					registerProcessor('processor', Processor)
+				`], {type: 'application/javascript'}))).then(() => {
+					const node = new AudioWorkletNode(audioContext, 'processor')
+					analyser.connect(node)
+					node.port.onmessage = processLevel
+				}).catch(e => {
+					console.warn('AudioWorkletNode failed, falling back to ScriptProcessorNode:', e)
+					const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1)
+					analyser.connect(javascriptNode)
+					javascriptNode.connect(audioContext.destination)
+					javascriptNode.onaudioprocess = processLevel
+				})
+			} else {
+				// Fallback for browsers without AudioWorkletNode
+				const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1)
+				analyser.connect(javascriptNode)
+				javascriptNode.connect(audioContext.destination)
+				javascriptNode.onaudioprocess = processLevel
 			}
 		}
 
