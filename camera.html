@@ -73,7 +73,7 @@
 <body>
 	<div>
 		Remember to turn off your display if possible to conserve the battery.<br>
-		<button onclick="setSource()">Start camera</button>
+		<button onclick="setSource()">Start</button> <button onclick="stop()">Stop</button>
 		<label for="audioSource">Audio: </label><select id="audioSource"></select>
 		<label for="videoSource">Video: </label><select id="videoSource"></select>
 		<button onclick="snap('Manual')">Snapshot</button>
@@ -81,6 +81,9 @@
 			onchange="vu_trigger = parseInt(this.value)" type="number" size="4" max="120" min="-1" value="69">
 		<label for="vid-trigger"> or video </label><input id="vid-trigger" onchange="vid_trigger = parseInt(this.value)"
 			type="number" size="4" max="120" min="-1" value="120"> of <span id="vid-level"></span>.
+	</div>
+	<div id="spinner" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;">
+		<span style="font-size:48px;">Starting... ⏳</span>
 	</div>
 	<div id="log"></div>
 	<canvas id="vu" width="50" height="100"></canvas><!-- Don't render whitespace!
@@ -123,8 +126,11 @@
 			})
 		}).catch(err => log(err))
 
+		const spinner = el('spinner')
 		let barcodeDetector, looker, scanner
 		async function setSource() {
+			log(`Starting at ${new Date()}`)
+			spinner.style.display = 'block'
 			const query = {
 				audio: { deviceId: audSel.value ? { exact: audSel.value } : undefined },
 				video: { deviceId: vidSel.value ? { exact: vidSel.value } : undefined },
@@ -132,6 +138,9 @@
 			await navigator.mediaDevices.getUserMedia(query)
 				.then(async src => {
 					vidEl.srcObject = src
+					vidEl.onloadedmetadata = () => {
+						spinner.style.display = 'none'
+					}
 					await sleep(1000).then(() => {
 						vid.canvas.width = vidEl.videoWidth
 						vid.canvas.height = vidEl.videoHeight
@@ -139,9 +148,9 @@
 						vu.canvas.height = parseInt(getComputedStyle(vidEl).height)
 						listen(src)
 					})
-				}
-				)
+				})
 				.catch(err => {
+					spinner.style.display = 'none'
 					log(err)
 					throw err
 				})
@@ -225,11 +234,11 @@
 			return barcodes
 		}
 
-		// AudioWorkletNode cannot load modules from Blob URLs or local files in Chrome when using . Use a local server and serve your files over HTTP/HTTPS.
+		let audioContext, analyser, microphone, workletNode, scriptNode
 		function listen(stream) {
-			const audioContext = new AudioContext()
-			const analyser = audioContext.createAnalyser()
-			const microphone = audioContext.createMediaStreamSource(stream)
+			audioContext = new AudioContext()
+			analyser = audioContext.createAnalyser()
+			microphone = audioContext.createMediaStreamSource(stream)
 
 			analyser.smoothingTimeConstant = 0.5
 			analyser.fftSize = 1024
@@ -253,7 +262,7 @@
 				if (level >= vu_trigger) snap('Audio')
 			}
 
-			// Try AudioWorkletNode
+			// AudioWorkletNode cannot load modules from Blob URLs or local files in Chrome when using . Use a local server and serve your files over HTTP/HTTPS.
 			if (window.AudioWorkletNode) {
 				audioContext.audioWorklet.addModule(URL.createObjectURL(new Blob([`
 					class Processor extends AudioWorkletProcessor {
@@ -264,22 +273,21 @@
 					}
 					registerProcessor('processor', Processor)
 				`], {type: 'application/javascript'}))).then(() => {
-					const node = new AudioWorkletNode(audioContext, 'processor')
+					workletNode = new AudioWorkletNode(audioContext, 'processor')
 					analyser.connect(node)
-					node.port.onmessage = processLevel
+					workletNode.port.onmessage = processLevel
 				}).catch(e => {
 					console.warn('AudioWorkletNode failed, falling back to ScriptProcessorNode:', e)
-					const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1)
-					analyser.connect(javascriptNode)
-					javascriptNode.connect(audioContext.destination)
-					javascriptNode.onaudioprocess = processLevel
+					scriptNode = audioContext.createScriptProcessor(2048, 1, 1)
+					analyser.connect(scriptNode)
+					scriptNode.connect(audioContext.destination)
+					scriptNode.onaudioprocess = processLevel
 				})
 			} else {
-				// Fallback for browsers without AudioWorkletNode
-				const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1)
-				analyser.connect(javascriptNode)
-				javascriptNode.connect(audioContext.destination)
-				javascriptNode.onaudioprocess = processLevel
+				scriptNode = audioContext.createScriptProcessor(2048, 1, 1)
+				analyser.connect(scriptNode)
+				scriptNode.connect(audioContext.destination)
+				scriptNode.onaudioprocess = processLevel
 			}
 		}
 
@@ -320,6 +328,36 @@
 		}
 		//let bad = setInterval(()=> say("Hello good morning"), 15000) // 13000 intermittendly.
 		//let good = setInterval(()=> say_all_via_sleepy_jack("Hello good morning"), 15000)
+
+		function stop() {
+			if (workletNode) {
+				analyser.disconnect(workletNode)
+				workletNode.disconnect()
+				workletNode = null
+			}
+			if (scriptNode) {
+				analyser.disconnect(scriptNode)
+				scriptNode.disconnect()
+				scriptNode = null
+			}
+			if (microphone) {
+				microphone.disconnect()
+				microphone = null
+			}
+			if (audioContext) {
+				audioContext.close()
+				audioContext = null
+			}
+
+			clearInterval(looker)
+			clearInterval(scanner)
+			if (vidEl.srcObject) {
+				vidEl.srcObject.getTracks().forEach(track => track.stop())
+				vidEl.srcObject = null
+			}
+
+			log(`Stopped at ${new Date()}`)
+		}
 	</script>
 </body>
 </html>
