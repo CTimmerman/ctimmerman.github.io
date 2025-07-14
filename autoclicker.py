@@ -25,6 +25,6 @@ try:
     if click:
       mouse.move(*target, True)
       mouse.click()
-    time.sleep(0.001)
+    time.sleep(0.001)  # 0.0001 might be related to Windows 11 GameInput BSOD.
 except KeyboardInterrupt:
   pass
