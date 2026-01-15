@@ -27,7 +27,7 @@
 		</tr>
 	</table>
 	<div>
-		<label>Show </label><input id="guides" type="checkbox" checked><label for="guides">potential moves</label>
+		<label for="guides">Show </label><input id="guides" type="checkbox" checked><label for="guides">potential moves</label>
 		<input id="stats" type="checkbox"><label for="stats">stats</label>
 		<input id="editmode" type="checkbox"><label for="editmode">Edit board</label><br>
 		<label for="ai_level">AI depth </label><input id="ai_level" type="number" value="2" min="1">
@@ -49,7 +49,7 @@
 		<textarea id="fenbox" type="text" placeholder="FEN"></textarea>
 	</div>
 	<div id="modal" onclick="if(event.target===this)this.style.visibility='hidden'"></div>
-	<script type="module" src="chess.mjs"></script>
+	<script type="module" src="chess.js"></script>
 </body>
 
 </html>
