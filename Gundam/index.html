@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-18</title>
+	<style>
+		a, html {
+			--fgcolor: white;
+			--bgcolor: rgb(40,40,40);
+			background-color: var(--bgcolor);
+			color: var(--fgcolor);
+			scrollbar-color: auto;
+		}
+		a:visited {
+			color: grey;
+		}
+		body {
+			margin: 0;
+		}
+		#battlefield {
+			background-image: url(https://raw.githubusercontent.com/ctimmerman/cgs/master/Gundam/PlayMat.png);
+			background-size: contain;
+			background-repeat: no-repeat;
+			position:absolute;
+			width: 100vmin;
+			height: 100vmin;
+		}
+		#dlog {
+			position:absolute;
+			margin: 0 0 0 85vmin;
+			width: stretch;
+			height: 100vmin;
+			overflow: scroll;
+			scrollbar-color: var(--fgcolor) var(--bgcolor);
+			scrollbar-width: thin;
+			font-family: monospace;
+			background-color: #08080888;
+			border: 1px solid var(--fgcolor);
+			
+		}
+		#overlay {
+			position: absolute;
+			font-size: xx-large;
+		}
+		.card {
+			background-size: contain;
+			background-repeat: no-repeat;
+			border:1px solid brown;
+			border-radius: 12px;
+			color: yellow;
+			cursor: pointer;
+			position: absolute;
+			width: 10vmin;
+			height: 14vmin;
+			font-size: small;
+			transition: 0.4s;
+		}
+		.card div {
+			background-color: brown;
+		}
+		.facedown {
+			background-image: url(https://gundams.dev/i/cardback.webp)!important;
+			border-color: black !important;
+		}
+		.rested {
+			transform: rotate(90deg);
+			margin-top: -1.4vmin;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="battlefield"></div>
+	<div id="dlog">
+		<a href="https://www.gundam-gcg.com/en/rules/">Gundam Card Game</a>
+	</div>
+	<div id="overlay"></div>
+	<script>
+		"use strict"
+
+		let cards = {}
+
+		function zoom(e) {
+			if (e.style.transform.indexOf("scale") > -1) {
+				e.style.transform = e.old_transform
+				e.style.zIndex = e.old_zIndex
+			} else {
+				e.old_transform = e.style.transform
+				e.old_zIndex = e.style.zIndex
+				e.style.transform = "scale(3.5)"
+				e.style.zIndex = 9000
+			}
+		}
+
+		function log(s) {
+			dlog.innerHTML += s + "<br>"
+			console.log(s)
+			dlog.scrollTop = dlog.scrollHeight
+		}
+
+		function rnd(min, max) {
+			return Math.floor(min + Math.random() * (1 + max - min))
+		}
+
+		// var Type;
+		// (function (Type) {
+		// 	Type[Type["RESOURCE"] = 0] = "RESOURCE";
+		//     Type[Type["BASE"] = 1] = "BASE";
+		//     Type[Type["COMMAND"] = 2] = "COMMAND";
+		//     Type[Type["PILOT"] = 3] = "PILOT";
+		// 	Type[Type["UNIT"] = 4] = "UNIT";
+		// 	Type[Type["UNITTOKEN"] = 5] = "UNITTOKEN";	
+		// })(Type || (Type = {}));
+
+
+		class Card {
+			constructor(type = "UNIT",
+						name = "",
+						ap = 0,
+						hp = 0,
+						level = 0,
+						cost = 0,
+						text = "",
+						zones = [],
+						traits = [],
+						link = "",
+						id = "",
+						color = "brown") {
+				this.id = id
+				this.color = ["WHITE", "BLUE", "PURPLE", "RED", "GREEN"].indexOf(color) >= 0 ? color : "brown"
+				this.level = parseInt(level) || 0
+				this.cost = parseInt(cost) || 0
+				// let type_num = parseInt(type) || type == 0? Type.RESOURCE : Type.UNITTOKEN
+				// if (Type[type]) {
+				// 	// number or string, we want number here
+				// 	type_num = parseInt(type)? type : Type[type]
+				// }
+				this.type = type || ""
+				this.name = name || ""
+				this.text = text || ""
+				this.zones = zones || []
+				this.traits = traits || []  // new for each, unlike in Python
+				this.link = link || ""
+				this.ap = parseInt(ap) || 0
+				this.hp = parseInt(hp) || 0
+				this.damage = 0
+				this.rested = false
+				this.sick = false
+			}
+			toString() {
+				return `${this.name} ${this.ap}/${this.hp}-${this.damage}${this.rested ? "/" : ""}`
+			}
+			toDict() {
+				return {
+					"id": this.id,
+					"color": this.color,
+					"level": this.level,
+					"cost": this.cost,
+					"type": this.type,
+					"name": this.name,
+					"text": this.text,
+					"zones": this.zones,
+					"traits": this.traits,
+					"link": this.link,
+					"ap": this.ap,
+					"hp": this.hp,
+				}
+			}
+			static fromDict(d) {
+				// log("Returning new card from dict " + JSON.stringify(d))
+				return new Card(d.type, d.name, d.ap, d.hp, d.level, d.cost, d.text, d.zones, d.traits, d.link, d.id, d.color)
+			}
+			toHTML(left, top, facedown=false, z=0) {
+				const id = this.id.split("_")[0]
+				//return `<div class="card" style="left:${left}vw; top:${top}vh; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}">L${this.level} C${this.cost} ${this.id}<br>${this.type}<br>${this.name}<br>${this.zones}<br>${this.traits}<br>Link: ${this.link}<br><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
+				//return `<div class="card" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}"><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
+				//return `<div class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);"><div class="rested">${this.type}</div></div>`
+				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'></div>`
+			}
+		}
+
+		const decks = [
+			`# Gundam Deck: ST01 - Heroic Beginnings
+2 ST01-001 Gundam
+4 ST01-002 Gundam (MA Form)
+4 ST01-003 Guncannon
+3 ST01-004 Guntank
+3 ST01-005 GM
+2 ST01-006 Gundam Aerial (Permet Score Six)
+4 ST01-007 Gundam Aerial (Bit on Form)
+3 ST01-008 Demi Trainer
+3 ST01-009 Zowort
+4 ST01-010 Amuro Ray
+4 ST01-011 Suletta Mercury
+3 ST01-012 Thoroughly Damaged
+3 ST01-013 Kai's Resolve
+2 ST01-014 Unforeseen Incident
+3 ST01-015 White Base
+3 ST01-016 Asticassia School of Technology, Earth House
+`,
+			`# Gundam Deck: ST02 - Wings of Advance
+2 ST02-001 Wing Gundam
+4 ST02-002 Wing Gundam (Bird Mode)
+4 ST02-003 Gundam Heavyarms
+3 ST02-004 Gundam Sandrock
+3 ST02-005 Maganac
+2 ST02-006 Tallgeese
+4 ST02-007 Leo
+3 ST02-008 Aries
+3 ST02-009 Tragos
+4 ST02-010 Heero Yuy
+4 ST02-011 Zechs Merquise
+3 ST02-012 Simultaneous Fire
+3 ST02-013 Peaceful Timbre
+2 ST02-014 Siege Ploy
+3 ST02-015 Saint Gabriel Institute
+3 ST02-016 Corsica Base`,
+			`# Gundam Deck: ST03 - Zeon's Rush
+2 ST03-001 Sinanju
+4 ST03-002 Angelo's Geara Zulu
+4 ST03-003 Geara Zulu
+3 ST03-004 Gaza D (Sleeves)
+3 ST03-005 Dra-C (Sleeves)
+2 ST03-006 Char's Zaku Ⅱ
+3 ST03-007 Zaku Ⅰ
+4 ST03-008 Zaku Ⅱ
+3 ST03-009 Gouf
+4 ST03-010 Full Frontal
+4 ST03-011 Char Aznable
+3 ST03-012 Indignation
+3 ST03-013 Close Combat
+2 ST03-014 The Blue Giant
+3 ST03-015 Rewloola
+3 ST03-016 Falmel`,
+			`# Gundam Deck: ST04 - SEED Strike
+2 ST04-001 Aile Strike Gundam
+4 ST04-002 Strike Gundam
+4 ST04-003 Moebius Zero
+3 ST04-004 Moebius
+3 ST04-005 Strike Dagger
+2 ST04-006 Aegis Gundam
+4 ST04-007 Aegis Gundam (MA Mode)
+3 ST04-008 Ginn
+3 ST04-009 Miguel's Ginn
+4 ST04-010 Kira Yamato
+4 ST04-011 Athrun Zala
+3 ST04-012 Striker Pack
+3 ST04-013 Hawk of Endymion
+2 ST04-014 The Magic Bullet of Dusk
+3 ST04-015 Archangel
+3 ST04-016 Vesalius`,
+			`# Top deck
+4 GD04-016
+2 GD04-077
+2 GD04-015
+3 GD01-086
+2 GD04-013
+2 GD01-006
+3 ST01-001
+4 GD04-003
+4 GD04-006
+4 GD04-065
+3 GD01-118
+4 GD04-121
+2 GD01-100
+4 ST01-010
+3 GD04-098
+4 GD04-081`]
+
+		// card id on the battlefield, link to render element
+		let cid = 0
+		function getCard(id) {
+			const d = cards[id]
+			if (!d) {
+				const msg = "Card not found: " + id
+				log(msg)
+				throw Error(msg)
+			}
+			const rv = Card.fromDict(d)
+			cid += 1
+			rv.cid = cid
+			return rv
+		}
+
+		class Player {
+			constructor(name) {
+				this.name = name
+				this.hand = []
+				this.deck = []
+				const lines = decks[rnd(0, decks.length - 1)].split("\n")
+				for (const line of lines) {
+					if (line.indexOf("# ") > -1) log(name + " is playing " + line)
+					const [count, id] = line.split(" ")
+					if (count >= 1) {
+						for (let i = 0; i < count; ++i) {
+							const c = getCard(id)
+							this.deck.push(c)
+						}
+					}
+				}
+				// for (let i = 0; i < 50; ++i) {
+				// 	const t = Type[rnd(1, 4)]
+				// 	this.deck.push(new Card(t, t+i, rnd(1, 5), rnd(1, 5), rnd(1, 7), rnd(1, 5), "", "", "ST04-008_PR", "RED"))
+				// }
+				this.battle = []
+				this.shield = []
+				this.base = getCard("EXB-001")  // new Card("BASE", "EX Base", 0, 3)
+				this.resource = []
+				this.trash = []
+
+				// Opening hand
+				this.draw(5)
+				// Shields
+				for (let i = 0; i < 6; ++i) {
+					const c = this.deck.pop()
+					c.rested = true
+					this.shield.push(c)
+				}
+			}
+
+			draw(number = 1) {
+				for (let i = 0; i < number; ++i) {
+					if (this.deck.length < 1) {
+						throw Error("" + this.name + " lost by empty deck")
+					}
+					this.hand.push(this.deck.pop())
+				}
+			}
+		}
+
+		let gameInfo = {}
+		async function loadCards() {
+			log("Loading")
+			// localStorage.clear()
+			gameInfo = JSON.parse(localStorage.getItem("gameInfo"))
+			if (!gameInfo) {
+				log("Fetching game info")
+				// gameInfo = await fetch('https://raw.githubusercontent.com/CTimmerman/cgs/refs/heads/master/Gundam/cgs.json').then((response) => response.json())
+				const response = await fetch('https://raw.githubusercontent.com/CTimmerman/cgs/refs/heads/master/Gundam/cgs.json')
+				gameInfo = await response.json()
+				localStorage.setItem("gameInfo", JSON.stringify(gameInfo))
+			}
+			log("Game info: " + JSON.stringify(gameInfo))
+			cards = JSON.parse(localStorage.getItem("cards")) || {}
+			if (Object.keys(cards).length > 1) {
+				log(`Loaded ${Object.keys(cards).length} cards`)
+			} else {
+				cards = {}
+				let pages = 1
+				let page = 0
+				let data = JSON.parse(localStorage.getItem("data")) || []
+				if (!data.length > 0) {
+					do {
+						++page
+						const link = `${gameInfo.allCardsUrl}&page=${page}`
+						log(`Loading ${link}`)
+						const response = await fetch(link)
+						const json = await response.json()
+						pages = json.meta.page_count
+						data = data.concat(json.data)
+						await new Promise(r => setTimeout(r, 500))  // rate limit to be nice to server
+					} while (page < pages)
+					localStorage.setItem("data", JSON.stringify(data))
+				}
+				for (const card of data) {
+					const id = card.card_number
+					cards[id] = new Card(
+						card.card_type,
+						card.card_name,
+						card.card_ap,
+						card.card_hp,
+						card.card_level,
+						card.card_cost,
+						card.card_text_unstyled,
+						card.card_zones,
+						card.card_traits,
+						card.card_link_requirement,
+						id,
+						card.card_color).toDict()
+				}
+				log("Cards: " + Object.keys(cards).length)
+				localStorage.setItem("cards", JSON.stringify(cards))
+			}
+		}
+
+		function render(p1, p2) {
+			let html = ""
+			for (const p of [p1, p2]) {
+				let x = 0
+				let y = 0
+				let top = 0
+				let left = 0
+				// Trash
+				for (let i = 0; i < p.trash.length; ++i) {
+					left = 2
+					top = 18 - 0.1 * i
+					if (p == p2) {
+						left += 70
+						top += 48.6
+					}
+					const c = p.trash[i]
+					c.rested = false
+					html += c.toHTML(left, top, false, p == p2? 2 : 0)
+				}
+				// Deck - Could use actual card, but this might be useful for sending to a client.
+				let resource = getCard("RP-004")
+				for (let i = 0; i < p.deck.length; ++i) {
+					left = 2
+					top = 33 - 0.1 * i
+					if (p == p2) {
+						left = 72
+						top += 18.5
+					}
+					html += resource.toHTML(left, top, true, 1)
+				}
+				// Resources
+				for (const c of p.resource) {
+					left = 2 + x * 5
+					top = 2
+					if (p == p2) {
+						left += 26
+						top += 80
+					}
+					html += c.toHTML(left, top)
+					x += 1
+				}
+				for (let i = 0; i < 10 - p.resource.length + (p == p2 ? 1 : 0); ++i) {
+					left = 57
+					top = 2 - 0.1 * i
+					if (p == p2) {
+						left = 17
+						top += 80
+					}
+					html += resource.toHTML(left, top, true)
+				}
+				// Shields
+				y = 0
+				for (const c of p.shield) {
+					left = 70
+					top = 0.5 + y
+					if (p == p2) {
+						left = 4
+						top = 85 - y
+					}
+					html += c.toHTML(left, top, true)
+					y += 4
+				}
+				if (p.base) {
+					left = 72
+					top = 33
+					if (p == p2) {
+						left = 1.9
+						top = 51.3
+					}
+					html += p.base.toHTML(left, top)
+				}
+				// Battlefield
+				x = 0
+				y = 0
+				for (const c of p.battle) {
+					if (c.type == "PILOT") continue
+					if (x == 3) {
+						x = 0
+						y += 0.9
+					}
+					left = 16.3 + x * 16.7
+					top = 17 + y * 16.4
+					if (p == p2) {
+						left += 7
+						top += 33
+					}
+					if (c.pilot) {
+						c.pilot.rested = c.rested
+						html += c.pilot.toHTML(left, top + 3.5)
+					}
+					html += c.toHTML(left, top)
+					x += 1
+				}
+			}
+			battlefield.innerHTML = html
+		}
+
+		let game_over = false
+			; (async () => {
+				await loadCards()
+
+				const p1 = new Player("Player 1")
+				const p2 = new Player("Player 2")
+				let player = p1
+				p2.resource.push(getCard("EXRP-002"))
+
+				while (true) {
+					// Set active
+					if (player.base != null)
+						player.base.rested = false
+
+					for (const r of player.resource) {
+						if (r.rested) r.rested = false
+					}
+					for (const c of player.battle) {
+						c.rested = false
+						c.sick = false
+					}
+
+					// Draw card
+					try {
+						player.draw()
+					} catch (ex) {
+						log(ex)
+						break
+					}
+					
+					let level = player.resource.length
+					if (level < 10 + (player == p2 ? 1 : 0)) {
+						// Place resource
+						player.resource.push(getCard("R-009"))
+					}
+
+					// Main phase
+					log("" + player.name + " level " + level)
+					for (const c of player.hand) {
+						let paid = 0
+						if (c.level <= level && c.cost <= level) {
+							// already have a base
+							if (c.type == "BASE" && player.base != null) continue
+							// no empty unit
+							let empty_units = player.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
+							if (c.type == "PILOT" && empty_units.length < 1) continue
+							// max 6 units
+							const units = player.battle.filter(bc => bc.type == "UNIT")
+							if (units.length >= 6) continue
+
+							// log("Playable " + c.name)
+							for (const r of player.resource) {
+								if (!r.rested) {
+									r.rested = true
+									paid += 1
+									if (paid >= c.cost) {
+										log("Playing " + c)
+										if (c.type == "COMMAND") {
+											player.trash.push(c)
+										} else if (c.type == "BASE") {
+											player.base = c
+										} else if (c.type == "UNIT") {
+											player.battle.push(c)
+											c.sick = true
+										} else if (c.type == "PILOT" && empty_units.length > 0) {
+											empty_units[0].pilot = c
+											empty_units[0].sick = false
+											player.battle.push(c)
+											empty_units = player.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
+										}
+										player.hand = player.hand.filter(item => item !== c)
+										break
+									}
+								}
+							}
+						}
+					}
+					// attack
+					while (true) {
+						const can_attack = player.battle.filter(bc => bc.type == "UNIT" && bc.rested == false && bc.sick == false)
+						if (can_attack.length < 1) break
+						const att = can_attack[0]
+						att.rested = true
+						const enemy = player === p1 ? p2 : p1
+						if (enemy.base) {
+							log(att + " attacks " + enemy.base)
+							const el = document.getElementById("c" + att.cid)
+							const old_top = el.top
+							const old_left = el.left
+							el.top = (player == p2? 100 : 0)
+							await new Promise(r => setTimeout(r, 500))
+							el.top = old_top
+							enemy.base.damage += att.ap
+							if (enemy.base.damage >= enemy.base.hp) {
+								log("Destroyed " + enemy.base)
+								enemy.trash.push(enemy.base)
+								enemy.base = null
+								// TODO: Suppress
+							}
+						} else {
+							const prone = enemy.battle.filter(bc => bc.type == "UNIT" && bc.rested)
+							if (prone.length > 0) {
+								const def = prone[0]
+								log(att + " attacks " + def)
+								def.damage += att.ap
+								if (def.damage >= def.hp) {
+									log("Destroyed " + def.name)
+									enemy.trash.push(def)
+									enemy.battle = enemy.battle.filter(bc => bc != def)
+									// TODO: Breach
+								}
+							} else {
+								log(att + " attacks shield area")
+								if (enemy.shield.length < 1) {
+									log(enemy.name + " died from " + att)
+									game_over = true
+									render(p1, p2)
+									break
+								}
+								const c = enemy.shield.pop()
+								log("Broke shield " + c)
+								if (c.text.includes("[Burst]")) {
+									// TODO: Run card code.
+								}
+								enemy.trash.push(c)
+								render(p1, p2)
+							}
+						}
+					}
+					if (game_over) break
+
+					// End phase
+					while (player.hand.length > 10) {
+						const c = player.hand.pop()
+						log("Discarding " + c.name)
+						player.trash.push(c)
+						player.hand = player.hand.filter(item => item !== c)
+					}
+					// log(structuredClone(player))  // clone to keep current lists state
+					render(p1, p2)
+					await new Promise(r => setTimeout(r, 500))
+
+					player = player == p1 ? p2 : p1
+				}
+			})() /* .catch(error => {
+	log("ERR " + error)
+	console.trace()
+}) */
+	</script>
+</body>
+
+</html>
