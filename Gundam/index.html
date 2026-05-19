@@ -2,50 +2,61 @@
 <html lang="en">
 
 <head>
+	<meta charset="utf-8" />
 	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-18</title>
+	<link rel="icon"
+		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
-		a, html {
+		a,
+		html {
 			--fgcolor: white;
-			--bgcolor: rgb(40,40,40);
+			--bgcolor: black;
 			background-color: var(--bgcolor);
 			color: var(--fgcolor);
 			scrollbar-color: auto;
+			font-family: monospace;
 		}
+
 		a:visited {
 			color: grey;
 		}
+
 		body {
 			margin: 0;
 		}
+
 		#battlefield {
-			background-image: url(https://raw.githubusercontent.com/ctimmerman/cgs/master/Gundam/PlayMat.png);
+			background-image: url(GundamPlayMat.png);
 			background-size: contain;
 			background-repeat: no-repeat;
-			position:absolute;
+			position: absolute;
 			width: 100vmin;
 			height: 100vmin;
 		}
+
 		#dlog {
-			position:absolute;
+			position: absolute;
 			margin: 0 0 0 85vmin;
 			width: stretch;
 			height: 100vmin;
-			overflow: scroll;
+			overflow-y: scroll;
 			scrollbar-color: var(--fgcolor) var(--bgcolor);
 			scrollbar-width: thin;
-			font-family: monospace;
 			background-color: #08080888;
 			border: 1px solid var(--fgcolor);
-			
+
 		}
+
 		#overlay {
 			position: absolute;
 			font-size: xx-large;
+			z-index: 9000;
 		}
+
 		.card {
 			background-size: contain;
 			background-repeat: no-repeat;
-			border:1px solid brown;
+			border: 1px solid brown;
 			border-radius: 12px;
 			color: yellow;
 			cursor: pointer;
@@ -53,15 +64,22 @@
 			width: 10vmin;
 			height: 14vmin;
 			font-size: small;
+			text-align: center;
 			transition: 0.4s;
 		}
+
 		.card div {
-			background-color: brown;
+			background-color: #08080888;
+			margin: 50%;
+			width: 50%;
+			transform: translateX(-50%) translateY(-50%);
 		}
+
 		.facedown {
-			background-image: url(https://gundams.dev/i/cardback.webp)!important;
+			background-image: url(https://gundams.dev/i/cardback.webp) !important;
 			border-color: black !important;
 		}
+
 		.rested {
 			transform: rotate(90deg);
 			margin-top: -1.4vmin;
@@ -70,15 +88,73 @@
 </head>
 
 <body>
+	<div id="overlay"></div>
 	<div id="battlefield"></div>
 	<div id="dlog">
 		<a href="https://www.gundam-gcg.com/en/rules/">Gundam Card Game</a>
 	</div>
-	<div id="overlay"></div>
 	<script>
 		"use strict"
 
 		let cards = {}
+
+		function destroy(card) {
+			log("💥Destroyed " + card)
+			if (card.pilot) card.owner.trash.push(card.pilot)
+			card.owner.trash.push(card)
+			card.owner.battle = card.owner.battle.filter(bc => bc != card && bc != card.pilot)
+		}
+
+		async function sleep(ms = 1000) {
+			await new Promise(r => setTimeout(r, ms))
+		}
+
+		function getel(card) {
+			return document.getElementById("c" + card.cid)
+		}
+
+		function activate(card) {
+			card.rested = false
+			try {
+				getel(card).classList.remove("rested")
+			} catch(ex) {
+				log(ex + " " + card)
+			}
+		}
+
+		function rest(card) {
+			card.rested = true
+			getel(card).classList.add("rested")
+		}
+
+		async function battle(att, def) {
+			/* Too much hassle to move the pilots at well
+			const e = getel(att)
+			const old_top = e.style.top
+			const old_left = e.style.left
+			const e2 = getel(def)
+			e.style.top = e2.style.top
+			e.style.left = e2.style.left
+			await new Promise(r => setTimeout(r, 800))
+			e.style.top = old_top
+			e.style.left = old_left
+			*/
+			const sa = getel(att).style
+			const sd = getel(def).style
+			let x1 = parseFloat(sa.left) + 5
+			let y1 = parseFloat(sa.top) + 5
+			let x2 = parseFloat(sd.left) + 5
+			let y2 = parseFloat(sd.top) + 5
+			// Laser time!
+			overlay.style.zIndex = 9000
+			overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
+				<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px">
+					<animate attributeName="stroke" values="#800;#fff;#800;#fff" dur="0.1s" repeatCount="indefinite"/>
+				</line>
+			</svg>`
+			await new Promise(r => setTimeout(r, 300))
+			overlay.style.zIndex = 0
+		}
 
 		function zoom(e) {
 			if (e.style.transform.indexOf("scale") > -1) {
@@ -115,17 +191,17 @@
 
 		class Card {
 			constructor(type = "UNIT",
-						name = "",
-						ap = 0,
-						hp = 0,
-						level = 0,
-						cost = 0,
-						text = "",
-						zones = [],
-						traits = [],
-						link = "",
-						id = "",
-						color = "brown") {
+				name = "",
+				ap = 0,
+				hp = 0,
+				level = 0,
+				cost = 0,
+				text = "",
+				zones = [],
+				traits = [],
+				link = "",
+				id = "",
+				color = "brown") {
 				this.id = id
 				this.color = ["WHITE", "BLUE", "PURPLE", "RED", "GREEN"].indexOf(color) >= 0 ? color : "brown"
 				this.level = parseInt(level) || 0
@@ -147,8 +223,15 @@
 				this.rested = false
 				this.sick = false
 			}
-			toString() {
-				return `${this.name} ${this.ap}/${this.hp}-${this.damage}${this.rested ? "/" : ""}`
+			getAP() {
+				return this.ap + (this.pilot? this.pilot.ap : 0)
+			}
+			getHP() {
+				return this.hp + (this.pilot? this.pilot.hp : 0)
+			}
+			toString(simple=false) {
+				if (simple) return this.name + this.pilot? " + " + this.pilot.name : ""
+				return `${this.name} ${this.pilot? " + " + this.pilot.name : ""} ${this.getAP()}/${this.getHP()}-${this.damage}${this.rested ? "/" : ""}`
 			}
 			toDict() {
 				return {
@@ -170,12 +253,12 @@
 				// log("Returning new card from dict " + JSON.stringify(d))
 				return new Card(d.type, d.name, d.ap, d.hp, d.level, d.cost, d.text, d.zones, d.traits, d.link, d.id, d.color)
 			}
-			toHTML(left, top, facedown=false, z=0) {
+			toHTML(left, top, facedown = false, z = 0) {
 				const id = this.id.split("_")[0]
 				//return `<div class="card" style="left:${left}vw; top:${top}vh; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}">L${this.level} C${this.cost} ${this.id}<br>${this.type}<br>${this.name}<br>${this.zones}<br>${this.traits}<br>Link: ${this.link}<br><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
 				//return `<div class="card" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}"><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
 				//return `<div class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);"><div class="rested">${this.type}</div></div>`
-				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'></div>`
+				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""}</div>`
 			}
 		}
 
@@ -282,6 +365,17 @@
 			return rv
 		}
 
+		// https://bost.ocks.org/mike/shuffle/compare.html
+		function shuffle(array) {
+			let m = array.length, t, i
+			while (m) {
+				i = Math.floor(Math.random() * m--)
+				t = array[m]
+				array[m] = array[i]
+				array[i] = t
+			}
+		}
+
 		class Player {
 			constructor(name) {
 				this.name = name
@@ -289,15 +383,17 @@
 				this.deck = []
 				const lines = decks[rnd(0, decks.length - 1)].split("\n")
 				for (const line of lines) {
-					if (line.indexOf("# ") > -1) log(name + " is playing " + line)
+					if (line.indexOf("# ") > -1) log("🎴" + name + " is playing " + line)
 					const [count, id] = line.split(" ")
 					if (count >= 1) {
 						for (let i = 0; i < count; ++i) {
 							const c = getCard(id)
+							c.owner = this
 							this.deck.push(c)
 						}
 					}
 				}
+				shuffle(this.deck)
 				// for (let i = 0; i < 50; ++i) {
 				// 	const t = Type[rnd(1, 4)]
 				// 	this.deck.push(new Card(t, t+i, rnd(1, 5), rnd(1, 5), rnd(1, 7), rnd(1, 5), "", "", "ST04-008_PR", "RED"))
@@ -340,7 +436,6 @@
 				gameInfo = await response.json()
 				localStorage.setItem("gameInfo", JSON.stringify(gameInfo))
 			}
-			log("Game info: " + JSON.stringify(gameInfo))
 			cards = JSON.parse(localStorage.getItem("cards")) || {}
 			if (Object.keys(cards).length > 1) {
 				log(`Loaded ${Object.keys(cards).length} cards`)
@@ -383,7 +478,7 @@
 			}
 		}
 
-		function render(p1, p2) {
+		function render() {
 			let html = ""
 			for (const p of [p1, p2]) {
 				let x = 0
@@ -400,7 +495,7 @@
 					}
 					const c = p.trash[i]
 					c.rested = false
-					html += c.toHTML(left, top, false, p == p2? 2 : 0)
+					html += c.toHTML(left, top, false, p == p2 ? 2 : 0)
 				}
 				// Deck - Could use actual card, but this might be useful for sending to a client.
 				let resource = getCard("RP-004")
@@ -413,7 +508,7 @@
 					}
 					html += resource.toHTML(left, top, true, 1)
 				}
-				// Resources
+				// Resource Area
 				for (const c of p.resource) {
 					left = 2 + x * 5
 					top = 2
@@ -433,7 +528,7 @@
 					}
 					html += resource.toHTML(left, top, true)
 				}
-				// Shields
+				// Shield Area
 				y = 0
 				for (const c of p.shield) {
 					left = 70
@@ -454,7 +549,7 @@
 					}
 					html += p.base.toHTML(left, top)
 				}
-				// Battlefield
+				// Battle Area
 				x = 0
 				y = 0
 				for (const c of p.battle) {
@@ -476,8 +571,22 @@
 					html += c.toHTML(left, top)
 					x += 1
 				}
+				// Hand
+				x = 0
+				top = p == p2 ? 96 : -12
+				for (const c of p.hand) {
+					left = 20 + x * 8
+					html += c.toHTML(left, top, p == p1)
+					x += 1
+				}
 			}
 			battlefield.innerHTML = html
+		}
+
+		function run(c, act) {
+			if (act == "Draw 1") {
+				c.owner.draw(1)
+			}
 		}
 
 		let game_over = false
@@ -486,21 +595,26 @@
 
 				const p1 = new Player("Player 1")
 				const p2 = new Player("Player 2")
+				// access via CLI
+				window.p1 = p1
+				window.p2 = p2
+
 				let player = p1
 				p2.resource.push(getCard("EXRP-002"))
 
+				render()
 				while (true) {
 					// Set active
-					if (player.base != null)
-						player.base.rested = false
+					if (player.base != null) activate(player.base)
 
-					for (const r of player.resource) {
-						if (r.rested) r.rested = false
+					for (const c of player.resource) {
+						if (c.rested) activate(c)
 					}
 					for (const c of player.battle) {
-						c.rested = false
+						if (c.rested) activate(c)
 						c.sick = false
 					}
+					await sleep(500)
 
 					// Draw card
 					try {
@@ -509,15 +623,18 @@
 						log(ex)
 						break
 					}
-					
+
+					// Place resource
 					let level = player.resource.length
 					if (level < 10 + (player == p2 ? 1 : 0)) {
-						// Place resource
 						player.resource.push(getCard("R-009"))
+						// TODO: pull from resource deck
+						render()
+						++level
 					}
 
 					// Main phase
-					log("" + player.name + " level " + level)
+					log("🎚️" + player.name + " level " + level)
 					for (const c of player.hand) {
 						let paid = 0
 						if (c.level <= level && c.cost <= level) {
@@ -533,21 +650,29 @@
 							// log("Playable " + c.name)
 							for (const r of player.resource) {
 								if (!r.rested) {
-									r.rested = true
+									rest(r)
 									paid += 1
 									if (paid >= c.cost) {
-										log("Playing " + c)
 										if (c.type == "COMMAND") {
+											log("⚡Execute " + c)
 											player.trash.push(c)
+											render()
 										} else if (c.type == "BASE") {
+											log("🟨Place " + c)
 											player.base = c
+											render()
 										} else if (c.type == "UNIT") {
+											log("🚀Deploy " + c)
 											player.battle.push(c)
 											c.sick = true
+											render()
 										} else if (c.type == "PILOT" && empty_units.length > 0) {
+											// TODO: Link
+											log("🧑‍✈️Pair " + c + " with " + empty_units[0])
 											empty_units[0].pilot = c
 											empty_units[0].sick = false
 											player.battle.push(c)
+											render()
 											empty_units = player.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
 										}
 										player.hand = player.hand.filter(item => item !== c)
@@ -562,51 +687,72 @@
 						const can_attack = player.battle.filter(bc => bc.type == "UNIT" && bc.rested == false && bc.sick == false)
 						if (can_attack.length < 1) break
 						const att = can_attack[0]
-						att.rested = true
+						rest(att)
 						const enemy = player === p1 ? p2 : p1
+						let breach = 0
 						if (enemy.base) {
-							log(att + " attacks " + enemy.base)
-							const el = document.getElementById("c" + att.cid)
-							const old_top = el.top
-							const old_left = el.left
-							el.top = (player == p2? 100 : 0)
-							await new Promise(r => setTimeout(r, 500))
-							el.top = old_top
-							enemy.base.damage += att.ap
-							if (enemy.base.damage >= enemy.base.hp) {
-								log("Destroyed " + enemy.base)
-								enemy.trash.push(enemy.base)
-								enemy.base = null
-								// TODO: Suppress
+							breach = att.getAP()
+						}
+						// Battle Area
+						const prone = enemy.battle.filter(bc => bc.type == "UNIT" && bc.rested)
+						if (prone.length > 0) {
+							const def = prone[0]
+							log("🔫" + att + " attacks " + def)
+							def.damage += att.getAP()
+							if (def.damage >= def.getHP()) {
+								destroy(def)
+								render()
+								const mo = /Breach (\d)/.exec(att.text)
+								if (mo) {
+									log("Breaching " + mo[1])
+									breach = parseInt(mo[1])
+								}
+								// TODO: enemy [Detroyed] after breach
 							}
-						} else {
-							const prone = enemy.battle.filter(bc => bc.type == "UNIT" && bc.rested)
-							if (prone.length > 0) {
-								const def = prone[0]
-								log(att + " attacks " + def)
-								def.damage += att.ap
-								if (def.damage >= def.hp) {
-									log("Destroyed " + def.name)
-									enemy.trash.push(def)
-									enemy.battle = enemy.battle.filter(bc => bc != def)
-									// TODO: Breach
+							att.damage += def.getAP()
+							if (att.damage >= att.getHP()) {
+								destroy(att)
+							}
+						}
+						// Shield Area
+						if (prone.length < 1 || breach) {
+							if (enemy.base) {
+								log("🔫" + att + " attacks " + enemy.base)
+								await battle(att, enemy.base)
+								enemy.base.damage += breach ? breach : att.getAP()
+								if (enemy.base.damage >= enemy.base.hp) {
+									log("💥Destroyed " + enemy.base)
+									enemy.trash.push(enemy.base)
+									enemy.base = null
+									render()
 								}
 							} else {
-								log(att + " attacks shield area")
+								log("🔫" + att + " attacks shield area")
+								await battle(att, enemy.shield[enemy.shield.length-1] || enemy.hand[0] || enemy.resource[0])
 								if (enemy.shield.length < 1) {
-									log(enemy.name + " died from " + att)
+									log("💀" + enemy.name + " died from " + att)
 									game_over = true
-									render(p1, p2)
+									render()
 									break
 								}
-								const c = enemy.shield.pop()
-								log("Broke shield " + c)
-								if (c.text.includes("[Burst]")) {
-									// TODO: Run card code.
+								const mo = /Suppression/.exec(att.text)
+								if (mo) {
+									log("Suppression")
 								}
-								enemy.trash.push(c)
-								render(p1, p2)
+								for (let i = 0; i < (mo ? 2 : 1); ++i) {
+									const c = enemy.shield.pop()
+									if (!c) break
+									log("💥Broke shield " + c)
+									const mo = /Burst[>\]】&gt;]+ ([^.]+)/.exec(c.text)
+									if (mo) {
+										log("Burst")
+										run(c, mo[1])
+									}
+									enemy.trash.push(c)
+									render()
+								}
 							}
+							render()
 						}
 					}
 					if (game_over) break
@@ -614,13 +760,13 @@
 					// End phase
 					while (player.hand.length > 10) {
 						const c = player.hand.pop()
-						log("Discarding " + c.name)
+						log("🗑️ Discarding " + c.name)
 						player.trash.push(c)
 						player.hand = player.hand.filter(item => item !== c)
 					}
 					// log(structuredClone(player))  // clone to keep current lists state
-					render(p1, p2)
-					await new Promise(r => setTimeout(r, 500))
+					await sleep(1000)
+					render()
 
 					player = player == p1 ? p2 : p1
 				}
