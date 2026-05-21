@@ -44,7 +44,6 @@
 			scrollbar-width: thin;
 			background-color: #08080888;
 			border: 1px solid var(--fgcolor);
-
 		}
 
 		#overlay {
@@ -57,7 +56,7 @@
 			background-size: contain;
 			background-repeat: no-repeat;
 			border: 1px solid brown;
-			border-radius: 12px;
+			border-radius: 1vmin;
 			color: yellow;
 			cursor: pointer;
 			position: absolute;
@@ -65,14 +64,18 @@
 			height: 14vmin;
 			font-size: small;
 			text-align: center;
-			transition: 0.4s;
+			text-shadow: 1px 1px #08080888;
+			transition: 0.3s;
 		}
 
 		.card div {
-			background-color: #08080888;
-			margin: 50%;
-			width: 50%;
-			transform: translateX(-50%) translateY(-50%);
+			/* background-color: #08080888; */
+			/* top: 50%; */
+			/* left: 50%; */
+			/* width: 50%; */
+			/* text-align: center; */
+			/* align-self: center; */
+			/* transform: translateX(-50%) translateY(-50%); */
 		}
 
 		.facedown {
@@ -93,16 +96,45 @@
 	<div id="dlog">
 		<a href="https://www.gundam-gcg.com/en/rules/">Gundam Card Game</a>
 	</div>
+	<audio id="pewpew" src="pewpew.opus"></audio>
+	<audio id="boom" src="boom.opus"></audio>
 	<script>
 		"use strict"
 
 		let cards = {}
 
-		function destroy(card) {
+		function escapeHTML(unsafe) {
+			return unsafe
+			.replaceAll("&", "&amp;")
+			.replaceAll("<", "&lt;")
+			.replaceAll(">", "&gt;")
+			.replaceAll('"', "&quot;")
+			.replaceAll("'", "&#039;")
+		}
+		function unescapeHTML(unsafe) {
+			return unsafe
+			.replaceAll("&amp;", "&")
+			.replaceAll("&lt;", "<")
+			.replaceAll("&gt;", ">")
+			.replaceAll("&quot;", '"')
+			.replaceAll("&#039;", "'")
+		}
+
+		function bounce(card) {
+			log("🔙Bounced " + card)
+			if (card.pilot) card.owner.hand.push(card.pilot)
+			card.owner.hand.push(card)
+			card.owner.battle = card.owner.battle.filter(bc => bc != card && bc != card.pilot)
+		}
+
+		async function destroy(card) {
 			log("💥Destroyed " + card)
 			if (card.pilot) card.owner.trash.push(card.pilot)
 			card.owner.trash.push(card)
 			card.owner.battle = card.owner.battle.filter(bc => bc != card && bc != card.pilot)
+			render()
+			boom.play().catch(ex => {})
+			await sleep(900)
 		}
 
 		async function sleep(ms = 1000) {
@@ -118,13 +150,22 @@
 			try {
 				getel(card).classList.remove("rested")
 			} catch(ex) {
-				log(ex + " " + card)
+				log("🚩🚩ERR " + ex + " " + card)
 			}
+			if (card.pilot) {
+				card.pilot.rested = false
+				getel(card.pilot).classList.remove("rested")
+			}
+
 		}
 
 		function rest(card) {
 			card.rested = true
 			getel(card).classList.add("rested")
+			if (card.pilot) {
+				card.pilot.rested = true
+				getel(card.pilot).classList.add("rested")
+			}
 		}
 
 		async function battle(att, def) {
@@ -135,7 +176,7 @@
 			const e2 = getel(def)
 			e.style.top = e2.style.top
 			e.style.left = e2.style.left
-			await new Promise(r => setTimeout(r, 800))
+			await sleep(800)
 			e.style.top = old_top
 			e.style.left = old_left
 			*/
@@ -148,12 +189,17 @@
 			// Laser time!
 			overlay.style.zIndex = 9000
 			overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
-				<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px">
-					<animate attributeName="stroke" values="#800;#fff;#800;#fff" dur="0.1s" repeatCount="indefinite"/>
+				<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px" stroke-linecap="round">
+					<animate attributeName="stroke" values="#880;#fff;#880;" dur="0.2s" repeatCount="indefinite"/>
+					<animate attributeName="stroke-width" values="4px;8px;4px;" dur="0.2s" repeatCount="indefinite"/>
 				</line>
 			</svg>`
-			await new Promise(r => setTimeout(r, 300))
+			pewpew.play().catch(ex => {})
+			// vfx
+			await sleep(400)
 			overlay.style.zIndex = 0
+			// sfx
+			await sleep(200)
 		}
 
 		function zoom(e) {
@@ -216,22 +262,25 @@
 				this.text = text || ""
 				this.zones = zones || []
 				this.traits = traits || []  // new for each, unlike in Python
+				this.traits_eot = []
 				this.link = link || ""
 				this.ap = parseInt(ap) || 0
+				this.ap_eot = 0
 				this.hp = parseInt(hp) || 0
 				this.damage = 0
 				this.rested = false
 				this.sick = false
+
 			}
 			getAP() {
-				return this.ap + (this.pilot? this.pilot.ap : 0)
+				return this.ap + (this.pilot? this.pilot.ap : 0) + this.ap_eot
 			}
 			getHP() {
 				return this.hp + (this.pilot? this.pilot.hp : 0)
 			}
 			toString(simple=false) {
 				if (simple) return this.name + this.pilot? " + " + this.pilot.name : ""
-				return `${this.name} ${this.pilot? " + " + this.pilot.name : ""} ${this.getAP()}/${this.getHP()}-${this.damage}${this.rested ? "/" : ""}`
+				return `${this.name} ${this.cid}${this.pilot? " + " + this.pilot.name : ""} ${this.getAP()}/${this.getHP()}-${this.damage}`
 			}
 			toDict() {
 				return {
@@ -258,7 +307,7 @@
 				//return `<div class="card" style="left:${left}vw; top:${top}vh; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}">L${this.level} C${this.cost} ${this.id}<br>${this.type}<br>${this.name}<br>${this.zones}<br>${this.traits}<br>Link: ${this.link}<br><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
 				//return `<div class="card" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}"><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
 				//return `<div class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);"><div class="rested">${this.type}</div></div>`
-				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""}</div>`
+				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.ap_eot ? '<div style="color: red">' + this.ap_eot + " AP</div>" : ""} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}</div>`
 			}
 		}
 
@@ -352,18 +401,6 @@
 
 		// card id on the battlefield, link to render element
 		let cid = 0
-		function getCard(id) {
-			const d = cards[id]
-			if (!d) {
-				const msg = "Card not found: " + id
-				log(msg)
-				throw Error(msg)
-			}
-			const rv = Card.fromDict(d)
-			cid += 1
-			rv.cid = cid
-			return rv
-		}
 
 		// https://bost.ocks.org/mike/shuffle/compare.html
 		function shuffle(array) {
@@ -387,7 +424,7 @@
 					const [count, id] = line.split(" ")
 					if (count >= 1) {
 						for (let i = 0; i < count; ++i) {
-							const c = getCard(id)
+							const c = this.getCard(id)
 							c.owner = this
 							this.deck.push(c)
 						}
@@ -400,9 +437,10 @@
 				// }
 				this.battle = []
 				this.shield = []
-				this.base = getCard("EXB-001")  // new Card("BASE", "EX Base", 0, 3)
+				this.base = this.getCard("EXB-001")  // new Card("BASE", "EX Base", 0, 3)
 				this.resource = []
 				this.trash = []
+				this.traits_eot = []
 
 				// Opening hand
 				this.draw(5)
@@ -421,6 +459,33 @@
 					}
 					this.hand.push(this.deck.pop())
 				}
+			}
+
+			discard(number=1) {
+				const c = this.hand[Math.floor(Math.random() * this.hand.length)]
+				if (!c) return
+				log("🗑️ Discard " + c.name)
+				this.trash.push(c)
+				this.hand = this.hand.filter(item => item !== c)
+			}
+
+			getCard(id) {
+				const d = cards[id]
+				if (!d) {
+					const msg = "Card not found: " + id
+					log(msg)
+					throw Error(msg)
+				}
+				const rv = Card.fromDict(d)
+				cid += 1
+				rv.cid = cid
+				rv.owner = this
+				return rv
+			}
+
+			getToken(name) {
+				// Yes, names are not unique.
+				for (const k in cards) if (cards[k].name == name && cards[k].type.indexOf("TOKEN") > -1) return this.getCard(k)
 			}
 		}
 
@@ -453,7 +518,7 @@
 						const json = await response.json()
 						pages = json.meta.page_count
 						data = data.concat(json.data)
-						await new Promise(r => setTimeout(r, 500))  // rate limit to be nice to server
+						await sleep(500)  // rate limit to be nice to server
 					} while (page < pages)
 					localStorage.setItem("data", JSON.stringify(data))
 				}
@@ -498,7 +563,7 @@
 					html += c.toHTML(left, top, false, p == p2 ? 2 : 0)
 				}
 				// Deck - Could use actual card, but this might be useful for sending to a client.
-				let resource = getCard("RP-004")
+				let resource = p.getCard("RP-004")
 				for (let i = 0; i < p.deck.length; ++i) {
 					left = 2
 					top = 33 - 0.1 * i
@@ -583,10 +648,144 @@
 			battlefield.innerHTML = html
 		}
 
-		function run(c, act) {
-			if (act == "Draw 1") {
-				c.owner.draw(1)
+		function getSectionText(card, act="Main") {
+			const rex = new RegExp(act + "】([^.].+?)(<br|$)")
+			const mo = unescapeHTML(card.text).match(rex)
+			if (mo) return mo[1]
+		}
+		async function run(card, act="Main") {
+			let i = 0
+			let t = getSectionText(card, act)
+			if (!t && act == "Main") t = getSectionText(card, "Action")
+			if (!t) {
+				log("🚩🚩Failed to parse " + card.id + act + " of " + escapeHTML(card.text))
+				return false
 			}
+			const p = card.owner
+
+			if (t == "Activate this card's 【Main】.") {
+				t = getSectionText(card, "Main")
+			}
+
+			let mo = t.match(/^Draw (\d).$/)
+			if (mo) {
+				p.draw(mo[1])
+				return true
+			}
+			if (t == "Draw 2. Then, discard 1.") {
+				p.draw(2)
+				p.discard()
+				return true
+			}
+			if (t == "Deploy this card.") {
+				if (card.type == "BASE") {
+					card.rested = false
+					p.base = card
+				}
+				else {
+					log("🚩🚩TODO: Deploy to battle")
+				}
+				return true
+			}
+			if (t == "Add this card to your hand.") {
+				p.hand.push(card)
+				return true
+			}
+
+			if (p.battle.length > 0) {
+				// Pilots are not units.
+				const fu = p.battle.filter(c => c.type.indexOf("UNIT") > -1)
+				if (t.indexOf("Choose 1 friendly Unit. It recovers 3 HP.") > -1) {
+					const target = fu.filter(c => c.damage > 0).toSorted(c => -c.damage)[0]
+					if (!target) return false
+					log("🎯Chose " + target)
+					target.damage -= 3
+					return true
+				}
+				if (t.indexOf("Choose 1 friendly Unit. It gets AP+2 during this turn.") > -1) {
+					const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.ap)[0]
+					if (!target) return false
+					log("🎯Chose " + target)
+					target.ap_eot += 2
+					return true
+				}
+				if (t.indexOf("Choose 1 of your Units. It gains <Breach 3> during this turn.") > -1) {
+					const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.ap)[0]
+					if (!target) return false
+					log("🎯Chose " + target)
+					target.traits_eot.push("Breach 3")
+					return true
+				}
+				if (t.indexOf("Choose 1 friendly Unit that is Lv.2 or lower. It gains <First Strike> during this turn.") > -1) {
+					const target = fu.filter(c => c.level <= 2 && !c.rested && !c.sick).toSorted(c => c.ap)[0]
+					if (!target) return false
+					log("🎯Chose " + target)
+					target.traits_eot.push("First Strike")
+					return true
+				}
+				if (t.indexOf("During this battle, your shield area cards can't receive damage from enemy Units that are Lv.4 or lower.") > -1) {
+					p.traits_eot.push("unit.enemy.lv4- nodmg ShieldArea")
+					return true
+				}
+				if (t.indexOf("Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.") > -1) {
+					const target = fu.toSorted(c => -c.ap)[0]
+					if (!target) return false
+					log("🎯Chose " + target)
+					target.traits_eot.push("enemy.unit.lv2- nodmg")
+					return true
+				}
+			} else {
+				// log(`No friendly ${card.owner.name} unit`)
+			}
+			if (t.indexOf("If you have no (Earth Alliance) Unit tokens in play, deploy 1 [Sword Strike Gundam]((Earth Alliance)･AP4･HP2･<Blocker>) or 1 [Launcher Strike Gundam]((Earth Alliance)･AP2･HP4･<Blocker>) Unit token.") > -1 && !p.battle.filter(c => c.type.indexOf("TOKEN") > -1 && c.traits.includes("(Earth Alliance)"))) {
+				if (p.battle.length >= 6) return false
+				p.battle.push(p.getToken("Sword Strike Gundam"))
+				return true
+			}
+
+			const en = (p == p1 ? p2 : p1)
+			if (en.battle.length < 1) return false
+			const eu = en.battle.filter(c => c.type.indexOf("UNIT") > -1)
+			if (t.indexOf("Choose 1 enemy Unit. Deal 2 damage to it.") > -1) {
+				const target = eu.toSorted(c => -c.hp)[0]
+				if (!target) return false
+				log("🎯Chose " + target)
+				target.damage += 2
+				if (target.damage >= target.getHP()) await destroy(target)
+				return true
+			}
+			if (t.indexOf("Choose 1 rested enemy Unit. Deal 1 damage to it.") > -1) {
+				const target = eu.filter(c => c.rested).toSorted(c => -c.hp)[0]
+				if (!target) return false
+				log("🎯Chose " + target)
+				target.damage += 1
+				if (target.damage >= target.getHP()) await destroy(target)
+				return true
+			}
+			if (t.indexOf("Choose 1 enemy Unit. It gets AP-3 during this turn.") > -1) {
+				const target = eu.toSorted(c => -c.ap)[0]
+				if (!target) return false
+				log("🎯Chose " + target)
+				target.ap_eot -= 3
+				return true
+			}
+			if (t.indexOf("Choose 1 enemy Unit with 3 or less HP. Return it to its owner's hand.") > -1) {
+				const target = eu.filter(c => c.getHP() <= 3).toSorted(c => -c.ap)[0]
+				if (!target) return false
+				log("🎯Chose " + target)
+				bounce(target)
+				return true
+			}
+			if (t.indexOf("Choose 1 enemy Unit with 5 or less HP. Rest it.") > -1) {
+				const target = eu.filter(c => c.getHP() <= 5).toSorted(c => -c.ap)[0]
+				if (!target) return false
+				log("🎯Chose " + target)
+				rest(target)
+				return true
+			}
+			if (p.battle.length < 1 && t.indexOf("friendly") > -1 || t.indexOf("of your") > -1) return false
+			log("🚩🚩Not implemented " + card.type + " " + card.id + ' "' + escapeHTML(t) + '". p battle length: ' + p.battle.length)
+			return false
 		}
 
 		let game_over = false
@@ -599,18 +798,18 @@
 				window.p1 = p1
 				window.p2 = p2
 
-				let player = p1
-				p2.resource.push(getCard("EXRP-002"))
+				let p = p1
+				p2.resource.push(p2.getCard("EXRP-002"))
 
 				render()
 				while (true) {
 					// Set active
-					if (player.base != null) activate(player.base)
+					if (p.base != null) activate(p.base)
 
-					for (const c of player.resource) {
+					for (const c of p.resource) {
 						if (c.rested) activate(c)
 					}
-					for (const c of player.battle) {
+					for (const c of p.battle) {
 						if (c.rested) activate(c)
 						c.sick = false
 					}
@@ -618,64 +817,68 @@
 
 					// Draw card
 					try {
-						player.draw()
+						p.draw()
 					} catch (ex) {
 						log(ex)
 						break
 					}
 
 					// Place resource
-					let level = player.resource.length
-					if (level < 10 + (player == p2 ? 1 : 0)) {
-						player.resource.push(getCard("R-009"))
+					let level = p.resource.length
+					if (level < 10 + (p == p2 ? 1 : 0)) {
+						p.resource.push(p.getCard("R-009"))
 						// TODO: pull from resource deck
 						render()
 						++level
 					}
 
 					// Main phase
-					log("🎚️" + player.name + " level " + level)
-					for (const c of player.hand) {
+					log("🎚️" + p.name + " level " + level)
+					for (const c of p.hand) {
 						let paid = 0
 						if (c.level <= level && c.cost <= level) {
 							// already have a base
-							if (c.type == "BASE" && player.base != null) continue
+							if (c.type == "BASE" && p.base != null) continue
 							// no empty unit
-							let empty_units = player.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
+							let empty_units = p.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
 							if (c.type == "PILOT" && empty_units.length < 1) continue
 							// max 6 units
-							const units = player.battle.filter(bc => bc.type == "UNIT")
+							const units = p.battle.filter(bc => bc.type == "UNIT")
 							if (units.length >= 6) continue
 
 							// log("Playable " + c.name)
-							for (const r of player.resource) {
+							for (const r of p.resource) {
 								if (!r.rested) {
 									rest(r)
 									paid += 1
 									if (paid >= c.cost) {
+										p.hand = p.hand.filter(item => item !== c)
 										if (c.type == "COMMAND") {
-											log("⚡Execute " + c)
-											player.trash.push(c)
-											render()
+											if (await run(c) === true) {
+												log("⚡Execute " + c)
+												p.trash.push(c)
+												render()
+											} else {
+												p.hand.push(c)
+											}
 										} else if (c.type == "BASE") {
 											log("🟨Place " + c)
-											player.base = c
+											p.base = c
 											render()
 										} else if (c.type == "UNIT") {
 											log("🚀Deploy " + c)
-											player.battle.push(c)
+											p.battle.push(c)
 											c.sick = true
 											render()
 										} else if (c.type == "PILOT" && empty_units.length > 0) {
-											// TODO: Link
 											log("🧑‍✈️Pair " + c + " with " + empty_units[0])
 											empty_units[0].pilot = c
+											// TODO: Link
 											empty_units[0].sick = false
-											player.battle.push(c)
+											p.battle.push(c)
 											render()
-											empty_units = player.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
+											empty_units = p.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
 										}
-										player.hand = player.hand.filter(item => item !== c)
 										break
 									}
 								}
@@ -684,25 +887,22 @@
 					}
 					// attack
 					while (true) {
-						const can_attack = player.battle.filter(bc => bc.type == "UNIT" && bc.rested == false && bc.sick == false)
+						const can_attack = p.battle.filter(bc => bc.type == "UNIT" && bc.rested == false && bc.sick == false)
 						if (can_attack.length < 1) break
 						const att = can_attack[0]
 						rest(att)
-						const enemy = player === p1 ? p2 : p1
+						const enemy = p === p1 ? p2 : p1
 						let breach = 0
-						if (enemy.base) {
-							breach = att.getAP()
-						}
 						// Battle Area
 						const prone = enemy.battle.filter(bc => bc.type == "UNIT" && bc.rested)
 						if (prone.length > 0) {
 							const def = prone[0]
 							log("🔫" + att + " attacks " + def)
+							await battle(att, def)
 							def.damage += att.getAP()
 							if (def.damage >= def.getHP()) {
-								destroy(def)
-								render()
-								const mo = /Breach (\d)/.exec(att.text)
+								await destroy(def)
+								const mo = /Breach (\d)/.exec(att.text + att.traits_eot)
 								if (mo) {
 									log("Breaching " + mo[1])
 									breach = parseInt(mo[1])
@@ -711,26 +911,33 @@
 							}
 							att.damage += def.getAP()
 							if (att.damage >= att.getHP()) {
-								destroy(att)
+								await destroy(att)
+								continue
 							}
+						} else {
+							breach = att.getAP()
 						}
 						// Shield Area
 						if (prone.length < 1 || breach) {
+							if (att.level <= 4 && enemy.traits_eot.some(txt => txt.match(new RegExp(`unit.enemy.lv[${att.level}-9] nodmg ShieldArea`)))) {
+								log("🛡️Shield area damage prevented.")
+								continue
+							}
 							if (enemy.base) {
 								log("🔫" + att + " attacks " + enemy.base)
 								await battle(att, enemy.base)
 								enemy.base.damage += breach ? breach : att.getAP()
 								if (enemy.base.damage >= enemy.base.hp) {
-									log("💥Destroyed " + enemy.base)
-									enemy.trash.push(enemy.base)
+									await destroy(enemy.base)
 									enemy.base = null
-									render()
 								}
 							} else {
 								log("🔫" + att + " attacks shield area")
 								await battle(att, enemy.shield[enemy.shield.length-1] || enemy.hand[0] || enemy.resource[0])
 								if (enemy.shield.length < 1) {
 									log("💀" + enemy.name + " died from " + att)
+									boom.play().catch(ex => {})
+									await sleep(2000)
 									game_over = true
 									render()
 									break
@@ -743,13 +950,16 @@
 									const c = enemy.shield.pop()
 									if (!c) break
 									log("💥Broke shield " + c)
-									const mo = /Burst[>\]】&gt;]+ ([^.]+)/.exec(c.text)
+									boom.play().catch(ex => {})
+									const mo = /Burst】([^.]+)/.exec(c.text)
+									let toTrash = true
 									if (mo) {
-										log("Burst")
-										run(c, mo[1])
+										log("⚡Burst: " + mo[1])
+										toTrash = !(await run(c, "Burst"))
 									}
-									enemy.trash.push(c)
+									if (toTrash) enemy.trash.push(c)
 									render()
+									await sleep(1000)
 								}
 							}
 							render()
@@ -758,17 +968,16 @@
 					if (game_over) break
 
 					// End phase
-					while (player.hand.length > 10) {
-						const c = player.hand.pop()
-						log("🗑️ Discarding " + c.name)
-						player.trash.push(c)
-						player.hand = player.hand.filter(item => item !== c)
+					while (p.hand.length > 10) p.discard()
+					for (const c of p.battle) {
+						c.ap_eot = 0
+						c.traits_eot = []
 					}
-					// log(structuredClone(player))  // clone to keep current lists state
-					await sleep(1000)
+					p.traits_eot = []
 					render()
-
-					player = player == p1 ? p2 : p1
+					// log(structuredClone(p))  // clone to keep current lists state
+					await sleep(2000)
+					p = p == p1 ? p2 : p1
 				}
 			})() /* .catch(error => {
 	log("ERR " + error)
