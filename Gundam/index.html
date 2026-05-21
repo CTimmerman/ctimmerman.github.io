@@ -68,16 +68,6 @@
 			transition: 0.3s;
 		}
 
-		.card div {
-			/* background-color: #08080888; */
-			/* top: 50%; */
-			/* left: 50%; */
-			/* width: 50%; */
-			/* text-align: center; */
-			/* align-self: center; */
-			/* transform: translateX(-50%) translateY(-50%); */
-		}
-
 		.facedown {
 			background-image: url(https://gundams.dev/i/cardback.webp) !important;
 			border-color: black !important;
@@ -101,6 +91,10 @@
 	<script>
 		"use strict"
 
+		// Why doesn't upstream list EXR promos like other promos?
+		// "EXR-001_PR", "EXR-001_PR2", "EXR-001_PR3", "EXR-001_PR4", "EXR-001_PR5"
+		const EX_RESOURCES = ["EXR-001", "EXRP-001", "EXRP-002"]
+
 		let cards = {}
 
 		function escapeHTML(unsafe) {
@@ -122,14 +116,22 @@
 
 		function bounce(card) {
 			log("🔙Bounced " + card)
-			if (card.pilot) card.owner.hand.push(card.pilot)
+			card.rested = false
+			if (card.pilot) {
+				card.pilot.rested = false
+				card.owner.hand.push(card.pilot)
+				card.pilot = null
+			}
 			card.owner.hand.push(card)
 			card.owner.battle = card.owner.battle.filter(bc => bc != card && bc != card.pilot)
 		}
 
 		async function destroy(card) {
 			log("💥Destroyed " + card)
-			if (card.pilot) card.owner.trash.push(card.pilot)
+			if (card.pilot) {
+				card.owner.trash.push(card.pilot)
+				card.pilot = null
+			}
 			card.owner.trash.push(card)
 			card.owner.battle = card.owner.battle.filter(bc => bc != card && bc != card.pilot)
 			render()
@@ -156,7 +158,6 @@
 				card.pilot.rested = false
 				getel(card.pilot).classList.remove("rested")
 			}
-
 		}
 
 		function rest(card) {
@@ -206,11 +207,18 @@
 			if (e.style.transform.indexOf("scale") > -1) {
 				e.style.transform = e.old_transform
 				e.style.zIndex = e.old_zIndex
+				e.style.top = e.old_top
+				e.style.left = e.old_left
 			} else {
 				e.old_transform = e.style.transform
 				e.old_zIndex = e.style.zIndex
-				e.style.transform = "scale(3.5)"
+				e.old_top = e.style.top
+				e.old_left = e.style.left
+
+				e.style.transform = "scale(5)"
 				e.style.zIndex = 9000
+				e.style.top = "40vmin"
+				e.style.left = "40vmin"
 			}
 		}
 
@@ -224,6 +232,9 @@
 			return Math.floor(min + Math.random() * (1 + max - min))
 		}
 
+		function rndPick(arr) {
+			return arr[Math.floor(Math.random() * arr.length)]
+		}
 		// var Type;
 		// (function (Type) {
 		// 	Type[Type["RESOURCE"] = 0] = "RESOURCE";
@@ -234,6 +245,13 @@
 		// 	Type[Type["UNITTOKEN"] = 5] = "UNITTOKEN";	
 		// })(Type || (Type = {}));
 
+		function linksWith(unit, pilot) {
+			if (!pilot) return false
+			for (let part of unit.link.split("/")) {
+				if (part == `[${pilot.name}]`) return true
+			}
+			return false
+		}
 
 		class Card {
 			constructor(type = "UNIT",
@@ -259,7 +277,7 @@
 				// }
 				this.type = type || ""
 				this.name = name || ""
-				this.text = text || ""
+				this.text = unescapeHTML(text) || ""
 				this.zones = zones || []
 				this.traits = traits || []  // new for each, unlike in Python
 				this.traits_eot = []
@@ -273,14 +291,40 @@
 
 			}
 			getAP() {
-				return this.ap + (this.pilot? this.pilot.ap : 0) + this.ap_eot
+				let rv = this.ap + this.ap_eot
+				if (this.pilot) {
+					rv += this.pilot.ap
+					if (linksWith(this, this.pilot)) {
+						if (this.pilot.text.indexOf("【During Link】This Unit gets AP+1 and HP+1.<br>") > -1) {
+							rv += 1
+						}
+					}
+				}
+				return rv
 			}
 			getHP() {
-				return this.hp + (this.pilot? this.pilot.hp : 0)
+				let rv = this.hp
+				if (this.pilot) {
+					rv += this.pilot.hp
+					if (linksWith(this, this.pilot)) {
+						if (this.pilot.text.indexOf("【During Link】This Unit gets AP+1 and HP+1.<br>") > -1) {
+							rv += 1
+						}
+					}
+				}
+				return rv
 			}
 			toString(simple=false) {
-				if (simple) return this.name + this.pilot? " + " + this.pilot.name : ""
-				return `${this.name} ${this.cid}${this.pilot? " + " + this.pilot.name : ""} ${this.getAP()}/${this.getHP()}-${this.damage}`
+				let pilot_name = ""
+				if (this.pilot) {
+					if(this.pilot.type == "COMMAND") {
+						pilot_name = getSectionText(this, "Pilot")
+					} else {
+						pilot_name = this.pilot.name
+					}
+				}
+				if (simple) return this.name + (pilot_name? " + " + pilot_name : "")
+				return `${this.name} ${this.cid}${pilot_name? " + " + pilot_name : ""} ${this.getAP()}/${this.getHP()}-${this.damage}`
 			}
 			toDict() {
 				return {
@@ -431,10 +475,15 @@
 					}
 				}
 				shuffle(this.deck)
+				// Maybe still useful for fuzzing.
 				// for (let i = 0; i < 50; ++i) {
 				// 	const t = Type[rnd(1, 4)]
 				// 	this.deck.push(new Card(t, t+i, rnd(1, 5), rnd(1, 5), rnd(1, 7), rnd(1, 5), "", "", "ST04-008_PR", "RED"))
 				// }
+				this.resource_deck = []
+				for (let i = 0; i < 10; ++i) {
+					this.resource_deck.push(this.getCard("R-00" + rnd(2, 9)))
+				}
 				this.battle = []
 				this.shield = []
 				this.base = this.getCard("EXB-001")  // new Card("BASE", "EX Base", 0, 3)
@@ -462,11 +511,13 @@
 			}
 
 			discard(number=1) {
-				const c = this.hand[Math.floor(Math.random() * this.hand.length)]
-				if (!c) return
-				log("🗑️ Discard " + c.name)
-				this.trash.push(c)
-				this.hand = this.hand.filter(item => item !== c)
+				for (let i = 0; i < number; ++i) {
+					const c = this.hand[Math.floor(Math.random() * this.hand.length)]
+					if (!c) return
+					log("🗑️ Discard " + c.name)
+					this.trash.push(c)
+					this.hand = this.hand.filter(item => item !== c)
+				}
 			}
 
 			getCard(id) {
@@ -560,7 +611,7 @@
 					}
 					const c = p.trash[i]
 					c.rested = false
-					html += c.toHTML(left, top, false, p == p2 ? 2 : 0)
+					html += c.toHTML(left, top, false, p == p2 ? 2 : 1)
 				}
 				// Deck - Could use actual card, but this might be useful for sending to a client.
 				let resource = p.getCard("RP-004")
@@ -584,7 +635,7 @@
 					html += c.toHTML(left, top)
 					x += 1
 				}
-				for (let i = 0; i < 10 - p.resource.length + (p == p2 ? 1 : 0); ++i) {
+				for (let i = 0; i < p.resource_deck.length; ++i) {
 					left = 57
 					top = 2 - 0.1 * i
 					if (p == p2) {
@@ -618,7 +669,6 @@
 				x = 0
 				y = 0
 				for (const c of p.battle) {
-					if (c.type == "PILOT") continue
 					if (x == 3) {
 						x = 0
 						y += 0.9
@@ -631,7 +681,7 @@
 					}
 					if (c.pilot) {
 						c.pilot.rested = c.rested
-						html += c.pilot.toHTML(left, top + 3.5)
+						html += c.pilot.toHTML(left - 2, top + 3.5)
 					}
 					html += c.toHTML(left, top)
 					x += 1
@@ -648,17 +698,34 @@
 			battlefield.innerHTML = html
 		}
 
-		function getSectionText(card, act="Main") {
-			const rex = new RegExp(act + "】([^.].+?)(<br|$)")
-			const mo = unescapeHTML(card.text).match(rex)
-			if (mo) return mo[1]
+		async function dealDamage(source, target, amount=1, chosen=false) {
+			if (!target) return false
+			if (chosen) log(`🎯${source} deals ${amount} damage to ${target}`)
+			target.damage += amount
+			if (target.damage >= target.getHP()) await destroy(target)
+			return true
 		}
-		async function run(card, act="Main") {
-			let i = 0
-			let t = getSectionText(card, act)
+
+		function getSectionText(card, act="Main", clause="") {
+			const rex = new RegExp("(.*?)" + (clause? clause : (act + "】")) + "([^.].+?)(<br|$)")
+			const mo = card.text.match(rex)
+			if (!mo) return ""
+			const limits = mo[1]
+			const text = mo[2]
+			if (limits.indexOf("During Link") > -1 && !linksWith(card, card.pilot)) return ""
+			if (limits.indexOf("During Pair") > -1 && !card.pilot) return ""
+			return text
+		}
+		async function run(card, act="Main", clause="") {
+			let rv = await runCard(card, act, clause)
+			if (card.pilot) rv = rv || await runCard(card.pilot, act, clause)
+			return rv
+		}
+		async function runCard(card, act, clause) {
+			let t = getSectionText(card, act, clause)
 			if (!t && act == "Main") t = getSectionText(card, "Action")
 			if (!t) {
-				log("🚩🚩Failed to parse " + card.id + act + " of " + escapeHTML(card.text))
+				// if (clause || card.text.indexOf(act) > -1) log(`🚩No act ${act} or clause "${escapeHTML(clause)}" found in ${card.id} ${escapeHTML(card.text)}`)
 				return false
 			}
 			const p = card.owner
@@ -667,14 +734,25 @@
 				t = getSectionText(card, "Main")
 			}
 
-			let mo = t.match(/^Draw (\d).$/)
+			let mo = t.match(/^Deploy 1 rested \[(.+?)\].*?token.$/)
+			if (mo) {
+				const weakest = p.battle.toSorted(c => c.ap)
+				if (weakest.length >= 6) destroy(weakest[0])
+				const c = p.getToken(mo[1])
+				c.rested = true
+				c.sick = true
+				p.battle.push(c)
+				return true
+			}
+			mo = t.match(/^Draw (\d).$/)
 			if (mo) {
 				p.draw(mo[1])
 				return true
 			}
-			if (t == "Draw 2. Then, discard 1.") {
-				p.draw(2)
-				p.discard()
+			mo = t.match(/^Draw (\d). Then, discard (\d).$/)
+			if (mo) {
+				p.draw(mo[1])
+				p.discard(mo[2])
 				return true
 			}
 			if (t == "Deploy this card.") {
@@ -691,7 +769,29 @@
 				p.hand.push(card)
 				return true
 			}
-
+			if (t == "Place 1 EX Resource.") {
+				p.resource.push(p.getCard(rndPick(EX_RESOURCES)))
+				render()
+				await sleep(500)
+				// TODO: Find & run "When you place an EX Resource," cards.
+				return true
+			}
+			if (t == "This Unit gets AP+2 during this turn.") {
+				card.ap_eot += 2
+				return true
+			}
+			if (t == "You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.") {
+				const target = p.hand.filter(item => item.level <= 4 && item.type == "UNIT" && item.traits.includes("Neo Zeon") || item.traits.includes("Zeon")).toSorted(item => item.ap)[0]
+				if (!target) return false
+				log("🎯Chose " + target)
+				p.battle.push(target)
+				p.hand = p.hand.filter(item => item !== target)
+				return true
+			}
+			if (t.indexOf("During this battle, your shield area cards can't receive damage from enemy Units that are Lv.4 or lower.") > -1) {
+				p.traits_eot.push("unit.enemy.lv4- nodmg ShieldArea")
+				return true
+			}
 			if (p.battle.length > 0) {
 				// Pilots are not units.
 				const fu = p.battle.filter(c => c.type.indexOf("UNIT") > -1)
@@ -723,10 +823,6 @@
 					target.traits_eot.push("First Strike")
 					return true
 				}
-				if (t.indexOf("During this battle, your shield area cards can't receive damage from enemy Units that are Lv.4 or lower.") > -1) {
-					p.traits_eot.push("unit.enemy.lv4- nodmg ShieldArea")
-					return true
-				}
 				if (t.indexOf("Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.") > -1) {
 					const target = fu.toSorted(c => -c.ap)[0]
 					if (!target) return false
@@ -734,39 +830,65 @@
 					target.traits_eot.push("enemy.unit.lv2- nodmg")
 					return true
 				}
+
+				if (t === "If you have 3 or more (League Militaire) Units in play, draw 1.") {
+					if (fu.filter(c => c.traits.includes("League Militaire")).length < 3) return false
+					p.draw(1)
+					return true
+				}
+				if (t.indexOf("If this is a (League Militaire) Unit, deploy 1 [Parts]((League Militaire)･AP1･HP1･This Unit can't choose the enemy player as its attack target) Unit token.") > -1) {
+					if (!card.unit.traits.includes("League Militaire")) return false
+					p.battle.push(p.getToken("Parts"))
+					return true
+				}
+				if (t.indexOf("If you have no (Earth Alliance) Unit tokens in play,") > -1) {
+					if (fu.filter(c => c.type.indexOf("TOKEN") > -1 && c.traits.includes("Earth Alliance"))) return false
+					const weakest = p.battle.toSorted(c => c.ap)
+					if (weakest.length >= 6) destroy(weakest[0])
+					if (t.indexOf("deploy 1 [Sword Strike Gundam]((Earth Alliance)･AP4･HP2･<Blocker>) or 1 [Launcher Strike Gundam]((Earth Alliance)･AP2･HP4･<Blocker>) Unit token.") > -1) {
+						p.battle.push(p.getToken("Sword Strike Gundam"))
+						return true
+					}
+					if (t.indexOf("deploy 1 [Aile Strike Gundam]((Earth Alliance)･AP3･HP3･<Blocker>) Unit token.") > -1) {
+						p.battle.push(p.getToken("Aile Strike Gundam"))
+						return true
+					}
+				}
 			} else {
 				// log(`No friendly ${card.owner.name} unit`)
-			}
-			if (t.indexOf("If you have no (Earth Alliance) Unit tokens in play, deploy 1 [Sword Strike Gundam]((Earth Alliance)･AP4･HP2･<Blocker>) or 1 [Launcher Strike Gundam]((Earth Alliance)･AP2･HP4･<Blocker>) Unit token.") > -1 && !p.battle.filter(c => c.type.indexOf("TOKEN") > -1 && c.traits.includes("(Earth Alliance)"))) {
-				if (p.battle.length >= 6) return false
-				p.battle.push(p.getToken("Sword Strike Gundam"))
-				return true
 			}
 
 			const en = (p == p1 ? p2 : p1)
 			if (en.battle.length < 1) return false
 			const eu = en.battle.filter(c => c.type.indexOf("UNIT") > -1)
+			if (t == "All enemy Units get AP-1 during this turn.") {
+				eu.forEach(item => item.ap_eot -= 1)
+				return true
+			}
 			if (t.indexOf("Choose 1 enemy Unit. Deal 2 damage to it.") > -1) {
 				const target = eu.toSorted(c => -c.hp)[0]
-				if (!target) return false
-				log("🎯Chose " + target)
-				target.damage += 2
-				if (target.damage >= target.getHP()) await destroy(target)
-				return true
+				return dealDamage(card, target, 2)
 			}
 			if (t.indexOf("Choose 1 rested enemy Unit. Deal 1 damage to it.") > -1) {
 				const target = eu.filter(c => c.rested).toSorted(c => -c.hp)[0]
-				if (!target) return false
-				log("🎯Chose " + target)
-				target.damage += 1
-				if (target.damage >= target.getHP()) await destroy(target)
-				return true
+				return dealDamage(card, target, 1)
 			}
 			if (t.indexOf("Choose 1 enemy Unit. It gets AP-3 during this turn.") > -1) {
 				const target = eu.toSorted(c => -c.ap)[0]
 				if (!target) return false
 				log("🎯Chose " + target)
 				target.ap_eot -= 3
+				return true
+			}
+			if (t == "If this Unit has 5 or more AP, choose 1 enemy Unit that is Lv.5 or higher. Deal 3 damage to it.") {
+				if (card.getAP() < 5) return false
+				const target = eu.filter(c => c.getHP() <= 3).toSorted(c => -c.ap)[0]
+				return dealDamage(card, target, 3)
+			}
+			if (t == " deal 1 damage to all enemy Units that are Lv.3 or lower.") {
+				const targets = eu.filter(c => c.level <= 3)
+				if (!targets) return false
+				targets.forEach(target => dealDamage(card, target, 1))
 				return true
 			}
 			if (t.indexOf("Choose 1 enemy Unit with 3 or less HP. Return it to its owner's hand.") > -1) {
@@ -776,15 +898,22 @@
 				bounce(target)
 				return true
 			}
-			if (t.indexOf("Choose 1 enemy Unit with 5 or less HP. Rest it.") > -1) {
-				const target = eu.filter(c => c.getHP() <= 5).toSorted(c => -c.ap)[0]
+			mo = t.match(/Choose 1 enemy Unit with (\d) or less HP. Rest it./)
+			if (mo) {
+				const target = eu.filter(c => c.getHP() <= mo[1]).toSorted(c => -c.ap)[0]
 				if (!target) return false
 				log("🎯Chose " + target)
 				rest(target)
 				return true
 			}
-			if (p.battle.length < 1 && t.indexOf("friendly") > -1 || t.indexOf("of your") > -1) return false
-			log("🚩🚩Not implemented " + card.type + " " + card.id + ' "' + escapeHTML(t) + '". p battle length: ' + p.battle.length)
+			if (t == "During this turn, this Unit may choose an active enemy Unit that is Lv.5 or lower as its attack target.") {
+				card.traits_eot.push = "canAttackActiveUnitLv5-"
+				return true
+			}
+
+			if ((p.battle.length < 1 && t.match("you have no .*? in play,") || t.indexOf("friendly") > -1 || t.indexOf("of your") > -1)
+				|| (eu.length < 1 && t.indexOf("enemy Unit") > -1)) return false
+			log(`🚩🚩Not implemented ${card.type} ${card.id} ${act}${clause} "${escapeHTML(t)}". p battle length: ${p.battle.length}`)
 			return false
 		}
 
@@ -799,7 +928,7 @@
 				window.p2 = p2
 
 				let p = p1
-				p2.resource.push(p2.getCard("EXRP-002"))
+				p2.resource.push(p2.getCard(rndPick(EX_RESOURCES)))
 
 				render()
 				while (true) {
@@ -813,24 +942,25 @@
 						if (c.rested) activate(c)
 						c.sick = false
 					}
-					await sleep(500)
+					await sleep(1000)
 
 					// Draw card
 					try {
 						p.draw()
+						render()
 					} catch (ex) {
 						log(ex)
 						break
 					}
 
 					// Place resource
-					let level = p.resource.length
-					if (level < 10 + (p == p2 ? 1 : 0)) {
-						p.resource.push(p.getCard("R-009"))
-						// TODO: pull from resource deck
+					let r = p.resource_deck.pop()
+					if (r) {
+						p.resource.push(r)
 						render()
-						++level
+						await sleep(1500)
 					}
+					let level = p.resource.length
 
 					// Main phase
 					log("🎚️" + p.name + " level " + level)
@@ -846,37 +976,62 @@
 							const units = p.battle.filter(bc => bc.type == "UNIT")
 							if (units.length >= 6) continue
 
+							await sleep(500)
+							// ensure cards have HTML elements
+							render()
+
 							// log("Playable " + c.name)
-							for (const r of p.resource) {
+							for (const r of p.resource.toSorted(c2 => c2.name.indexOf("EX"))) {
 								if (!r.rested) {
 									rest(r)
+									if (r.name.indexOf("EX") > -1) {
+										p.resource = p.resource.filter(item => item != r)
+										// Wait for rest animation and show gone.
+										await sleep(300)
+										render()
+									}
 									paid += 1
 									if (paid >= c.cost) {
 										p.hand = p.hand.filter(item => item !== c)
 										if (c.type == "COMMAND") {
-											if (await run(c) === true) {
-												log("⚡Execute " + c)
+											// Do pilot part of command 1/3 of the time.
+											if ((!c.text.indexOf("【Pilot】") > -1 || rnd(1, 3) > 1) && await run(c) === true) {
+												log("⚡Executed " + c.toString(true) + ": " + escapeHTML(c.text))
 												p.trash.push(c)
 												render()
+												break
 											} else {
+												// No useful target, so don't play this.
+												// TODO check targets before using EX Resources
+												for (let i = 0; i < c.cost && i < p.resource.length; ++i) {
+													activate(p.resource[i])
+												}
 												p.hand.push(c)
+												// Don't break because this card might be a pilot as well.
 											}
-										} else if (c.type == "BASE") {
-											log("🟨Place " + c)
+										}
+										if (c.type == "BASE") {
+											log("🟨Deployed base " + c)
 											p.base = c
 											render()
+											await run(c, "Deploy")
 										} else if (c.type == "UNIT") {
-											log("🚀Deploy " + c)
+											log("🚀Deployed unit " + c)
 											p.battle.push(c)
 											c.sick = true
 											render()
-										} else if (c.type == "PILOT" && empty_units.length > 0) {
-											log("🧑‍✈️Pair " + c + " with " + empty_units[0])
+											await run(c, "Deploy")
+										} else if (empty_units.length > 0 && (c.type == "PILOT" || c.text.indexOf("【Pilot】") > -1)) {
+											log("🧑‍✈️Paired " + c + " with " + empty_units[0])
 											empty_units[0].pilot = c
-											// TODO: Link
-											empty_units[0].sick = false
-											p.battle.push(c)
+											c.unit = empty_units[0]
 											render()
+											await run(c, "When Paired")
+											if (c.unit.link && linksWith(c.unit, c)) {
+												log("🔗Linked")
+												empty_units[0].sick = false
+												await run(c, "When Linked")
+											}
 											empty_units = p.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
 										}
 										break
@@ -887,14 +1042,20 @@
 					}
 					// attack
 					while (true) {
-						const can_attack = p.battle.filter(bc => bc.type == "UNIT" && bc.rested == false && bc.sick == false)
+						const can_attack = p.battle.filter(bc => bc.type == "UNIT" && bc.rested == false && bc.sick == false).toSorted(bc => bc.ap)
 						if (can_attack.length < 1) break
 						const att = can_attack[0]
 						rest(att)
+						await sleep(500)
 						const enemy = p === p1 ? p2 : p1
+						await run(att, "Attack")
 						let breach = 0
 						// Battle Area
-						const prone = enemy.battle.filter(bc => bc.type == "UNIT" && bc.rested)
+						let prone = enemy.battle.filter(bc => bc.type == "UNIT" && bc.rested)
+						if (att.traits_eot.includes("canAttackActiveUnitLv5-")) {
+							const extra = enemy.battle.filter(bc => bc.type == "UNIT" && !bc.rested && bc.level <=5)
+							if (extra) prone = extra.concat(prone)
+						}
 						if (prone.length > 0) {
 							const def = prone[0]
 							log("🔫" + att + " attacks " + def)
@@ -908,6 +1069,7 @@
 									breach = parseInt(mo[1])
 								}
 								// TODO: enemy [Detroyed] after breach
+								await run(att, "", "During your turn, when this Unit destroys an enemy Unit with battle damage,")
 							}
 							att.damage += def.getAP()
 							if (att.damage >= att.getHP()) {
@@ -924,17 +1086,21 @@
 								continue
 							}
 							if (enemy.base) {
-								log("🔫" + att + " attacks " + enemy.base)
-								await battle(att, enemy.base)
-								enemy.base.damage += breach ? breach : att.getAP()
-								if (enemy.base.damage >= enemy.base.hp) {
-									await destroy(enemy.base)
+								let target = enemy.base
+								log("🔫" + att + " attacks " + target)
+								await battle(att, target)
+								target.damage += breach ? breach : att.getAP()
+								if (target.damage >= target.hp) {
 									enemy.base = null
+									await destroy(target)
 								}
 							} else {
 								log("🔫" + att + " attacks shield area")
 								await battle(att, enemy.shield[enemy.shield.length-1] || enemy.hand[0] || enemy.resource[0])
 								if (enemy.shield.length < 1) {
+									if (att.text.indexOf("This Unit can't choose the enemy player as its attack target") > -1) {
+										continue
+									}
 									log("💀" + enemy.name + " died from " + att)
 									boom.play().catch(ex => {})
 									await sleep(2000)
@@ -950,6 +1116,7 @@
 									const c = enemy.shield.pop()
 									if (!c) break
 									log("💥Broke shield " + c)
+									activate(c)
 									boom.play().catch(ex => {})
 									const mo = /Burst】([^.]+)/.exec(c.text)
 									let toTrash = true
@@ -974,9 +1141,9 @@
 						c.traits_eot = []
 					}
 					p.traits_eot = []
+					await sleep(400)
 					render()
 					// log(structuredClone(p))  // clone to keep current lists state
-					await sleep(2000)
 					p = p == p1 ? p2 : p1
 				}
 			})() /* .catch(error => {
