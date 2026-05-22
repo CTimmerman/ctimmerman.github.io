@@ -99,19 +99,19 @@
 
 		function escapeHTML(unsafe) {
 			return unsafe
-			.replaceAll("&", "&amp;")
-			.replaceAll("<", "&lt;")
-			.replaceAll(">", "&gt;")
-			.replaceAll('"', "&quot;")
-			.replaceAll("'", "&#039;")
+				.replaceAll("&", "&amp;")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				.replaceAll('"', "&quot;")
+				.replaceAll("'", "&#039;")
 		}
 		function unescapeHTML(unsafe) {
 			return unsafe
-			.replaceAll("&amp;", "&")
-			.replaceAll("&lt;", "<")
-			.replaceAll("&gt;", ">")
-			.replaceAll("&quot;", '"')
-			.replaceAll("&#039;", "'")
+				.replaceAll("&amp;", "&")
+				.replaceAll("&lt;", "<")
+				.replaceAll("&gt;", ">")
+				.replaceAll("&quot;", '"')
+				.replaceAll("&#039;", "'")
 		}
 
 		function bounce(card) {
@@ -135,7 +135,7 @@
 			card.owner.trash.push(card)
 			card.owner.battle = card.owner.battle.filter(bc => bc != card && bc != card.pilot)
 			render()
-			boom.play().catch(ex => {})
+			boom.play().catch(ex => { })
 			await sleep(900)
 		}
 
@@ -151,7 +151,7 @@
 			card.rested = false
 			try {
 				getel(card).classList.remove("rested")
-			} catch(ex) {
+			} catch (ex) {
 				log("🚩🚩ERR " + ex + " " + card)
 			}
 			if (card.pilot) {
@@ -195,7 +195,7 @@
 					<animate attributeName="stroke-width" values="4px;8px;4px;" dur="0.2s" repeatCount="indefinite"/>
 				</line>
 			</svg>`
-			pewpew.play().catch(ex => {})
+			pewpew.play().catch(ex => { })
 			// vfx
 			await sleep(400)
 			overlay.style.zIndex = 0
@@ -277,7 +277,7 @@
 				// }
 				this.type = type || ""
 				this.name = name || ""
-				this.text = unescapeHTML(text) || ""
+				this.text = unescapeHTML(text || "")
 				this.zones = zones || []
 				this.traits = traits || []  // new for each, unlike in Python
 				this.traits_eot = []
@@ -314,17 +314,13 @@
 				}
 				return rv
 			}
-			toString(simple=false) {
+			toString(simple = false) {
+				if (this.type == "COMMAND" && this.unit) return getSectionText(this, "Pilot").slice(1, -1) + (simple ? "" : ` ${this.cid} ${this.getAP()}/${this.getHP()}`)
+				if (this.type == "PILOT" && simple) return this.name
 				let pilot_name = ""
-				if (this.pilot) {
-					if(this.pilot.type == "COMMAND") {
-						pilot_name = getSectionText(this, "Pilot")
-					} else {
-						pilot_name = this.pilot.name
-					}
-				}
-				if (simple) return this.name + (pilot_name? " + " + pilot_name : "")
-				return `${this.name} ${this.cid}${pilot_name? " + " + pilot_name : ""} ${this.getAP()}/${this.getHP()}-${this.damage}`
+				if (this.pilot) pilot_name = this.pilot.toString(true)
+				if (simple) return `${this.name}${pilot_name ? " + " + pilot_name : ""}`
+				return `${this.name} ${this.cid}${pilot_name ? " + " + pilot_name : ""} ${this.getAP()}/${this.getHP()}${this.damage ? -this.damage : ""}`
 			}
 			toDict() {
 				return {
@@ -510,7 +506,7 @@
 				}
 			}
 
-			discard(number=1) {
+			discard(number = 1) {
 				for (let i = 0; i < number; ++i) {
 					const c = this.hand[Math.floor(Math.random() * this.hand.length)]
 					if (!c) return
@@ -528,6 +524,35 @@
 					throw Error(msg)
 				}
 				const rv = Card.fromDict(d)
+				// DeckPlanet bug workarounds
+				if (rv.id == "ST02-009") {
+					rv.color = "BLUE"
+					rv.cost = 1
+				}
+				if (rv.id == "ST04-004_PR") {
+					rv.color = "WHITE"
+					rv.cost = 1
+				}
+				if (rv.id == "ST05-003") {
+					rv.color = "PURPLE"
+					rv.cost = 1
+				}
+				if (rv.id == "ST05-003_PR") {
+					rv.color = "PURPLE"
+					rv.cost = 1
+				}
+				if (rv.id == "ST06-012") {
+					rv.color = "GREEN"
+					rv.cost = 1
+				}
+				if (rv.id == "ST06-012_PR") {
+					rv.color = "GREEN"
+					rv.cost = 1
+				}
+				if (rv.id == "ST03-010") {
+					rv.ap = 2
+					rv.hp = 2
+				}
 				cid += 1
 				rv.cid = cid
 				rv.owner = this
@@ -673,10 +698,10 @@
 						x = 0
 						y += 0.9
 					}
-					left = 16.3 + x * 16.7
+					left = 18 + x * 17
 					top = 17 + y * 16.4
 					if (p == p2) {
-						left += 7
+						left += 5
 						top += 33
 					}
 					if (c.pilot) {
@@ -698,7 +723,7 @@
 			battlefield.innerHTML = html
 		}
 
-		async function dealDamage(source, target, amount=1, chosen=false) {
+		async function dealDamage(source, target, amount = 1, chosen = false) {
 			if (!target) return false
 			if (chosen) log(`🎯${source} deals ${amount} damage to ${target}`)
 			target.damage += amount
@@ -706,8 +731,8 @@
 			return true
 		}
 
-		function getSectionText(card, act="Main", clause="") {
-			const rex = new RegExp("(.*?)" + (clause? clause : (act + "】")) + "([^.].+?)(<br|$)")
+		function getSectionText(card, act = "Main", clause = "") {
+			const rex = new RegExp("(.*?)" + (clause ? clause : (act + "】")) + "([^.].+?)(<br|$)")
 			const mo = card.text.match(rex)
 			if (!mo) return ""
 			const limits = mo[1]
@@ -716,7 +741,7 @@
 			if (limits.indexOf("During Pair") > -1 && !card.pilot) return ""
 			return text
 		}
-		async function run(card, act="Main", clause="") {
+		async function run(card, act = "Main", clause = "") {
 			let rv = await runCard(card, act, clause)
 			if (card.pilot) rv = rv || await runCard(card.pilot, act, clause)
 			return rv
@@ -773,11 +798,18 @@
 				p.resource.push(p.getCard(rndPick(EX_RESOURCES)))
 				render()
 				await sleep(500)
-				// TODO: Find & run "When you place an EX Resource," cards.
+				for (const c of c.owner.battle) {
+					run(c, "", "When you place an EX Resource, ")
+				}
 				return true
 			}
 			if (t == "This Unit gets AP+2 during this turn.") {
 				card.ap_eot += 2
+				return true
+			}
+			if (t == "During this turn, this Unit gets AP+1 and, if it is a Link Unit, it gains <High-Maneuver>.") {
+				card.unit.ap_eot += 1
+				if (linksWith(card.unit, card)) card.unit.traits_eot.push("High-Maneuver")
 				return true
 			}
 			if (t == "You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.") {
@@ -863,6 +895,13 @@
 			const eu = en.battle.filter(c => c.type.indexOf("UNIT") > -1)
 			if (t == "All enemy Units get AP-1 during this turn.") {
 				eu.forEach(item => item.ap_eot -= 1)
+				return true
+			}
+			if (t == "Choose 1 enemy Unit. It gets AP-2 during this battle.") {
+				const target = eu.toSorted(c => -c.ap)[0]
+				if (!target) return false
+				log("🎯Chose " + target)
+				target.ap_eot -= 2  // TODO battle instead of turn
 				return true
 			}
 			if (t.indexOf("Choose 1 enemy Unit. Deal 2 damage to it.") > -1) {
@@ -1022,9 +1061,9 @@
 											render()
 											await run(c, "Deploy")
 										} else if (empty_units.length > 0 && (c.type == "PILOT" || c.text.indexOf("【Pilot】") > -1)) {
+											c.unit = empty_units[0]
 											log("🧑‍✈️Paired " + c + " with " + empty_units[0])
 											empty_units[0].pilot = c
-											c.unit = empty_units[0]
 											render()
 											await run(c, "When Paired")
 											if (c.unit.link && linksWith(c.unit, c)) {
@@ -1053,7 +1092,7 @@
 						// Battle Area
 						let prone = enemy.battle.filter(bc => bc.type == "UNIT" && bc.rested)
 						if (att.traits_eot.includes("canAttackActiveUnitLv5-")) {
-							const extra = enemy.battle.filter(bc => bc.type == "UNIT" && !bc.rested && bc.level <=5)
+							const extra = enemy.battle.filter(bc => bc.type == "UNIT" && !bc.rested && bc.level <= 5)
 							if (extra) prone = extra.concat(prone)
 						}
 						if (prone.length > 0) {
@@ -1096,13 +1135,13 @@
 								}
 							} else {
 								log("🔫" + att + " attacks shield area")
-								await battle(att, enemy.shield[enemy.shield.length-1] || enemy.hand[0] || enemy.resource[0])
+								await battle(att, enemy.shield[enemy.shield.length - 1] || enemy.hand[0] || enemy.resource[0])
 								if (enemy.shield.length < 1) {
 									if (att.text.indexOf("This Unit can't choose the enemy player as its attack target") > -1) {
 										continue
 									}
 									log("💀" + enemy.name + " died from " + att)
-									boom.play().catch(ex => {})
+									boom.play().catch(ex => { })
 									await sleep(2000)
 									game_over = true
 									render()
@@ -1117,7 +1156,7 @@
 									if (!c) break
 									log("💥Broke shield " + c)
 									activate(c)
-									boom.play().catch(ex => {})
+									boom.play().catch(ex => { })
 									const mo = /Burst】([^.]+)/.exec(c.text)
 									let toTrash = true
 									if (mo) {
