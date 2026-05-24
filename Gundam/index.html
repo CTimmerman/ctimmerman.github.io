@@ -1207,6 +1207,10 @@
 			if (mo) {
 				const target = fu.filter(c => !c.rested && !c.sick && c.getHP() > 1).toSorted(c => c.ap)[0]
 				if (!target) return false
+				if (t.indexOf("Rest this Unit") > -1) {
+					if (card.rested) return false
+					rest(card)
+				}
 				log("🎯Boosting " + target)
 				dealDamage(card, target)
 				target.ap_eot += mo[1]
@@ -1503,7 +1507,10 @@
 							await doBattle(att, def)
 							continue
 						}
-						if (must_attack_unit) continue
+						if (must_attack_unit) {
+							att.sick = true  // avoid loop
+							continue
+						}
 
 						// Shield Area
 						if (att.level <= 4 && enemy.traits_eot.some(txt => txt.match(new RegExp(`unit.enemy.lv[${att.level}-9] nodmg ShieldArea`)))) {
