@@ -305,12 +305,10 @@
 			pilot.unit = unit
 			await render()
 			await run(unit, "When Paired")
-			await run(pilot, "When Paired")
 			if (unit.link && linksWith(unit, pilot)) {
 				log("🔗Link")
 				unit.sick = false
 				await run(unit, "When Linked")
-				await run(pilot, "When Linked")
 			}
 		}
 
@@ -361,6 +359,9 @@
 			}
 			getAP() {
 				let rv = this.ap + this.ap_eot
+				if (this.damage > 0 && this.text.indexOf("While this Unit is damaged, it gets AP+2.") > -1) {
+					rv += 2
+				}
 				if (this.pilot) {
 					rv += this.pilot.ap
 					if (linksWith(this, this.pilot)) {
@@ -369,6 +370,10 @@
 						}
 					}
 				}
+				if (this.text.indexOf("While you have another (Triple Ship Alliance) Unit in play, this Unit gets AP+1 and <Blocker>.") > -1) {
+					if (this.owner.battle.filter(c => c.hasTrait("Triple Ship Alliance")).length > 1) rv += 1
+				}
+
 				return rv
 			}
 			getHP() {
@@ -422,82 +427,112 @@
 			hasTrait(trait) {
 				if (trait == "protection.enemy.units" && this.facedown && this.owner.battle.filter(c => c.rested && c.text.indexOf("While this Unit is rested, friendly Shields can't receive battle damage from enemy Units.") > -1).length) return true
 
-				if (trait == "Blocker" && this.owner.battle.filter(c => c.rested && c.text.indexOf("While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.") > -1).length && this.traits.concat(this.traits_eot).includes("League Militaire")) return true
+				if (trait == "Blocker") {
+					if (this.text.indexOf("While you have another (Triple Ship Alliance) Unit in play, this Unit gets AP+1 and <Blocker>.") > -1) {
+						if (this.owner.battle.filter(c => c.hasTrait("Triple Ship Alliance")).length > 1) return true
+					}
+
+					if(this.owner.battle.filter(c => c.rested && c.text.indexOf("While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.") > -1).length && this.traits.concat(this.traits_eot).includes("League Militaire")) return true
+				}
+
+				if (trait == "Suppression") {
+					if (this.text.indexOf("While this is damaged, it gains <Suppression>.") > -1) return this.damage > 0
+					const mo = /Suppression/.exec(this.text)
+					if (mo) return true
+				}
 
 				return this.traits.concat(this.traits_eot).includes(trait)
 			}
 		}
 
 		const decks = [
-			// 			`# ST01 - Heroic Beginnings
-			// 2 ST01-001 Gundam
-			// 4 ST01-002 Gundam (MA Form)
-			// 4 ST01-003 Guncannon
-			// 3 ST01-004 Guntank
-			// 3 ST01-005 GM
-			// 2 ST01-006 Gundam Aerial (Permet Score Six)
-			// 4 ST01-007 Gundam Aerial (Bit on Form)
-			// 3 ST01-008 Demi Trainer
-			// 3 ST01-009 Zowort
-			// 4 ST01-010 Amuro Ray
-			// 4 ST01-011 Suletta Mercury
-			// 3 ST01-012 Thoroughly Damaged
-			// 3 ST01-013 Kai's Resolve
-			// 2 ST01-014 Unforeseen Incident
-			// 3 ST01-015 White Base
-			// 3 ST01-016 Asticassia School of Technology, Earth House
-			// `,
-			// 			`# ST02 - Wings of Advance
-			// 2 ST02-001 Wing Gundam
-			// 4 ST02-002 Wing Gundam (Bird Mode)
-			// 4 ST02-003 Gundam Heavyarms
-			// 3 ST02-004 Gundam Sandrock
-			// 3 ST02-005 Maganac
-			// 2 ST02-006 Tallgeese
-			// 4 ST02-007 Leo
-			// 3 ST02-008 Aries
-			// 3 ST02-009 Tragos
-			// 4 ST02-010 Heero Yuy
-			// 4 ST02-011 Zechs Merquise
-			// 3 ST02-012 Simultaneous Fire
-			// 3 ST02-013 Peaceful Timbre
-			// 2 ST02-014 Siege Ploy
-			// 3 ST02-015 Saint Gabriel Institute
-			// 3 ST02-016 Corsica Base`,
-			// 			`# ST03 - Zeon's Rush
-			// 2 ST03-001 Sinanju
-			// 4 ST03-002 Angelo's Geara Zulu
-			// 4 ST03-003 Geara Zulu
-			// 3 ST03-004 Gaza D (Sleeves)
-			// 3 ST03-005 Dra-C (Sleeves)
-			// 2 ST03-006 Char's Zaku Ⅱ
-			// 3 ST03-007 Zaku Ⅰ
-			// 4 ST03-008 Zaku Ⅱ
-			// 3 ST03-009 Gouf
-			// 4 ST03-010 Full Frontal
-			// 4 ST03-011 Char Aznable
-			// 3 ST03-012 Indignation
-			// 3 ST03-013 Close Combat
-			// 2 ST03-014 The Blue Giant
-			// 3 ST03-015 Rewloola
-			// 3 ST03-016 Falmel`,
-			// 			`# ST04 - SEED Strike
-			// 2 ST04-001 Aile Strike Gundam
-			// 4 ST04-002 Strike Gundam
-			// 4 ST04-003 Moebius Zero
-			// 3 ST04-004 Moebius
-			// 3 ST04-005 Strike Dagger
-			// 2 ST04-006 Aegis Gundam
-			// 4 ST04-007 Aegis Gundam (MA Mode)
-			// 3 ST04-008 Ginn
-			// 3 ST04-009 Miguel's Ginn
-			// 4 ST04-010 Kira Yamato
-			// 4 ST04-011 Athrun Zala
-			// 3 ST04-012 Striker Pack
-			// 3 ST04-013 Hawk of Endymion
-			// 2 ST04-014 The Magic Bullet of Dusk
-			// 3 ST04-015 Archangel
-			// 3 ST04-016 Vesalius`,
+			`# Heroic Beginnings [ST01]
+2 ST01-001 Gundam
+4 ST01-002 Gundam (MA Form)
+4 ST01-003 Guncannon
+3 ST01-004 Guntank
+3 ST01-005 GM
+2 ST01-006 Gundam Aerial (Permet Score Six)
+4 ST01-007 Gundam Aerial (Bit on Form)
+3 ST01-008 Demi Trainer
+3 ST01-009 Zowort
+4 ST01-010 Amuro Ray
+4 ST01-011 Suletta Mercury
+3 ST01-012 Thoroughly Damaged
+3 ST01-013 Kai's Resolve
+2 ST01-014 Unforeseen Incident
+3 ST01-015 White Base
+3 ST01-016 Asticassia School of Technology, Earth House
+`,
+			`# Wings of Advance [ST02]
+2 ST02-001 Wing Gundam
+4 ST02-002 Wing Gundam (Bird Mode)
+4 ST02-003 Gundam Heavyarms
+3 ST02-004 Gundam Sandrock
+3 ST02-005 Maganac
+2 ST02-006 Tallgeese
+4 ST02-007 Leo
+3 ST02-008 Aries
+3 ST02-009 Tragos
+4 ST02-010 Heero Yuy
+4 ST02-011 Zechs Merquise
+3 ST02-012 Simultaneous Fire
+3 ST02-013 Peaceful Timbre
+2 ST02-014 Siege Ploy
+3 ST02-015 Saint Gabriel Institute
+3 ST02-016 Corsica Base`,
+			`# Zeon's Rush [ST03]
+2 ST03-001 Sinanju
+4 ST03-002 Angelo's Geara Zulu
+4 ST03-003 Geara Zulu
+3 ST03-004 Gaza D (Sleeves)
+3 ST03-005 Dra-C (Sleeves)
+2 ST03-006 Char's Zaku Ⅱ
+3 ST03-007 Zaku Ⅰ
+4 ST03-008 Zaku Ⅱ
+3 ST03-009 Gouf
+4 ST03-010 Full Frontal
+4 ST03-011 Char Aznable
+3 ST03-012 Indignation
+3 ST03-013 Close Combat
+2 ST03-014 The Blue Giant
+3 ST03-015 Rewloola
+3 ST03-016 Falmel`,
+			`# SEED Strike [ST04]
+2 ST04-001 Aile Strike Gundam
+4 ST04-002 Strike Gundam
+4 ST04-003 Moebius Zero
+3 ST04-004 Moebius
+3 ST04-005 Strike Dagger
+2 ST04-006 Aegis Gundam
+4 ST04-007 Aegis Gundam (MA Mode)
+3 ST04-008 Ginn
+3 ST04-009 Miguel's Ginn
+4 ST04-010 Kira Yamato
+4 ST04-011 Athrun Zala
+3 ST04-012 Striker Pack
+3 ST04-013 Hawk of Endymion
+2 ST04-014 The Magic Bullet of Dusk
+3 ST04-015 Archangel
+3 ST04-016 Vesalius`,
+			`# Iron Bloom [ST05]
+2 ST01-014 Unforeseen Incident
+2 ST05-001 Gundam Barbatos 4th Form
+4 ST05-002 Gundam Barbatos 2nd Form
+4 ST05-003 CGS Mobile Worker
+4 ST05-004 Graze Custom
+4 ST05-005 Gundam Gusion Rebake
+3 ST05-006 Hyakuren
+2 ST05-007 McGillis' Schwalbe Graze
+4 ST05-008 Graze Commander Type
+3 ST05-009 Graze
+4 ST05-010 Mikazuki Augus
+3 ST05-011 Akihiro Altland
+3 ST05-012 McGillis Fareed
+2 ST05-013 With Iron and Blood
+2 ST05-014 Fatal Strike
+4 ST05-015 Isaribi
+`,
 			`# Top deck
 4 GD04-016
 2 GD04-077
@@ -515,7 +550,7 @@
 4 ST01-010
 3 GD04-098
 4 GD04-081`,
-`# Cees's Green Zeon deck
+			`# Cees's Green Zeon deck
 4 ST03-008
 4 ST03-009
 1 ST03-014
@@ -532,7 +567,7 @@
 2 GD03-107  # too few?
 1 GD03-126
 `
-]
+		]
 
 		// card id on the battlefield, link to render element
 		let cid = 0
@@ -557,6 +592,7 @@
 				this.deck = []
 				this.fulldeck = []
 				const lines = decks[rnd(0, decks.length - 1)].split("\n")
+				// const lines = decks[4].split("\n")
 				for (const line of lines) {
 					if (line.indexOf("# ") == 0) log(`🎴${name} deck: <a href="#" onclick="showDeck(p${this.pid})">${line.slice(2)}</a>`)
 					const [count, id] = line.split(" ")
@@ -604,7 +640,7 @@
 					const weakest = this.battle.toSorted(c => c.ap)[0]
 					await destroy(weakest)
 				}
-				log(`🚀Deploy ${card.rested ? "rested" : ""} ${card}`)
+				log(`🚀Deploy ${card.rested ? "rested " : ""}${card}`)
 				card.sick = true
 				this.battle.push(card)
 			}
@@ -994,6 +1030,7 @@
 				return true
 			}
 			if (t == "Rest this Base：All friendly Link Units get AP+1 during this turn.") {
+				if (card.rested) return false
 				const targets = fu.filter(c => !c.rested && !c.sick && c.pilot && linksWith(c, c.pilot))
 				if (targets.length < 1) return false
 				rest(card)
@@ -1004,11 +1041,21 @@
 				return true
 			}
 			if (t == "Rest this Base：Choose 1 friendly Unit. It gets AP+1 during this turn.") {
+				if (card.rested) return false
 				const target = fu.filter(c => !c.rested && !c.sick)[0]
 				if (!target) return false
 				rest(card)
 				log("🎯" + card + " AP+1 " + target)
 				target.ap_eot += 1
+				return true
+			}
+			if (t == "Rest this Base：Choose 1 of your damaged Units. It gets AP+2 during this turn.") {
+				if (card.rested) return false
+				const target = fu.filter(c => c.damage > 0 && !c.rested && !c.sick)[0]
+				if (!target) return false
+				rest(card)
+				log("🎯" + card + " AP+2 " + target)
+				target.ap_eot += 2
 				return true
 			}
 			if (t == "【Once per Turn】②：Deploy 1 [Gundam]((White Base Team)･AP3･HP3) Unit token if you have no Units in play, deploy 1 [Guncannon]((White Base Team)･AP2･HP2) Unit token if you have only 1 Unit in play, or deploy 1 [Guntank]((White Base Team)･AP1･HP1) Unit token if you have 2 or more Units in play.") {
@@ -1155,6 +1202,25 @@
 				target.traits_eot.push("First Strike")
 				return true
 			}
+			// ST05-03 & ST05-013
+			mo = t.match(/Choose 1 of your Units. Deal 1 damage to it. It gets AP\+(\d) during this turn.$/)
+			if (mo) {
+				const target = fu.filter(c => !c.rested && !c.sick && c.getHP() > 1).toSorted(c => c.ap)[0]
+				if (!target) return false
+				log("🎯Boosting " + target)
+				dealDamage(card, target)
+				target.ap_eot += mo[1]
+				return true
+			}
+			// ST05-001
+			if (t == "Choose 1 of your other Units. Deal 1 damage to it. It gets AP+1 during this turn.") {
+				const target = fu.filter(c => !c.rested && !c.sick && c.getHP() > 1).toSorted(c => c.ap)[0]
+				if (!target) return false
+				log("🎯Boosting " + target)
+				dealDamage(card, target)
+				target.ap_eot += 1
+				return true
+			}
 			if (t.indexOf("Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.") > -1) {
 				const target = fu.toSorted(c => -c.ap)[0]
 				const enemies = eu.filter(c => c.getAP() <= 2)
@@ -1177,6 +1243,12 @@
 			if (t.indexOf("Deploy 1 [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.") > -1) {
 				if (fu.length >= 6) return false
 				p.addToBattle(p.getToken("Hy-Gogg"))
+				return true
+			}
+			if (t == "Choose 1 enemy Unit that is Lv.3 or lower. Destroy it.") {
+				const target = eu.filter(c => c.level <= 3)[0]
+				if (!target) return false
+				await destroy(target)
 				return true
 			}
 			if (t == "Choose 1 enemy Unit that is Lv.5 or lower. Deal damage to it equal to the number of friendly Unit tokens in play.") {
@@ -1240,6 +1312,14 @@
 				if (!target) return false
 				log("🎯Bouncing " + target)
 				bounce(target)
+				return true
+			}
+			mo = t.match(/Choose 1 enemy Unit with (\d) or less AP. Rest it./)
+			if (mo) {
+				const target = eu.filter(c => c.getAP() <= mo[1]).toSorted(c => -c.ap)[0]
+				if (!target) return false
+				log("🎯Resting " + target + " by " + card)
+				rest(target)
 				return true
 			}
 			mo = t.match(/Choose 1 enemy Unit with (\d) or less HP. Rest it./)
@@ -1455,7 +1535,7 @@
 								}
 								rest(att)
 								await battle(att, enemy.hand[0] || enemy.resource[0])
-								log("💀" + enemy.name + " died from " + att)
+								log("💀" + enemy.name + " kill by " + att)
 								boom.play().catch(ex => { })
 								await sleep(2000)
 								game_over = true
@@ -1465,11 +1545,11 @@
 							if (enemy.shield.slice(-1)[0].hasTrait("protection.enemy.units")) continue
 							rest(att)
 							await battle(att, enemy.shield.slice(-1)[0])
-							const mo = /Suppression/.exec(att.text)
-							if (mo) {
-								log("Suppression")
+							let sup = att.hasTrait("Suppression")
+							if (sup) {
+								log("❌Suppression")
 							}
-							for (let i = 0; i < (mo ? 2 : 1); ++i) {
+							for (let i = 0; i < (sup ? 2 : 1); ++i) {
 								const c = enemy.shield.pop()
 								if (!c) break
 								log("💥Broke shield " + c)
