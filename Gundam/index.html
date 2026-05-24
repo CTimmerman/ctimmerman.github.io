@@ -47,21 +47,24 @@
 		}
 
 		#overlay {
+			display: none;
 			position: absolute;
 			font-size: xx-large;
 			z-index: 9000;
+			width: 100%;
+			height: 100%;
 		}
 
 		.card {
 			background-size: contain;
 			background-repeat: no-repeat;
 			border: 1px solid brown;
-			border-radius: 1vmin;
+			border-radius: 0.6vmin;
 			color: yellow;
 			cursor: pointer;
 			position: absolute;
 			width: 10vmin;
-			height: 14vmin;
+			height: 13.96vmin;
 			font-size: small;
 			text-align: center;
 			text-shadow: 1px 1px #08080888;
@@ -199,7 +202,7 @@
 			let x2 = parseFloat(sd.left) + 5
 			let y2 = parseFloat(sd.top) + 5
 			// Laser time!
-			overlay.style.zIndex = 9000
+			overlay.style.display = "block"
 			overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
 				<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px" stroke-linecap="round">
 					<animate attributeName="stroke" values="#880;#fff;#880;" dur="0.2s" repeatCount="indefinite"/>
@@ -209,12 +212,50 @@
 			pewpew.play().catch(ex => { })
 			// vfx
 			await sleep(400)
-			overlay.style.zIndex = 0
+			overlay.style.display = "none"
 			// sfx
 			await sleep(200)
 		}
 
+		function showDeck(player) {
+			window.pause = (window.pause || 0) + 1
+			let html = `<div onclick="overlay.style.display = 'none'; window.pause = 0" style="width:100%; height:100%; background-color: #08080888">`
+			overlay.style.display = "block"
+			let deck = player.fulldeck.toSorted(
+				(a, b) => {
+					if (a.type > b.type) return 1
+					if (a.type < b.type) return -1
+					if (a.level > b.level) return 1
+					if (a.level < b.level) return -1
+					if (a.cost > b.cost) return 1
+					if (a.cost < b.cost) return -1
+					if (a.name > b.name) return 1
+					if (a.name < b.name) return -1
+					return 0
+				}
+			)
+			let type = deck[0].type
+			let left = 20
+			let top = 10
+			for (const c of deck) {
+				if (c.type != type) {
+					type = c.type
+					left += 12
+					top = 10
+				}
+				html += c.toHTML(left, top)
+				top += 4
+				if (top > 54) {
+					left += 12
+					top = 10
+				}
+			}
+			overlay.innerHTML = html + "</div>"
+		}
+
 		function zoom(e) {
+			event.preventDefault()
+			event.stopPropagation()
 			if (e.style.transform.indexOf("scale") > -1) {
 				e.style.transform = e.old_transform
 				e.style.zIndex = e.old_zIndex
@@ -377,78 +418,86 @@
 				//return `<div class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);"><div class="rested">${this.type}</div></div>`
 				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.ap_eot ? '<div style="color: red">' + this.ap_eot + " AP</div>" : ""} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}</div>`
 			}
+
+			hasTrait(trait) {
+				if (trait == "protection.enemy.units" && this.facedown && this.owner.battle.filter(c => c.rested && c.text.indexOf("While this Unit is rested, friendly Shields can't receive battle damage from enemy Units.") > -1).length) return true
+
+				if (trait == "Blocker" && this.owner.battle.filter(c => c.rested && c.text.indexOf("While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.") > -1).length && this.traits.concat(this.traits_eot).includes("League Militaire")) return true
+
+				return this.traits.concat(this.traits_eot).includes(trait)
+			}
 		}
 
 		const decks = [
-			`# ST01 - Heroic Beginnings
-2 ST01-001 Gundam
-4 ST01-002 Gundam (MA Form)
-4 ST01-003 Guncannon
-3 ST01-004 Guntank
-3 ST01-005 GM
-2 ST01-006 Gundam Aerial (Permet Score Six)
-4 ST01-007 Gundam Aerial (Bit on Form)
-3 ST01-008 Demi Trainer
-3 ST01-009 Zowort
-4 ST01-010 Amuro Ray
-4 ST01-011 Suletta Mercury
-3 ST01-012 Thoroughly Damaged
-3 ST01-013 Kai's Resolve
-2 ST01-014 Unforeseen Incident
-3 ST01-015 White Base
-3 ST01-016 Asticassia School of Technology, Earth House
-`,
-			`# ST02 - Wings of Advance
-2 ST02-001 Wing Gundam
-4 ST02-002 Wing Gundam (Bird Mode)
-4 ST02-003 Gundam Heavyarms
-3 ST02-004 Gundam Sandrock
-3 ST02-005 Maganac
-2 ST02-006 Tallgeese
-4 ST02-007 Leo
-3 ST02-008 Aries
-3 ST02-009 Tragos
-4 ST02-010 Heero Yuy
-4 ST02-011 Zechs Merquise
-3 ST02-012 Simultaneous Fire
-3 ST02-013 Peaceful Timbre
-2 ST02-014 Siege Ploy
-3 ST02-015 Saint Gabriel Institute
-3 ST02-016 Corsica Base`,
-			`# ST03 - Zeon's Rush
-2 ST03-001 Sinanju
-4 ST03-002 Angelo's Geara Zulu
-4 ST03-003 Geara Zulu
-3 ST03-004 Gaza D (Sleeves)
-3 ST03-005 Dra-C (Sleeves)
-2 ST03-006 Char's Zaku Ⅱ
-3 ST03-007 Zaku Ⅰ
-4 ST03-008 Zaku Ⅱ
-3 ST03-009 Gouf
-4 ST03-010 Full Frontal
-4 ST03-011 Char Aznable
-3 ST03-012 Indignation
-3 ST03-013 Close Combat
-2 ST03-014 The Blue Giant
-3 ST03-015 Rewloola
-3 ST03-016 Falmel`,
-			`# ST04 - SEED Strike
-2 ST04-001 Aile Strike Gundam
-4 ST04-002 Strike Gundam
-4 ST04-003 Moebius Zero
-3 ST04-004 Moebius
-3 ST04-005 Strike Dagger
-2 ST04-006 Aegis Gundam
-4 ST04-007 Aegis Gundam (MA Mode)
-3 ST04-008 Ginn
-3 ST04-009 Miguel's Ginn
-4 ST04-010 Kira Yamato
-4 ST04-011 Athrun Zala
-3 ST04-012 Striker Pack
-3 ST04-013 Hawk of Endymion
-2 ST04-014 The Magic Bullet of Dusk
-3 ST04-015 Archangel
-3 ST04-016 Vesalius`,
+			// 			`# ST01 - Heroic Beginnings
+			// 2 ST01-001 Gundam
+			// 4 ST01-002 Gundam (MA Form)
+			// 4 ST01-003 Guncannon
+			// 3 ST01-004 Guntank
+			// 3 ST01-005 GM
+			// 2 ST01-006 Gundam Aerial (Permet Score Six)
+			// 4 ST01-007 Gundam Aerial (Bit on Form)
+			// 3 ST01-008 Demi Trainer
+			// 3 ST01-009 Zowort
+			// 4 ST01-010 Amuro Ray
+			// 4 ST01-011 Suletta Mercury
+			// 3 ST01-012 Thoroughly Damaged
+			// 3 ST01-013 Kai's Resolve
+			// 2 ST01-014 Unforeseen Incident
+			// 3 ST01-015 White Base
+			// 3 ST01-016 Asticassia School of Technology, Earth House
+			// `,
+			// 			`# ST02 - Wings of Advance
+			// 2 ST02-001 Wing Gundam
+			// 4 ST02-002 Wing Gundam (Bird Mode)
+			// 4 ST02-003 Gundam Heavyarms
+			// 3 ST02-004 Gundam Sandrock
+			// 3 ST02-005 Maganac
+			// 2 ST02-006 Tallgeese
+			// 4 ST02-007 Leo
+			// 3 ST02-008 Aries
+			// 3 ST02-009 Tragos
+			// 4 ST02-010 Heero Yuy
+			// 4 ST02-011 Zechs Merquise
+			// 3 ST02-012 Simultaneous Fire
+			// 3 ST02-013 Peaceful Timbre
+			// 2 ST02-014 Siege Ploy
+			// 3 ST02-015 Saint Gabriel Institute
+			// 3 ST02-016 Corsica Base`,
+			// 			`# ST03 - Zeon's Rush
+			// 2 ST03-001 Sinanju
+			// 4 ST03-002 Angelo's Geara Zulu
+			// 4 ST03-003 Geara Zulu
+			// 3 ST03-004 Gaza D (Sleeves)
+			// 3 ST03-005 Dra-C (Sleeves)
+			// 2 ST03-006 Char's Zaku Ⅱ
+			// 3 ST03-007 Zaku Ⅰ
+			// 4 ST03-008 Zaku Ⅱ
+			// 3 ST03-009 Gouf
+			// 4 ST03-010 Full Frontal
+			// 4 ST03-011 Char Aznable
+			// 3 ST03-012 Indignation
+			// 3 ST03-013 Close Combat
+			// 2 ST03-014 The Blue Giant
+			// 3 ST03-015 Rewloola
+			// 3 ST03-016 Falmel`,
+			// 			`# ST04 - SEED Strike
+			// 2 ST04-001 Aile Strike Gundam
+			// 4 ST04-002 Strike Gundam
+			// 4 ST04-003 Moebius Zero
+			// 3 ST04-004 Moebius
+			// 3 ST04-005 Strike Dagger
+			// 2 ST04-006 Aegis Gundam
+			// 4 ST04-007 Aegis Gundam (MA Mode)
+			// 3 ST04-008 Ginn
+			// 3 ST04-009 Miguel's Ginn
+			// 4 ST04-010 Kira Yamato
+			// 4 ST04-011 Athrun Zala
+			// 3 ST04-012 Striker Pack
+			// 3 ST04-013 Hawk of Endymion
+			// 2 ST04-014 The Magic Bullet of Dusk
+			// 3 ST04-015 Archangel
+			// 3 ST04-016 Vesalius`,
 			`# Top deck
 4 GD04-016
 2 GD04-077
@@ -465,7 +514,25 @@
 2 GD01-100
 4 ST01-010
 3 GD04-098
-4 GD04-081`]
+4 GD04-081`,
+`# Cees's Green Zeon deck
+4 ST03-008
+4 ST03-009
+1 ST03-014
+4 GD04-028
+4 GD03-027
+4 GD03-024
+4 ST03-016
+4 GD04-123
+4 GD03-108
+4 GD03-090
+3 GD04-027
+4 GD04-088
+3 GD03-106  # Corsica Base is better
+2 GD03-107  # too few?
+1 GD03-126
+`
+]
 
 		// card id on the battlefield, link to render element
 		let cid = 0
@@ -481,23 +548,28 @@
 			}
 		}
 
+		let pid = 0
 		class Player {
 			constructor(name) {
+				this.pid = ++pid
 				this.name = name
 				this.hand = []
 				this.deck = []
+				this.fulldeck = []
 				const lines = decks[rnd(0, decks.length - 1)].split("\n")
 				for (const line of lines) {
-					if (line.indexOf("# ") == 0) log("🎴" + name + " deck: " + line.slice(2))
+					if (line.indexOf("# ") == 0) log(`🎴${name} deck: <a href="#" onclick="showDeck(p${this.pid})">${line.slice(2)}</a>`)
 					const [count, id] = line.split(" ")
 					if (count >= 1) {
 						for (let i = 0; i < count; ++i) {
 							const c = this.getCard(id)
 							c.owner = this
 							this.deck.push(c)
+							this.fulldeck.push(this.getCard(id))
 						}
 					}
 				}
+				if (this.deck.length != 50) throw Error("Deck length not 50: " + this.deck.length)
 				shuffle(this.deck)
 				// Maybe still useful for fuzzing.
 				// for (let i = 0; i < 50; ++i) {
@@ -532,7 +604,7 @@
 					const weakest = this.battle.toSorted(c => c.ap)[0]
 					await destroy(weakest)
 				}
-				log(`🚀Deploy ${card.rested? "rested" : ""} ${card}`)
+				log(`🚀Deploy ${card.rested ? "rested" : ""} ${card}`)
 				card.sick = true
 				this.battle.push(card)
 			}
@@ -800,7 +872,7 @@
 						if (def.owner.base) {
 							log("➤Breach " + breach)
 							await dealDamage(att, def.owner.base, breach)
-						} else if (def.owner.shield) {
+						} else if (def.owner.shield.length > 0) {
 							log("➤Breach " + breach)
 							await dealDamage(att, def.owner.shield.slice(-1)[0], breach)
 						}
@@ -850,40 +922,16 @@
 			const en = (p == p1 ? p2 : p1)
 			const fu = p.battle
 			const eu = en.battle
-			// BURST abilities
+
+			// Mandatory abilities (not Main/Action)
 			if (t == "Activate this card's 【Main】.") {
 				t = getSectionText(card, "Main")
 			}
-
-			let mo = t.match(/^Deploy 1 rested \[(.+?)\].*?token.$/)
-			if (mo) {
-				const c = p.getToken(mo[1])
-				c.rested = true
-				c.sick = true
-				await p.addToBattle(c)
-				return true
-			}
-			mo = t.match(/^Draw (\d).$/)
-			if (mo) {
-				p.draw(mo[1])
-				return true
-			}
-			mo = t.match(/^Draw (\d). Then, discard (\d).$/)
-			if (mo) {
-				p.draw(mo[1])
-				p.discard(mo[2])
-				return true
-			}
 			if (t == "Deploy this card.") {
-				if (card.type == "BASE") {
-					card.rested = false
-					p.base = card
-					await render()
-					await run(card, "Deploy")
-				}
-				else {
-					log("🚩🚩TODO: Deploy to battle")
-				}
+				card.rested = false
+				p.base = card
+				await render()
+				await run(card, "Deploy")
 				return true
 			}
 			if (t == "Add this card to your hand.") {
@@ -894,105 +942,7 @@
 				p.hand.push(card)
 				return true
 			}
-			if (t == "Place 1 EX Resource.") {
-				// https://www.gundam-gcg.com/en/pdf/comprehensiverules_en.pdf?v#:~:text=You%20may%20have%20up%20to,view%20cards%20in%20this%20location.
-				// TODO: Replace existing rested EX Resource?
-				if (p.resource.filter(item => item.name == "EX Resource").length >= 5) return false
-				p.resource.push(p.getCard(rndPick(EX_RESOURCES)))
-				await render()
-				await sleep(500)
-				for (const c of p.battle) {
-					await run(c, "", "When you place an EX Resource, ")
-				}
-				return true
-			}
-			if (t == "【Once per Turn】Choose 1 of your Resources. Set it as active.") {
-				if (window.once_per_turn.includes(t + card.cid)) return false
-				window.once_per_turn.push(t + card.cid)
-				for (const c of p.resource) {
-					if (c.rested) {
-						activate(c)
-						return true
-					}
-				}
-				return false
-			}
-			if (t == "This Unit gets AP+2 during this turn.") {
-				card.ap_eot += 2
-				return true
-			}
-			if (t == "During this turn, this Unit gets AP+1 and, if it is a Link Unit, it gains <High-Maneuver>.") {
-				card.unit.ap_eot += 1
-				if (linksWith(card.unit, card)) card.unit.traits_eot.push("High-Maneuver")
-				return true
-			}
-			if (t == "You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.") {
-				const target = p.hand.filter(item => item.level <= 4 && item.type == "UNIT" && (item.traits.includes("Neo Zeon") || item.traits.includes("Zeon"))).toSorted(item => -item.cost)[0]
-				if (!target || fu.length >= 6) return false
-				log("🎯Deploying " + target)
-				await p.addToBattle(target)
-				p.hand = p.hand.filter(item => item !== target)
-				return true
-			}
-			if (t.indexOf("During this battle, your shield area cards can't receive damage from enemy Units that are Lv.4 or lower.") > -1) {
-				p.traits_eot.push("unit.enemy.lv4- nodmg ShieldArea")
-				return true
-			}
-			if (t.indexOf("Choose 1 friendly Unit. It recovers 3 HP.") > -1) {
-				const target = fu.filter(c => c.damage > 0).toSorted(c => -c.damage)[0]
-				if (!target) return false
-				if (target.damage < 1) return false
-				log("🎯Healing " + target)
-				target.damage -= 3
-				if (target.damage < 0) target.damage =0
-				return true
-			}
-			if (t.indexOf("Choose 1 friendly Unit. It gets AP+2 during this turn.") > -1) {
-				const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.getAP())[0]
-				if (!target) return false
-				const strongest_enemy = eu.toSorted(c => -c.getHP())[0]
-				const enemy_hp = strongest_enemy && strongest_enemy.getAP() || 0
-				const enemy_base_hp = (en.base && en.base.getHP()) || 0
-				if (Math.max(enemy_hp, enemy_base_hp) <= target.getAP()) return false
-				log("🎯Boosting " + target)
-				target.ap_eot += 2
-				return true
-			}
-			if (t.indexOf("Choose 1 of your Units. It gains <Breach 3> during this turn.") > -1) {
-				const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.ap)[0]
-				if (!target || (en.shield.length < 1 && !en.base)) return false
-				log("🎯Boosting " + target)
-				target.traits_eot.push("Breach 3")
-				return true
-			}
-			if (t.indexOf("Choose 1 friendly Unit that is Lv.2 or lower. It gains <First Strike> during this turn.") > -1) {
-				const target = fu.filter(c => c.level <= 2 && !c.rested && !c.sick).toSorted(c => c.ap)[0]
-				if (!target) return false
-				log("🎯Boosting " + target)
-				target.traits_eot.push("First Strike")
-				return true
-			}
-			if (t.indexOf("Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.") > -1) {
-				const target = fu.toSorted(c => -c.ap)[0]
-				if (!target) return false
-				log("🎯Protecting " + target)
-				target.traits_eot.push("enemy.unit.lv2- nodmg")
-				return true
-			}
-
-			if (t === "If you have 3 or more (League Militaire) Units in play, draw 1.") {
-				if (fu.filter(c => c.traits.includes("League Militaire")).length < 3) return false
-				p.draw(1)
-				return true
-			}
-			if (t.indexOf("If this is a (League Militaire) Unit, deploy 1 [Parts]((League Militaire)･AP1･HP1･This Unit can't choose the enemy player as its attack target) Unit token.") > -1) {
-				if (!card.unit.traits.includes("League Militaire")) return false
-				await p.addToBattle(p.getToken("Parts"))
-				return true
-			}
-
-			// BASE abilities
-			if (card.type == "BASE" && t.indexOf("Add 1 of your Shields to your hand.") == 0) {
+			if (t.indexOf("Add 1 of your Shields to your hand.") == 0) {
 				const target = p.shield.pop()
 				if (target) {
 					log(`🎴${p.name} took shield`)
@@ -1076,15 +1026,166 @@
 			}
 			if (t == "【Once per Turn】②：Choose 1 friendly Unit with <Blocker>. Set it as active. It can't attack during this turn.") {
 				if (window.once_per_turn.includes(t + card.cid)) return false
-				const target = fu.filter(c => c.traits.includes("Blocker") && c.rested)[0]
+				const target = fu.filter(c => c.rested && c.hasTrait("Blocker"))[0]
 				if (!target || !await p.pay(2)) return false
 				window.once_per_turn.push(t + card.cid)
 				activate(target)
 				target.sick = true
 				return true
 			}
+			if (t == "Choose 1 active enemy Unit. It gains <Blocker> during this turn.") {
+				const target = eu.filter(c => !c.rested)[0]
+				const attacker_count = fu.filter(c => !c.rested && !c.sick).length
+				if (!target || attacker_count < 1) return false
+				target.traits_eot.push("Blocker")
+				return false
+			}
+			if (t == "Deploy 1 rested [Zaku Ⅱ]((Zeon)･AP1･HP1) Unit token.") {
+				const c = p.getToken("Zaku Ⅱ")
+				c.rested = true
+				c.sick = true
+				await p.addToBattle(c)
+				return true
+			}
+			if (t == "Choose 1 of your active (League Militaire) Units and 1 enemy Unit that is Lv.3 or lower. Rest them.") {
+				const target = eu.filter(c => c.level <= 3).toSorted(c => -c.ap)[0]
+				if (!target) return false
+				const friend = fu.filter(c => c.traits.includes("League Militaire")).toSorted(c => c.ap)[0]
+				if (!friend) return false
+				rest(friend)
+				rest(target)
+				return true
+			}
+			if (t == "Deploy 1 rested [GQuuuuuuX (Omega Psycommu)]((Clan)･AP3･HP2) Unit token and 1 rested [Red Gundam]((Clan)･AP2･HP3) Unit token.") {
+				if (fu.length >= 6) return false
+				for (const token of ["GQuuuuuuX (Omega Psycommu)", "Red Gundam"]) {
+					const c = p.getToken(token)
+					c.rested = true
+					c.sick = true
+					await p.addToBattle(c)
+				}
+				return true
+			}
+			let mo = t.match(/^Draw (\d).$/)
+			if (mo) {
+				p.draw(mo[1])
+				return true
+			}
+			mo = t.match(/^Draw (\d). Then, discard (\d).$/)
+			if (mo) {
+				p.draw(mo[1])
+				p.discard(mo[2])
+				return true
+			}
+			if (t == "Place 1 EX Resource.") {
+				// https://www.gundam-gcg.com/en/pdf/comprehensiverules_en.pdf?v#:~:text=You%20may%20have%20up%20to,view%20cards%20in%20this%20location.
+				// TODO: Replace existing rested EX Resource?
+				if (p.resource.filter(item => item.name == "EX Resource").length >= 5) return false
+				p.resource.push(p.getCard(rndPick(EX_RESOURCES)))
+				await render()
+				await sleep(500)
+				for (const c of p.battle) {
+					await run(c, "", "When you place an EX Resource, ")
+				}
+				return true
+			}
+			if (t == "【Once per Turn】Choose 1 of your Resources. Set it as active.") {
+				if (window.once_per_turn.includes(t + card.cid)) return false
+				window.once_per_turn.push(t + card.cid)
+				for (const c of p.resource) {
+					if (c.rested) {
+						activate(c)
+						return true
+					}
+				}
+				return false
+			}
+			if (t == "This Unit gets AP+2 during this turn.") {
+				card.ap_eot += 2
+				return true
+			}
+			if (t == "During this turn, this Unit gets AP+1 and, if it is a Link Unit, it gains <High-Maneuver>.") {
+				card.unit.ap_eot += 1
+				if (linksWith(card.unit, card)) card.unit.traits_eot.push("High-Maneuver")
+				return true
+			}
+			if (t == "You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.") {
+				const target = p.hand.filter(item => item.level <= 4 && item.type == "UNIT" && (item.traits.includes("Neo Zeon") || item.traits.includes("Zeon"))).toSorted(item => -item.cost)[0]
+				if (!target || fu.length >= 6) return false
+				log("🎯Deploying " + target)
+				await p.addToBattle(target)
+				p.hand = p.hand.filter(item => item !== target)
+				return true
+			}
+			if (t.indexOf("During this battle, your shield area cards can't receive damage from enemy Units that are Lv.4 or lower.") > -1) {
+				p.traits_eot.push("unit.enemy.lv4- nodmg ShieldArea")
+				return true
+			}
+			if (t.indexOf("Choose 1 friendly Unit. It recovers 3 HP.") > -1) {
+				const target = fu.filter(c => c.damage > 0).toSorted(c => -c.damage)[0]
+				if (!target) return false
+				if (target.damage < 1) return false
+				log("🎯Healing " + target)
+				target.damage -= 3
+				if (target.damage < 0) target.damage = 0
+				return true
+			}
+			if (t.indexOf("Choose 1 friendly Unit. It gets AP+2 during this turn.") > -1) {
+				const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.getAP())[0]
+				if (!target) return false
+				const strongest_enemy = eu.toSorted(c => -c.getHP())[0]
+				const enemy_hp = strongest_enemy && strongest_enemy.getAP() || 0
+				const enemy_base_hp = (en.base && en.base.getHP()) || 0
+				if (Math.max(enemy_hp, enemy_base_hp) <= target.getAP()) return false
+				log("🎯Boosting " + target)
+				target.ap_eot += 2
+				return true
+			}
+			if (t.indexOf("Choose 1 of your Units. It gains <Breach 3> during this turn.") > -1) {
+				const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.ap)[0]
+				if (!target || (en.shield.length < 1 && !en.base)) return false
+				log("🎯Boosting " + target)
+				target.traits_eot.push("Breach 3")
+				return true
+			}
+			if (t.indexOf("Choose 1 friendly Unit that is Lv.2 or lower. It gains <First Strike> during this turn.") > -1) {
+				const target = fu.filter(c => c.level <= 2 && !c.rested && !c.sick).toSorted(c => c.ap)[0]
+				if (!target) return false
+				log("🎯Boosting " + target)
+				target.traits_eot.push("First Strike")
+				return true
+			}
+			if (t.indexOf("Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.") > -1) {
+				const target = fu.toSorted(c => -c.ap)[0]
+				const enemies = eu.filter(c => c.getAP() <= 2)
+				if (!target && enemies.length < 1) return false
+				log("🎯Protecting " + target)
+				target.traits_eot.push("enemy.unit.lv2- nodmg")
+				return true
+			}
 
-			// COMMAND abilities
+			if (t === "If you have 3 or more (League Militaire) Units in play, draw 1.") {
+				if (fu.filter(c => c.traits.includes("League Militaire")).length < 3) return false
+				p.draw(1)
+				return true
+			}
+			if (t.indexOf("If this is a (League Militaire) Unit, deploy 1 [Parts]((League Militaire)･AP1･HP1･This Unit can't choose the enemy player as its attack target) Unit token.") > -1) {
+				if (!card.unit.traits.includes("League Militaire")) return false
+				await p.addToBattle(p.getToken("Parts"))
+				return true
+			}
+			if (t.indexOf("Deploy 1 [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.") > -1) {
+				if (fu.length >= 6) return false
+				p.addToBattle(p.getToken("Hy-Gogg"))
+				return true
+			}
+			if (t == "Choose 1 enemy Unit that is Lv.5 or lower. Deal damage to it equal to the number of friendly Unit tokens in play.") {
+				const target = eu.filter(c => c.level <= 5)[0]
+				const token_count = fu.filter(c => c.type.indexOf("TOKEN") > -1).length
+				if (!target || token_count < 1) return false
+				dealDamage(card, target, token_count)
+				return true
+			}
 			if (t.indexOf("If you have no (Earth Alliance) Unit tokens in play,") > -1) {
 				if (fu.filter(c => c.type.indexOf("TOKEN") > -1 && c.traits.includes("Earth Alliance")).length > 0) return false
 				if (t.indexOf("deploy 1 [Sword Strike Gundam]((Earth Alliance)･AP4･HP2･<Blocker>) or 1 [Launcher Strike Gundam]((Earth Alliance)･AP2･HP4･<Blocker>) Unit token.") > -1) {
@@ -1095,16 +1196,6 @@
 					await p.addToBattle(p.getToken("Aile Strike Gundam"))
 					return true
 				}
-			}
-			// UNIT abilities
-			if (t == "Choose 1 of your active (League Militaire) Units and 1 enemy Unit that is Lv.3 or lower. Rest them.") {
-				const target = eu.filter(c => c.level <= 3).toSorted(c => -c.ap)[0]
-				if (!target) return false
-				const friend = fu.filter(c => c.traits.includes("League Militaire")).toSorted(c => c.ap)[0]
-				if (!friend) return false
-				rest(friend)
-				rest(target)
-				return true
 			}
 
 			if (t == "All enemy Units get AP-1 during this turn.") {
@@ -1230,7 +1321,7 @@
 					// Main phase
 					log("🎚️" + p.name + " level " + level)
 					let considered = []
-					while(true) {
+					while (true) {
 						let to_play = p.hand.filter(c => considered.indexOf(c) < 0).toSorted(c => ["BASE", "UNIT", "PILOT", "COMMAND"].indexOf(c.type))
 						if (to_play.length < 1) break
 						const c = to_play[0]
@@ -1272,7 +1363,7 @@
 									// No useful target, so don't play this and roll back payment.
 									ex_res_count -= p.resource.filter(bc => bc.type.indexOf("EX") > -1).length || 0
 									for (let i = 0; i < ex_res_count; ++i) {
-										p.resource.push(rndPick(EX_RESOURCES))
+										p.resource.push(getCard(rndPick(EX_RESOURCES)))
 									}
 									for (let i = 0; i < Math.max(free_res_count, c.cost); ++i) {
 										activate(p.resource[i])
@@ -1295,7 +1386,7 @@
 								await pair(empty_units[0], c)
 								empty_units = p.battle.filter(bc => bc.type == "UNIT" && bc.pilot == null)
 							}
-							await sleep(1200)
+							await sleep(800)
 						}
 					}
 
@@ -1311,11 +1402,7 @@
 							att.sick = true
 							continue
 						}
-						// TODO: Parts can't attack player
-						rest(att)
-						await sleep(500)
 						const enemy = p === p1 ? p2 : p1
-						await run(att, "Attack")
 
 						// Battle Area
 						let prone = enemy.battle.filter(bc => bc.rested).toSorted(def => def.getHP())
@@ -1323,11 +1410,16 @@
 							const extra = enemy.battle.filter(bc => !bc.rested && bc.level <= 5)
 							if (extra) prone = extra.concat(prone).toSorted(def => def.getHP())
 						}
-						let must_attack_unit = att.text.indexOf("This Unit can't choose the enemy player as its attack target") > -1 && !enemy.base && enemy.shield.length < 1
-						
+
+						// Base and shields also count as enemy player: https://www.gundam-gcg.com/en/cards/index.php?freeword=GD04-016#cards
+						let must_attack_unit = att.text.indexOf("This Unit can't choose the enemy player as its attack target") > -1
+
 						if (prone.length > 0 && (must_attack_unit || enemy.shield.length > can_attack.length || (att.traits.concat(att.traits_eot).filter(trait => trait.indexOf("Breach") > -1).length && prone.filter(def => att.getAP() >= def.getHP()).length > 0).length > 0)) {
 							const def = prone[0]
 							log("🔫" + att + " attacks " + def)
+							rest(att)
+							await sleep(500)
+							await run(att, "Attack")
 							await doBattle(att, def)
 							continue
 						}
@@ -1341,19 +1433,28 @@
 						if (enemy.base) {
 							let target = enemy.base
 							log("🔫" + att + " attacks " + target)
+							rest(att)
+							await sleep(500)
+							await run(att, "Attack")
 							await doBattle(att, target)
 						} else {
 							log("🔫" + att + " attacks shield area")
-							await battle(att, enemy.shield[enemy.shield.length - 1] || enemy.hand[0] || enemy.resource[0])
 							if (enemy.shield.length < 1) {
 								for (const bc of enemy.battle) {
-									if (!bc.rested && bc.traits.includes("Blocker") && !att.traits.concat(att.traits_eot).includes("High-Maneuver")) {
+									if (!bc.rested && bc.hasTrait("Blocker") && !att.traits.concat(att.traits_eot).includes("High-Maneuver")) {
 										log(`🛡️${bc} blocks ${att}`)
 										rest(bc)
+										rest(att)
+										await sleep(500)
+										await run(att, "Attack")
+										await run(att, "", "blocked")
+										await battle(att, bc)
 										await doBattle(att, bc)
 										continue
 									}
 								}
+								rest(att)
+								await battle(att, enemy.hand[0] || enemy.resource[0])
 								log("💀" + enemy.name + " died from " + att)
 								boom.play().catch(ex => { })
 								await sleep(2000)
@@ -1361,6 +1462,9 @@
 								await render()
 								break
 							}
+							if (enemy.shield.slice(-1)[0].hasTrait("protection.enemy.units")) continue
+							rest(att)
+							await battle(att, enemy.shield.slice(-1)[0])
 							const mo = /Suppression/.exec(att.text)
 							if (mo) {
 								log("Suppression")
