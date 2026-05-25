@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-18</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-25</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -99,6 +99,10 @@
 		const EX_RESOURCES = ["EXR-001", "EXRP-001", "EXRP-002"]
 
 		let cards = {}
+
+		function mySort(arr, fun) {
+			return arr.toSorted((a, b) => fun(a) - fun(b))
+		}
 
 		function escapeHTML(unsafe) {
 			return unsafe
@@ -374,6 +378,11 @@
 					if (this.owner.battle.filter(c => c.hasTrait("Triple Ship Alliance")).length > 1) rv += 1
 				}
 
+				if (active_player != this.owner && this.type.indexOf("TOKEN") > -1) {
+					// "Friendly" instead of "your" implies team base counts too.
+					rv += this.owner.battle.filter(c => c.text.indexOf("All friendly Unit tokens get AP+1 during your opponent's turn.") > -1).length
+				}
+
 				return rv
 			}
 			getHP() {
@@ -421,7 +430,8 @@
 				//return `<div class="card" style="left:${left}vw; top:${top}vh; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}">L${this.level} C${this.cost} ${this.id}<br>${this.type}<br>${this.name}<br>${this.zones}<br>${this.traits}<br>Link: ${this.link}<br><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
 				//return `<div class="card" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; ${this.rested ? "transform: rotate(90deg);" : ""}"><img src="https://exburst.dev/gundam/cards/sd/${id}.webp"></div>`
 				//return `<div class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);"><div class="rested">${this.type}</div></div>`
-				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.ap_eot ? '<div style="color: red">' + this.ap_eot + " AP</div>" : ""} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}</div>`
+				// return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""} ${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.ap_eot ? '<div style="color: red">' + this.ap_eot + " AP</div>" : ""} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}</div>`
+				return `<div id="c${this.cid}" class="card ${this.rested ? "rested " : ""}${facedown ? "facedown" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: ${this.color}; background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${this.getAP()}/${this.getHP()}</div>`
 			}
 
 			hasTrait(trait) {
@@ -637,7 +647,7 @@
 			async addToBattle(card) {
 				if (card.type.indexOf("UNIT") < 0) throw Error("Not a unit: " + card)
 				if (this.battle.length >= 6) {
-					const weakest = this.battle.toSorted(c => c.ap)[0]
+					const weakest = mySort(this.battle, c => c.getAP())[0]
 					await destroy(weakest)
 				}
 				log(`🚀Deploy ${card.rested ? "rested " : ""}${card}`)
@@ -722,7 +732,7 @@
 				if (cost > this.resource.filter(r => !r.rested).length) return false
 				let paid = 0
 				// EX last
-				for (const r of this.resource.toSorted(c => c.type.indexOf("EX"))) {
+				for (const r of mySort(this.resource, c => c.type.indexOf("EX"))) {
 					rest(r)
 					paid += 1
 					if (r.type.indexOf("EX") > -1) {
@@ -971,7 +981,7 @@
 				return true
 			}
 			if (t == "Add this card to your hand.") {
-				log("To hand:" + card)
+				log("To hand: " + card)
 				card.rested = false
 				card.pilot = null
 				card.unit = null
@@ -1095,9 +1105,9 @@
 				return true
 			}
 			if (t == "Choose 1 of your active (League Militaire) Units and 1 enemy Unit that is Lv.3 or lower. Rest them.") {
-				const target = eu.filter(c => c.level <= 3).toSorted(c => -c.ap)[0]
+				const target = mySort(eu.filter(c => c.level <= 3), c => -c.getAP())[0]
 				if (!target) return false
-				const friend = fu.filter(c => c.traits.includes("League Militaire")).toSorted(c => c.ap)[0]
+				const friend = mySort(fu.filter(c => c.traits.includes("League Militaire")), c => c.getAP())[0]
 				if (!friend) return false
 				rest(friend)
 				rest(target)
@@ -1157,7 +1167,7 @@
 				return true
 			}
 			if (t == "You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.") {
-				const target = p.hand.filter(item => item.level <= 4 && item.type == "UNIT" && (item.traits.includes("Neo Zeon") || item.traits.includes("Zeon"))).toSorted(item => -item.cost)[0]
+				const target = mySort(p.hand.filter(item => item.level <= 4 && item.type == "UNIT" && (item.traits.includes("Neo Zeon") || item.traits.includes("Zeon"))), item => -item.cost)[0]
 				if (!target || fu.length >= 6) return false
 				log("🎯Deploying " + target)
 				await p.addToBattle(target)
@@ -1169,7 +1179,7 @@
 				return true
 			}
 			if (t.indexOf("Choose 1 friendly Unit. It recovers 3 HP.") > -1) {
-				const target = fu.filter(c => c.damage > 0).toSorted(c => -c.damage)[0]
+				const target = mySort(fu.filter(c => c.damage > 0), c => -c.damage)[0]
 				if (!target) return false
 				if (target.damage < 1) return false
 				log("🎯Healing " + target)
@@ -1178,9 +1188,9 @@
 				return true
 			}
 			if (t.indexOf("Choose 1 friendly Unit. It gets AP+2 during this turn.") > -1) {
-				const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.getAP())[0]
+				const target = mySort(fu.filter(c => !c.rested && !c.sick), c => c.getAP())[0]
 				if (!target) return false
-				const strongest_enemy = eu.toSorted(c => -c.getHP())[0]
+				const strongest_enemy = mySort(eu, c => -c.getHP())[0]
 				const enemy_hp = strongest_enemy && strongest_enemy.getAP() || 0
 				const enemy_base_hp = (en.base && en.base.getHP()) || 0
 				if (Math.max(enemy_hp, enemy_base_hp) <= target.getAP()) return false
@@ -1189,14 +1199,14 @@
 				return true
 			}
 			if (t.indexOf("Choose 1 of your Units. It gains <Breach 3> during this turn.") > -1) {
-				const target = fu.filter(c => !c.rested && !c.sick).toSorted(c => c.ap)[0]
+				const target = mySort(fu.filter(c => !c.rested && !c.sick), c => c.getAP())[0]
 				if (!target || (en.shield.length < 1 && !en.base)) return false
 				log("🎯Boosting " + target)
 				target.traits_eot.push("Breach 3")
 				return true
 			}
 			if (t.indexOf("Choose 1 friendly Unit that is Lv.2 or lower. It gains <First Strike> during this turn.") > -1) {
-				const target = fu.filter(c => c.level <= 2 && !c.rested && !c.sick).toSorted(c => c.ap)[0]
+				const target = mySort(fu.filter(c => c.level <= 2 && !c.rested && !c.sick), c => c.getAP())[0]
 				if (!target) return false
 				log("🎯Boosting " + target)
 				target.traits_eot.push("First Strike")
@@ -1205,7 +1215,7 @@
 			// ST05-03 & ST05-013
 			mo = t.match(/Choose 1 of your Units. Deal 1 damage to it. It gets AP\+(\d) during this turn.$/)
 			if (mo) {
-				const target = fu.filter(c => !c.rested && !c.sick && c.getHP() > 1).toSorted(c => c.ap)[0]
+				const target = mySort(fu.filter(c => !c.rested && !c.sick && c.getHP() > 1), c => c.getAP())[0]
 				if (!target) return false
 				if (t.indexOf("Rest this Unit") > -1) {
 					if (card.rested) return false
@@ -1218,7 +1228,7 @@
 			}
 			// ST05-001
 			if (t == "Choose 1 of your other Units. Deal 1 damage to it. It gets AP+1 during this turn.") {
-				const target = fu.filter(c => !c.rested && !c.sick && c.getHP() > 1).toSorted(c => c.ap)[0]
+				const target = mySort(fu.filter(c => !c.rested && !c.sick && c.getHP() > 1), c => c.getAP())[0]
 				if (!target) return false
 				log("🎯Boosting " + target)
 				dealDamage(card, target)
@@ -1226,7 +1236,7 @@
 				return true
 			}
 			if (t.indexOf("Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.") > -1) {
-				const target = fu.toSorted(c => -c.ap)[0]
+				const target = mySort(fu, c => -c.getAP())[0]
 				const enemies = eu.filter(c => c.getAP() <= 2)
 				if (!target && enemies.length < 1) return false
 				log("🎯Protecting " + target)
@@ -1279,22 +1289,22 @@
 				return true
 			}
 			if (t == "Choose 1 enemy Unit. It gets AP-2 during this battle.") {
-				const target = eu.toSorted(c => -c.ap)[0]
+				const target = mySort(eu, c => -c.getAP())[0]
 				if (!target) return false
 				log("🎯Afflicting " + target)
 				target.ap_eot -= 2  // TODO battle instead of turn
 				return true
 			}
 			if (t.indexOf("Choose 1 enemy Unit. Deal 2 damage to it.") > -1) {
-				const target = eu.toSorted(c => -c.hp)[0]
+				const target = mySort(eu, c => -c.getHP())[0]
 				return await dealDamage(card, target, 2)
 			}
 			if (t.indexOf("Choose 1 rested enemy Unit. Deal 1 damage to it.") > -1) {
-				const target = eu.filter(c => c.rested).toSorted(c => -c.hp)[0]
+				const target = mySort(eu.filter(c => c.rested), c => -c.getHP())[0]
 				return await dealDamage(card, target, 1)
 			}
 			if (t.indexOf("Choose 1 enemy Unit. It gets AP-3 during this turn.") > -1) {
-				const target = eu.toSorted(c => -c.ap)[0]
+				const target = mySort(eu, c => -c.getAP())[0]
 				if (!target) return false
 				log("🎯Afflicting " + target)
 				target.ap_eot -= 3
@@ -1302,7 +1312,7 @@
 			}
 			if (t == "If this Unit has 5 or more AP, choose 1 enemy Unit that is Lv.5 or higher. Deal 3 damage to it.") {
 				if (card.getAP() < 5) return false
-				const target = eu.filter(c => c.getHP() <= 3).toSorted(c => -c.ap)[0]
+				const target = mySort(eu.filter(c => c.getHP() <= 3), c => -c.getAP())[0]
 				return await dealDamage(card, target, 3)
 			}
 			if (t == " deal 1 damage to all enemy Units that are Lv.3 or lower.") {
@@ -1312,7 +1322,7 @@
 				return true
 			}
 			if (t.indexOf("Choose 1 enemy Unit with 3 or less HP. Return it to its owner's hand.") > -1) {
-				const target = eu.filter(c => c.getHP() <= 3).toSorted(c => -c.ap)[0]
+				const target = mySort(eu.filter(c => c.getHP() <= 3), c => -c.getAP())[0]
 				if (!target) return false
 				log("🎯Bouncing " + target)
 				bounce(target)
@@ -1320,7 +1330,7 @@
 			}
 			mo = t.match(/Choose 1 enemy Unit with (\d) or less AP. Rest it./)
 			if (mo) {
-				const target = eu.filter(c => c.getAP() <= mo[1]).toSorted(c => -c.ap)[0]
+				const target = mySort(eu.filter(c => c.getAP() <= mo[1]), c => -c.getAP())[0]
 				if (!target) return false
 				log("🎯Resting " + target + " by " + card)
 				rest(target)
@@ -1328,7 +1338,7 @@
 			}
 			mo = t.match(/Choose 1 enemy Unit with (\d) or less HP. Rest it./)
 			if (mo) {
-				const target = eu.filter(c => c.getHP() <= mo[1]).toSorted(c => -c.ap)[0]
+				const target = mySort(eu.filter(c => c.getHP() <= mo[1]), c => -c.getAP())[0]
 				if (!target) return false
 				log("🎯Resting " + target + " by " + card)
 				rest(target)
@@ -1368,7 +1378,7 @@
 
 				let p = p1
 				p2.resource.push(p2.getCard(rndPick(EX_RESOURCES)))
-
+				window.active_player = p
 				await render()
 				while (true) {
 					window.active_player = p
@@ -1406,7 +1416,7 @@
 					log("🎚️" + p.name + " level " + level)
 					let considered = []
 					while (true) {
-						let to_play = p.hand.filter(c => considered.indexOf(c) < 0).toSorted(c => ["BASE", "UNIT", "PILOT", "COMMAND"].indexOf(c.type))
+						let to_play = mySort(p.hand.filter(c => !considered.includes(c)), c => ["BASE", "UNIT", "PILOT", "COMMAND"].indexOf(c.type) * 10 + c.cost)
 						if (to_play.length < 1) break
 						const c = to_play[0]
 						considered.push(c)
@@ -1477,10 +1487,12 @@
 					await run(p.base, "Main")
 
 					// attack
+					considered = []
 					while (true) {
-						const can_attack = p.battle.filter(bc => bc.rested == false && bc.sick == false).toSorted(bc => -bc.ap)
+						const can_attack = mySort(p.battle.filter(bc => !bc.rested && !bc.sick && !considered.includes(bc)), bc => -bc.getAP())
 						if (can_attack.length < 1) break
 						const att = can_attack[0]
+						considered.push(att)
 						if (att.getAP() < 1) {
 							// TODO: Might get boosted later
 							att.sick = true
@@ -1489,10 +1501,10 @@
 						const enemy = p === p1 ? p2 : p1
 
 						// Battle Area
-						let prone = enemy.battle.filter(bc => bc.rested).toSorted(def => def.getHP())
+						let prone = mySort(enemy.battle.filter(bc => bc.rested), def => def.getHP())
 						if (att.traits_eot.includes("canAttackActiveUnitLv5-")) {
 							const extra = enemy.battle.filter(bc => !bc.rested && bc.level <= 5)
-							if (extra) prone = extra.concat(prone).toSorted(def => def.getHP())
+							if (extra) prone = mySort(extra.concat(prone), def => def.getHP())
 						}
 
 						// Base and shields also count as enemy player: https://www.gundam-gcg.com/en/cards/index.php?freeword=GD04-016#cards
@@ -1508,7 +1520,6 @@
 							continue
 						}
 						if (must_attack_unit) {
-							att.sick = true  // avoid loop
 							continue
 						}
 
@@ -1592,6 +1603,11 @@
 						c.ap_eot = 0
 						c.traits_eot = []
 					}
+					for (const c of p1.trash.concat(p2.trash).concat(p1.hand).concat(p2.hand)) {
+						c.ap_eot = 0
+						c.traits_eot = []
+					}
+
 					p.traits_eot = []
 					window.once_per_turn = []
 					// wait for untap animation
