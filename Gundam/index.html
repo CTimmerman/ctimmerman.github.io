@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-25</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-26</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -83,6 +83,7 @@
 			background-color: white !important;
 			border-color: black !important;
 		}
+
 		.facedown.resource {
 			background-image: url(ResourceCardBack.webp) !important;
 			background-color: white !important;
@@ -454,7 +455,7 @@
 						if (this.owner.battle.filter(c => c.hasTrait("Triple Ship Alliance")).length > 1) return true
 					}
 
-					if(this.owner.battle.filter(c => c.rested && hasText(c.text, "While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.")).length && this.traits.concat(this.traits_eot).includes("League Militaire")) return true
+					if (this.owner.battle.filter(c => c.rested && hasText(c.text, "While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.")).length && this.traits.concat(this.traits_eot).includes("League Militaire")) return true
 				}
 
 				if (trait == "Suppression") {
@@ -484,8 +485,7 @@
 3 ST01-013 Kai's Resolve
 2 ST01-014 Unforeseen Incident
 3 ST01-015 White Base
-3 ST01-016 Asticassia School of Technology, Earth House
-`,
+3 ST01-016 Asticassia School of Technology, Earth House`,
 			`# Wings of Advance [ST02]
 2 ST02-001 Wing Gundam
 4 ST02-002 Wing Gundam (Bird Mode)
@@ -553,8 +553,7 @@
 3 ST05-012 McGillis Fareed
 2 ST05-013 With Iron and Blood
 2 ST05-014 Fatal Strike
-4 ST05-015 Isaribi
-`,
+4 ST05-015 Isaribi`,
 			`# Clan Unity [ST06]
 2 ST03-013 Close Combat  # Listed last on https://x.com/GUNDAM_GCG_ENG/status/1976623748871811321/photo/1
 2 ST06-001 GQuuuuuuX (Omega Psycommu)
@@ -571,8 +570,41 @@
 4 ST06-012 Schoolgirl and Smuggler
 2 ST06-013 Fierce Unity
 2 ST06-014 Clan Battle
-2 ST06-015 Kaneban Co., Ltd.
-`,
+2 ST06-015 Kaneban Co., Ltd.`,
+// 			`# Celestial Drive [ST07]
+// 2 ST07-001 Gundam Exia
+// 4 ST07-002 Gundam Exia
+// 4 ST07-003 Gundam Virtue
+// 3 ST07-004 Gundam Virtue
+// 2 ST07-005 Gundam Dynames
+// 4 ST07-006 Gundam Dynames
+// 3 ST07-007 Gundam Kyrios
+// 4 ST07-008 Gundam Kyrios (Flight Mode)
+// 3 ST07-009 Setsuna F. Seiei
+// 3 ST07-010 Tieria Erde
+// 3 ST07-011 Lockon Stratos (Neil)
+// 3 ST07-012 Allelujah Haptism
+// 2 ST07-013 Armed Intervention
+// 4 ST07-014 Tactical Visionary
+// 4 ST07-015 Ptolemaios
+// 2 ST05-014 Fatal Strike`,
+// 			`# Flash of Radiance [ST08]
+// 2 ST08-001 Ξ Gundam
+// 4 ST08-002 Ξ Gundam
+// 3 ST08-003 Messer (Type-F Naked) (Commander Type)
+// 4 ST08-004 Messer Type-F01
+// 3 ST08-005 Messer Type-F02 Minelayer
+// 2 ST08-006 Penelope
+// 4 ST08-007 Penelope
+// 4 ST08-008 Gustav Karl Type-00
+// 3 ST08-009 Jegan Ground Type-A (Man Hunter)
+// 4 ST08-010 Hathaway Noa
+// 4 ST08-011 Lane Aim
+// 3 ST08-012 Words for Hathaway
+// 3 ST08-013 Lady Luck
+// 3 ST08-014 Valiant
+// 2 ST08-015 Davao
+// 2 ST02-014 Siege Ploy`,
 			`# Top deck
 4 GD04-016
 2 GD04-077
@@ -631,8 +663,8 @@
 				this.hand = []
 				this.deck = []
 				this.fulldeck = []
-				//const lines = decks[rnd(0, decks.length - 1)].split("\n")
-				const lines = decks[5].split("\n")
+				const lines = decks[rnd(0, decks.length - 1)].split("\n")
+				// wait for upstream const lines = decks[6].split("\n")
 				const colors = []
 				for (const line of lines) {
 					if (line.indexOf("# ") == 0) log(`🎴${name} deck: <a href="#" onclick="showDeck(p${this.pid})">${line.slice(2)}</a>`)
@@ -1470,7 +1502,7 @@
 					log(`🚩🚩FIXME Not implemented ${card.type} ${card.id} ${act}${clause} "${escapeHTML(t)}". p battle length: ${p.battle.length}`)
 					return false
 				}
-				
+
 				if (target) {
 					log(`${p.name} reveals from top ${look}: ${target}`)
 					if (hasText(t, "add it to your hand")) {
