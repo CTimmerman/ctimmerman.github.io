@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-26</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-27</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -92,6 +92,11 @@
 		.rested {
 			transform: rotate(90deg);
 			margin-top: -1.4vmin;
+		}
+		
+		.rested.resource {
+			transform: rotate(70deg);
+			margin: auto;
 		}
 	</style>
 </head>
@@ -227,7 +232,7 @@
 			overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
 				<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px" stroke-linecap="round">
 					<animate attributeName="stroke" values="#880;#fff;#880;" dur="0.2s" repeatCount="indefinite"/>
-					<animate attributeName="stroke-width" values="4px;8px;4px;" dur="0.2s" repeatCount="indefinite"/>
+					<animate attributeName="stroke-width" values="2px;8px;2px;" dur="0.2s" repeatCount="indefinite"/>
 				</line>
 			</svg>`
 			pewpew.play().catch(ex => { })
@@ -297,7 +302,7 @@
 			}
 		}
 
-		function log(s) {
+		function log(s = "") {
 			dlog.innerHTML += s + "<br>"
 			console.log(s)
 			dlog.scrollTop = dlog.scrollHeight
@@ -320,8 +325,13 @@
 		// 	Type[Type["UNITTOKEN"] = 5] = "UNITTOKEN";	
 		// })(Type || (Type = {}));
 
+		function getPilotName(card) {
+			if (card.type == "PILOT") return card.name
+			return getSectionText(card, "Pilot").slice(1, -1)
+		}
+
 		async function pair(unit, pilot) {
-			log("🧑‍✈️Pair " + pilot + " with " + unit)
+			log("🧑‍✈️Pair " + getPilotName(pilot) + " with " + unit)
 			unit.pilot = pilot
 			pilot.unit = unit
 			await render()
@@ -334,9 +344,12 @@
 		}
 
 		function linksWith(unit, pilot) {
+			// TODO "Elan Ceres (Enhanced Person Number 5)" match as "Elan Ceres"
 			if (!pilot) return false
+			let pilot_name = getPilotName(pilot)
 			for (let part of unit.link.split("/")) {
-				if (part == `[${pilot.name}]`) return true
+				if (part == `[${pilot_name}]`) return true
+				if (unit.traits.includes(part.slice(1, -1))) return true
 			}
 			return false
 		}
@@ -469,7 +482,7 @@
 		}
 
 		const decks = [
-			`# Heroic Beginnings [ST01]
+			`# Heroic Beginnings [ST01] (WU)
 2 ST01-001 Gundam
 4 ST01-002 Gundam (MA Form)
 4 ST01-003 Guncannon
@@ -486,7 +499,7 @@
 2 ST01-014 Unforeseen Incident
 3 ST01-015 White Base
 3 ST01-016 Asticassia School of Technology, Earth House`,
-			`# Wings of Advance [ST02]
+			`# Wings of Advance [ST02] (UG)
 2 ST02-001 Wing Gundam
 4 ST02-002 Wing Gundam (Bird Mode)
 4 ST02-003 Gundam Heavyarms
@@ -503,7 +516,7 @@
 2 ST02-014 Siege Ploy
 3 ST02-015 Saint Gabriel Institute
 3 ST02-016 Corsica Base`,
-			`# Zeon's Rush [ST03]
+			`# Zeon's Rush [ST03] (RG)
 2 ST03-001 Sinanju
 4 ST03-002 Angelo's Geara Zulu
 4 ST03-003 Geara Zulu
@@ -520,7 +533,7 @@
 2 ST03-014 The Blue Giant
 3 ST03-015 Rewloola
 3 ST03-016 Falmel`,
-			`# SEED Strike [ST04]
+			`# SEED Strike [ST04] (WR)
 2 ST04-001 Aile Strike Gundam
 4 ST04-002 Strike Gundam
 4 ST04-003 Moebius Zero
@@ -537,7 +550,7 @@
 2 ST04-014 The Magic Bullet of Dusk
 3 ST04-015 Archangel
 3 ST04-016 Vesalius`,
-			`# Iron Bloom [ST05]
+			`# Iron Bloom [ST05] (WP)
 2 ST01-014 Unforeseen Incident
 2 ST05-001 Gundam Barbatos 4th Form
 4 ST05-002 Gundam Barbatos 2nd Form
@@ -554,7 +567,7 @@
 2 ST05-013 With Iron and Blood
 2 ST05-014 Fatal Strike
 4 ST05-015 Isaribi`,
-			`# Clan Unity [ST06]
+			`# Clan Unity [ST06] (RG)
 2 ST03-013 Close Combat  # Listed last on https://x.com/GUNDAM_GCG_ENG/status/1976623748871811321/photo/1
 2 ST06-001 GQuuuuuuX (Omega Psycommu)
 4 ST06-002 GQuuuuuuX (Omega Psycommu)
@@ -571,41 +584,42 @@
 2 ST06-013 Fierce Unity
 2 ST06-014 Clan Battle
 2 ST06-015 Kaneban Co., Ltd.`,
-// 			`# Celestial Drive [ST07]
-// 2 ST07-001 Gundam Exia
-// 4 ST07-002 Gundam Exia
-// 4 ST07-003 Gundam Virtue
-// 3 ST07-004 Gundam Virtue
-// 2 ST07-005 Gundam Dynames
-// 4 ST07-006 Gundam Dynames
-// 3 ST07-007 Gundam Kyrios
-// 4 ST07-008 Gundam Kyrios (Flight Mode)
-// 3 ST07-009 Setsuna F. Seiei
-// 3 ST07-010 Tieria Erde
-// 3 ST07-011 Lockon Stratos (Neil)
-// 3 ST07-012 Allelujah Haptism
-// 2 ST07-013 Armed Intervention
-// 4 ST07-014 Tactical Visionary
-// 4 ST07-015 Ptolemaios
-// 2 ST05-014 Fatal Strike`,
-// 			`# Flash of Radiance [ST08]
-// 2 ST08-001 Ξ Gundam
-// 4 ST08-002 Ξ Gundam
-// 3 ST08-003 Messer (Type-F Naked) (Commander Type)
-// 4 ST08-004 Messer Type-F01
-// 3 ST08-005 Messer Type-F02 Minelayer
-// 2 ST08-006 Penelope
-// 4 ST08-007 Penelope
-// 4 ST08-008 Gustav Karl Type-00
-// 3 ST08-009 Jegan Ground Type-A (Man Hunter)
-// 4 ST08-010 Hathaway Noa
-// 4 ST08-011 Lane Aim
-// 3 ST08-012 Words for Hathaway
-// 3 ST08-013 Lady Luck
-// 3 ST08-014 Valiant
-// 2 ST08-015 Davao
-// 2 ST02-014 Siege Ploy`,
-			`# Top deck
+			// 			`# Celestial Drive [ST07] (PG)
+			// 2 ST07-001 Gundam Exia
+			// 4 ST07-002 Gundam Exia
+			// 4 ST07-003 Gundam Virtue
+			// 3 ST07-004 Gundam Virtue
+			// 2 ST07-005 Gundam Dynames
+			// 4 ST07-006 Gundam Dynames
+			// 3 ST07-007 Gundam Kyrios
+			// 4 ST07-008 Gundam Kyrios (Flight Mode)
+			// 3 ST07-009 Setsuna F. Seiei
+			// 3 ST07-010 Tieria Erde
+			// 3 ST07-011 Lockon Stratos (Neil)
+			// 3 ST07-012 Allelujah Haptism
+			// 2 ST07-013 Armed Intervention
+			// 4 ST07-014 Tactical Visionary
+			// 4 ST07-015 Ptolemaios
+			// 2 ST05-014 Fatal Strike`,
+			// 			`# Flash of Radiance [ST08] (UR)
+			// 2 ST08-001 Ξ Gundam
+			// 4 ST08-002 Ξ Gundam
+			// 3 ST08-003 Messer (Type-F Naked) (Commander Type)
+			// 4 ST08-004 Messer Type-F01
+			// 3 ST08-005 Messer Type-F02 Minelayer
+			// 2 ST08-006 Penelope
+			// 4 ST08-007 Penelope
+			// 4 ST08-008 Gustav Karl Type-00
+			// 3 ST08-009 Jegan Ground Type-A (Man Hunter)
+			// 4 ST08-010 Hathaway Noa
+			// 4 ST08-011 Lane Aim
+			// 3 ST08-012 Words for Hathaway
+			// 3 ST08-013 Lady Luck
+			// 3 ST08-014 Valiant
+			// 2 ST08-015 Davao
+			// 2 ST02-014 Siege Ploy`,
+			// 			`# Destiny Ignition [ST09] (WR)`,
+			`# Top deck (WU)
 4 GD04-016
 2 GD04-077
 2 GD04-015
@@ -622,7 +636,7 @@
 4 ST01-010
 3 GD04-098
 4 GD04-081`,
-			`# Cees's Green Zeon deck
+			`# Cees's Green Zeon deck (G)
 4 ST03-008
 4 ST03-009
 1 ST03-014
@@ -748,42 +762,9 @@
 					throw Error(msg)
 				}
 				const rv = Card.fromDict(d)
-				// DeckPlanet bug workarounds
+				// DeckPlanet bug workarounds. See also cards.json.
 				rv.text = rv.text.replaceAll("[action]", "【Action】").replaceAll("[br]", "<br>").replaceAll("[burst]", "【Burst】").replaceAll("[breach 3]", "【Breach 3】").replaceAll("[deploy]", "【Deploy】").replaceAll("[main]", "【Main】").replaceAll("[pilot]", "【Pilot】").replaceAll("[when paired]", "【When Paired】")
-				if (["ST06-001", "ST06-002", "ST06-003", "ST06-004", "ST06-009", "ST06-011", "ST06-014", "ST06-016"].includes(rv.id)) rv.color = "RED"
-				else if (["ST06-005", "ST06-006", "ST06-007", "ST06-008", "ST06-010", "ST06-012", "ST06-013", "ST06-015"].includes(rv.id)) rv.color = "GREEN"
-				if (rv.id == "ST02-009") {
-					rv.color = "BLUE"
-					rv.cost = 1
-				}
-				if (rv.id == "ST04-004_PR") {
-					rv.color = "WHITE"
-					rv.cost = 1
-				}
-				if (rv.id == "ST05-003") {
-					rv.color = "PURPLE"
-					rv.cost = 1
-				}
-				if (rv.id == "ST05-003_PR") {
-					rv.color = "PURPLE"
-					rv.cost = 1
-				}
-				if (rv.id == "ST06-012") {
-					rv.color = "GREEN"
-					rv.cost = 1
-				}
-				if (rv.id == "ST06-012_PR") {
-					rv.color = "GREEN"
-					rv.cost = 1
-				}
-				if (rv.id == "ST03-010") {
-					rv.ap = 2
-					rv.hp = 2
-				}
-				if (rv.id == "GD04-098") {
-					rv.ap = 1
-					rv.hp = 2
-				}
+
 				cid += 1
 				rv.cid = cid
 				rv.owner = this
@@ -797,12 +778,14 @@
 
 			async pay(cost) {
 				if (cost > this.resource.filter(r => !r.rested).length) return false
+				// log("💲Paying " + cost)
 				let paid = 0
 				// EX last
-				for (const r of mySort(this.resource, c => c.type.indexOf("EX"))) {
+				for (const r of mySort(this.resource.filter(c => !c.rested), c => c.type.indexOf("EX"))) {
 					rest(r)
 					paid += 1
 					if (hasText(r.type, "EX")) {
+						log("💲Spending EX Resource " + r.id)
 						this.resource = this.resource.filter(item => item !== r)
 						// Wait for rest animation and show gone.
 						await sleep(300)
@@ -826,46 +809,57 @@
 				gameInfo = await response.json()
 				localStorage.setItem("gameInfo", JSON.stringify(gameInfo))
 			}
-			cards = JSON.parse(localStorage.getItem("cards")) || {}
+			//cards = JSON.parse(localStorage.getItem("cards")) || {}
+			const response = await fetch("cards.json")
+			cards = await response.json()
 			if (Object.keys(cards).length > 1) {
 				log(`Loaded ${Object.keys(cards).length} cards`)
-			} else {
-				cards = {}
-				let pages = 1
-				let page = 0
-				let data = JSON.parse(localStorage.getItem("data")) || []
-				if (!data.length > 0) {
-					do {
-						++page
-						const link = `${gameInfo.allCardsUrl}&page=${page}`
-						log(`Loading ${link}`)
-						const response = await fetch(link)
-						const json = await response.json()
-						pages = json.meta.page_count
-						data = data.concat(json.data)
-						await sleep(500)  // rate limit to be nice to server
-					} while (page < pages)
-					localStorage.setItem("data", JSON.stringify(data))
+				for (const k in cards) {
+					const card = cards[k]
+					if (card.cost < 1 && !card.id.match(/^[TRE]/)) {
+						log("🚩🚩FIXME: Card cost < 1: " + card.id)
+						// ORB let card_data = await fetch(`https://gundamcard.gg/cards/${card.id}/`)
+					}
 				}
-				for (const card of data) {
-					const id = card.card_number
-					cards[id] = new Card(
-						card.card_type,
-						card.card_name,
-						card.card_ap,
-						card.card_hp,
-						card.card_level,
-						card.card_cost,
-						card.card_text_unstyled,
-						card.card_zones,
-						card.card_traits,
-						card.card_link_requirement,
-						id,
-						card.card_color).toDict()
-				}
-				log("Cards: " + Object.keys(cards).length)
-				localStorage.setItem("cards", JSON.stringify(cards))
+				// localStorage.setItem("cards", JSON.stringify(cards))
 			}
+			// else {
+			// 	cards = {}
+			// 	let pages = 1
+			// 	let page = 0
+			// 	let data = JSON.parse(localStorage.getItem("data")) || []
+			// 	if (!data.length > 0) {
+			// 		do {
+			// 			++page
+			// 			const link = `${gameInfo.allCardsUrl}&page=${page}`
+			// 			log(`Loading ${link}`)
+			// 			const response = await fetch(link)
+			// 			const json = await response.json()
+			// 			pages = json.meta.page_count
+			// 			data = data.concat(json.data)
+			// 			await sleep(500)  // rate limit to be nice to server
+			// 		} while (page < pages)
+			// 		localStorage.setItem("data", JSON.stringify(data))
+			// 	}
+			// 	for (const card of data) {
+			// 		const id = card.card_number
+			// 		cards[id] = new Card(
+			// 			card.card_type,
+			// 			card.card_name,
+			// 			card.card_ap || card.card_ap_boost,
+			// 			card.card_hp || card.card_hp_boost,
+			// 			card.card_level,
+			// 			card.card_cost,
+			// 			card.card_text_unstyled,
+			// 			card.card_zones,
+			// 			card.card_traits,
+			// 			card.card_link_requirement,
+			// 			id,
+			// 			card.card_color).toDict()
+			// 	}
+			// 	log("Cards: " + Object.keys(cards).length)
+			// 	localStorage.setItem("cards", JSON.stringify(cards))
+			// }
 		}
 
 		async function render() {
@@ -965,7 +959,7 @@
 				top = p == p2 ? 96 : -12
 				for (const c of p.hand) {
 					left = 8 + x * 8
-					html += c.toHTML(left, top, p == p1)
+					html += c.toHTML(left, top)
 					x += 1
 				}
 			}
@@ -1046,7 +1040,7 @@
 				for (const target of targets) target.traits_eot.push("noDmg enemy.unit.lv2min")
 				return false
 			}
-			// Mandatory abilities (not Main/Action)
+			// If Burst is optional, why not Attack etc?
 			if (t == "Activate this card's 【Main】.") {
 				t = getSectionText(card, "Main")
 			}
@@ -1386,9 +1380,10 @@
 				target.ap_eot -= 2  // TODO battle instead of turn
 				return true
 			}
-			if (hasText(t, "Choose 1 enemy Unit. Deal 2 damage to it.")) {
+			mo = t.match(/Choose 1 enemy Unit. Deal (\d) damage to it./)
+			if (mo) {
 				const target = mySort(eu, c => -c.HP())[0]
-				return await dealDamage(card, target, 2)
+				return await dealDamage(card, target, mo[1])
 			}
 			if (hasText(t, "Choose 1 rested enemy Unit. Deal 1 damage to it.")) {
 				const target = mySort(eu.filter(c => c.rested), c => -c.HP())[0]
@@ -1399,6 +1394,14 @@
 				if (!target) return false
 				log("🎯Afflicting " + target)
 				target.ap_eot -= 3
+				return true
+			}
+			if (t == "Choose 1 of your Units and 1 enemy Unit. Deal 1 damage to them.") {
+				const target1 = mySort(fu, c => -c.HP())[0]
+				const target2 = mySort(eu, c => -c.HP())[0]
+				if (!target1 || !target2) return false
+				await dealDamage(card, target1, 1)
+				await dealDamage(card, target2, 1)
 				return true
 			}
 			if (t == "If this Unit has 5 or more AP, choose 1 enemy Unit that is Lv.5 or higher. Deal 3 damage to it.") {
@@ -1430,6 +1433,14 @@
 			mo = t.match(/Choose 1 enemy Unit with (\d) or less HP. Rest it./)
 			if (mo) {
 				const target = mySort(eu.filter(c => c.HP() <= mo[1]), c => -c.AP())[0]
+				if (!target) return false
+				log("🎯Resting " + target + " by " + card)
+				rest(target)
+				return true
+			}
+			if (t == "If you have 2 or more other (Gjallarhorn)/(Tekkadan) Units in play, choose 1 enemy Unit with 3 or less HP. Rest it.") {
+				if (fu.filter(c => c !== card && (c.traits.includes("Gjallarhorn") || c.traits.includes("Tekkadan"))).length < 2) return false
+				const target = mySort(eu.filter(c => c.HP() <= 3), c => -c.AP())[0]
 				if (!target) return false
 				log("🎯Resting " + target + " by " + card)
 				rest(target)
@@ -1548,7 +1559,7 @@
 						c.sick = false
 					}
 					await sleep(1000)
-
+					log("")
 					// Draw card
 					try {
 						p.draw()
@@ -1591,7 +1602,9 @@
 						await render()
 						let free_res_count = p.resource.filter(bc => bc.type.indexOf("EX") < 0).length || 0
 						let ex_res_count = p.resource.filter(bc => hasText(bc.type, "EX")).length || 0
+						// log(`🤔Considering ${c.type} #${c.cid} ${c.id} ${c.name}`)
 						if (await p.pay(c.cost)) {
+							log(`💲Paid ${c.cost} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
 							await sleep(400)
 							// Remove card from hand
 							p.hand = p.hand.filter(item => item !== c)
@@ -1631,7 +1644,7 @@
 								await p.addToBattle(c)
 								await render()
 								await run(c, "Deploy")
-							} else if (c.type == "PILOT" > -1) {
+							} else if (c.type == "PILOT") {
 								await pair(empty_units[0], c)
 								empty_units = p.battle.filter(bc => !bc.pilot && hasText(bc.type, "UNIT"))
 							}
@@ -1717,8 +1730,10 @@
 								rest(att)
 								await battle(att, enemy.hand[0] || enemy.resource[0])
 								log("💀" + enemy.name + " kill by " + att)
+								boom.playbackRate = 0.5
 								boom.play().catch(ex => { })
 								await sleep(2000)
+								boom.playbackRate = 1
 								game_over = true
 								await render()
 								break
