@@ -1942,15 +1942,15 @@
 						let ex_res_count = p.resource.filter(bc => hasText(bc.type, "EX")).length || 0
 						// log(`🤔Considering ${c.type} #${c.cid} ${c.id} ${c.name}`)
 						if (await p.pay(c.cost)) {
-							log(`💲Paid ${c.cost} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
-							await sleep(400)
 							// Remove card from hand
 							p.hand = p.hand.filter(item => item !== c)
 							await render()
 							if (c.type == "COMMAND") {
 								// Do pilot part of command 2/3 of the time.
 								if ((!hasText(c.text, "【Pilot】") || rnd(1, 3) > 2) && await run(c)) {
+									log(`💲Paid ${c.cost} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
 									log(`⚡Ran #${c.cid} ${c.toString(true)} Main: ${escapeHTML(c.text)}`)
+									await sleep(400)
 									p.trash.push(c)
 									await render()
 									continue
