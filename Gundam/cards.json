@@ -72,7 +72,7 @@
             "Tekkadan",
             "Gundam Frame"
         ],
-        "link": "",
+        "link": "[Akihiro Altland]",
         "ap": 3,
         "hp": 4
     },
@@ -244,7 +244,7 @@
             "Tekkadan",
             "Gundam Frame"
         ],
-        "link": "",
+        "link": "[Mikazuki Augus]",
         "ap": 4,
         "hp": 5
     },
@@ -396,7 +396,7 @@
         "id": "GD03-092",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Nyaan",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】Place the top card of your deck into your trash. If you placed a (Zeon)/(Clan) card with this effect, choose 1 enemy Unit. Deal 1 damage to it.",
@@ -943,7 +943,7 @@
         "id": "ST07-001",
         "color": "PURPLE",
         "level": 5,
-        "cost": 5,
+        "cost": 4,
         "type": "UNIT",
         "name": "Gundam Exia",
         "text": "At the end of your turn, if there are 7 or more (CB) cards in your trash, choose 1 of your Resources. Set it as active.<br>【When Paired】Place the top 2 cards of your deck into your trash. If you place a (CB) card with this effect, draw 1.",
@@ -955,7 +955,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Setsuna F. Seiei]",
         "ap": 4,
         "hp": 4
     },
@@ -1254,7 +1254,7 @@
         "id": "GD02-091",
         "color": "RED",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "PILOT",
         "name": "Haman Karn",
         "text": "【Burst】Add this card to your hand.<br />【When Paired】If this Unit is red, choose 1 enemy Unit whose Lv. is equal to or lower than this Unit. Deal 1 damage to it.",
@@ -1452,7 +1452,7 @@
         "traits": [
             "Mafty"
         ],
-        "link": "",
+        "link": "(Mafty) Trait",
         "ap": 2,
         "hp": 1
     },
@@ -1951,7 +1951,7 @@
         "id": "ST07-013",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "COMMAND",
         "name": "Armed Intervention",
         "text": "【Burst】Draw 1.<br>【Action】Choose 1 rested friendly (CB) Unit. Change the attack target of the battling enemy Unit to it.",
@@ -2604,7 +2604,7 @@
         "id": "ST04-007",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 3,
         "type": "UNIT",
         "name": "Aegis Gundam (MA Mode)",
         "text": "<Breach 3> (When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
@@ -2615,7 +2615,7 @@
         "traits": [
             "ZAFT"
         ],
-        "link": "",
+        "link": "[Athrun Zala]",
         "ap": 3,
         "hp": 4
     },
@@ -2668,7 +2668,7 @@
             "Tekkadan",
             "Gundam Frame"
         ],
-        "link": "",
+        "link": "[Mikazuki Augus]",
         "ap": 2,
         "hp": 4
     },
@@ -2866,7 +2866,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "",
+        "link": "[Amate Yuzuriha (Machu)]",
         "ap": 4,
         "hp": 2
     },
@@ -2885,7 +2885,7 @@
         "traits": [
             "Gjallarhorn"
         ],
-        "link": "",
+        "link": "[McGillis Fareed]",
         "ap": 4,
         "hp": 2
     },
@@ -2903,7 +2903,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "",
+        "link": "[Gaia]",
         "ap": 2,
         "hp": 2
     },
@@ -2941,7 +2941,7 @@
         "id": "GD02-098",
         "color": "WHITE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Quattro Bajeena",
         "text": "This card's name is also treated as [Char Aznable].<br />【Burst】Add this card to your hand.<br />【When Linked】If this is an (AEUG) Unit, draw 1. If you do, discard 1.",
@@ -3273,7 +3273,7 @@
         "id": "GD02-085",
         "color": "BLUE",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "PILOT",
         "name": "Four Murasame",
         "text": "【Burst】Add this card to your hand.<br />【During Link】【Once per Turn】During your turn, when this Unit recovers HP, if you have 4 or less cards in your hand, draw 1.",
@@ -3290,7 +3290,7 @@
         "id": "GD02-087",
         "color": "BLUE",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "PILOT",
         "name": "Orga, Crot, and Shani",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】If this is a blue Unit, choose 1 enemy Unit with <Blocker>. Rest it.",
@@ -3398,7 +3398,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "",
+        "link": "[Shuji Itō]",
         "ap": 4,
         "hp": 3
     },
@@ -3416,7 +3416,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "",
+        "link": "[Ortega (GQ)]",
         "ap": 3,
         "hp": 2
     },
@@ -3435,7 +3435,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "",
+        "link": "(Clan) Trait",
         "ap": 3,
         "hp": 3
     },
@@ -3548,7 +3548,7 @@
         "id": "ST03-010",
         "color": "RED",
         "level": 6,
-        "cost": 6,
+        "cost": 1,
         "type": "PILOT",
         "name": "Full Frontal",
         "text": "【Burst】Add this card to your hand.<br />【When Paired】You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.",
@@ -3815,7 +3815,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "",
+        "link": "[Amate Yuzuriha (Machu)]",
         "ap": 4,
         "hp": 4
     },
@@ -4098,7 +4098,7 @@
         "id": "GD03-086",
         "color": "BLUE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Yazan Gable",
         "text": "【Burst】Add this card to your hand.<br />【Attack】Choose 1 of your (Titans) Units whose Lv. is equal to or lower than this Unit. It gets AP+1 during this turn.",
@@ -4114,7 +4114,7 @@
         "id": "GD03-087",
         "color": "BLUE",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Sarah Zabiarov",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】Choose 1 enemy Unit that is Lv.3 or lower. Rest it.",
@@ -4267,7 +4267,7 @@
         "id": "GD02-086",
         "color": "BLUE",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Jerid Messa",
         "text": "【Burst】Add this card to your hand.<br />While you have another (Titans) Unit in play, this gets AP+1.",
@@ -4283,7 +4283,7 @@
         "id": "GD02-094",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Garrod Ran & Tiffa Adill",
         "text": "【Burst】Add this card to your hand.<br />【When Paired】You may discard 1. If you do, look at the top 3 cards of your deck. You may reveal 1 (Vulture) Unit card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.",
@@ -4346,7 +4346,7 @@
         "id": "ST04-016",
         "color": "RED",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "BASE",
         "name": "Vesalius",
         "text": "【Burst】Deploy this card.<br />【Deploy】Add 1 of your Shields to your hand.<br />【Activate･Main】Rest this Base：Choose 1 friendly Unit. It gets AP+1 during this turn.",
@@ -4365,7 +4365,7 @@
         "id": "ST08-005",
         "color": "RED",
         "level": 3,
-        "cost": 3,
+        "cost": 2,
         "type": "UNIT",
         "name": "Messer Type-F02 Minelayer",
         "text": "",
@@ -4384,7 +4384,7 @@
         "id": "ST08-014",
         "color": "RED",
         "level": 2,
-        "cost": 2,
+        "cost": 1,
         "type": "BASE",
         "name": "Valiant",
         "text": "【Burst】Deploy this card.<br>【Deploy】Add 1 of your Shields to your hand. Then, choose 1 of your Units. It gets AP+2 during this turn.",
@@ -4414,7 +4414,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "",
+        "link": "[Shuji Itō]",
         "ap": 0,
         "hp": 0
     },
@@ -4487,7 +4487,7 @@
         "id": "ST08-015",
         "color": "BLUE",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "BASE",
         "name": "Davao",
         "text": "【Burst】Deploy this card.<br>【Deploy】Add 1 of your Shields to your hand.<br>【Activate･Main】【Once per Turn】②：Choose 1 of your Units. It recovers 2 HP.",
@@ -4715,7 +4715,7 @@
         "id": "GD02-110",
         "color": "PURPLE",
         "level": 6,
-        "cost": 6,
+        "cost": 2,
         "type": "COMMAND",
         "name": "Awakened Power",
         "text": "【Main】Choose 1 Unit card that is Lv.5 or lower from your trash. Pay its cost to deploy it.",
@@ -5241,7 +5241,7 @@
         "traits": [
             "Gjallarhorn"
         ],
-        "link": "",
+        "link": "(Gjallarhorn) Trait",
         "ap": 3,
         "hp": 2
     },
@@ -5493,7 +5493,7 @@
         "id": "GD02-096",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Desil Galette",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】You may choose 1 (Vagan) Unit card that is Lv.2 or lower from your trash. Pay its cost to deploy it.",
@@ -5566,7 +5566,7 @@
         "id": "GD03-094",
         "color": "PURPLE",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "PILOT",
         "name": "Zeheart Galette",
         "text": "【Burst】Add this card to your hand.<br />【When Paired】Place the top 2 cards of your deck into your trash. If you placed a (Vagan) card with this effect, choose 1 enemy Unit. It gets AP-2 during this turn.",
@@ -5685,7 +5685,7 @@
         "id": "GD02-076",
         "color": "WHITE",
         "level": 4,
-        "cost": 4,
+        "cost": 3,
         "type": "UNIT",
         "name": "Buster Gundam",
         "text": "While this Unit has 5 or more AP, it gains <Blocker>.<br />(Rest this Unit to change the attack target to it.)",
@@ -5696,7 +5696,7 @@
         "traits": [
             "Triple Ship Alliance"
         ],
-        "link": "",
+        "link": "(Coordinator) Trait",
         "ap": 4,
         "hp": 3
     },
@@ -5742,7 +5742,7 @@
         "id": "GD02-090",
         "color": "GREEN",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "PILOT",
         "name": "Challia Bull (GQ)",
         "text": "【Burst】Add this card to your hand.<br />While you have another Unit with <High-Maneuver> in play, this Unit gets AP+1.",
@@ -5983,7 +5983,7 @@
         "id": "GD03-098",
         "color": "WHITE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Graham Aker",
         "text": "【Burst】Add this card to your hand.<br />【During Link】When this rested Unit is set as active by an effect, choose 1 enemy Unit with 3 or less HP. Return it to its owner's hand.",
@@ -6000,7 +6000,7 @@
         "id": "GD03-099",
         "color": "WHITE",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Emma Sheen",
         "text": "【Burst】Add this card to your hand.<br />【During Link】【Destroyed】If a friendly white Base is in play, choose 1 enemy Unit whose Lv. is equal to or lower than this Unit. Return it to its owner's hand.",
@@ -6074,7 +6074,7 @@
         "id": "GD02-092",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Shagia Frost",
         "text": "【Burst】Add this card to your hand.<br />【During Link】【Attack】Choose 1 of your (New UNE) Units. It gets AP+2 during this turn.",
@@ -6090,7 +6090,7 @@
         "id": "GD02-097",
         "color": "WHITE",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "PILOT",
         "name": "Kamille Bidan",
         "text": "【Burst】Add this card to your hand.<br />While there is a friendly white Base in play, this Unit gets AP+2.",
@@ -6121,7 +6121,7 @@
         "id": "GD02-102",
         "color": "BLUE",
         "level": 2,
-        "cost": 2,
+        "cost": 1,
         "type": "COMMAND",
         "name": "Mouar’s Determination",
         "text": "【Main】/【Action】Choose 1 friendly (Titans) Unit. It gets AP+2 during this turn.<br />【Pilot】[Mouar Pharaoh]",
@@ -6189,7 +6189,7 @@
         "id": "ST08-001",
         "color": "RED",
         "level": 9,
-        "cost": 9,
+        "cost": 8,
         "type": "UNIT",
         "name": "Ξ Gundam",
         "text": "While you have no Units that are Lv.6 or higher in play, this card in your hand gets Lv. -1 and cost -1 for each enemy Unit in play.<br>【When Paired】Choose 1 enemy Unit with the highest Lv. Deal 3 damage to it.",
@@ -6200,7 +6200,7 @@
         "traits": [
             "Mafty"
         ],
-        "link": "",
+        "link": "[Hathaway Noa]",
         "ap": 5,
         "hp": 5
     },
@@ -6208,7 +6208,7 @@
         "id": "ST08-006",
         "color": "BLUE",
         "level": 7,
-        "cost": 7,
+        "cost": 6,
         "type": "UNIT",
         "name": "Penelope",
         "text": "【During Pair】【Attack】【Once per Turn】If this Unit is attacking the enemy player, reveal 1 (Earth Federation) Unit card from your hand. Return it to the bottom of your deck. If you do, draw 2.",
@@ -6219,7 +6219,7 @@
         "traits": [
             "Earth Federation"
         ],
-        "link": "",
+        "link": "[Lane Aim]",
         "ap": 5,
         "hp": 5
     },
@@ -6227,7 +6227,7 @@
         "id": "ST06-009",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Amate Yuzuriha (Machu)",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】Look at the top card of your deck. If it is a (Clan) card, you may reveal it and add it to your hand. Return any remaining card to the bottom of your deck.",
@@ -6303,7 +6303,7 @@
         "id": "ST08-010",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Hathaway Noa",
         "text": "【Burst】Add this card to your hand.<br>【When Paired】If this is a (Mafty) Unit, choose 1 of your (Mafty) Units. During this turn, it may choose a damaged active enemy Unit as its attack target.",
@@ -6337,7 +6337,7 @@
         "id": "GD02-089",
         "color": "GREEN",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Lalah Sune",
         "text": "【Burst】Add this card to your hand.<br />【When Paired】Choose 1 of your other (Zeon) Link Units. It gains <Breach 1> during this turn.<br />(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
@@ -6387,7 +6387,7 @@
         "id": "GD03-097",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Wistario Afam",
         "text": "【Burst】Add this card to your hand.<br />【During Link】【Once per Turn】During your turn, when this Unit destroys an enemy Unit with battle damage, look at the top 2 cards of your deck and return 1 to the top. Place the remaining card into your trash.",
@@ -6420,7 +6420,7 @@
         "id": "GD02-095",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Lafter Frankland",
         "text": "【Burst】Add this card to your hand.<br />【Attack】If this Unit is damaged and Lv.5 or lower, it gains <High-Maneuver> during this battle.<br />(This Unit can't be blocked.)",
@@ -6644,8 +6644,8 @@
         "ap": 1,
         "hp": 2
     },
-    "ST08-008_PR": {
-        "id": "ST08-008_PR",
+    "ST08-008": {
+        "id": "ST08-008",
         "color": "BLUE",
         "level": 3,
         "cost": 3,
@@ -6830,7 +6830,7 @@
         "id": "GD03-100",
         "color": "WHITE",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Soma Peries",
         "text": "【Burst】Add this card to your hand.<br />【Destroyed】Choose 1 enemy Unit. It gets AP-3 during this turn.",
@@ -6955,7 +6955,7 @@
         "id": "GD02-088",
         "color": "GREEN",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Flit Asuno",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】Look at the top 3 cards of your deck. You may reveal 1 green (Earth Federation) Unit card/1 card with \"AGE Device\" in its card name among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.",
@@ -6973,7 +6973,7 @@
         "id": "GD02-099",
         "color": "WHITE",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Gaelio Bauduin",
         "text": "【Burst】Add this card to your hand.<br />【When Paired】If there are 4 or more (Gjallarhorn) cards in your trash, choose 1 enemy Unit. It gets AP-2 during this turn.",
@@ -7300,7 +7300,7 @@
         "id": "ST07-011",
         "color": "GREEN",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Lockon Stratos (Neil)",
         "text": "【Burst】Add this card to your hand.<br>【When Paired】If this is a (CB) Unit, it may choose an active enemy Unit whose Lv. is equal to or lower than this Unit as its attack target during this turn.",
@@ -7672,7 +7672,7 @@
         "id": "GD03-027",
         "color": "GREEN",
         "level": 3,
-        "cost": 3,
+        "cost": 2,
         "type": "UNIT",
         "name": "Z’Gok E",
         "text": "",
@@ -7863,7 +7863,7 @@
         "id": "GD03-089",
         "color": "GREEN",
         "level": 2,
-        "cost": 2,
+        "cost": 1,
         "type": "PILOT",
         "name": "Bernard Wiseman",
         "text": "【Burst】Add this card to your hand.<br />Increase this Unit's AP by an amount equal to the number of (Cyclops Team) Pilot cards/Command cards with unique names in your trash.",
@@ -7954,7 +7954,7 @@
         "id": "GD02-093",
         "color": "RED",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Olba Frost",
         "text": "【Burst】Add this card to your hand.<br />During your turn, when this Unit destroys an enemy Unit paired with a (Newtype) Pilot with battle damage, draw 1.",
@@ -8034,7 +8034,7 @@
         "id": "ST08-002",
         "color": "RED",
         "level": 5,
-        "cost": 5,
+        "cost": 4,
         "type": "UNIT",
         "name": "Ξ Gundam",
         "text": "【Deploy】Choose 1 enemy Unit. Deal 1 damage to it.",
@@ -8045,7 +8045,7 @@
         "traits": [
             "Mafty"
         ],
-        "link": "",
+        "link": "[Hathaway Noa]",
         "ap": 4,
         "hp": 4
     },
@@ -8073,7 +8073,7 @@
         "id": "GD03-093",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Carris Nautilus",
         "text": "【Burst】Add this card to your hand.<br />While no enemy Base is in play, this Unit gets AP+1.",
@@ -8104,7 +8104,7 @@
         "id": "GD03-096",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Jamil Neate",
         "text": "【Burst】Add this card to your hand.<br />【During Link】【Attack】You may discard 1. If you do, draw 1.",
@@ -8121,7 +8121,7 @@
         "id": "GD03-095",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Azee Gurumin",
         "text": "【Burst】Add this card to your hand.<br />【Once per Turn】When this Unit receives effect damage, choose 1 enemy Unit. It gets AP-1 during this turn.",
@@ -8137,7 +8137,7 @@
         "id": "GD03-090",
         "color": "GREEN",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Mikhail Kaminsky",
         "text": "【Burst】Add this card to your hand.<br />【Attack】Choose 1 of your (Cyclops Team) Units. It gains <Breach 1> during this turn.<br />(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
@@ -8154,7 +8154,7 @@
         "id": "GD03-084",
         "color": "BLUE",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "PILOT",
         "name": "Paptimus Scirocco",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】Choose 1 of your other Units. It gains <Repair 2> during this turn. Then, if it is a (Jupitris) Unit, draw 1.<br />(At the end of your turn, this Unit recovers the specified number of HP.)",
@@ -8172,7 +8172,7 @@
         "id": "GD03-107",
         "color": "GREEN",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "COMMAND",
         "name": "Over the River and Through the Woods",
         "text": "【Main】Choose 1 enemy Unit that is Lv.5 or lower. Deal damage to it equal to the number of friendly Unit tokens in play.<br />【Pilot】[Hardie Steiner]",
@@ -8203,7 +8203,7 @@
         "id": "GD03-085",
         "color": "BLUE",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Christina Mackenzie",
         "text": "【Burst】Add this card to your hand.<br />When playing this card from your hand and pairing it with a Unit with \"Gundam NT-1\" in its card name, play this card as if it has 0 cost.",
@@ -8813,7 +8813,7 @@
         "id": "GD03-088",
         "color": "GREEN",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Asemu Asuno",
         "text": "【Burst】Add this card to your hand.<br />【During Link】If this is an (AGE System) Unit, it gets AP+1 and <Breach 1>.<br />(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
@@ -8830,7 +8830,7 @@
         "id": "GD03-091",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Rau Le Creuset",
         "text": "【Burst】Add this card to your hand.<br />【When Linked】Choose 1 (ZAFT) Base card from your trash. Add it to your hand.",
@@ -8947,7 +8947,7 @@
         "id": "ST08-003",
         "color": "RED",
         "level": 4,
-        "cost": 4,
+        "cost": 2,
         "type": "UNIT",
         "name": "Messer (Type-F Naked) (Commander Type)",
         "text": "",
@@ -8958,7 +8958,7 @@
         "traits": [
             "Mafty"
         ],
-        "link": "",
+        "link": "(Mafty) Trait",
         "ap": 4,
         "hp": 3
     },
@@ -9157,7 +9157,7 @@
         "id": "GD03-070",
         "color": "WHITE",
         "level": 6,
-        "cost": 6,
+        "cost": 5,
         "type": "UNIT",
         "name": "Freedom Gundam",
         "text": "While this Unit is rested, friendly Shields can't receive battle damage from enemy Units.",
@@ -9168,7 +9168,7 @@
         "traits": [
             "Triple Ship Alliance"
         ],
-        "link": "",
+        "link": "[Kira Yamato]",
         "ap": 4,
         "hp": 5
     },
@@ -9210,11 +9210,11 @@
         "ap": 0,
         "hp": 5
     },
-    "ST07-004_PR": {
-        "id": "ST07-004_PR",
+    "ST07-004": {
+        "id": "ST07-004",
         "color": "PURPLE",
         "level": 3,
-        "cost": 3,
+        "cost": 2,
         "type": "UNIT",
         "name": "Gundam Virtue",
         "text": "While you have a (CB) Pilot in play, this Unit gains <Blocker>.<br>(Rest this Unit to change the attack target to it.)",
@@ -9226,7 +9226,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Tieria Erde]",
         "ap": 3,
         "hp": 3
     },
@@ -9273,7 +9273,7 @@
         "id": "ST07-009",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Setsuna F. Seiei",
         "text": "【Burst】Add this card to your hand.<br>【Attack】This Unit gets AP+1 during this turn. If there are 7 or more (CB) cards in your trash, all your (CB) Units get AP+1 instead.",
@@ -9339,11 +9339,11 @@
         "ap": 0,
         "hp": 0
     },
-    "ST08-011_PR": {
-        "id": "ST08-011_PR",
+    "ST08-011": {
+        "id": "ST08-011",
         "color": "BLUE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Lane Aim",
         "text": "【Burst】Add this card to your hand.<br>When you draw with an effect, if this is a blue Unit, it gains <High-Maneuver> during this turn.<br>(This Unit can't be blocked.)",
@@ -9393,11 +9393,11 @@
         "ap": 5,
         "hp": 4
     },
-    "ST07-005_PR": {
-        "id": "ST07-005_PR",
+    "ST07-005": {
+        "id": "ST07-005",
         "color": "GREEN",
         "level": 4,
-        "cost": 4,
+        "cost": 3,
         "type": "UNIT",
         "name": "Gundam Dynames",
         "text": "During your turn, when this Unit destroys an enemy Unit with battle damage, this Unit recovers 2 HP.<br>【During Link】This Unit gets AP+2.",
@@ -9409,7 +9409,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Lockon Stratos]",
         "ap": 2,
         "hp": 4
     },
@@ -9450,8 +9450,8 @@
         "ap": 0,
         "hp": 0
     },
-    "ST07-008_PR": {
-        "id": "ST07-008_PR",
+    "ST07-008": {
+        "id": "ST07-008",
         "color": "GREEN",
         "level": 2,
         "cost": 2,
@@ -9466,7 +9466,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
         "ap": 3,
         "hp": 1
     },
@@ -9598,11 +9598,11 @@
         "ap": 4,
         "hp": 3
     },
-    "ST07-006_PR": {
-        "id": "ST07-006_PR",
+    "ST07-006": {
+        "id": "ST07-006",
         "color": "GREEN",
         "level": 3,
-        "cost": 3,
+        "cost": 2,
         "type": "UNIT",
         "name": "Gundam Dynames",
         "text": "",
@@ -9614,7 +9614,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Lockon Stratos]",
         "ap": 3,
         "hp": 3
     },
@@ -9767,11 +9767,11 @@
         "ap": 0,
         "hp": 0
     },
-    "ST08-007_PR": {
-        "id": "ST08-007_PR",
+    "ST08-007": {
+        "id": "ST08-007",
         "color": "BLUE",
         "level": 5,
-        "cost": 5,
+        "cost": 3,
         "type": "UNIT",
         "name": "Penelope",
         "text": "",
@@ -9782,15 +9782,15 @@
         "traits": [
             "Earth Federation"
         ],
-        "link": "",
+        "link": "[Lane Aim]",
         "ap": 5,
         "hp": 4
     },
-    "ST08-012_PR": {
-        "id": "ST08-012_PR",
+    "ST08-012": {
+        "id": "ST08-012",
         "color": "RED",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "COMMAND",
         "name": "Words for Hathaway",
         "text": "【Main】Choose 1 friendly Link Unit. It gains <Breach 1> during this turn.<br>(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)<br>【Pilot】[Gawman Nobile]",
@@ -9806,7 +9806,7 @@
         "id": "ST08-013",
         "color": "RED",
         "level": 5,
-        "cost": 5,
+        "cost": 1,
         "type": "COMMAND",
         "name": "Lady Luck",
         "text": "【Main】/【Action】Choose 1 enemy Unit. Deal 1 damage to it. If a friendly (Mafty) Link Unit is in play, deal 2 damage instead.",
@@ -9820,7 +9820,7 @@
         "id": "ST07-002",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 2,
         "type": "UNIT",
         "name": "Gundam Exia",
         "text": "",
@@ -9832,7 +9832,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Setsuna F. Seiei]",
         "ap": 4,
         "hp": 3
     },
@@ -9840,7 +9840,7 @@
         "id": "ST07-003",
         "color": "PURPLE",
         "level": 5,
-        "cost": 5,
+        "cost": 3,
         "type": "UNIT",
         "name": "Gundam Virtue",
         "text": "",
@@ -9852,15 +9852,15 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Tieria Erde]",
         "ap": 5,
         "hp": 4
     },
-    "ST07-007_PR": {
-        "id": "ST07-007_PR",
+    "ST07-007": {
+        "id": "ST07-007",
         "color": "GREEN",
         "level": 3,
-        "cost": 3,
+        "cost": 2,
         "type": "UNIT",
         "name": "Gundam Kyrios",
         "text": "During your turn, while you have a (CB) Pilot in play, this Unit gets AP+2.",
@@ -9872,7 +9872,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
         "ap": 2,
         "hp": 3
     },
@@ -9915,11 +9915,11 @@
         "ap": 3,
         "hp": 5
     },
-    "ST07-010_PR": {
-        "id": "ST07-010_PR",
+    "ST07-010": {
+        "id": "ST07-010",
         "color": "PURPLE",
         "level": 4,
-        "cost": 4,
+        "cost": 1,
         "type": "PILOT",
         "name": "Tieria Erde",
         "text": "【Burst】Add this card to your hand.<br>【Destroyed】If it is your opponent's turn and this is a (CB) Unit, draw 1.",
@@ -10160,7 +10160,7 @@
         ],
         "link": "",
         "ap": 4,
-        "hp": 0
+        "hp": 1
     },
     "GD04-029": {
         "id": "GD04-029",
@@ -10684,8 +10684,8 @@
         "ap": 2,
         "hp": 3
     },
-    "ST07-014_PR": {
-        "id": "ST07-014_PR",
+    "ST07-014": {
+        "id": "ST07-014",
         "color": "GREEN",
         "level": 1,
         "cost": 1,
@@ -10795,11 +10795,11 @@
         "ap": 2,
         "hp": 2
     },
-    "ST07-012_PR": {
-        "id": "ST07-012_PR",
+    "ST07-012": {
+        "id": "ST07-012",
         "color": "GREEN",
         "level": 3,
-        "cost": 3,
+        "cost": 1,
         "type": "PILOT",
         "name": "Allelujah Haptism",
         "text": "【Burst】Add this card to your hand.<br>During your turn, while you have a (CB) Link Unit in play, this Unit can't receive battle damage from enemy Units with 3 or less AP.",
@@ -10812,11 +10812,11 @@
         "ap": 1,
         "hp": 1
     },
-    "ST07-015_PR": {
-        "id": "ST07-015_PR",
+    "ST07-015": {
+        "id": "ST07-015",
         "color": "PURPLE",
         "level": 2,
-        "cost": 2,
+        "cost": 1,
         "type": "BASE",
         "name": "Ptolemaios",
         "text": "【Burst】Deploy this card.<br>【Deploy】Add 1 of your Shields to your hand.<br>While a rested friendly (CB) Unit is in play, this Base can't receive damage from enemy Units that are Lv.3 or lower, other than Unit tokens.",
