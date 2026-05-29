@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-28</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-29</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -446,6 +446,22 @@
 				}
 				return rv - this.damage
 			}
+			canDamage(def) {
+				if (hasText(def.text, "During your turn, while this Unit has <Breach>, it can't receive battle damage from enemy Units with 3 or less AP.") && active_player == def.owner && def.getBreach() && this.AP() <= 3) return false
+
+				if (hasText(def.text, "During your turn, while you have a (CB) Link Unit in play, this Unit can't receive battle damage from enemy Units with 3 or less AP.") && this.AP() <= 3 && active_player == def.owner && def.battle.some(c => c.hasTrait("CB") && c.linked())) return false
+
+				if (def.facedown && def.owner.battle.some(c => c.text == "While this Unit is rested, friendly Shields can't receive battle damage from enemy Units.")) return false
+
+				if ((def.facedown || def == def.owner.base) && this.level <= 4 && def.owner.traits_eob.includes("noDmgShield enemy.unit.lv4min")) return false
+
+				if (hasText(def.text, "While you have a rested (Zeon) Unit in play, this Base can't receive battle damage from enemy Units that are Lv.4 or lower.") && this.level <= 4 && def.owner.battle.some(c => c.rested && c.hasTrait("Zeon"))) return false
+
+				if (def.traits_eob.some(txt => txt.match(new RegExp(`noDmg enemy.unit$`)))) return false
+
+				if (def.traits_eot.some(txt => txt.match(new RegExp(`noDmg enemy.unit.lv[${this.level}-9]min`)))) return false
+				return true
+			}
 			linked() {
 				return this.pilot && linksWith(this, this.pilot)
 			}
@@ -729,8 +745,7 @@
 4 GD04-088
 3 GD03-106  # Corsica Base is better
 2 GD03-107  # too few?
-1 GD03-126
-`
+1 GD03-126`
 		]
 
 		// card id on the battlefield, link to render element
@@ -756,7 +771,7 @@
 				this.deck = []
 				this.fulldeck = []
 				const lines = decks[rnd(0, decks.length - 1)].split("\n")
-				// const lines = decks[9].split("\n")
+				//const lines = decks[11].split("\n")
 				const colors = []
 				for (const line of lines) {
 					if (line.indexOf("# ") == 0) log(`🎴${name} deck: <a href="#" onclick="showDeck(p${this.pid})">${line.slice(2)}</a>`)
@@ -802,6 +817,27 @@
 				}
 			}
 
+			async breakShield() {
+				const c = this.shield.pop()
+				if (!c) return false
+				log("💥Broke shield: " + c)
+				activate(c)
+				boom.play().catch(ex => { })
+				const mo = /Burst】([^.]+)/.exec(c.text)
+				let toTrash = true
+				if (mo) {
+					log("⚡Burst: " + mo[1])
+					toTrash = !(await run(c, "Burst"))
+					if (toTrash) {
+						log("🚩🚩FIXME: fizzled")
+					}
+				}
+				if (toTrash) this.trash.push(c)
+				await render()
+				await sleep(1000)
+				return true
+			}
+
 			async deploy(card) {
 				if (card.type.indexOf("UNIT") < 0) throw Error("Not a unit: " + card)
 				if (this.battle.length >= 6) {
@@ -810,6 +846,7 @@
 				}
 				log(`🚀Deploy ${card.rested ? "rested " : ""}${card}`)
 				card.sick = true
+				card.damage = 0
 				this.battle.push(card)
 			}
 
@@ -1053,23 +1090,6 @@
 			battlefield.innerHTML = html
 		}
 
-		function canBeDamagedBy(def, att) {
-			if (hasText(def.text, "During your turn, while this Unit has <Breach>, it can't receive battle damage from enemy Units with 3 or less AP.") && active_player == def.owner && def.getBreach() && att.AP() <= 3) return false
-
-			if (hasText(def.text, "During your turn, while you have a (CB) Link Unit in play, this Unit can't receive battle damage from enemy Units with 3 or less AP.") && att.AP() <= 3 && active_player == def.owner && def.battle.some(c => c.hasTrait("CB") && c.linked())) return false
-
-			if (def.facedown && def.owner.battle.some(c => c.text == "While this Unit is rested, friendly Shields can't receive battle damage from enemy Units.")) return false
-
-			if ((def.facedown || def == def.owner.base) && att.level <= 4 && def.owner.traits_eob.includes("noDmgShield enemy.unit.lv4min"))
-
-			if (hasText(def.text, "While you have a rested (Zeon) Unit in play, this Base can't receive battle damage from enemy Units that are Lv.4 or lower.") && att.level <= 4 && def.owner.battle.some(c => c.rested && c.hasTrait("Zeon"))) return false
-
-			if (def.traits_eob.some(txt => txt.match(new RegExp(`noDmg enemy.unit$`)))) return false
-
-			if (def.traits_eot.some(txt => txt.match(new RegExp(`noDmg enemy.unit.lv[${att.level}-9]min`)))) return false
-			return true
-		}
-
 		// https://www.gundam-gcg.com/en/pdf/comprehensiverules_en.pdf section 9.
 		async function actionStep() {
 			// log("Action step")
@@ -1097,7 +1117,7 @@
 							}
 						}
 					} else {
-						refund = await run(c, "Action")  // matches 【Activate･Action】
+						await run(c, "Action")
 					}
 					if (refund) {
 						// No useful target, so don't play this and roll back payment.
@@ -1117,27 +1137,28 @@
 			}
 		}
 
+		function getDamage(att, def) {
+			if (!att.canDamage(def)) return 0
+			let damage = Math.max(0, att.AP())
+			if (hasText(def.text, "If you have a (CB) Pilot in play, when this Unit receives damage from an enemy, reduce it by 1.") && def.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) {
+				if (damage > 0) damage -= 1
+			}
+			return damage
+		}
+
 		async function doBattle(att, def) {
 			defender = def
 			await actionStep()
 			def = defender
 			await battle(att, def)
-			if (canBeDamagedBy(def, att)) {
-				let damage = att.AP()
-				if (hasText(def.text, "If you have a (CB) Pilot in play, when this Unit receives damage from an enemy, reduce it by 1.") && def.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) {
-					if (damage > 0) damage -= 1
-				}
-				if (damage > 0) def.damage += damage
+			let dmg = getDamage(att, def)
+			let destroy_def = false
+			if (dmg) {
+				def.damage += dmg
+				if (hasText(att.text, "When this Unit deals battle damage to an enemy Unit that is Lv.5 or lower, if you have a (CB) Pilot in play, destroy that enemy Unit.") && att.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) destroy_def = true
 			}
-			let destroy_def = def.HP() < 1
-			if (canBeDamagedBy(att, def)) {
-				let damage = def.AP()
-				if (damage > 0) {
-					att.damage += damage
-					if (hasText(att.text, "When this Unit deals battle damage to an enemy Unit that is Lv.5 or lower, if you have a (CB) Pilot in play, destroy that enemy Unit.") && att.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) destroy_def = true
-				}
-			}
-			if (destroy_def) {
+			att.damage += getDamage(def, att)
+			if (destroy_def || def.HP() < 1) {
 				if (hasText(def.type, "UNIT")) {
 					const breach = att.getBreach()
 					if (breach) {
@@ -1146,7 +1167,7 @@
 							await dealDamage(att, def.owner.base, breach)
 						} else if (def.owner.shield.length > 0) {
 							log("➤Breach " + breach)
-							await dealDamage(att, def.owner.shield.slice(-1)[0], breach)
+							await def.owner.breakShield()
 						}
 					}
 				}
@@ -1154,6 +1175,7 @@
 				await run(att, "", "During your turn, when this Unit destroys an enemy Unit with battle damage, ")
 			}
 			if (att.HP() < 1) await destroy(att)
+
 			// end of battle
 			for (const c of p1.battle.concat(p2.battle)) {
 				c.ap_eob = 0
@@ -1193,7 +1215,7 @@
 				// log("DEBUG Running " + card + " " + act + " " + clause)
 			}
 			let rv = await runCard(card, act, clause)
-			if (card.pilot) rv = rv || await runCard(card.pilot, act, clause)
+			if (card.pilot && card.pilot.type == "PILOT") rv = rv || await runCard(card.pilot, act, clause)
 			return rv
 		}
 		async function runCard(card, act, clause) {
@@ -1278,7 +1300,7 @@
 					log(p.name + " puts top card on bottom")
 					p.deck = [c].concat(p.deck)
 				} else {
-					log(p.name + " leaves top card")
+					log("🎴" + p.name + " leaves top card")
 					p.deck.push(c)
 				}
 				return true
@@ -1291,7 +1313,7 @@
 					log(p.name + " puts top card in trash")
 					p.trash.push(c)
 				} else {
-					log(p.name + " leaves top card")
+					log("🎴" + p.name + " leaves top card")
 					p.deck.push(c)
 				}
 				return true
@@ -1497,21 +1519,21 @@
 				const enemy_hp = strongest_enemy && strongest_enemy.AP() || 0
 				const enemy_base_hp = (en.base && en.base.HP()) || 0
 				if (Math.max(enemy_hp, enemy_base_hp) <= target.AP()) return false
-				log("🎯Boosting " + target)
+				log("🎯AP+2 " + target)
 				target.ap_eot += 2
 				return true
 			}
 			if (t == "Choose 1 friendly Link Unit. It gains <Breach 1> during this turn.") {
 				const target = mySort(fu.filter(c => !c.rested && !c.sick && c.linked()), c => c.AP())[0]
 				if (!target || (en.shield.length < 1 && !en.base)) return false
-				log("🎯Boosting " + target)
+				log("🎯Breach+1 " + target)
 				target.traits_eot.push("Breach 1")
 				return true
 			}
 			if (hasText(t, "Choose 1 of your Units. It gains <Breach 3> during this turn.")) {
 				const target = mySort(fu.filter(c => !c.rested && !c.sick), c => c.AP())[0]
 				if (!target || (en.shield.length < 1 && !en.base)) return false
-				log("🎯Boosting " + target)
+				log("🎯Breach+3 " + target)
 				target.traits_eot.push("Breach 3")
 				return true
 			}
@@ -1519,14 +1541,14 @@
 			if (hasText(t, "Choose 1 of your (Cyclops Team) Units. It gains <Breach 1> during this turn.")) {
 				const target = mySort(fu.filter(c => c.traits.includes("Cyclops Team")), c => c.AP())[0]
 				if (!target) return false
-				log("🎯Boosting " + target)
+				log("🎯Breach+1 " + target)
 				target.traits_eot.push("Breach 1")
 				return true
 			}
 			if (hasText(t, "Choose 1 friendly Unit that is Lv.2 or lower. It gains <First Strike> during this turn.")) {
 				const target = mySort(fu.filter(c => c.level <= 2 && !c.rested && !c.sick), c => c.AP())[0]
 				if (!target) return false
-				log("🎯Boosting " + target)
+				log("🎯First Strike " + target)
 				target.traits_eot.push("First Strike")
 				return true
 			}
@@ -1539,9 +1561,9 @@
 					if (card.rested) return false
 					rest(card)
 				}
-				log("🎯Boosting " + target)
+				log("🎯AP+" + mo[1] + " " + target)
 				dealDamage(card, target)
-				target.ap_eot += mo[1]
+				target.ap_eot += parseInt(mo[1])
 				return true
 			}
 			// ST05-001
@@ -1699,7 +1721,7 @@
 				const target = mySort(eu.filter(c => c.HP() <= 3), c => -c.AP())[0]
 				return await dealDamage(card, target, 3)
 			}
-			if (t == " deal 1 damage to all enemy Units that are Lv.3 or lower.") {
+			if (t == "deal 1 damage to all enemy Units that are Lv.3 or lower.") {
 				const targets = eu.filter(c => c.level <= 3)
 				if (targets.length < 1) return false
 				await targets.forEach(target => dealDamage(card, target, 1))
@@ -1777,6 +1799,8 @@
 			if (t == `Choose 1 (Minerva Squad) Unit card without "Force Impulse Gundam" in its card name from your trash. Add it to your hand.`) {
 				const target = p.trash.filter(c => !hasText(c.name, "Force Impulse Gundam"))[0]
 				if (!target) return false
+				log(`🎴${card.owner} took ${target}`)
+				target.damage = 0
 				p.hand.push(target)
 				p.trash = p.trash.filter(c => c !== target)
 				return true
@@ -1855,6 +1879,7 @@
 				if (target) {
 					log(`${p.name} reveals from top ${look}: ${target}`)
 					if (hasText(t, "add it to your hand")) {
+						log(`🎴${p.name} took ${target}`)
 						p.hand.push(target)
 					} else if (hasText(t, "You may deploy")) {
 						p.deploy(target)
@@ -1972,6 +1997,7 @@
 									continue
 								}
 							}
+							log(`💲Paid ${c.cost} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
 							if (c.type == "BASE") {
 								log("🟨Deploy base " + c)
 								c.rested = false
@@ -2044,7 +2070,7 @@
 						}
 
 						// Shield Area
-						if (att.level <= 4 && enemy.traits_eot.some(txt => txt.match(new RegExp(`noShieldDmg enemy.unit.lv[${att.level}-9]`)))) {
+						if (att.level <= 4 && enemy.traits_eot.some(txt => txt.match(new RegExp(`noDmgShield enemy.unit.lv[${att.level}-9]`)))) {
 							log("🛡️Shield area damage prevented.")
 							continue
 						}
@@ -2094,23 +2120,7 @@
 								log("❌Suppression")
 							}
 							for (let i = 0; i < (sup ? 2 : 1); ++i) {
-								const c = enemy.shield.pop()
-								if (!c) break
-								log("💥Broke shield: " + c)
-								activate(c)
-								boom.play().catch(ex => { })
-								const mo = /Burst】([^.]+)/.exec(c.text)
-								let toTrash = true
-								if (mo) {
-									log("⚡Burst: " + mo[1])
-									toTrash = !(await run(c, "Burst"))
-									if (toTrash) {
-										log("FIXME: fizzled")
-									}
-								}
-								if (toTrash) enemy.trash.push(c)
-								await render()
-								await sleep(1000)
+								await p.breakShield()
 							}
 						}
 						for (const c of p1.battle.concat(p2.battle)) {
