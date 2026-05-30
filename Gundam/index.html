@@ -269,7 +269,7 @@
 		let maxDelay = 2
 		function setSpeed() {
 			delay = maxDelay - maxDelay * parseFloat(ndelay.value) / parseFloat(ndelay.max)
-			boom.playbackRate = parseFloat(ndelay.value) / parseFloat(ndelay.max)
+			boom.playbackRate = 1 + parseFloat(ndelay.value) / parseFloat(ndelay.max)
 			pewpew.playbackRate = boom.playbackRate
 		}
 		setSpeed()
