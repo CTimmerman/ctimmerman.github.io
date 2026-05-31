@@ -929,9 +929,10 @@
 				log("💥Broke shield: " + c)
 				activate(c)
 				boom.play().catch(ex => { })
-				const t = /Burst】([^.]+)/.exec(c.text)[1]
 				let toTrash = true
+				let t = /Burst】([^.]+)/.exec(c.text)
 				if (t) {
+					t = t[1]
 					log("⚡Burst: " + t)
 					await run(c, "Burst")
 					toTrash = !(hasText(t, "Add this card to your hand.") || hasText(t, "Deploy this card."))
