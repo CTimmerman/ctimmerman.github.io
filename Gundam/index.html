@@ -174,7 +174,7 @@
 				onclick="setGameOver(true); log(`⛔Stopping game ${game}/${games} by user input`)">Stop</button>
 			<button id="bstart" disabled="true"
 				onclick="if (game_over) {setGameOver(false); setTimeout(playGames, 0) } else alert('Game in progress')">Start</button>
-			<label for="ngames">Games</label> <input id="ngames" type="number" value="1" min="1" max="999"
+			<label for="ngames">Games</label> <input id="ngames" type="number" value="1" min="1" max="9999"
 				onchange="games = this.value" oninput="clamp(this)" />
 			<label for="ndelay">Speed</label> <input id="ndelay" type="number" value="50" min="0" max="100"
 				onchange="setSpeed()" oninput="clamp(this)" />%
@@ -186,7 +186,7 @@
 			<label for="p2deck">P2 deck</label>
 			<select id="p2deck" value="0"></select>
 		</div><br>
-		<div><button onclick="console.clear(); dlog.innerHTML=''">Clear logs</button></div>
+		<div><button onclick="dlog.innerHTML=''">Clear log</button></div>
 	</div>
 	<script>
 		"use strict"
@@ -269,13 +269,13 @@
 		let maxDelay = 2
 		function setSpeed() {
 			delay = maxDelay - maxDelay * parseFloat(ndelay.value) / parseFloat(ndelay.max)
-			boom.playbackRate = 1 + parseFloat(ndelay.value) / parseFloat(ndelay.max)
+			boom.playbackRate = 1 + 2 * parseFloat(ndelay.value) / parseFloat(ndelay.max)
 			pewpew.playbackRate = boom.playbackRate
 		}
 		setSpeed()
 		async function sleep(ms = 1000) {
 			do {
-				if (delay > 0) await new Promise(r => setTimeout(r, delay * ms))
+				await new Promise(r => setTimeout(r, delay * ms))
 			} while (delay == maxDelay)
 		}
 
@@ -315,38 +315,42 @@
 		}
 
 		async function battle(att, def) {
-			if (delay == 0) return
-			/* Too much hassle to move the pilots at well
-			const e = getel(att)
-			const old_top = e.style.top
-			const old_left = e.style.left
-			const e2 = getel(def)
-			e.style.top = e2.style.top
-			e.style.left = e2.style.left
-			await sleep(800)
-			e.style.top = old_top
-			e.style.left = old_left
-			*/
-			const sa = getel(att).style
-			const sd = getel(def).style
-			let x1 = parseFloat(sa.left) + 5
-			let y1 = parseFloat(sa.top) + 5
-			let x2 = parseFloat(sd.left) + 5
-			let y2 = parseFloat(sd.top) + 5
-			// Laser time!
-			overlay.style.display = "block"
-			overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
-				<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px" stroke-linecap="round">
-					<animate attributeName="stroke" values="#880;#fff;#880;" dur="0.2s" repeatCount="indefinite"/>
-					<animate attributeName="stroke-width" values="2px;8px;2px;" dur="0.2s" repeatCount="indefinite"/>
-				</line>
-			</svg>`
-			pewpew.play().catch(ex => { })
-			// vfx
-			await sleep(400)
-			overlay.style.display = "none"
-			// sfx
-			await sleep(200)
+			// if (delay == 0) return
+			try {
+				/* Too much hassle to move the pilots at well
+				const e = getel(att)
+				const old_top = e.style.top
+				const old_left = e.style.left
+				const e2 = getel(def)
+				e.style.top = e2.style.top
+				e.style.left = e2.style.left
+				await sleep(800)
+				e.style.top = old_top
+				e.style.left = old_left
+				*/
+				const sa = getel(att).style
+				const sd = getel(def).style
+				let x1 = parseFloat(sa.left) + 5
+				let y1 = parseFloat(sa.top) + 5
+				let x2 = parseFloat(sd.left) + 5
+				let y2 = parseFloat(sd.top) + 5
+				// Laser time!
+				overlay.style.display = "block"
+				overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
+					<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px" stroke-linecap="round">
+						<animate attributeName="stroke" values="#880;#fff;#880;" dur="0.2s" repeatCount="indefinite"/>
+						<animate attributeName="stroke-width" values="2px;8px;2px;" dur="0.2s" repeatCount="indefinite"/>
+					</line>
+				</svg>`
+				pewpew.play().catch(ex => { })
+				// vfx
+				await sleep(400)
+				overlay.style.display = "none"
+				// sfx
+				await sleep(200)
+			} catch(ex) {
+				// cosmetic
+			}
 		}
 
 		function showDeck(player) {
@@ -411,8 +415,7 @@
 		function log(s = "") {
 			dlog.innerHTML += s + "<br>"
 			dlog.scrollTop = dlog.scrollHeight
-			// lags a lot in Edge
-			// console.log(s)
+			if (hasText(s, "FIXME")) console.log(s)
 		}
 
 		function rnd(min, max) {
@@ -926,14 +929,12 @@
 				log("💥Broke shield: " + c)
 				activate(c)
 				boom.play().catch(ex => { })
-				const mo = /Burst】([^.]+)/.exec(c.text)
+				const t = /Burst】([^.]+)/.exec(c.text)[1]
 				let toTrash = true
-				if (mo) {
-					log("⚡Burst: " + mo[1])
-					toTrash = !(await run(c, "Burst"))
-					if (toTrash) {
-						log("🚩🚩FIXME: fizzled " + c)
-					}
+				if (t) {
+					log("⚡Burst: " + t)
+					await run(c, "Burst")
+					toTrash = !(hasText(t, "Add this card to your hand.") || hasText(t, "Deploy this card."))
 				}
 				if (toTrash) this.trash.push(c)
 				await render()
@@ -1098,7 +1099,7 @@
 		}
 
 		async function render() {
-			if (delay == 0) return
+			// if (delay == 0) return
 			while (window.pause) await sleep(1000)
 			let html = ""
 			for (const p of [p1, p2]) {
@@ -1706,7 +1707,7 @@
 			if (hasText(t, "Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.")) {
 				const target = mySort(fu, c => -c.AP())[0]
 				const enemies = eu.filter(c => c.AP() <= 2)
-				if (!target && enemies.length < 1) return false
+				if (!target || enemies.length < 1) return false
 				log("🎯Protecting " + target)
 				target.traits_eob.push("noDmg enemy.unit.lv2min")
 				return true
@@ -1985,7 +1986,7 @@
 				let targets = p.deck.slice(-look)
 				if (targets.length < 1) return false
 				let target = null
-				if (hasText(t, "If it is a (Clan) card, you may reveal it and add it to your hand. Return any remaining card to the bottom of your deck.")) {
+				if (hasText(t, "If it is a (Clan) card, you may reveal it and add it to your hand.")) {
 					target = targets.filter(c => c.traits.includes("Clan"))[0]
 				}
 				if (hasText(t, "If it is a (Zeon)/(Neo Zeon) Unit card, you may reveal it and add it to your hand.")) {
@@ -2023,8 +2024,8 @@
 				}
 				else if (hasText(t, "You may reveal 1 (Operation Meteor)/(G Team) Unit card/Pilot card among them and add it to your hand.")) {
 					target = targets.filter(c => (c.traits.includes("Operation Meteor") || c.traits.includes("G Team")) && (c.type == "UNIT" || c.type == "PILOT"))[0]
-				} else {
-					log(`🚩🚩FIXME Not implemented ${card.type} ${card.id} ${act}${clause} "${escapeHTML(t)}". p battle length: ${p.battle.length}`)
+				} else if (target === null) {
+					log(`🚩🚩FIXME No target for ${card.type} ${card.id} ${act}${clause} "${escapeHTML(t)}". p battle length: ${p.battle.length}`)
 					return false
 				}
 
@@ -2049,13 +2050,19 @@
 
 		let games = ngames.value
 		let game = 0
+		let game_start = new Date()
 		let game_over = false
 		let p1 = null
 		let p2 = null
 
 		async function playGame() {
+			// prevent lag and make game start easier to find
+			// FIXMEs stay in the browser console
+			dlog.innerHTML = ''
+
 			game += 1
-			log(`\n<br>🏁Game ${game}/${games} start`)
+			game_start = new Date()
+			log(`\n<br>🏁Game ${game}/${games} start: ${game_start.toISOString().replace('T', ' ')}`)
 			setGameOver(false)
 			pid = 0
 			cid = 0
@@ -2346,7 +2353,7 @@
 				deck_stats[loser.deckname] = wdl
 			}
 			let stats = Object.entries(deck_stats).sort((a, b) => a[1] > b[1] ? -1 : a[1] < b[1] ? 1 : 0)
-			log(`🏁Game ${game}/${games} over. ${winner.name} beat ${loser.name}.<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]}<br>\nDecks ranked by W/D/L:`)
+			log(`🏁Game ${game}/${games} end: ${new Date().toISOString().replace('T', ' ')} in ${Math.round((new Date() - game_start) / 1000)}s<br>\n${winner.name} beat ${loser.name}.<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]}<br>\nDecks ranked by W/D/L:`)
 			for (let i = 0; i < stats.length; ++i) {
 				log(`${1 + i}. ${stats[i][0]}: ${stats[i][1]}`)
 			}
@@ -2355,14 +2362,15 @@
 
 		async function playGames() {
 			if (Object.keys(cards).length < 1) await loadCards()
+			window.games_start = new Date()
 			while (game < games) {
 				setSpeed()
 				await playGame()
-				log(`Finished game ${game}/${games}.`)
 				delay = 1
 				await render()
-				await sleep(400)
+				await sleep(200)
 			}
+			if (game > 1) log(`Game ${game} over in ${Number((new Date() - window.games_start) / 60000).toFixed(2)}m`)
 			game = 0
 		}
 
