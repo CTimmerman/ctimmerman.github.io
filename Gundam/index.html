@@ -95,6 +95,27 @@
 			transition: 0.3s;
 		}
 
+		#search {
+			z-index: 9001;
+			position: absolute;
+			width: stretch;
+			height: 100vmin;
+			text-align: center;
+			overflow: auto;
+			transition: 0.3s;
+			background-color: #08080888;
+			border: 1px solid var(--fgcolor);
+			scrollbar-color: var(--fgcolor) var(--bgcolor);
+			scrollbar-width: thin;
+		}
+
+		.searchsmall {
+			height: 3vmin !important;
+			width: 3vmin !important;
+			overflow: hidden !important;
+			border: none !important;
+		}
+
 		#wheel {
 			transition: 0.4s;
 		}
@@ -151,6 +172,11 @@
 
 <body>
 	<div id="overlay"></div>
+	<div id="search" class="searchsmall">
+		<div onclick="toggleSearch()" style="cursor: pointer; background-color: #08080888;"><label for="searchtext">🔎Search</label></div>
+		<input id="searchtext" onchange="findCards(this.value)">
+		<div id="searchresults"></div>
+	</div>
 	<div id="battlefield"></div>
 	<div id="dlog">
 		<a href="https://www.gundam-gcg.com/en/rules/">Gundam Card Game</a><br>
@@ -864,21 +890,37 @@
 3 GD04-098
 4 GD04-081`,
 			`# Cees's Green Zeon deck (G)
-4 ST03-008
-4 ST03-009
-1 ST03-014
-4 GD04-028
-4 GD03-027
-4 GD03-024
-4 ST03-016
-4 GD04-123
-4 GD03-108
-4 GD03-090
-3 GD04-027
-4 GD04-088
-3 GD03-106  # Corsica Base is better
-2 GD03-107  # too few?
-1 GD03-126`
+4 ST03-008 Zaku II
+4 ST03-009 Gouf
+1 ST03-014 The Blue Giant
+4 GD04-028 Zakrello
+4 GD03-027 Z'Gok E  # too weak?
+4 GD03-024 Hy-Gogg
+4 ST03-016 Falmel
+4 GD04-123 A Baoa Qu  # -1
+4 GD03-108 How Many Miles to the Battlefield?
+4 GD03-090 Mikhail Kaminsky # -1
+3 GD04-027 Bigro # +1
+4 GD04-088 Tokwan
+3 GD03-106 M.A.V. Tactics  # not Zeon! Corsica base is better
+2 GD03-107 Over the River and Through the Woods  # too few?
+1 GD03-126 Cyclops Team`,
+			`# Cees's Green Zeon deck 2 (G)
+4 ST03-008 Zaku II
+4 ST03-009 Gouf
+1 ST03-014 The Blue Giant
+4 GD04-028 Zakrello
+4 GD03-027 Z'Gok E  # too weak?
+4 GD03-024 Hy-Gogg
+4 ST03-016 Falmel
+3 GD04-123 A Baoa Qu
+4 GD03-108 How Many Miles to the Battlefield?
+3 GD03-090 Mikhail Kaminsky
+4 GD04-027 Bigro
+4 GD04-088 Tokwan
+4 GD04-032 Xavier's Gyan Hakuji-Packs (GQ)
+2 GD03-107 Over the River and Through the Woods  # too few?
+1 GD03-126 Cyclops Team`,
 		]
 
 		// card id on the battlefield, link to render element
@@ -2339,6 +2381,10 @@
 						continue
 					}
 					if (enemy.base) {
+						if (!att.canDamage(enemy.base)) {
+							log("🛡️Base damage prevented.")
+							continue
+						}
 						let target = enemy.base
 						log("🔫" + att + " attacks " + target)
 						rest(att)
@@ -2493,12 +2539,34 @@
 			game = 0
 		}
 
+		function toggleSearch() {
+			if (search.classList.contains('searchsmall')) search.classList.remove('searchsmall')
+			else search.classList.add('searchsmall')
+		}
 		function toggleSettings() {
-			if (settings.classList.contains("open")) {
-				settings.classList.remove("open")
-				return
+			if (settings.classList.contains("open")) settings.classList.remove("open")
+			else settings.classList.add("open")
+		}
+
+		function findCards(query) {
+			let html = ""
+			let oldcid = cid
+			let count = 0
+			for (const entry of Object.entries(cards)) {
+				const text = JSON.stringify(entry[1])
+				if (text.indexOf(query) > -1) {
+					let left = 5 + (count % 10) * 12
+					let top = 10 + Math.floor(count / 10) * 15
+					count += 1
+					html += p1.getCard(entry[0]).toHTML(left, top)
+				}
 			}
-			settings.classList.add("open")
+			if (count === 0) html = "No results."
+			else {
+				cid = oldcid
+				html = "" + count + " results:<br>" + html
+			}
+			searchresults.innerHTML = html
 		}
 
 		playGames()
