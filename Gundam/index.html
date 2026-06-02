@@ -3,11 +3,10 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11-31</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-02</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
-		a,
 		button,
 		html,
 		input,
@@ -24,6 +23,10 @@
 			background-color: var(--bgcolor);
 			color: var(--fgcolor);
 			scrollbar-color: auto;
+			font-family: monospace;
+		}
+		a {
+			color: var(--fgcolor);
 			font-family: monospace;
 		}
 
@@ -83,6 +86,17 @@
 			height: 100%;
 		}
 
+		#pricecheck {
+			cursor: help;
+			top: 40vmin;
+			left: 60vmin;
+			position: absolute;
+			width: 8vmin;
+			height: 8vmin;
+			display: block;
+			font-size: 3vmin;
+			z-index: 9001;
+		}
 		#settings {
 			z-index: 9001;
 			position: absolute;
@@ -107,13 +121,21 @@
 			border: 1px solid var(--fgcolor);
 			scrollbar-color: var(--fgcolor) var(--bgcolor);
 			scrollbar-width: thin;
+			top: 0vmin;
 		}
 
 		.searchsmall {
-			height: 3vmin !important;
-			width: 3vmin !important;
+			height: 4vmin !important;
+			width: 4vmin !important;
 			overflow: hidden !important;
 			border: none !important;
+			top: 47vmin !important;
+			left: 5vmin !important;
+		}
+
+		.icon {
+			cursor: pointer;
+			font-size: 3vmin;
 		}
 
 		#wheel {
@@ -173,7 +195,7 @@
 <body>
 	<div id="overlay"></div>
 	<div id="search" class="searchsmall">
-		<div onclick="toggleSearch()" style="cursor: pointer; background-color: #08080888;"><label for="searchtext">🔎Search</label></div>
+		<div onclick="toggleSearch()" class="icon"><label for="searchtext">🔎Search</label></div>
 		<input id="searchtext" onchange="findCards(this.value)">
 		<div id="searchresults"></div>
 	</div>
@@ -184,7 +206,7 @@
 	<audio id="pewpew" src="pewpew.opus"></audio>
 	<audio id="boom" src="boom.opus"></audio>
 	<div id="settings">
-		<div id="wheel" title="Settings" onclick="toggleSettings()" style="cursor: pointer; font-size: 3vmin">⚙️</div>
+		<div id="wheel" class="icon" title="Settings" onclick="toggleSettings()">⚙️</div>
 		<br>
 		<div>
 			<label for="volume">Volume</label>
@@ -209,8 +231,10 @@
 		</div><br>
 		<div><button onclick="dlog.innerHTML=''">Clear log</button></div>
 	</div>
+	<div id="pricecheck" onclick="window.open(`https://www.cardtrader.com/en/search?q=${escapeHTML(encodeURIComponent(zoomed.getAttribute('name')))}`, '_blank'); event.stopPropagation();">&nbsp;</div>
 	<script>
 		"use strict"
+		let zoomed = ""
 
 		function clamp(e) {
 			let v = parseInt(e.value)
@@ -379,11 +403,40 @@
 			}
 		}
 
-		function showDeck(player) {
+		function showDeck(name) {
 			window.pause = (window.pause || 0) + 1
 			let html = `<div onclick="overlay.style.display = 'none'; window.pause = 0" style="width:100%; height:100%; background-color: #08080888">`
 			overlay.style.display = "block"
-			let deck = player.fulldeck.toSorted(
+			let decklist = ""
+			for (decklist of decks) {
+				if (decklist.split("\n")[0].indexOf(name) > -1) {
+					break
+				}
+			}
+			let oldcid = cid
+			let fulldeck = []
+			let deckname = "Anonymous deck"
+
+			const lines = decklist.split("\n")
+			const colors = []
+			for (const line of lines) {
+				if (line.indexOf("# ") === 0) {
+					deckname = line.slice(2)
+				}
+				const [count, id] = line.split(" ")
+				if (count >= 1) {
+					for (let i = 0; i < count; ++i) {
+						const c = p1.getCard(id)
+						fulldeck.push(p1.getCard(id))
+						if (!colors.includes(c.color)) colors.push(c.color)
+					}
+				}
+			}
+			html += deckname
+			if (colors.length > 2) alert("Deck colors > 2: " + colors)
+			if (fulldeck.length !== 50) alert("Deck length not 50: " + fulldeck.length)
+
+			let deck = fulldeck.toSorted(
 				(a, b) => {
 					if (a.type > b.type) return 1
 					if (a.type < b.type) return -1
@@ -416,9 +469,11 @@
 		}
 
 		function zoom(e) {
+			zoomed = e
 			event.preventDefault()
 			event.stopPropagation()
 			if (hasText(e.style.transform, "scale")) {
+				pricecheck.style.display = "none"
 				e.style.transform = e.old_transform
 				e.style.zIndex = e.old_zIndex
 				e.style.top = e.old_top
@@ -432,9 +487,12 @@
 
 				e.style.transform = "scale(5)"
 				e.style.zIndex = 9000
-				e.style.top = "40vmin"
+				if (parseInt(e.old_top) < 40) e.style.top = "40vmin"
 				e.style.left = "40vmin"
 				window.pause = (window.pause || 0) + 1
+				pricecheck.style.left = e.style.left
+				pricecheck.style.top = e.style.top
+				pricecheck.style.display = "block"
 			}
 		}
 
@@ -664,7 +722,7 @@
 			}
 			toHTML(left, top, facedown = false, z = 0) {
 				const id = this.id.split("_")[0]
-				return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: var(--${this.color}); background-color: var(--${this.color});background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${this.AP()}/${this.HP()}</div>`
+				return `<div id="c${this.cid}" name="${escapeHTML(this.name)}" class="card ${this.rested ? "rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: var(--${this.color}); background-color: var(--${this.color});background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${this.AP()}/${this.HP()}</div>`
 			}
 
 			hasTrait(trait) {
@@ -955,7 +1013,7 @@
 				for (const line of lines) {
 					if (line.indexOf("# ") === 0) {
 						this.deckname = line.slice(2)
-						log(`🎴${name} deck: <a href="#" onclick="showDeck(p${this.pid}); event.preventDefault()">${this.deckname}</a>`)
+						log(`🎴${name} deck: <a href="#" onclick='showDeck(\"${escapeHTML(this.deckname)}\"); event.preventDefault()'>${this.deckname}</a>`)
 					}
 					const [count, id] = line.split(" ")
 					if (count >= 1) {
@@ -968,7 +1026,7 @@
 						}
 					}
 				}
-				if (colors > 2) throw Error("Deck colors > 2: " + colors)
+				if (colors.length > 2) throw Error("Deck colors > 2: " + colors)
 				if (this.deck.length !== 50) throw Error("Deck length not 50: " + this.deck.length)
 				shuffle(this.deck)
 				// Maybe still useful for fuzzing.
@@ -2502,11 +2560,10 @@
 				wdl[2] += 1
 				deck_stats[loser.deckname] = wdl
 			}
-			// For CLI: let dur = Number((new Date() - games_start) / 60000); JSON.stringify(Object.entries(deck_stats).sort(sortStats)) + " / " + game + " / " + dur.toFixed(2) + " = " + (dur/game*60).toFixed(2) + "s/game"
 			let stats = Object.entries(deck_stats).sort(sortStats)
 			log(`🏁Game ${game}/${games} end: ${new Date().toISOString().replace('T', ' ')} in ${Math.round((new Date() - game_start) / 1000)}s<br>\n${winner.name} beat ${loser.name}.<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]}<br>\nDecks ranked by W/D/L:`)
 			for (let i = 0; i < stats.length; ++i) {
-				log(`${1 + i}. ${stats[i][0]}: ${stats[i][1]}`)
+				log(`${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(stats[i][0])}\"); event.preventDefault()'>${stats[i][0]}</a>: ${stats[i][1]}`)
 			}
 			log()
 		}
@@ -2532,11 +2589,20 @@
 				setSpeed()
 				await playGame()
 				delay = 1
+				// For CLI: let dur = Number((new Date() - games_start) / 60000); JSON.stringify(Object.entries(deck_stats).sort(sortStats)) + " / " + game + " / " + dur.toFixed(2) + " = " + (dur/game*60).toFixed(2) + "s/game; " + ((games-game) * dur/game*60).toFixed(2) + "m left"
+				const m = Number((new Date() - games_start) / 60000)
+				if (game > 1) {
+					let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m`
+					if (game < games) msg += "; " + ((games - game) * m / game).toFixed(2) + "m left"
+					log(msg)
+				}
 				await render()
-				await sleep(200)
+				if (games <= 10) await sleep(3000)
+				else await sleep(300)
 			}
-			if (game > 1) log(`Game ${game} over in ${Number((new Date() - window.games_start) / 60000).toFixed(2)}m`)
 			game = 0
+			deck_stats = {}
+			player_wins = [0, 0]
 		}
 
 		function toggleSearch() {
