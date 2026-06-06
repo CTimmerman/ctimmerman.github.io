@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-02</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-06</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -25,6 +25,7 @@
 			scrollbar-color: auto;
 			font-family: monospace;
 		}
+
 		a {
 			color: var(--fgcolor);
 			font-family: monospace;
@@ -92,11 +93,12 @@
 			left: 60vmin;
 			position: absolute;
 			width: 8vmin;
-			height: 8vmin;
+			height: 4vmin;
 			display: block;
 			font-size: 3vmin;
 			z-index: 9001;
 		}
+
 		#settings {
 			z-index: 9001;
 			position: absolute;
@@ -210,7 +212,7 @@
 		<br>
 		<div>
 			<label for="volume">Volume</label>
-			<input id="volume" type="range" value="0.2" min="0" max="1" step="0.1" onchange="setVolume()" /><br>
+			<input id="volume" type="range" value="0.1" min="0" max="1" step="0.1" onchange="setVolume()" /><br>
 		</div>
 		<div>
 			<button id="bstop"
@@ -231,7 +233,9 @@
 		</div><br>
 		<div><button onclick="dlog.innerHTML=''">Clear log</button></div>
 	</div>
-	<div id="pricecheck" onclick="window.open(`https://www.cardtrader.com/en/search?q=${escapeHTML(encodeURIComponent(zoomed.getAttribute('name')))}`, '_blank'); event.stopPropagation();">&nbsp;</div>
+	<div id="pricecheck"
+		onclick="window.open(`https://www.cardtrader.com/en/search?q=${escapeHTML(encodeURIComponent(zoomed && zoomed.getAttribute('name')))}`, '_blank'); event.stopPropagation();">
+		&nbsp;</div>
 	<script>
 		"use strict"
 		let zoomed = ""
@@ -243,13 +247,15 @@
 
 		function setVolume() {
 			// complete silence pauses execution while screen is locked
-			boom.volume = Math.max(0.01, parseFloat(volume.value))
+			boom.volume = Math.max(0.005, parseFloat(volume.value))
 			pewpew.volume = boom.volume
 		}
 		setVolume()
 
 		let active_player = null
 		let defender = null
+		let destroyer = null
+		let once_per_turn = []
 
 		let cards = {}
 		// Why doesn't upstream list EXR promos like other promos?
@@ -265,7 +271,7 @@
 		}
 
 		function escapeHTML(unsafe) {
-			return unsafe
+			return (unsafe || "")
 				.replaceAll("&", "&amp;")
 				.replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;")
@@ -273,7 +279,7 @@
 				.replaceAll("'", "&#039;")
 		}
 		function unescapeHTML(unsafe) {
-			return unsafe
+			return (unsafe || "")
 				.replaceAll("&amp;", "&")
 				.replaceAll("&lt;", "<")
 				.replaceAll("&gt;", ">")
@@ -490,8 +496,8 @@
 				if (parseInt(e.old_top) < 40) e.style.top = "40vmin"
 				e.style.left = "40vmin"
 				window.pause = (window.pause || 0) + 1
-				pricecheck.style.left = e.style.left
-				pricecheck.style.top = e.style.top
+				pricecheck.style.left = `${parseFloat(e.style.left) + 22}vmin`
+				pricecheck.style.top = `${parseFloat(e.style.top) - 27}vmin`
 				pricecheck.style.display = "block"
 			}
 		}
@@ -499,7 +505,7 @@
 		function log(s = "") {
 			dlog.innerHTML += s + "<br>"
 			dlog.scrollTop = dlog.scrollHeight
-			if (hasText(s, "FIXME")) console.log(s)
+			if (hasText("" + s, "FIXME")) console.log(s)
 		}
 
 		function rnd(min, max) {
@@ -520,13 +526,17 @@
 		// })(Type || (Type = {}));
 
 		function getPilotName(card) {
-			if (card.type === "PILOT") return card.name
+			if (card.type === "PILOT") {
+				let brace = card.name.indexOf(" (")
+				if (brace > -1) return card.name.slice(0, card.name.indexOf(" ("))
+				return card.name
+			}
 			let rv = getSectionText(card, "Pilot")
 			return rv.slice(1, rv.indexOf(" ("))
 		}
 
 		async function pair(unit, pilot) {
-			log(`🧑‍✈️Pair ${pilot.AP()}/${pilot.HP()} ${getPilotName(pilot)} with ${unit}`)
+			log(`🧑‍✈️Pair ${pilot.AP()}/${pilot.HP()} #${pilot.cid} ${getPilotName(pilot)} with ${unit}`)
 			unit.pilot = pilot
 			pilot.unit = unit
 			await render()
@@ -544,7 +554,8 @@
 			if (!pilot) return false
 			let pilot_name = getPilotName(pilot)
 			for (let part of unit.link.split(" / ")) {
-				if (part === `[${pilot_name}]`) return true
+				if (part === `[${pilot_name}]`) return true // (Neil)
+				if (part === `[${pilot.name}]`) return true // (Machu)
 				if (pilot_name === "Quattro Bajeena" && part === "Char Aznable") return true
 				if (part.indexOf(" Trait") > -1) part = part.slice(0, -6)
 				if (unit.traits.includes(part.slice(1, -1))) return true
@@ -631,6 +642,9 @@
 				if (this.damage > 0 && hasText(this.text, "While this Unit is damaged, it gets AP+2.")) {
 					rv += 2
 				}
+				if (hasText(this.text, "【During Link】 This Unit gets AP+2.") && this.linked()) {
+					rv += 2
+				}
 				if (this.pilot) {
 					rv += this.pilot.ap
 				}
@@ -686,18 +700,18 @@
 				log("🛠️Recover " + number + " " + this)
 				this.damage -= parseInt(number)
 				if (this.damage < 0) this.damage = 0
-				if (this.linked && !window.once_per_turn.includes(this.text + this.cid) && hasText(this.text, "【During Link】【Once per Turn】During your turn, when this Unit recovers HP, if you have 4 or less cards in your hand, draw 1.") && this.owner.hand.length <= 4) {
+				if (this.linked && !once_per_turn.includes(this.text + this.cid) && hasText(this.text, "【During Link】【Once per Turn】During your turn, when this Unit recovers HP, if you have 4 or less cards in your hand, draw 1.") && this.owner.hand.length <= 4) {
 					this.owner.draw()
-					window.once_per_turn.push(this.text + this.cid)
+					once_per_turn.push(this.text + this.cid)
 				}
 				return true
 			}
 			toString(simple = false) {
 				let rv = simple ? "" : (this.type === "COMMAND" || hasText(this.type, "RESOURCE")) ? `#${this.cid} ` : `${this.AP()}/${this.HP()} #${this.cid} `
-				if (this.type === "COMMAND" && this.unit) return rv + getSectionText(this, "Pilot").slice(1, -1)
-				if (this.type === "PILOT" && simple) return this.name
+				if (this.type === "COMMAND" && this.unit) return rv + getPilotName(this)
+				if (this.type === "PILOT" && simple) return getPilotName(this)
 				let pilot_name = ""
-				if (this.pilot) pilot_name = this.pilot.toString(true)
+				if (this.pilot) pilot_name = getPilotName(this.pilot)
 				return rv + `${this.name}${pilot_name ? " + " + pilot_name : ""}`
 			}
 			toDict() {
@@ -751,7 +765,9 @@
 			}
 
 			getBreach() {
-				return (this.text + this.traits_eot).matchAll(/Breach (\d)/g).map(mo => parseInt(mo[1])).reduce((tot, a) => tot + a, 0)
+				let rv = (this.text + this.traits_eot).matchAll(/(?<!gains? <)Breach (\d)/g).map(mo => parseInt(mo[1])).reduce((tot, a) => tot + a, 0)
+				if (hasText(this.type, "TOKEN")) rv += this.owner.battle.filter(c => hasText(c.text, "All your Unit tokens gain <Breach 1>.")).length
+				return rv
 			}
 		}
 
@@ -947,38 +963,46 @@
 4 ST01-010
 3 GD04-098
 4 GD04-081`,
-			`# Cees's Green Zeon deck (G)
+			`# Cees's CB deck (G)
+4 ST07-008 Gundam Kyrios (Flight Mode)
+4 GD03-028 Auda's Maganac
+4 ST07-006 Gundam Dynames
+3 GD04-029 Gundam Dynames (GN Full Shield)
+2 ST07-007 Gundam Kyrios
+4 GD03-030 Gundam Kyrios (Tail Unit Flight Mode)
+2 ST02-004 Gundam Sandrock
+2 ST07-005 Gundam Dynames
+4 GD03-026 Gundam Dynames
+4 ST02-003 Gundam Heavyarms
+1 GD04-019 GN Armor Type-D (Trans-Am)
+3 GD03-029 Gundam Heavyarms Custom
+3 GD03-025 Gundam Sandrock Custom
+3 ST07-012 Allelujah
+3 ST07-011 Lockon Stratos
+4 GD03-125 Peacemillion`,
+			`# Cees's Zeon deck (G)
+1 GD03-032 Zaku (Four Snake Eyes') [YETI] (GQ)
 4 ST03-008 Zaku II
 4 ST03-009 Gouf
-1 ST03-014 The Blue Giant
+0 GD03-017 Kampfer
 4 GD04-028 Zakrello
 4 GD03-027 Z'Gok E  # too weak?
 4 GD03-024 Hy-Gogg
-4 ST03-016 Falmel
-4 GD04-123 A Baoa Qu  # -1
-4 GD03-108 How Many Miles to the Battlefield?
-4 GD03-090 Mikhail Kaminsky # -1
-3 GD04-027 Bigro # +1
-4 GD04-088 Tokwan
-3 GD03-106 M.A.V. Tactics  # not Zeon! Corsica base is better
-2 GD03-107 Over the River and Through the Woods  # too few?
-1 GD03-126 Cyclops Team`,
-			`# Cees's Green Zeon deck 2 (G)
-4 ST03-008 Zaku II
-4 ST03-009 Gouf
-1 ST03-014 The Blue Giant
-4 GD04-028 Zakrello
-4 GD03-027 Z'Gok E  # too weak?
-4 GD03-024 Hy-Gogg
-4 ST03-016 Falmel
-3 GD04-123 A Baoa Qu
-4 GD03-108 How Many Miles to the Battlefield?
-3 GD03-090 Mikhail Kaminsky
 4 GD04-027 Bigro
-4 GD04-088 Tokwan
 4 GD04-032 Xavier's Gyan Hakuji-Packs (GQ)
-2 GD03-107 Over the River and Through the Woods  # too few?
-1 GD03-126 Cyclops Team`,
+1 GD04-022 Kikeroga (MS Mode) (GQ)
+1 GD04-017 Zeong
+Command/Pilot
+4 ST03-014 The Blue Giant
+0 GD03-107 Over the River and Through the Woods
+4 GD03-108 How Many Miles to the Battlefield?
+Pilot
+3 GD03-090 Mikhail Kaminsky
+2 GD04-088 Tokwan
+Base
+4 ST03-016 Falmel
+1 GD03-126 Cyclops Team
+1 GD04-123 A Baoa Qu`,
 		]
 
 		// card id on the battlefield, link to render element
@@ -1067,11 +1091,13 @@
 				let t = /Burst】([^.]+)/.exec(c.text)
 				if (t) {
 					t = t[1]
-					log("⚡Burst: " + t)
 					await run(c, "Burst")
 					toTrash = !(hasText(t, "Add this card to your hand.") || hasText(t, "Deploy this card."))
 				}
-				if (toTrash) this.trash.push(c)
+				if (toTrash) {
+					log("🗑️Trash " + c)
+					this.trash.push(c)
+				}
 				await render()
 				await sleep(1000)
 				return true
@@ -1083,6 +1109,7 @@
 					const weakest = mySort(this.battle, c => c.AP())[0]
 					await destroy(weakest)
 				}
+				if (card.LEVEL() <= 3 && p1.battle.concat(p2.battle).some(c => hasText(c.text, "All Units that are Lv.3 or lower other than Unit tokens are deployed rested.") && c.linked())) card.rested = true
 				log(`🚀Deploy ${card.rested ? "rested " : ""}${card}`)
 				card.sick = true
 				card.damage = 0
@@ -1091,7 +1118,7 @@
 
 			draw(number = 1) {
 				number = parseInt(number)
-				log("🎴" + this.name + " draws " + number)
+				log("🎴" + this.name + " draw " + number)
 				for (let i = 0; i < number; ++i) {
 					if (this.deck.length < 1) {
 						endGame(this === p1 ? p2 : p1)
@@ -1121,7 +1148,7 @@
 				}
 				const rv = Card.fromDict(d)
 				// DeckPlanet bug workarounds. See also cards.json.
-				rv.text = rv.text.replaceAll("[action]", "【Action】").replaceAll("[br]", "<br>").replaceAll("[burst]", "【Burst】").replaceAll("[breach 3]", "【Breach 3】").replaceAll("[deploy]", "【Deploy】").replaceAll("[main]", "【Main】").replaceAll("[pilot]", "【Pilot】").replaceAll("[when paired]", "【When Paired】")
+				rv.text = rv.text.replaceAll("<br />", "<br>").replaceAll("[action]", "【Action】").replaceAll("[br]", "<br>").replaceAll("[burst]", "【Burst】").replaceAll("[breach 3]", "【Breach 3】").replaceAll("[deploy]", "【Deploy】").replaceAll("[main]", "【Main】").replaceAll("[pilot]", "【Pilot】").replaceAll("[when paired]", "【When Paired】")
 
 				cid += 1
 				rv.cid = cid
@@ -1426,8 +1453,11 @@
 							}
 						}
 					}
+					destroyer = att
 					await destroy(def)
-					await run(att, "", "During your turn, when this Unit destroys an enemy Unit with battle damage, ")
+					// await run(att, "", "During your turn, when this Unit destroys an enemy Unit with battle damage, ")
+					await run(att, "", " destroys an enemy Unit with battle damage, ")
+					if (att.owner.base) await run(att.owner.base, "", " destroys an enemy Unit with battle damage, ")
 				}
 			}
 			if (afs && def.traits.includes("dead")) dmg_to_att = 0
@@ -1461,14 +1491,50 @@
 		}
 
 		function getSectionText(card, act = "Main", clause = "") {
-			const rex = new RegExp("(.*?)" + (clause ? clause : (act + "】")) + "([^.].+?)(<br|$)")
-			const mo = card.text.match(rex)
+			let mo = null
+			for (let line of card.text.split("<br>")) {
+				const rex = new RegExp("(.*?)" + (clause ? clause : ("【([^】]*?)" + act + "([^】]*?)】")) + "([^.].+?)(?:<br|$)")
+				mo = card.text.match(rex)
+				if (mo) break
+			}
 			if (!mo) return ""
 			const limits = mo[1]
-			const text = mo[2]
-			if (hasText(limits, "During Link") && !card.linked()) return ""
+			if (hasText(limits, "During your turn") && !active_player === card.owner) return ""
 			if (hasText(limits, "During Pair") && !(card.pilot || card.unit)) return ""
-			if ((act === "During Pair" || act === "During Link") && (text.indexOf("【") === 0 || text.indexOf("During") === 0) || text.indexOf("When") === 0) return ""
+			if (hasText(limits, "During Link") && !card.linked()) return ""
+			const limits2 = mo[2]
+			const limits3 = mo[3]
+			const text = mo.length === 3 ? mo[2] : mo[4]
+			if ((act === "During Pair" || act === "During Link") && (text.indexOf("【") === 0 || text.indexOf("During") === 0 || text.indexOf("When") === 0)) return ""
+
+			let l3ok = !limits3
+			let mo2 = null
+			if (!l3ok) {
+				// 【When Paired･(Cyber-Newtype)/(Newtype) Pilot】
+				mo2 = limits3.match(/^･\((.+)\) Pilot$/)
+				if (mo2 && (!card.pilot || !mo2[1].split(")/(").some(part => card.traits.includes(part)))) return ""
+				l3ok = true
+			}
+			if (!l3ok) {
+				mo2 = limits3.match(/^･Lv.(\d) or Higher Pilot$/)
+				if (mo2 && !card.pilot.level >= parseInt(mo2[1])) return ""
+				l3ok = true
+			}
+			if (!l3ok) {
+				mo2 = limits3.match(/^･Lv.(\d) or Lower Pilot$/)
+				if (mo2 && !card.pilot.level <= parseInt(mo2[1])) return ""
+				l3ok = true
+			}
+			if (!l3ok) {
+				mo2 = limits3.match(/^･Lv.(White|Blue|Purple|Red|Green) Pilot$/)
+				if (mo2 && !card.pilot.color === mo2[1]) return ""
+				l3ok = true
+			}
+
+			if (act != "Pilot") {
+				if ((mo.length > 3 && limits2 && limits2 !== "Activate･") || !l3ok) log(`🚩FIXME: ${card} ACT${act}/CLAUSE${escapeHTML(clause)} LIMITS2` + escapeHTML(limits2) + "LIMITS3" + escapeHTML(limits3) + " MO" + escapeHTML("" + mo) + " TEXT" + text + " MO2" + mo2)
+			}
+			if (once_per_turn.includes(text + card.cid)) return false  // TODO: Might hide first run.
 			return text
 		}
 		async function run(card, act = "Main", clause = "") {
@@ -1481,6 +1547,11 @@
 			return rv
 		}
 		async function runCard(card, act, clause) {
+			let rv = await runCard2(card, act, clause)
+			if (rv) log(`⚡Ran${act === "Main" ? " " + card : ""} ${(act || clause)}: ${escapeHTML(getSectionText(card, act, clause))}`)
+			return rv
+		}
+		async function runCard2(card, act, clause) {
 			let t = getSectionText(card, act, clause)
 			if (!t) {
 				// if (clause || hasText(card.text, act)) log(`🚩No act ${act} or clause "${escapeHTML(clause)}" found in ${card.id} ${escapeHTML(card.text)}`)
@@ -1493,6 +1564,13 @@
 			// make sure to apply effects to the unit card
 			const u = card.unit || card
 
+			// Activated Attack
+			if (t === "If you are attacking an enemy Unit, this Unit gets AP+2 during this battle.") {
+				if (!hasText(defender.type, "UNIT")) return false
+				card.ap_eob += 2
+				return true
+			}
+
 			if (hasText(card.text, " to an enemy Unit that is Lv.5 or lower, if you have a (CB) Pilot in play, destroy that enemy Unit.")) {
 				if (!fu.some(c => c.pilot && c.pilot.hasTrait("CB"))) return false
 				await destroy(defender)
@@ -1502,11 +1580,10 @@
 				return u.recover(2)
 			}
 			if (t === "【Once per Turn】②：Choose 1 of your Units. It recovers 2 HP.") {
-				if (window.once_per_turn.includes(t + card.cid)) return false
 				const target = mySort(fu.filter(c => c.damage > 0), c => -c.damage)[0]
 				if (!target) return false
 				if (!await p.pay(2)) return false
-				window.once_per_turn.push(t + card.cid)
+				once_per_turn.push(t + card.cid)
 				target.recover(2)
 				return true
 			}
@@ -1519,6 +1596,7 @@
 			if (t === "Choose 1 rested friendly (CB) Unit. Change the attack target of the battling enemy Unit to it.") {
 				const target = fu.filter(c => c.rested && c.traits.includes("CB"))[0]
 				if (!target) return false
+				log("🎯" + target + " is new attack target")
 				defender = target
 				return true
 			}
@@ -1526,6 +1604,7 @@
 				const targets = fu.filter(c => c.traits.includes("Clan")).slice(0, 2)
 				const enemy_count = eu.filter(c => c.level <= 2 && active_player === p ? c.rested : (!c.rested && !c.sick)).length
 				if (!targets.length > 0 || enemy_count < 1) return false
+				log("🎯" + targets + " battle damage protection from Lv2- this turn")
 				for (const target of targets) target.traits_eot.push("noDmg enemy.unit.lv2min")
 				return false
 			}
@@ -1573,7 +1652,7 @@
 				const c = p.deck.pop()
 				if (!c) return false
 				if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
-					log(p.name + " puts top card on bottom")
+					log("🎴" + p.name + " puts top card on bottom")
 					p.deck = [c].concat(p.deck)
 				} else {
 					log("🎴" + p.name + " leaves top card")
@@ -1586,7 +1665,7 @@
 				const c = p.deck.pop()
 				if (!c) return false
 				if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
-					log(p.name + " puts top card in trash")
+					log("🗑️" + p.name + " puts top card in trash")
 					p.trash.push(c)
 				} else {
 					log("🎴" + p.name + " leaves top card")
@@ -1640,7 +1719,7 @@
 				const target = fu.filter(c => !c.rested && !c.sick)[0]
 				if (!target) return false
 				rest(card)
-				log("🎯" + card + " AP+1 " + target)
+				log("🎯AP+1 " + target)
 				target.ap_eot += 1
 				return true
 			}
@@ -1649,7 +1728,7 @@
 				const target = fu.filter(c => c.damage > 0 && !c.rested && !c.sick)[0]
 				if (!target) return false
 				rest(card)
-				log("🎯" + card + " AP+2 " + target)
+				log("🎯AP+2 " + target)
 				target.ap_eot += 2
 				return true
 			}
@@ -1658,14 +1737,13 @@
 				const target = fu.filter(c => !c.rested && !c.sick)[0]
 				if (!target) return false
 				rest(card)
-				log("🎯" + card + " AP+2 " + target)
+				log("🎯AP+2 " + target)
 				target.ap_eot += 2
 				return true
 			}
 			if (t === "【Once per Turn】②：Deploy 1 [Gundam]((White Base Team)･AP3･HP3) Unit token if you have no Units in play, deploy 1 [Guncannon]((White Base Team)･AP2･HP2) Unit token if you have only 1 Unit in play, or deploy 1 [Guntank]((White Base Team)･AP1･HP1) Unit token if you have 2 or more Units in play.") {
-				if (window.once_per_turn.includes(t + card.cid)) return false
 				if (!await p.pay(2)) return false
-				window.once_per_turn.push(t + card.cid)
+				once_per_turn.push(t + card.cid)
 				if (fu.length === 0) {
 					await p.deploy(p.getToken("Gundam"))
 				} else if (fu.length === 1) {
@@ -1676,10 +1754,9 @@
 				return true
 			}
 			if (t === "【Once per Turn】②：Choose 1 friendly Unit with <Blocker>. Set it as active. It can't attack during this turn.") {
-				if (window.once_per_turn.includes(t + card.cid)) return false
 				const target = fu.filter(c => c.rested && c.hasTrait("Blocker"))[0]
 				if (!target || !await p.pay(2)) return false
-				window.once_per_turn.push(t + card.cid)
+				once_per_turn.push(t + card.cid)
 				activate(target)
 				target.sick = true
 				return true
@@ -1687,6 +1764,7 @@
 			if (t === "Choose 1 active enemy Unit. It gains <Blocker> during this turn.") {
 				const target = eu.filter(c => !c.rested).toSorted(c => c.AP())[0]
 				if (!target) return false
+				log("🎯+Blocker " + target)
 				target.traits_eot.push("Blocker")
 				return true
 			}
@@ -1696,10 +1774,10 @@
 				target.traits_eot.push("First Strike")
 				return true
 			}
-			if (t === "Deploy 1 rested [Zaku Ⅱ]((Zeon)･AP1･HP1) Unit token.") {
-				const c = p.getToken("Zaku Ⅱ")
+			let mo = t.match(/Deploy 1 rested \[(.*?)\].*? Unit token./)
+			if (mo) {
+				const c = p.getToken(mo[1])
 				c.rested = true
-				c.sick = true
 				await p.deploy(c)
 				return true
 			}
@@ -1722,7 +1800,7 @@
 				}
 				return true
 			}
-			let mo = t.match(/^Draw (\d).$/)
+			mo = t.match(/^Draw (\d).$/)
 			if (mo) {
 				p.draw(mo[1])
 				return true
@@ -1746,8 +1824,7 @@
 				return true
 			}
 			if (t === "【Once per Turn】Choose 1 of your Resources. Set it as active.") {
-				if (window.once_per_turn.includes(t + card.cid)) return false
-				window.once_per_turn.push(t + card.cid)
+				once_per_turn.push(t + card.cid)
 				for (const c of p.resource) {
 					if (c.rested) {
 						activate(c)
@@ -1763,10 +1840,10 @@
 			// Pilot Attack
 			if (t === "This Unit gets AP+1 during this turn. If there are 7 or more (CB) cards in your trash, all your (CB) Units get AP+1 instead.") {
 				if (p.trash.filter(c => c.traits.includes("CB")).length >= 7) {
-					log("Boosting all my (CB) units")
+					log("🎯AP+1 all my (CB) units")
 					fu.filter(c => c.traits.includes("CB")).forEach(c => c.ap_eot += 1)
 				} else {
-					log("Boosting " + u)
+					log("🎯AP+1 " + u)
 					u.ap_eot += 1
 				}
 				return true
@@ -1787,6 +1864,10 @@
 			if (hasText(t, "During this battle, your shield area cards can't receive damage from enemy Units that are Lv.4 or lower.")) {
 				p.traits_eob.push("noDmgShield enemy.unit.lv4min")
 				return true
+			}
+			if (t === "All Units that are Lv.3 or lower other than Unit tokens are deployed rested.") {
+				// Static effect handled in deploy(); return false to not print ran.
+				return false
 			}
 			if (hasText(t, "Choose 1 friendly Unit. It recovers 3 HP.")) {
 				const target = mySort(fu.filter(c => c.damage > 0), c => -c.damage)[0]
@@ -1843,7 +1924,7 @@
 					rest(u)
 				}
 				log("🎯AP+" + mo[1] + " " + target)
-				dealDamage(card, target)
+				await dealDamage(card, target)
 				target.ap_eot += parseInt(mo[1])
 				return true
 			}
@@ -1852,7 +1933,7 @@
 				const target = mySort(fu.filter(c => !c.rested && !c.sick && c.HP() > 1), c => c.AP())[0]
 				if (!target) return false
 				log("🎯Boosting " + target)
-				dealDamage(card, target)
+				await dealDamage(card, target)
 				target.ap_eot += 1
 				return true
 			}
@@ -1877,6 +1958,18 @@
 				return true
 			}
 			// When Paired
+			// Unit
+			if (t === "Deploy 2 [Wire-Guided Arm]((Zeon)･AP2･HP1・This Unit can't be paired with a Pilot) Unit tokens.") {
+				await p.deploy(p.getToken("Wire-Guided Arm"))
+				await p.deploy(p.getToken("Wire-Guided Arm"))
+				return true
+			}
+			if (t === "Choose 1 enemy Unit with 4 or less HP. Return it to its owner's hand.") {
+				const target = mySort(eu.filter(c => c.HP() <= 4), c => -c.cost + c.rested)[0]
+				if (!target) return false
+				bounce(target)
+				return true
+			}
 			// Pilot
 			if (t === "If this is a (Mafty) Unit, choose 1 of your (Mafty) Units. During this turn, it may choose a damaged active enemy Unit as its attack target.") {
 				if (!card.unit.traits.includes("Mafty")) return false
@@ -1888,6 +1981,10 @@
 			if (t === "If this is a (CB) Unit, it may choose an active enemy Unit whose Lv. is equal to or lower than this Unit as its attack target during this turn.") {
 				if (!card.unit.traits.includes("CB")) return false
 				card.traits_eot.push(`canAttack active.unit.lv${card.level}min`)
+				return true
+			}
+			if (t === "All your (Cyclops Team) Units may choose an active enemy Unit with 5 or less AP as their attack target during this turn.") {
+				fu.forEach(c => c.traits.includes("Cyclops Team") && c.traits_eot.push(`canAttack active.unit.ap5min`))
 				return true
 			}
 			if (hasText(t, "If this is a (League Militaire) Unit, deploy 1 [Parts]((League Militaire)･AP1･HP1･This Unit can't choose the enemy player as its attack target) Unit token.")) {
@@ -1903,7 +2000,20 @@
 			}
 			if (hasText(t, "Deploy 1 [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.")) {
 				if (fu.length >= 6) return false
-				p.deploy(p.getToken("Hy-Gogg"))
+				await p.deploy(p.getToken("Hy-Gogg"))
+				return true
+			}
+			if (t === "If you have another Link Unit in play, draw 1.") {
+				if (!fu.some(c => c.linked())) return false
+				p.draw()
+				return true
+			}
+			// When Linked
+			if (t === "If you have another (Cyclops Team) Unit in play, deploy 1 rested [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.") {
+				if (!fu.some(c => c.traits.includes("Cyclops Team"))) return false
+				const target = p.getToken("Hy-Gogg")
+				target.rested = true
+				await p.deploy(target)
 				return true
 			}
 			// 【Main】/【Action】
@@ -1930,7 +2040,7 @@
 				const target = eu.filter(c => c.level <= 5)[0]
 				const token_count = fu.filter(c => hasText(c.type, "TOKEN")).length
 				if (!target || token_count < 1) return false
-				dealDamage(card, target, token_count)
+				await dealDamage(card, target, token_count)
 				return true
 			}
 			if (hasText(t, "If you have no (Earth Alliance) Unit tokens in play,")) {
@@ -1994,11 +2104,11 @@
 				return true
 			}
 			// Attack trigger
-			if (t === "【Once per Turn】If this Unit is attacking the enemy player, reveal 1 (Earth Federation) Unit card from your hand. Return it to the bottom of your deck. If you do, draw 2." && !window.once_per_turn.includes(t + card.cid)) {
+			if (t === "【Once per Turn】If this Unit is attacking the enemy player, reveal 1 (Earth Federation) Unit card from your hand. Return it to the bottom of your deck. If you do, draw 2.") {
 				if (eu.includes(defender)) return false
 				const target = p.hand.filter(c => c.traits.includes("Earth Federation"))[0]
 				if (!target) return false
-				window.once_per_turn.push(t + card.cid)
+				once_per_turn.push(t + card.cid)
 				p.hand = p.hand.filter(c => c !== target)
 				p.deck = [target].concat(p.deck)
 				p.draw(2)
@@ -2011,7 +2121,7 @@
 				if (targets.length > 1) {
 					if (targets[0] === defender && u.AP() >= defender.HP()) target = targets[1]
 				}
-				dealDamage(card, target)
+				await dealDamage(card, target)
 				return true
 			}
 			if (t === "Choose 1 enemy Unit with the highest Lv. Deal 3 damage to it.") {
@@ -2073,22 +2183,22 @@
 				return true
 			}
 			if (t === "During this turn, this Unit may choose an active enemy Unit that is Lv.5 or lower as its attack target.") {
-				u.traits_eot.push = "canAttack active.unit.lv5min"
+				u.traits_eot.push("canAttack active.unit.lv5min")
 				return true
 			}
 			if (hasText(t, "During this turn, this Unit may choose an active enemy Unit with AP equal to or less than this Unit as its attack target.")) {
-				u.traits_eot.push = "canAttack active.unit.apEqmin"
+				u.traits_eot.push("canAttack active.unit.apEqmin")
 				return true
 			}
 			if (hasText(t, "Choose 1 of your other (Clan) Units. During this turn, it may choose an active enemy Unit with 3 or less AP as its attack target.")) {
 				const target = fu.filter(c => !c.rested && !c.sick && c !== card && c.traits.includes("Clan"))[0]
 				if (!target || eu.filter(c => !c.rested && c.AP() <= 3).length < 1) return false
-				u.traits_eot.push = "canAttack active.unit.ap3min"
+				u.traits_eot.push("canAttack active.unit.ap3min")
 				return true
 			}
 			if (t === "If another friendly (Clan) Unit is in play, choose 1 enemy Unit. Deal 1 damage to it.") {
 				if (!eu.length || !fu.filter(c => c !== card && c.traits.includes("Clan")).length) return false
-				dealDamage(card, mySort(eu, c => c.HP())[0])
+				await dealDamage(card, mySort(eu, c => c.HP())[0])
 				return true
 			}
 			if (t === "If another friendly (Clan) Unit is in play, this gains <First Strike> during this turn.") {
@@ -2121,13 +2231,33 @@
 				return true
 			}
 			// destroys trigger
-			if (t === "draw 1.") {
+			if (t === "that friendly Unit may recover 2 HP." && card.id === "GD03-125") {
+				if (active_player != p || destroyer.level < 6 || !(destroyer.traits.includes("Operation Meteor") || destroyer.traits.includes("G Team"))) return false
+				once_per_turn.push(card.text + card.cid)
+				destroyer.recover(2)
+				return true
+			}
+			if (t === "draw 1." || t === "Draw 1.") {
 				p.draw(1)
 				return true
 			}
+			if (t === "deal 2 damage to all enemy Units with <Blocker>.") {
+				const targets = eu.filter(c => c.hasTrait("Blocker"))
+				if (targets.length < 1) return false
+				targets.forEach(async target => await dealDamage(card, target, 2))
+				return true
+			}
+
 			if (t === "choose 1 (Tekkadan) Unit card that is Lv.2 or lower from your trash. Add it to your hand.") {
 				// TODO choose best
 				const target = p.trash.filter(c => c.level <= 2 && c.traits.includes("Tekkadan"))[0]
+				if (!target) return false
+				p.trash = p.trash.filter(c => c !== target)
+				p.hand.push(target)
+				return true
+			}
+			if (t === "Choose 1 (Cyclops Team) Pilot card from your trash. Add it to your hand.") {
+				const target = p.trash.filter(c => c.type === "PILOT" && c.traits.includes("Cyclops Team"))[0]
 				if (!target) return false
 				p.trash = p.trash.filter(c => c !== target)
 				p.hand.push(target)
@@ -2154,10 +2284,10 @@
 				const target = p.trash.filter(c => c.level <= 5 && c.type === "UNIT" && c.COST() <= p.resource.filter(c => !c.rested).length)[0]
 				if (!target) return false
 				if (await p.pay(target.COST())) {
-					log(`💲Paid ${target.COST()} for ${target.type} #${target.cid} ${target.id} ${target.name}`)
+					log(`💲Pay ${target.COST()} for ${target.type} #${target.cid} ${target.id} ${target.name}`)
 					p.trash = p.trash.filter(c => c !== target)
 					target.from_trash = true
-					p.deploy(target)
+					await p.deploy(target)
 					target.from_trash = false
 					return true
 				}
@@ -2169,7 +2299,7 @@
 				const target = eu.filter(c => c.level <= 3).toSorted(c => -c.AP())[0]
 				if (!target) return false
 				log(t)
-				destroy(target)
+				await destroy(target)
 				return true
 			}
 
@@ -2230,7 +2360,7 @@
 						log(`🎴${p.name} took ${target}`)
 						p.hand.push(target)
 					} else if (hasText(t, "You may deploy")) {
-						p.deploy(target)
+						await p.deploy(target)
 					}
 					targets = targets.filter(c => c !== target)
 				}
@@ -2268,18 +2398,13 @@
 			let enemy = p === p1 ? p2 : p1
 			enemy.resource.push(enemy.getCard(rndPick(EX_RESOURCES)))
 			await render()
+			let turn = 0
 			while (true) {
+				turn += 1
 				active_player = p
-
-				// During
-				for (const c of p1.battle.concat(p2.battle)) {
-					await run(c, "During Pair")
-					await run(c, "During Link")
-				}
-
-				// Set active
+				// Start phase
+				// Active Step
 				if (p.base !== null) activate(p.base)
-
 				for (const c of p.resource) {
 					if (c.rested) activate(c)
 				}
@@ -2289,7 +2414,15 @@
 				}
 				await sleep(1000)
 				log("")
-				// Draw card
+				// Start Step
+				// Effects that specify “at the start of the turn” activate.
+				// During
+				for (const c of p1.battle.concat(p2.battle)) {
+					await run(c, "During Pair")
+					await run(c, "During Link")
+				}
+
+				// Draw phase
 				try {
 					p.draw()
 					await render()
@@ -2297,7 +2430,7 @@
 					log(ex)
 					break
 				}
-				// Place resource
+				// Resource phase
 				let r = p.resource_deck.pop()
 				if (r) {
 					p.resource.push(r)
@@ -2305,7 +2438,7 @@
 					await sleep(1500)
 				}
 				let level = p.resource.length
-				log("📈" + p.name + " level " + level)
+				log("📈Turn " + turn + " " + p.name + " level " + level)
 				// Main phase
 				let considered = []
 				while (true) {
@@ -2317,36 +2450,42 @@
 					if (c.level > level || c.COST() > level) continue
 					// already have a base
 					if (c.type === "BASE" && p.base !== null) continue
-					// no empty unit
-					let empty_units = p.getPairableUnits()
-					if (c.type === "PILOT" && empty_units.length < 1) continue
 					// max 6 units
 					if (c.type === "UNIT" && p.battle.length >= 6) continue
-					// log("Consider L" + c.level + " C" + c.COST() + " " + c)
-					await sleep(400)
-					// ensure cards have HTML elements
-					await render()
+
+					let empty_units = p.getPairableUnits()
+					let doPair = false
+					if (empty_units.length < 1 && c.type === "PILOT") continue
+					if (empty_units.length > 0 && (c.type === "PILOT" || hasText(c.text, "【Pilot】"))) {
+						doPair = true
+						empty_units.sort(u => !linksWith(u, c))
+						if ((!linksWith(empty_units[0], c) && p.hand.filter(bc => linksWith(empty_units[0], bc)).length > 0)) {
+							if (c.type === "PILOT") continue
+							doPair = false
+						}
+					}
+					// log(`🤔Considering ${c.type} #${c.cid} ${c.id} ${c.name}`)
 					let free_res_count = p.resource.filter(bc => bc.type.indexOf("EX") < 0).length || 0
 					let ex_res_count = p.resource.filter(bc => hasText(bc.type, "EX")).length || 0
-					// log(`🤔Considering ${c.type} #${c.cid} ${c.id} ${c.name}`)
 					const cost = c.COST()
 					if (await p.pay(cost)) {
 						// Remove card from hand
 						p.hand = p.hand.filter(item => item !== c)
+						// ensure cards have HTML elements
 						await render()
+						await sleep(300)
 						if (c.type === "COMMAND") {
 							// Do pilot part of command 2/3 of the time.
-							if ((!hasText(c.text, "【Pilot】") || rnd(1, 3) > 2) && await run(c)) {
-								log(`💲Paid ${c.COST()} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
+							if ((!doPair || !hasText(c.text, "【Pilot】") || rnd(1, 3) > 2) && await run(c)) {
+								log(`💲Pay ${c.COST()} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
 								log(`⚡Ran #${c.cid} ${c.toString(true)} Main: ${escapeHTML(c.text)}`)
-								await sleep(400)
 								p.trash.push(c)
 								await render()
+								await sleep(800)
 								continue
 							} else {
-								if (empty_units.length > 0 && hasText(c.text, "【Pilot】")) {
+								if (doPair) {
 									await pair(empty_units[0], c)
-									empty_units = p.getPairableUnits()
 									continue
 								}
 								// No useful target, so don't play this and roll back payment.
@@ -2361,7 +2500,7 @@
 								continue
 							}
 						}
-						log(`💲Paid ${cost} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
+						log(`💲Pay ${cost} for ${c.type} #${c.cid} ${c.id} ${c.name}`)
 						if (c.type === "BASE") {
 							log("🟨Deploy base " + c)
 							c.rested = false
@@ -2374,7 +2513,6 @@
 							await run(c, "Deploy")
 						} else if (c.type === "PILOT") {
 							await pair(empty_units[0], c)
-							empty_units = p.getPairableUnits()
 						}
 						await sleep(800)
 					}
@@ -2383,7 +2521,6 @@
 				await run(p.base, "Main")
 
 				// attack
-				// TODO: Actions of defender, attacker, defender, etc.  Or not but then how are rest commands useful?
 				considered = []
 				while (true) {
 					const can_attack = mySort(p.battle.filter(bc => !bc.rested && !bc.sick && !considered.includes(bc)), bc => -bc.AP())
@@ -2407,21 +2544,34 @@
 						const extra = enemy.battle.filter(bc => !bc.rested && bc.ap <= att.ap)
 						if (extra) prone = mySort(extra.concat(prone), def => def.HP())
 					}
-					if (att.traits_eot.includes("canAttack active.unit.ap3min")) {
-						const extra = enemy.battle.filter(bc => !bc.rested && bc.AP() <= 3)
-						if (extra) prone = mySort(extra.concat(prone), def => def.HP())
+					for (let i = 0; i <= 9; ++i) {
+						if (att.traits_eot.includes(`canAttack active.unit.ap${i}min`)) {
+							const extra = enemy.battle.filter(bc => !bc.rested && bc.AP() <= i)
+							if (extra) prone = mySort(extra.concat(prone), def => def.HP())
+						}
+						if (att.traits_eot.includes(`canAttack active.unit.lv${i}min`)) {
+							const extra = enemy.battle.filter(bc => !bc.rested && bc.level <= i)
+							if (extra) prone = mySort(extra.concat(prone), def => def.HP())
+						}
 					}
-					if (att.traits_eot.includes("canAttack active.unit.lv5min")) {
-						const extra = enemy.battle.filter(bc => !bc.rested && bc.level <= 5)
-						if (extra) prone = mySort(extra.concat(prone), def => def.HP())
-					}
-
 					// Base and shields also count as enemy player: https://www.gundam-gcg.com/en/cards/index.php?freeword=GD04-016#cards
 					let must_attack_unit = hasText(att.text, "This Unit can't choose the enemy player as its attack target")
 
-					if (prone.length > 0 && (must_attack_unit || enemy.shield.length > can_attack.length || (att.getBreach() && prone.some(def => att.AP() >= def.HP())))) {
-						const def = prone[0]
-						log("🔫" + att + " attacks " + def)
+					// TODO: Action can solve this in doBattle
+					if (att.level <= 4 && enemy.traits_eot.some(txt => txt.match(new RegExp(`noDmgShield enemy.unit.lv[${att.level}-9]`)))) {
+						must_attack_unit = true
+					}
+					if (enemy.base && !att.canDamage(enemy.base)) {
+						must_attack_unit = true
+					}
+
+					if (prone.length > 0 && (must_attack_unit || enemy.shield.length > can_attack.length || ((att.getBreach() || rnd(1, 2) > 1) && prone.some(def => att.AP() >= def.HP())))) {
+						let def = prone[0]
+						if (enemy.battle.some(bc => bc.text === "Enemy Units choose one of your rested (Maganac Corps) Units as their attack target if possible when attacking.")) {
+							let newdef = enemy.battle.filter(bc => bc.rested && bc.traits.includes("Maganac Corps"))[0]
+							def = newdef || def
+						}
+						log("🔫" + att + " attack " + def)
 						rest(att)
 						await sleep(500)
 						defender = def
@@ -2440,18 +2590,17 @@
 					}
 					if (enemy.base) {
 						if (!att.canDamage(enemy.base)) {
-							log("🛡️Base damage prevented.")
+							log(`🛡️${enemy.base} would take no battle damage from ${att}`)
 							continue
 						}
 						let target = enemy.base
-						log("🔫" + att + " attacks " + target)
+						log("🔫" + att + " attack " + target)
 						rest(att)
 						await sleep(500)
 						defender = target
 						await run(att, "Attack")
 						await doBattle(att, target)
 					} else {
-						log("🔫" + att + " attacks " + enemy.name)
 						if (enemy.shield.length < 1) {
 							rest(att)
 							let blocked = false
@@ -2480,9 +2629,10 @@
 							break
 						}
 						if (enemy.shield.slice(-1)[0].hasTrait("protection.enemy.units")) {
-							log("🛡️Shield protected from enemy units")
+							log("🛡️" + enemy.name + " shield protected from enemy units")
 							continue
 						}
+						log("🔫" + att + " attacks " + enemy.name)
 						rest(att)
 						await battle(att, enemy.shield.slice(-1)[0])
 						let sup = att.hasTrait("Suppression")
@@ -2511,7 +2661,7 @@
 				await actionStep()
 				while (p.hand.length > 10) p.discard()
 				for (const c of p1.battle.concat(p2.battle)) {
-					run(c, "", "At the end of the turn ")
+					await run(c, "", "At the end of the turn ")
 					const mo = c.text.match(/<Repair (\d)>/)
 					if (mo && c.damage > 0) {
 						log("🛠️Repair " + mo[1] + " " + c)
@@ -2529,7 +2679,7 @@
 				}
 
 				p.traits_eot = []
-				window.once_per_turn = []
+				once_per_turn = []
 				// wait for untap animation
 				await sleep(400)
 				await render()
