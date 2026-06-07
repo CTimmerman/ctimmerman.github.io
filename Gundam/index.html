@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-06</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-07</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -22,7 +22,8 @@
 
 			background-color: var(--bgcolor);
 			color: var(--fgcolor);
-			scrollbar-color: auto;
+			scrollbar-color: var(--fgcolor) var(--bgcolor);
+			scrollbar-width: thin;
 			font-family: monospace;
 			height: 2vmin;
 			font-size: 1.2vmin;
@@ -74,7 +75,6 @@
 			width: stretch;
 			height: 100vmin;
 			overflow-y: scroll;
-			scrollbar-color: var(--fgcolor) var(--bgcolor);
 			scrollbar-width: thin;
 			background-color: #08080888;
 			border: 1px solid var(--fgcolor);
@@ -127,7 +127,16 @@
 			scrollbar-width: thin;
 			top: 0vmin;
 		}
-
+		#tadecklist {
+			width: 65vmin;
+			height: 20vmin;
+			position: absolute;
+			top: 70vmin;
+			left: 10vmin;
+			scrollbar-width: thin;
+			color: var(--fgcolor);
+			background-color: #08080888;
+		}
 		.searchsmall {
 			height: 4vmin !important;
 			width: 4vmin !important;
@@ -477,7 +486,15 @@
 			let top = 10
 			let sumCost = 0
 			let sumLevel = 0
+			let text = ""
+			let idcount = 0
+			let oldc = null
 			for (const c of deck) {
+				if (!oldc || c.id !== oldc.id) {
+					if (oldc && oldc.id !== c.id) text += `${idcount} ${oldc.id} ${oldc.name}\n`
+					idcount = 1
+					oldc = c
+				} else idcount += 1
 				sumCost += c.cost
 				sumLevel += c.level
 				if ((cols === "T" && spliton !== c.type)
@@ -494,7 +511,8 @@
 					top = 10
 				}
 			}
-			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}</div>`
+			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
+<textarea id="tadecklist" onclick="event.stopPropagation()">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea></div>`
 		}
 
 		function zoom(e) {
