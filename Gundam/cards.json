@@ -333,7 +333,7 @@
         "traits": [
             "Neo Zeon"
         ],
-        "link": "",
+        "link": "[Full Frontal]",
         "ap": 5,
         "hp": 4
     },
@@ -888,7 +888,7 @@
         "id": "ST04-008",
         "color": "RED",
         "level": 2,
-        "cost": 2,
+        "cost": 1,
         "type": "UNIT",
         "name": "Ginn",
         "text": "",
@@ -2831,7 +2831,7 @@
         "traits": [
             "Operation Meteor"
         ],
-        "link": "",
+        "link": "[Trowa Barton]",
         "ap": 3,
         "hp": 4
     },
@@ -3416,7 +3416,7 @@
         "traits": [
             "Clan"
         ],
-        "link": "[Ortega (GQ)]",
+        "link": "[Ortega]",
         "ap": 3,
         "hp": 2
     },
@@ -7683,7 +7683,7 @@
             "Zeon",
             "Cyclops Team"
         ],
-        "link": "",
+        "link": "(Cyclops Team) Trait",
         "ap": 3,
         "hp": 3
     },
@@ -7778,7 +7778,7 @@
         "traits": [
             "ZAFT"
         ],
-        "link": "",
+        "link": "[Yzak Jule]",
         "ap": 3,
         "hp": 4
     },
@@ -8230,7 +8230,7 @@
         "traits": [
             "Maganac Corps"
         ],
-        "link": "",
+        "link": "(Maganac Corps) Trait",
         "ap": 2,
         "hp": 3
     },
@@ -8533,7 +8533,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
         "ap": 3,
         "hp": 4
     },
@@ -8689,7 +8689,7 @@
         "traits": [
             "G Team"
         ],
-        "link": "",
+        "link": "[Trowa Barton]",
         "ap": 4,
         "hp": 5
     },
@@ -8977,7 +8977,7 @@
         "traits": [
             "ZAFT"
         ],
-        "link": "",
+        "link": "[Rau Le Creuset]",
         "ap": 4,
         "hp": 3
     },
@@ -8996,7 +8996,7 @@
         "traits": [
             "G Team"
         ],
-        "link": "",
+        "link": "[Quatre Raberba Winner]",
         "ap": 5,
         "hp": 4
     },
@@ -9321,7 +9321,7 @@
             "Civilian",
             "Gundam Frame"
         ],
-        "link": "",
+        "link": "[Wistario Afam]",
         "ap": 3,
         "hp": 3
     },
@@ -9429,7 +9429,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Lockon Stratos]",
         "ap": 4,
         "hp": 4
     },
@@ -9653,7 +9653,7 @@
         "traits": [
             "ZAFT"
         ],
-        "link": "",
+        "link": "[Rau Le Creuset]",
         "ap": 3,
         "hp": 4
     },
@@ -9673,7 +9673,7 @@
             "Civilian",
             "Gundam Frame"
         ],
-        "link": "",
+        "link": "[Wistario Afam]",
         "ap": 4,
         "hp": 3
     },
