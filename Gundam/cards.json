@@ -1107,7 +1107,7 @@
         "traits": [
             "Superpower Bloc"
         ],
-        "link": "",
+        "link": "(Superpower Bloc) Trait",
         "ap": 3,
         "hp": 1
     },
@@ -2743,7 +2743,7 @@
         "traits": [
             "Superpower Bloc"
         ],
-        "link": "",
+        "link": "[Sergei Smirnov]",
         "ap": 3,
         "hp": 1
     },
@@ -8457,7 +8457,7 @@
         "traits": [
             "AEUG"
         ],
-        "link": "",
+        "link": "(AEUG) Trait",
         "ap": 4,
         "hp": 4
     },
@@ -8786,7 +8786,7 @@
         "traits": [
             "Superpower Bloc"
         ],
-        "link": "",
+        "link": "(Superpower Bloc) Trait",
         "ap": 2,
         "hp": 1
     },
