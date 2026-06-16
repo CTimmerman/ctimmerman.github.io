@@ -1201,13 +1201,12 @@
 1 GD03-118 Awakened Potential
 0 GD03-099 Emma Sheen
 3 GD04-075 GN-X
-1 GD03-083 AEU Hellion
 2 GD03-100 Soma Peries
 2 GD03-098 Graham Aker
 4 GD03-083 AEU Hellion
 4 GD03-081 AEU Enact Demonstration Color
 4 GD03-078 Tieren High Mobility Type
-2 GD03-074 Tieren Taozi
+3 GD03-074 Tieren Taozi
 4 GD03-082 Union Flag
 4 GD04-080 Alvatore
 4 GD04-079 Agrissa
@@ -1255,6 +1254,7 @@
 				this.fulldeck = []
 				const lines = deck.split("\n")
 				const colors = []
+				const counts = {}
 				for (const line of lines) {
 					if (line.indexOf("# ") === 0) {
 						this.deckname = line.slice(2)
@@ -1268,6 +1268,8 @@
 							this.deck.push(c)
 							this.fulldeck.push(this.getCard(id))
 							if (!colors.includes(c.color)) colors.push(c.color)
+							counts[id] = (counts[id] || 0) + 1
+							if (counts[id] > 4) throw Error("Max 4 of " + id)
 						}
 					}
 				}
@@ -3457,7 +3459,7 @@
 				try {
 					await playGame()
 				} catch (ex) {
-					log("FIXME?: " + ex + " " + ex.stack)
+					log("🚩FIXME: " + ex + " " + ex.stack)
 				}
 				if (game > 1 && delay > 0 || game >= games) showStats()
 				if (delay > 0) {
