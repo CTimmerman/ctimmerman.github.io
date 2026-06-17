@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-13</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-17</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -15,11 +15,10 @@
 			--bgcolor: black;
 			--WHITE: #ffffff;
 			--BLUE: #0077bb;
-			--PURPLE: #884499;
+			--PURPLE: #764A92;
 			--RED: #bb0055;
-			--GREEN: #669944;
+			--GREEN: #62A43E;
 			--BROWN: #664400;
-
 			background-color: var(--bgcolor);
 			color: var(--fgcolor);
 			scrollbar-color: var(--fgcolor) var(--bgcolor);
@@ -82,7 +81,7 @@
 		#overlay {
 			display: none;
 			position: absolute;
-			font-size: xx-large;
+			font-size: 4vmin;
 			z-index: 9000;
 			width: 100%;
 			height: 100%;
@@ -115,7 +114,7 @@
 		#search {
 			z-index: 9001;
 			position: absolute;
-			width: 130vmin;
+			width: 120vmin;
 			/* https://caniuse.com/?search=width%3Astretch */
 			height: 100vmin;
 			text-align: center;
@@ -126,6 +125,10 @@
 			scrollbar-color: var(--fgcolor) var(--bgcolor);
 			scrollbar-width: thin;
 			top: 0vmin;
+		}
+
+		#searchtext {
+			width: 40vmin;
 		}
 
 		#tadecklist {
@@ -212,7 +215,7 @@
 	<div id="overlay"></div>
 	<div id="search" class="searchsmall">
 		<div onclick="toggleSearch()" class="icon"><label for="searchtext">🔎Search</label></div>
-		<input id="searchtext" onchange="findCards(this.value)">
+		<input id="searchtext" onchange="findCards(this.value)" placeholder="Case-sensitive. AND and OR supported.">
 		<div id="searchresults"></div>
 	</div>
 	<div id="battlefield"></div>
@@ -472,7 +475,7 @@
 			overlay.style.display = "block"
 			let decklist = ""
 			for (decklist of decks) {
-				if (decklist.split("\n")[0].indexOf(name) > -1) {
+				if (hasText(decklist.split("\n")[0], name)) {
 					break
 				}
 			}
@@ -583,7 +586,7 @@
 		}
 
 		function log(s = "") {
-			if (delay > 0 || s.indexOf(" start:") > -1) {
+			if (delay > 0 || hasText(s, " start:")) {
 				dlog.innerHTML += s + "<br>"
 				dlog.scrollTop = dlog.scrollHeight
 			}
@@ -612,7 +615,7 @@
 		function getPilotName(card) {
 			if (card.type === "PILOT") {
 				let brace = card.name.indexOf(" (")
-				if (brace > -1) return card.name.slice(0, card.name.indexOf(" ("))
+				if (brace > -1) return card.name.slice(0, brace)
 				return card.name
 			}
 			let rv = getSectionText(card, "Pilot")
@@ -644,7 +647,7 @@
 				if (part === `[${pilot_name}]`) return true // (Neil)
 				if (part === `[${pilot.name}]`) return true // (Machu)
 				if (pilot_name === "Quattro Bajeena" && part === "Char Aznable") return true
-				if (part.indexOf(" Trait") > -1) part = part.slice(0, -6)
+				if (hasText(part, " Trait")) part = part.slice(0, -6)
 				if (unit.hasTrait(part.slice(1, -1))) return true
 			}
 			return false
@@ -761,7 +764,7 @@
 				}
 				// bonus from other units
 				for (const c of this.owner.battle) {
-					if (active_player == this.owner && this.owner.trash.length >= 7 && this.hasTrait("Vulture") && hasText(t, "【During Link】During your turn, while there are 7 or more cards in your trash, all your other (Vulture) Units get AP+2.") && c.linked()) rv += 2
+					if (active_player == this.owner && this.owner.trash.length >= 7 && c !== this && this.hasTrait("Vulture") && hasText(t, "【During Link】During your turn, while there are 7 or more cards in your trash, all your other (Vulture) Units get AP+2.") && c.linked()) rv += 2
 				}
 				return rv
 			}
@@ -875,9 +878,7 @@
 
 				if (trait === "Suppression") {
 					if (hasText(t, "While this is damaged, it gains <Suppression>.")) return this.damage > 0
-
-					const mo = /Suppression/.exec(t)
-					if (mo) return true
+					if (t.match(/<Suppression>/)) return true
 				}
 
 				// Find missing rules.
@@ -1052,8 +1053,8 @@
 3 ST08-014 Valiant
 2 ST08-015 Davao
 2 ST02-014 Siege Ploy`,
-			// March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			`# Destiny Ignition [ST09] (PW)
+March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 3 ST01-014 Unforeseen Incident
 4 ST04-002 Strike Gundam
 4 ST04-010 Kira Yamato
@@ -1142,6 +1143,26 @@
 4 GD04-055 Heine's Gouf Ignited
 2 ST09-002 Force Impulse Gundam
 2 GD04-050 Destiny Gundam`,
+			`# Cees's Red CB deck (PR)
+3 GD04-126 Izuma Colony
+4 ST07-015 Ptolemaios
+2 GD04-125 Trinity Warship
+3 GD01-111 Battle of Aces
+2 ST07-013 Armed Intervention
+1 GD04-111 Trinity
+2 GD04-090 Hallelujah Haptism
+3 ST07-009 Setsuna F. Seiei
+3 ST07-010 Tieria Erde
+4 GD03-063 0 Gundam
+2 GD04-047 Gundam Virtue
+3 ST07-004 Gundam Virtue
+4 ST07-002 Gundam Exia
+2 GD04-045 Gundam Throne Zwei
+2 GD04-041 Gundam Throne Drei
+4 ST07-003 Gundam Virtue
+3 GD04-046 Gundam Dynames
+2 ST07-001 Gundam Exia
+1 GD04-036 Gundam Throne Eins`,
 			`# Cees's Red ZAFT deck (R)
 4 GD03-127 Jachin Due
 4 ST04-011 Athrun Zala
@@ -1176,19 +1197,23 @@
 4 GD03-015 Baund Doc`,
 			`# Cees's Vulture deck (P)
 4 GD04-127 Freeden Ⅱ
+1 ST05-013 With Iron and Blood
 1 GD04-113 Damage Control
-2 GD02-110 Awakened Power
-4 GD04-094 Pala Sys
+3 GD04-094 Pala Sys
 4 GD04-096 Ennil El
-4 GD03-096 Jamil Neate
-4 GD03-097 Wistario Afam
-3 GD04-059 Daughtress High Mobility Command Wise Wallaby
+2 GD03-096 Jamil Neate
+1 GD03-097 Wistario Afam
+4 GD04-059 Daughtress High Mobility Command Wise Wallaby
 4 GD04-061 G-Falcon
 4 GD04-060 Esperansa
 4 GD03-068 Gundam Hajiroboshi
-2 GD04-058 Jamil's Gundam X
+4 GD04-058 Jamil's Gundam X
+1 GD04-062 Lunamaria's Gunner Zaku Warrior
 4 GD03-062 GX-Bit
 2 GD03-055 Gundam Hajiroboshi (2nd Form)
+1 GD04-056 Sword Impulse Gundam
+1 GD03-066 Gundam Barbatos 5th Form (Ground Type)
+1 GD04-055 Heine's Gouf Ignited
 1 GD04-051 Gundam Airmaster Burst
 1 GD04-052 Gundam Leopard Destroy
 2 GD04-049 Gundam DX`,
@@ -1685,13 +1710,20 @@
 				const mo = trait.match(/redirect_battle_damage (\d+)/)
 				if (mo) {
 					for (const c of def.owner.battle) {
-						if (c.cid == mo[1]) defender = def
+						if (c.cid == mo[1]) {
+							log("↪Damage redirect to " + c)
+							defender = c
+						}
 					}
 				}
 			}
 			await actionStep()
 			def = defender
 
+			if (def.HP() < 1) {
+				log(`🚩🚩FIXME: 💀Attack target ${def} already dead.`)
+				return
+			}
 			// vfx
 			await battle(att, def)
 			let afs = att.hasTrait("First Strike")
@@ -1778,14 +1810,13 @@
 
 		function getSectionText(card, act = "Main", clause = "", limit = true) {
 			// debug card
-			// if (card.id === "GD04-071" && act == "Burst") {
+			// if (card.id === "ST08-013" && act == "Action") {
 			// 	log("FIXME: DEBUG " + act + " " + clause + " " + card)
 			// }
 			let mo = null
 			for (let line of card.text.split("<br>")) {
 				const rex = new RegExp("(.*?)" + (clause ? clause : ("【([^】]*?)" + act + "([^】]*?)】")) + "([^.].+?)(?:<br|$)")
-				mo = card.text.match(rex)
-				if (mo) break
+				if (mo = card.text.match(rex)) break
 			}
 			if (!mo) return ""
 			const limits = mo[1]
@@ -1847,7 +1878,7 @@
 			if (!t) return false
 			let rv = await runCard2(card, act, clause)
 			const context = (act && hasText(card.text, "Activate･" + act)) ? " " + card : ""
-			if (rv) log(`⚡Ran${context} ${(act || clause)}: ${escapeHTML(t)}`)
+			if (rv || act === "Burst") log(`⚡Ran${context} ${(act || clause)}: ${escapeHTML(t)}`)
 			return rv
 		}
 		async function runCard2(card, act, clause) {
@@ -1866,49 +1897,127 @@
 			let targets = []
 			let target = null
 			let mo = null
-
 			// trim if and other cruft
-			mo = t.match(/\/.Action./)
-			if (mo) t = t.slice(mo[0].length)
+			if (mo = t.match(/^\/.Action./)) t = t.slice(mo[0].length)
+			if (mo = t.match(/^Add 1 of your Shields to your hand. ?/)) {
+				// Always return true in this block to log handled acts.
+				target = p.shield.pop()
+				if (target) {
+					log(`🎴${p.name} took shield`)
+					target.rested = false
+					p.hand.push(target)
+				}
+				t = t.slice(mo[0].length)
+				if (t === "") return true
+				if (t.indexOf("Then, ") === 0) t = t.slice(6)
+				if (t === "choose 1 of your Units. It gets AP+2 during this turn.") {
+					target = mySort(fu, c => c.AP())[0]
+					if (!target) return true
+					target.ap_eot += 2
+					return true
+				}
+				if (t === "look at the top 2 cards of your deck and return 1 to the top and 1 to the bottom.") {
+					// TODO
+					const c = p.deck.pop()
+					if (!c) return true
+					if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
+						log("🎴" + p.name + " puts top card on bottom")
+						p.deck = [c].concat(p.deck)
+					} else {
+						log("🎴" + p.name + " leaves top card")
+						p.deck.push(c)
+					}
+					return true
+				}
+				// TODO: Process per sentence.
+				if (t === "if a friendly (Jupitris) Unit is in play, choose 1 enemy Unit that is Lv.3 or lower. Rest it.") {
+					if (!fu.some(c => c.hasTrait("Jupitris"))) return true
+					target = eu.filter(c => c.LEVEL() <= 3)[0]
+					if (!target) return true
+					rest(target)
+					return true
+				}
+				if (t === "if there are 7 or more (Vulture) cards in your trash, choose 1 enemy Unit with 2 or less AP. Destroy it.") {
+					if (!p.trash.filter(c => c.hasTrait("Vulture")).length < 7) return true
+					target = eu.filter(c => c.AP() <= 2)[0]
+					if (!target) return true
+					await destroy(target)
+					return true
+				}
+				if (t === "if it is your turn, look at the top 2 cards of your deck and return 1 to the top. Place the remaining card into your trash.") {
+					if (!myturn) return true
+					const c = p.deck.pop()
+					if (!c) return true
+					if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
+						log("🗑️" + p.name + " puts top card in trash")
+						p.trash.push(c)
+					} else {
+						log("🎴" + p.name + " leaves top card")
+						p.deck.push(c)
+					}
+					return true
+				}
+				if (hasText(t, "if it is your turn, deploy 1 rested [Char's Zaku Ⅱ]((Zeon)･AP3･HP1) Unit token.")) {
+					if (!myturn) return true
+					target = p.getToken("Char's Zaku Ⅱ")
+					target.rested = true
+					await p.deploy(target)
+					return true
+				}
+				if (hasText(t, "during your turn, if a friendly (League Militaire) Unit is in play, deploy 1 [Parts]((League Militaire)･AP1･HP1･This Unit can't choose the enemy player as its attack target) Unit token.")) {
+					if (!myturn) return true
+					if (fu.filter(c => c.hasTrait("League Militaire").length > 0)) {
+						await p.deploy(p.getToken("Parts"))
+					}
+					return true
+				}
+				if (hasText(t, "if it is your turn, deploy 1 [Tallgeese]((OZ)･AP4･HP2) Unit token. If it is your turn and a card with \"Corsica Base\" in its card name is in your trash, deploy 2 [Leo]((OZ)･AP1･HP1) Unit tokens instead.")) {
+					if (!myturn) return true
+					if (p.trash.filter(c => c.name.indexOf("Corsica Base")).length > 0) {
+						await p.deploy(p.getToken("Leo"))
+						await p.deploy(p.getToken("Leo"))
+					} else {
+						await p.deploy(p.getToken("Tallgeese"))
+					}
+					return true
+				}
+				if (t === "Choose 1 friendly (ZAFT) Unit. It gets AP+3 during this turn.") {
+					target = mySort(fu.filter(c => c.hasTrait("ZAFT")), c => myturn ? c.rested + c.sick : !c.rested)[0]
+					if (!target) return true
+					target.ap_eot += 3
+					return true
+				}
+			}
 
 			if (t.slice(0, 40) === "If you deploy this Unit from your trash,") {
 				if (!card.from_trash) return false
 				t = t[41].toUpperCase + t.slice(42)
 			}
 
-			mo = t.match(/^If you are attacking the enemy player, /)
-			if (mo) {
+			if (mo = t.match(/^If it is your turn, /)) {
+				if (!myturn) return false
+				t = t.slice(mo[0].length)
+			}
+			if (mo = t.match(/^If you are attacking the enemy player, /)) {
 				if (!attacker || defender) return false
 				t = t.slice(mo[0].length)
 			}
-			
-			mo = t.match(/^If you have (\d) or more other \((.+)\) Units in play, /)
-			if (mo) {
+			if (mo = t.match(/^If you have (\d) or more other \((.+)\) Units in play, /)) {
 				const types = mo[2].split(")/(")
-				if(!fu.filter(c => c !== u && types.some(part => c.hasTrait(part))).length >= parseInt(mo[1])) return false
+				if (!fu.filter(c => c !== u && types.some(part => c.hasTrait(part))).length >= parseInt(mo[1])) return false
 				t = t.slice(mo[0].length)
 			}
-			
-			mo = t.match(/^If you have an \(AEUG\) Link Unit in play, /)
-			if (mo) {
+			if (mo = t.match(/^If you have an \(AEUG\) Link Unit in play, /)) {
 				if (!fu.some(c => c.hasTrait("AEUG") && c.linked())) return false
 				t = t.slice(mo[0].length)
 			}
-			mo = t.match(/^If another friendly \(Clan\) Unit is in play, /)
-			if (mo) {
+			if (mo = t.match(/^If another friendly \(Clan\) Unit is in play, /)) {
 				if (!fu.some(c => c !== card && c.hasTrait("Clan"))) return false
 				t = t.slice(mo[0].length)
 			}
-			mo = t.match(/^If an enemy \(CB\) Unit is in play, /)
-			if (mo) {
+			if (mo = t.match(/^If an enemy \(CB\) Unit is in play, /)) {
 				if (!eu.some(c => c.hasTrait("CB"))) return false
 				t = t.slice(mo[0].length)
-			}
-			if (t === "choose 1 enemy Unit. Deal 1 damage to it.") {
-				target = mySort(eu, c => c.HP())[0]
-				if (!target) return false
-				await dealDamage(card, target)
-				return true
 			}
 			if (t === "this gains <First Strike> during this turn.") {
 				if (myturn && !eu.some(c => c.rested) && !u.traits.some(trait => trait.match(/^canAttack active/))) return false
@@ -1936,7 +2045,7 @@
 				bounce(target.pilot)
 				return true
 			}
-			
+
 			// Burst - Optional, so why not Attack etc.?
 			if (t === "Activate this card's 【Main】.") {
 				await runCard(card, "Main")
@@ -1952,48 +2061,51 @@
 
 			// Action
 			if (!hasText(t, "instead")) {
-				mo = t.match(/^[Cc]hoose 1 enemy Unit with (\d) or less AP. /)
-				if (mo) {
+				if (mo = t.match(/^[Cc]hoose 1 enemy Unit\. /)) {
+					targets = eu
+					target = targets[0]
+					if (!target) return false
+					t = t.slice(mo[0].length)
+				}
+				if (mo = t.match(/^Choose 1 rested enemy Unit\. /)) {
+					targets = mySort(eu.filter(c => c.rested), c => -c.HP())
+					target = targets[0]
+					if (!target) return false
+					t = t.slice(mo[0].length)
+				}
+				if (mo = t.match(/^[Cc]hoose 1 enemy Unit with (\d) or less AP\. /)) {
 					targets = eu.filter(c => c.AP() <= mo[1])
 					target = targets[0]
 					if (!target) return false
 					t = t.slice(mo[0].length)
 				}
-				mo = t.match(/^.hoose 1 active enemy Unit with 4 or less AP. /)
-				if (mo) {
-					target = eu.filter(c => !c.rested && c.AP() <= 4)[0]
+				if (mo = t.match(/^.hoose 1 active enemy Unit with 4 or less AP. /)) {
+					targets = eu.filter(c => !c.rested && c.AP() <= 4)
+					target = targets[0]
 					if (!target) return false
 					t = t.slice(mo[0].length)
 				}
-				mo = t.match(/^[Cc]hoose 1 enemy Unit with (\d) or less HP. /)
-				if (mo) {
+				if (mo = t.match(/^[Cc]hoose 1 enemy Unit with (\d) or less HP. /)) {
 					targets = eu.filter(c => c.HP() <= mo[1])
 					target = targets[0]
 					if (!target) return false
 					t = t.slice(mo[0].length)
 				}
-				mo = t.match(/^[Cc]hoose 1 enemy Unit that is Lv.(\d) or lower. /)
-				if (mo) {
-					targets = eu.filter(c => c.LEVEL() <= mo[1])
+				if (mo = t.match(/^[Cc]hoose 1 (rested|active)? ?enemy Unit that is Lv.(\d) or lower. /)) {
+					targets = eu.filter(c => c.LEVEL() <= mo[2])
+					if (mo[1] === "active") targets = targets.filter(c => !c.rested)
+					else if (mo[1] === "rested") targets = targets.filter(c => c.rested)
 					target = targets[0]
 					if (!target) return false
 					t = t.slice(mo[0].length)
 				}
-				mo = t.match(/^[Cc]hoose 1 rested enemy Unit that is Lv.(\d) or lower. /)
-				if (mo) {
-					targets = eu.filter(c => c.rested && c.LEVEL() <= mo[1])
+				if (mo = t.match(/^Choose 1 enemy Unit with no paired Pilot. /)) {
+					targets = eu.filter(c => !c.pilot)
 					target = targets[0]
 					if (!target) return false
 					t = t.slice(mo[0].length)
 				}
-				mo = t.match(/^Choose 1 enemy Unit with no paired Pilot. /)
-				if (mo) {
-					target = eu.filter(c => !c.pilot)[0]
-					if (!target) return false
-					t = t.slice(mo[0].length)
-				}
-				mo = t.match(/^[Cc]hoose 1 of your \(Titans\) Link Units battling an enemy Unit. /)
-				if (mo) {
+				if (mo = t.match(/^[Cc]hoose 1 of your \(Titans\) Link Units battling an enemy Unit. /)) {
 					if (!defender || defender.type == "BASE") return false
 					target = fu.filter(c => c.hasTrait("Titans") && c.linked())[0]
 					if (!target) return false
@@ -2024,20 +2136,53 @@
 				} else if (t === "Set it as active.") {
 					activate(target)
 					return true
+				} else if (mo = t.match(/^Deal (\d) damage to it\./)) {
+					target = targets.toSorted(c => c.HP())[0]
+					if (!target) return false
+					return await dealDamage(u, target, parseInt(mo[1]))
 				}
-				mo = t.match(/Choose 1 enemy Unit. It gets AP-(\d) during this turn./)
-				if (mo) {
-					target = eu[0]
+				if (mo = t.match(/^It gets AP-(\d) during this turn\./)) {
+					target = mySort(targets, c => -c.AP() - 10 * (myturn ? c.rested : !c.rested))[0]
 					if (!target) return false
 					log(`🎯AP-${mo[1]} EOT ${target}`)
 					target.ap_eot -= parseInt(mo[1])
 					return true
 				}
-				mo = t.match(/It gets AP-(\d) during this turn.$/)
-				if (mo) {
-					target.ap_eot -= parseInt(mo[2])
+				if (t === "It gets AP-2 during this battle.") {
+					target = mySort(targets, c => -c.AP())[0]
+					if (!target) return false
+					log("🎯AP-2 EOB " + target)
+					target.ap_eob -= 2
 					return true
 				}
+				if (t === "It won't be set as active during the start phase of your opponent's next turn.") {
+					target = mySort(eu.filter(c => c.level <= 2), c => c.HP())[0]
+					if (!target) return false
+					log("🎯Stunning " + target)
+					target.stunned = true
+					return true
+				}
+				if (t === "Choose 1 of your Units and 1 enemy Unit. Deal 1 damage to them.") {
+					const target1 = mySort(fu, c => -c.HP())[0]
+					const target2 = mySort(eu, c => -c.HP())[0]
+					if (!target1 || !target2) return false
+					await dealDamage(card, target1, 1)
+					await dealDamage(card, target2, 1)
+					return true
+				}
+			}
+			if (t === "Choose 1 enemy Unit. Deal 1 damage to it. If a friendly (Mafty) Link Unit is in play, deal 2 damage instead.") {
+				target = mySort(eu, c => c.HP())[0]
+				if (!target) return false
+				await dealDamage(u, target, fu.some(c => c.hasTrait("Mafty") && c.linked()) ? 2 : 1)
+				return true
+			}
+			if (t === "Choose 1 of your (CB) Units. During this turn, it may choose a damaged active enemy Unit as its attack target.") {
+				target = fu.filter(c => !c.rested && !c.sick && c.hasTrait("CB"))
+				if (!target || !eu.some(c => !c.rested && c.damage > 0)) return false
+				log("🎯Chose " + target)
+				target.traits_eot.push("canAttack active.unit.damaged")
+				return true
 			}
 			if (t === "Choose 1 friendly Base and 1 enemy Unit with 3 or less HP. Rest them.") {
 				if (!p.base || p.base.rested) return false
@@ -2066,8 +2211,7 @@
 			}
 
 			// Activate Main
-			mo = t.match(/^<Support (\d)>/)
-			if (mo) {
+			if (mo = t.match(/^<Support (\d)>/)) {
 				let support = parseInt(mo[1])
 				if (u.rested || !u.sick && u.AP() > support) return false
 				target = mySort(fu.filter(c => !c.rested && !c.sick), c => c.AP())[0]
@@ -2303,8 +2447,7 @@
 				target.ap_eot += 1
 				return true
 			}
-			mo = t.match(/Deploy 1 rested \[(.*?)\].*? Unit token./)
-			if (mo) {
+			if (mo = t.match(/Deploy 1 rested \[(.*?)\].*? Unit token./)) {
 				const c = p.getToken(mo[1])
 				c.rested = true
 				await p.deploy(c)
@@ -2329,13 +2472,11 @@
 				}
 				return true
 			}
-			mo = t.match(/^Draw (\d).$/)
-			if (mo) {
+			if (mo = t.match(/^Draw (\d).$/)) {
 				p.draw(mo[1])
 				return true
 			}
-			mo = t.match(/^Draw (\d). Then, discard (\d).$/)
-			if (mo) {
+			if (mo = t.match(/^Draw (\d). Then, discard (\d).$/)) {
 				p.draw(mo[1])
 				p.discard(mo[2])
 				return true
@@ -2451,6 +2592,21 @@
 				p.draw()
 				return true
 			}
+			// Same for Deploy, mandatory so says may.
+			if (t === "You may rest this Unit. If you do, choose 1 enemy Unit that is Lv.3 or lower. Deal 2 damage to it.") {
+				target = eu.filter(c => c.LEVEL() <= 3 && c.HP() <= 2 && u.canDamage(c))[0]
+				if (!target) return false
+				rest(u)
+				await dealDamage(u, target, 2)
+				return true
+			}
+			if (t === "Choose 1 to 3 of your (CB) Units. They get AP+2 during this turn.") {
+				targets = fu.filter(c => c.hasTrait("CB") && !c.rested && !c.sick).slice(0, 3)
+				// TODO: Might be worth to risk hitting a Burst-deployed BASE.
+				if (targets.length < 1 || (eu.filter(c => c.rested).length < 1 && !eu.base)) return false
+				targets.forEach(c => c.ap_eot += 2)
+				return true
+			}
 			if (t === "Choose 1 (Superpower Bloc) card and 1 (UN) card from your trash. Exile them from the game. If you do, set this Unit as active. It can't attack during this turn.") {
 				if (!u.rested) return false
 				target = p.trash.filter(c => c.hasTrait("Superpower Bloc"))[0]
@@ -2486,8 +2642,7 @@
 				return true
 			}
 			// ST05-03 & ST05-013
-			mo = t.match(/Choose 1 of your Units. Deal 1 damage to it. It gets AP\+(\d) during this turn.$/)
-			if (mo) {
+			if (mo = t.match(/Choose 1 of your Units. Deal 1 damage to it. It gets AP\+(\d) during this turn.$/)) {
 				target = mySort(fu.filter(c => !c.rested && !c.sick && c.HP() > 1), c => c.AP())[0]
 				if (!target) return false
 				if (hasText(t, "Rest this Unit")) {
@@ -2500,6 +2655,17 @@
 				return true
 			}
 			// Activate･Main
+			if (t === "【Once per Turn】①, rest 1 friendly (CB) Unit：Choose 1 enemy Unit that is Lv.5 or lower. Deal 1 damage to it.") {
+				target = mySort(eu.filter(c => c.LEVEL() <= 5), c => c.HP())[0]
+				if (!target) return false
+				const mine = mySort(fu.filter(c => !c.rested && c.hasTrait("CB")), c => -c.sick || c.AP())[0]
+				if (!mine) return false
+				if (!await p.pay(1)) return false
+				rest(mine)
+				once_per_turn.push(t + card.cid)
+				dealDamage(u, target)
+				return true
+			}
 			if (t === "Choose 1 of your other Units. Deal 1 damage to it. It gets AP+1 during this turn.") {
 				target = mySort(fu.filter(c => c !== u && !c.rested && !c.sick && c.HP() > 1), c => c.AP())[0]
 				if (!target) return false
@@ -2631,37 +2797,7 @@
 				eu.forEach(item => item.ap_eot -= 1)
 				return true
 			}
-			if (t === "Choose 1 enemy Unit. It gets AP-2 during this battle.") {
-				target = mySort(eu, c => -c.AP())[0]
-				if (!target) return false
-				log("🎯AP-2 EOB " + target)
-				target.ap_eob -= 2
-				return true
-			}
-			mo = t.match(/Choose 1 enemy Unit. Deal (\d) damage to it./)
-			if (mo) {
-				target = mySort(eu, c => -c.HP())[0]
-				return await dealDamage(card, target, mo[1])
-			}
-			if (hasText(t, "Choose 1 rested enemy Unit. Deal 1 damage to it.")) {
-				target = mySort(eu.filter(c => c.rested), c => -c.HP())[0]
-				return await dealDamage(card, target, 1)
-			}
-			if (t === "Choose 1 rested enemy Unit that is Lv.2 or lower. It won't be set as active during the start phase of your opponent's next turn.") {
-				target = mySort(eu.filter(c => c.level <= 2), c => c.HP())[0]
-				if (!target) return false
-				log("🎯Stunning " + target)
-				target.stunned = true
-				return true
-			}
-			if (t === "Choose 1 of your Units and 1 enemy Unit. Deal 1 damage to them.") {
-				const target1 = mySort(fu, c => -c.HP())[0]
-				const target2 = mySort(eu, c => -c.HP())[0]
-				if (!target1 || !target2) return false
-				await dealDamage(card, target1, 1)
-				await dealDamage(card, target2, 1)
-				return true
-			}
+
 			// At the end of the turn
 			if (t === "when this Unit is paired with a Pilot, set it as active.") {
 				if (!u.pilot || !u.rested) return false
@@ -2699,8 +2835,7 @@
 				target = mySort(eu.filter(c => c.HP() <= 3), c => -c.AP())[0]
 				return await dealDamage(card, target, 3)
 			}
-			mo = t.match(/eal 1 damage to all (enemy )?Units that are Lv.(\d) or lower.$/)
-			if (mo) {
+			if (mo = t.match(/eal 1 damage to all (enemy )?Units that are Lv.(\d) or lower.$/)) {
 				targets = mo[1] ? eu.filter(c => c.level <= mo[2]) : eu.concat(fu).filter(c => c.level <= mo[2])
 				if (targets.length < 1) return false
 				targets.forEach(async target => await dealDamage(card, target, 1))
@@ -2727,10 +2862,14 @@
 				return true
 			}
 			// Deploy
-			if (t === "choose 1 enemy Unit with 4 or less AP. Deal 2 damage to it.") {
-				target = eu.filter(c => c.AP() <= 4).toSorted(c => c.HP())[0]
-				if (!target) return false
-				await dealDamage(card, target, 2)
+			if (t === "You may choose 1 to 2 of your other active (CB) Units. Rest them. If you do, deal damage equal to the number of Units rested with this effect to all enemy Units that are Lv.6 or lower.") {
+				targets = mySort(eu.filter(c => c.LEVEL <= 6), c => -c.HP())
+				if (targets.length < 1) return false
+				const maxDamage = targets[0].HP()
+				const mine = fu.filter(c => c !== u && !c.rested && c.hasTrait("CB")).slice(0, maxDamage < 2 ? 1 : 2)
+				if (mine.length < 1) return false
+				mine.forEach(c => rest(c))
+				targets.forEach(async c => await dealDamage(u, c, mine.length))
 				return true
 			}
 			if (t === "Choose 1 enemy Base. Deal 1 damage to it.") {
@@ -2750,8 +2889,7 @@
 				if (!target) return false
 				return await dealDamage(card, target, 3)
 			}
-			mo = t.match(/Choose 1 enemy Unit with (\d) or less HP. Rest it./)
-			if (mo) {
+			if (mo = t.match(/Choose 1 enemy Unit with (\d) or less HP. Rest it./)) {
 				target = mySort(eu.filter(c => c.HP() <= mo[1]), c => -c.AP())[0]
 				if (!target) return false
 				rest(target)
@@ -2773,7 +2911,7 @@
 				return true
 			}
 			if (hasText(t, "Choose 1 of your other (Clan) Units. During this turn, it may choose an active enemy Unit with 3 or less AP as its attack target.")) {
-				target = fu.filter(c => !c.rested && !c.sick && c !== card && c.hasTrait("Clan"))[0]
+				target = fu.filter(c => !c.rested && !c.sick && c !== u && c.hasTrait("Clan"))[0]
 				if (!target || eu.filter(c => !c.rested && c.AP() <= 3).length < 1) return false
 				u.traits_eot.push("canAttack active.unit.ap3min")
 				return true
@@ -2850,22 +2988,37 @@
 				return true
 			}
 
-			mo = t.match(/^Look at the top (\d) cards of your deck./)
+			mo = t.match(/^[Ll]ook at the top (\d) cards of your deck[. ]/)
 			let look = mo && mo[1] || 0
-			if (t.indexOf("Look at the top card of your deck.") === 0) look = 1
+			if (t.indexOf("ook at the top card of your deck.") === 1) look = 1
 			if (look > 0) {
 				if (hasText(t, "may deploy") && fu.length >= 6) return false
 				targets = p.deck.slice(-look)
 				if (targets.length < 1) return false
 				let target = null
-				if (hasText(t, "If it is a (Clan) card, you may reveal it and add it to your hand.")) {
-					target = targets.filter(c => c.hasTrait("Clan"))[0]
+				if (t === "look at the top 2 cards of your deck and return 1 to the top. Place the remaining card into your trash.") {
+					const c = p.deck.pop()
+					if (!c) return false
+					if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
+						log("🗑️" + p.name + " puts top card in trash")
+						p.trash.push(c)
+					} else {
+						log("🎴" + p.name + " leaves top card")
+						p.deck.push(c)
+					}
+					return true
 				}
+
 				if (hasText(t, "If it is a (Zeon)/(Neo Zeon) Unit card, you may reveal it and add it to your hand.")) {
 					target = targets.filter(c => c.type === "UNIT" && (c.hasTrait("Zeon") || c.hasTrait("Neo Zeon")))[0]
 				}
-				mo = t.match(/You may deploy 1 \((.+?)\) Unit card that is Lv.4 or lower among them./)
-				if (mo) {
+				if (mo = t.match(/If it is a \((.+?)\) card, you may reveal it and add it to your hand./)) {
+					for (const part of mo[1].split(")/(")) {
+						target = targets.filter(c => c.hasTrait(mo[1]))[0]
+						if (target) break
+					}
+				}
+				if (mo = t.match(/You may deploy 1 \((.+?)\) Unit card that is Lv.4 or lower among them./)) {
 					target = targets.filter(c => c.level <= 4 && c.hasTrait(mo[1]))[0]
 				}
 				else if (hasText(t, "You may reveal 1 Pilot card among them and add it to your hand.")) {
@@ -2874,8 +3027,7 @@
 				else if (hasText(t, "You may reveal 1 (Academy) Unit card/Command card among them and add it to your hand.")) {
 					target = targets.filter(c => (c.type === "UNIT" || c.type === "COMMAND") && c.hasTrait("Academy"))[0]
 				}
-				mo = t.match(/You may reveal 1 \((.+?)\) Unit card\/Pilot card among them and add it to your hand./)
-				if (mo) {
+				if (mo = t.match(/You may reveal 1 \((.+?)\) Unit card\/Pilot card among them and add it to your hand./)) {
 					target = targets.filter(c => (c.type === "UNIT" || c.type === "PILOT") && c.hasTrait(mo[1]))[0]
 				}
 				else if (hasText(t, "You may reveal 1 (CB) Unit card that is Lv.5 or lower among them and add it to your hand.")) {
@@ -2915,102 +3067,6 @@
 				return true
 			}
 
-			mo = t.match(/Add 1 of your Shields to your hand. ?/)
-			if (mo) {
-				// Always return true in this block to log handled acts.
-				target = p.shield.pop()
-				if (target) {
-					log(`🎴${p.name} took shield`)
-					target.rested = false
-					p.hand.push(target)
-				}
-				t = t.slice(mo[0].length)
-
-				if (t === "") return true
-				if (t === "Then, choose 1 of your Units. It gets AP+2 during this turn.") {
-					target = mySort(fu, c => c.AP())[0]
-					if (!target) return true
-					target.ap_eot += 2
-					return true
-				}
-				if (t === "Then, choose 1 enemy Unit with 5 or less AP. Deal 1 damage to it.") {
-					target = eu.filter(c => c.AP() <= 5)[0]
-					if (!target) return true
-					return await dealDamage(card, target)
-				}
-				if (t === "Then, look at the top 2 cards of your deck and return 1 to the top and 1 to the bottom.") {
-					// TODO
-					const c = p.deck.pop()
-					if (!c) return true
-					if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
-						log("🎴" + p.name + " puts top card on bottom")
-						p.deck = [c].concat(p.deck)
-					} else {
-						log("🎴" + p.name + " leaves top card")
-						p.deck.push(c)
-					}
-					return true
-				}
-				// TODO: Process per sentence.
-				if (t === "Then, if a friendly (Jupitris) Unit is in play, choose 1 enemy Unit that is Lv.3 or lower. Rest it.") {
-					if(!fu.some(c => c.hasTrait("Jupitris"))) return true
-					target = eu.filter(c => c.LEVEL() <= 3)[0]
-					if (!target) return true
-					rest(target)
-					return true
-				}
-				if (t === "Then, if there are 7 or more (Vulture) cards in your trash, choose 1 enemy Unit with 2 or less AP. Destroy it.") {
-					if (!p.trash.filter(c => c.hasTrait("Vulture")).length < 7) return true
-					target = eu.filter(c => c.AP() <= 2)[0]
-					if (!target) return true
-					await destroy(target)
-					return true
-				}
-				if (t === "Then, if it is your turn, look at the top 2 cards of your deck and return 1 to the top. Place the remaining card into your trash.") {
-					if (!myturn) return true
-					const c = p.deck.pop()
-					if (!c) return true
-					if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
-						log("🗑️" + p.name + " puts top card in trash")
-						p.trash.push(c)
-					} else {
-						log("🎴" + p.name + " leaves top card")
-						p.deck.push(c)
-					}
-					return true
-				}
-				if (hasText(t, "Then, if it is your turn, deploy 1 rested [Char's Zaku Ⅱ]((Zeon)･AP3･HP1) Unit token.")) {
-					if (!myturn) return true
-					target = p.getToken("Char's Zaku Ⅱ")
-					target.rested = true
-					await p.deploy(target)
-					return true
-				}
-				if (hasText(t, "Then, during your turn, if a friendly (League Militaire) Unit is in play, deploy 1 [Parts]((League Militaire)･AP1･HP1･This Unit can't choose the enemy player as its attack target) Unit token.")) {
-					if (!myturn) return true
-					if (fu.filter(c => c.hasTrait("League Militaire").length > 0)) {
-						await p.deploy(p.getToken("Parts"))
-					}
-					return true
-				}
-				if (hasText(t, "Then, if it is your turn, deploy 1 [Tallgeese]((OZ)･AP4･HP2) Unit token. If it is your turn and a card with \"Corsica Base\" in its card name is in your trash, deploy 2 [Leo]((OZ)･AP1･HP1) Unit tokens instead.")) {
-					if (!myturn) return true
-					if (p.trash.filter(c => c.name.indexOf("Corsica Base")).length > 0) {
-						await p.deploy(p.getToken("Leo"))
-						await p.deploy(p.getToken("Leo"))
-					} else {
-						await p.deploy(p.getToken("Tallgeese"))
-					}
-					return true
-				}
-				if (t === "Then, Choose 1 friendly (ZAFT) Unit. It gets AP+3 during this turn.") {
-					target = mySort(fu.filter(c => c.hasTrait("ZAFT")), c => myturn ? c.rested + c.sick : !c.rested)[0]
-					if (!target) return true
-					target.ap_eot += 3
-					return true
-				}
-			}
-
 			// Destroyed, so return true to log?
 			if (t === "Return the card paired with this Unit to your hand.") {
 				if (!u.pilot) return false
@@ -3018,8 +3074,8 @@
 				u.pilot = null
 				return true
 			}
-			if (t === "If it is your turn, return this Unit's paired Pilot to its owner's hand.") {
-				if (!myturn && !u.pilot) return true
+			if (t === "return this Unit's paired Pilot to its owner's hand.") {
+				if (!u.pilot) return false
 				toHand(u.pilot)
 				u.pilot = null
 				return true
@@ -3034,18 +3090,6 @@
 			if (t === "If it is your opponent's turn and this is a (CB) Unit, draw 1.") {
 				if (myturn || u.hasTrait("CB")) return false
 				p.draw()
-				return true
-			}
-			if (t === "look at the top 2 cards of your deck and return 1 to the top. Place the remaining card into your trash.") {
-				const c = p.deck.pop()
-				if (!c) return false
-				if (c.type === "PILOT" && p.getPairableUnits().length < 1 && p.hand.filter(c => c.type === "UNIT").length < 1) {
-					log("🗑️" + p.name + " puts top card in trash")
-					p.trash.push(c)
-				} else {
-					log("🎴" + p.name + " leaves top card")
-					p.deck.push(c)
-				}
 				return true
 			}
 			if (t === "If you have a (Clan) Unit in play, look at the top card of your deck. Return it to the top or bottom of your deck.") {
@@ -3120,7 +3164,7 @@
 					p.draw(1, false)
 					await render()
 				} catch (ex) {
-					log(ex)
+					log("🚩" + ex)
 					break
 				}
 				// Resource phase
@@ -3227,7 +3271,7 @@
 						continue
 					}
 					if (att.text === "This Unit can only attack during a turn when one of your (Superpower Bloc)/(UN) Units is deployed.") {
-						if(!p.traits_eot.some(trait => trait.match(/^Deployed .*(Superpower Bloc|UN)/))) continue
+						if (!p.traits_eot.some(trait => trait.match(/^Deployed .*(Superpower Bloc|UN)/))) continue
 					}
 					enemy = p === p1 ? p2 : p1
 
@@ -3488,19 +3532,42 @@
 			let html = ""
 			let oldcid = cid
 			let count = 0
-			for (const entry of Object.entries(cards)) {
-				const text = JSON.stringify(entry[1])
-				if (text.indexOf(query) > -1) {
-					let left = 5 + (count % 10) * 12
-					let top = 10 + Math.floor(count / 10) * 15
-					count += 1
-					html += p1.getCard(entry[0]).toHTML(left, top)
+			let results = []
+			let tosearch = Object.entries(cards)
+			let op = "AND"
+			for (const q of query.split(/ (AND|OR) /)) {
+				console.log(`q>${q}<`)
+				if (q === "AND") {
+					if (count === 0) break
+					op = "AND"
+					tosearch = results
+					continue
+				}
+				if (q === "OR") {
+					op = "OR"
+					continue
+				}
+				count = 0
+				if (op === "AND") results = []
+				for (const entry of tosearch.toSorted()) {
+					const text = JSON.stringify(entry[1])
+					if (hasText(text, q)) {
+						results.push(entry)
+						++count
+					}
 				}
 			}
-			if (count === 0) html = "No results."
+			if (results.length < 1) html = "No results."
 			else {
+				count = 0
 				cid = oldcid
-				html = "" + count + " results:<br>" + html
+				html = "" + results.length + " results:<br>"
+				for (const entry of results) {
+					let left = 5 + (count % 10) * 11
+					let top = 10 + Math.floor(count / 10) * 15
+					++count
+					html += p1.getCard(entry[0]).toHTML(left, top, false, 0, true)
+				}
 			}
 			searchresults.innerHTML = html
 		}

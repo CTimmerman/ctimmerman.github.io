@@ -6448,7 +6448,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Tieria Erde]",
         "ap": 3,
         "hp": 3
     },
@@ -6506,7 +6506,7 @@
         "traits": [
             "Earth Alliance"
         ],
-        "link": "",
+        "link": "(Biological CPU) Trait",
         "ap": 4,
         "hp": 4
     },
@@ -6583,7 +6583,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "[Setsuna F. Seiei]",
         "ap": 6,
         "hp": 4
     },
@@ -9370,7 +9370,7 @@
         "traits": [
             "ZAFT"
         ],
-        "link": "",
+        "link": "[Rau Le Creuset]",
         "ap": 5,
         "hp": 5
     },
@@ -9389,7 +9389,7 @@
             "Tekkadan",
             "Gundam Frame"
         ],
-        "link": "",
+        "link": "[Mikazuki Augus]",
         "ap": 5,
         "hp": 4
     },
@@ -9693,7 +9693,7 @@
             "CB",
             "GN Drive"
         ],
-        "link": "",
+        "link": "(CB) Trait",
         "ap": 5,
         "hp": 4
     },
