@@ -214,8 +214,8 @@
 <body>
 	<div id="overlay"></div>
 	<div id="search" class="searchsmall">
-		<div onclick="toggleSearch()" class="icon"><label for="searchtext">🔎Search</label></div>
-		<input id="searchtext" onchange="findCards(this.value)" placeholder="Case-sensitive. AND and OR supported.">
+		<div onclick="toggleSearch()" class="icon" title="Search">🔎<label for="searchtext">Search</label></div>
+		<input id="searchtext" onchange="findCards(this.value)" placeholder="Case-sensitive. Supports AND, OR, and NOT.">
 		<div id="searchresults"></div>
 	</div>
 	<div id="battlefield"></div>
@@ -293,6 +293,7 @@
 		const EX_RESOURCES = ["EXR-001", "EXRP-001", "EXRP-002"]
 
 		function hasText(body, s) {
+			if (!body) return false
 			return body.indexOf(s) > -1
 		}
 
@@ -373,8 +374,8 @@
 			// tokens don't go to trash
 			if (card.type.indexOf("TOKEN") < 0 && card.type.indexOf("EX") !== 0) trash(card)
 			await render()
-			boom.play().catch(ex => { })
-			await sleep(900)
+			await boom.play().catch(ex => { })
+			await sleep(500)
 			return true
 		}
 
@@ -432,41 +433,37 @@
 
 		async function battle(att, def) {
 			if (delay === 0) return
-			try {
-				/* Too much hassle to move the pilots at well
-				const e = getel(att)
-				const old_top = e.style.top
-				const old_left = e.style.left
-				const e2 = getel(def)
-				e.style.top = e2.style.top
-				e.style.left = e2.style.left
-				await sleep(800)
-				e.style.top = old_top
-				e.style.left = old_left
-				*/
-				const sa = getel(att).style
-				const sd = getel(def).style
-				let x1 = parseFloat(sa.left) + 5
-				let y1 = parseFloat(sa.top) + 5
-				let x2 = parseFloat(sd.left) + 5
-				let y2 = parseFloat(sd.top) + 5
-				// Laser time!
-				overlay.style.display = "block"
-				overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
-					<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px" stroke-linecap="round">
-						<animate attributeName="stroke" values="#880;#fff;#880;" dur="0.2s" repeatCount="indefinite"/>
-						<animate attributeName="stroke-width" values="2px;8px;2px;" dur="0.2s" repeatCount="indefinite"/>
-					</line>
-				</svg>`
-				pewpew.play().catch(ex => { })
-				// vfx
-				await sleep(400)
-				overlay.style.display = "none"
-				// sfx
-				await sleep(200)
-			} catch (ex) {
-				// cosmetic
-			}
+			await render()
+			/* Too much hassle to move the pilots at well
+			const e = getel(att)
+			const old_top = e.style.top
+			const old_left = e.style.left
+			const e2 = getel(def)
+			e.style.top = e2.style.top
+			e.style.left = e2.style.left
+			await sleep(800)
+			e.style.top = old_top
+			e.style.left = old_left
+			*/
+			const sa = getel(att).style
+			const sd = getel(def).style
+			let x1 = parseFloat(sa.left) + 5
+			let y1 = parseFloat(sa.top) + 5
+			let x2 = parseFloat(sd.left) + 5
+			let y2 = parseFloat(sd.top) + 5
+			// Laser time!
+			overlay.style.display = "block"
+			overlay.innerHTML = `<svg id="boardbg" style="height:100vmin;width:100vmin">
+				<line x1="${x1}vmin" y1="${y1}vmin" x2="${x2}vmin" y2="${y2}vmin" stroke="white" stroke-width="4px" stroke-linecap="round">
+					<animate attributeName="stroke" values="#880;#fff;#880;" dur="0.2s" repeatCount="indefinite"/>
+					<animate attributeName="stroke-width" values="2px;8px;2px;" dur="0.2s" repeatCount="indefinite"/>
+				</line>
+			</svg>`
+			// vfx
+			await sleep(400)
+			// sfx
+			await pewpew.play().catch(ex => { })
+			overlay.style.display = "none"
 		}
 
 		function showDeck(name) {
@@ -1345,7 +1342,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				if (!c) return false
 				log(`💥Broke shield ${this.shield.length + 1}: ${c}`)
 				activate(c)
-				boom.play().catch(ex => { })
+				await boom.play().catch(ex => { })
 				let toTrash = true
 				let t = /Burst】([^.]+)/.exec(c.text)
 				if (t) {
@@ -1640,6 +1637,64 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			battlefield.innerHTML = html
 		}
 
+		async function attackStep(att, def = null) {
+			attacker = att
+			defender = def
+			const enemy = att.owner === p1 ? p2 : p1
+			const name = def ? def.name : enemy.name
+			log("🔫" + att + " attack " + name)
+			rest(att, false)
+			await sleep(500)
+			await run(att, "Attack")
+
+			// Block Step
+			let blocked = false
+			for (const bc of enemy.battle) {
+				if (!bc.rested && bc.hasTrait("Blocker") && !att.hasTrait("High-Maneuver")) {
+					// Don't block if...
+					if (defender) {
+						if (defender.HP() > attacker.AP() || defender.AP() >= attacker.HP()) continue
+					}
+					log(`🛡️${bc} blocks ${att}`)
+					rest(bc, false)
+					defender = bc
+					await sleep(500)
+					await run(att, "", "blocked")
+					break
+				}
+			}
+
+			// Action Step
+			await actionStep()
+
+			// Player or shield
+			if (!defender || defender.facedown) {
+				if (enemy.shield.length < 1) {
+					await battle(att, enemy.hand[0] || enemy.resource[0])
+					log("💀" + enemy.name + " died")
+					boom.playbackRate = 0.5
+					await boom.play().catch(ex => { })
+					await sleep(2000)
+					boom.playbackRate = 1
+					endGame(att.owner)
+					await render()
+					return
+				} else {
+					await battle(att, enemy.shield.slice(-1)[0])
+					let sup = att.hasTrait("Suppression")
+					if (sup) {
+						log("❌Suppression")
+					}
+					for (let i = 0; i < (sup ? 2 : 1); ++i) {
+						await enemy.breakShield()
+					}
+				}
+				return
+			}
+			// Action step before this to change defender!
+			await doBattle(att, defender)
+		}
+
 		// https://www.gundam-gcg.com/en/pdf/comprehensiverules_en.pdf section 9.
 		// [Action] COMMAND cards and [Activate-Action] effects.
 		async function actionStep() {
@@ -1717,15 +1772,15 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 					}
 				}
 			}
-			await actionStep()
 			def = defender
-
+			// vfx to show defender
+			await battle(att, def)
 			if (def.HP() < 1) {
-				log(`🚩🚩FIXME: 💀Attack target ${def} already dead.`)
+				// Action or attack trigger could have killed it. TODO: vfx that instead?
 				return
 			}
-			// vfx
-			await battle(att, def)
+
+			// Damage Step
 			let afs = att.hasTrait("First Strike")
 			let dfs = def.hasTrait("First Strike")
 			let dmg_to_def = getDamage(att, def)
@@ -1773,7 +1828,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			if (dmg_to_att > 0) await run(def, "", "When this Unit deals battle damage")
 			if (att.HP() < 1 && !att.owner.trash.includes(att)) await destroy(att)
 
-			// end of battle
+			// End of Battle Step
 			for (const c of p1.battle.concat(p2.battle)) {
 				c.ap_eob = 0
 				c.hp_eob = 0
@@ -2178,7 +2233,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (t === "Choose 1 of your (CB) Units. During this turn, it may choose a damaged active enemy Unit as its attack target.") {
-				target = fu.filter(c => !c.rested && !c.sick && c.hasTrait("CB"))
+				target = fu.filter(c => !c.rested && !c.sick && c.hasTrait("CB"))[0]
 				if (!target || !eu.some(c => !c.rested && c.damage > 0)) return false
 				log("🎯Chose " + target)
 				target.traits_eot.push("canAttack active.unit.damaged")
@@ -2227,6 +2282,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (t === "【Once per Turn】Exile 3 (Titans) cards from your trash: This Unit gains <Breach 4> during this turn.") {
+				if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
 				targets = p.trash.filter(c => c.hasTrait("Titans")).slice(0, 3)
 				if (targets.length < 3) return false
 				once_per_turn.push(t + card.cid)
@@ -2556,13 +2612,14 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (clause == " Unit links, " && hasText(card.text, "【Once per Turn】When a friendly (Clan) Unit links, it gains <Breach 3> during this turn.")) {
-				if (!active_unit.hasTrait("Clan")) return false
+				if (active_unit.owner !== u.owner || !active_unit.hasTrait("Clan")) return false
 				once_per_turn.push(t + card.cid)
 				log("🎯+Breach 3 " + active_unit)
 				active_unit.traits_eot.push("Breach 3")
 				return true
 			}
 			if (t === "Choose 1 friendly Link Unit. It gains <Breach 1> during this turn.") {
+				if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
 				target = mySort(fu.filter(c => !c.rested && !c.sick && c.linked()), c => c.AP())[0]
 				if (!target || (en.shield.length < 1 && !en.base)) return false
 				log("🎯Breach+1 " + target)
@@ -2570,6 +2627,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (hasText(t, "Choose 1 of your Units. It gains <Breach 3> during this turn.")) {
+				if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
 				target = mySort(fu.filter(c => !c.rested && !c.sick), c => c.AP())[0]
 				if (!target || (en.shield.length < 1 && !en.base)) return false
 				log("🎯Breach+3 " + target)
@@ -2628,6 +2686,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (hasText(t, "Choose 1 of your (Cyclops Team) Units. It gains <Breach 1> during this turn.")) {
+				if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
 				target = mySort(fu.filter(c => c.hasTrait("Cyclops Team")), c => c.AP())[0]
 				if (!target) return false
 				log("🎯Breach+1 " + target)
@@ -2641,9 +2700,9 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				target.traits_eot.push("First Strike")
 				return true
 			}
-			// ST05-03 & ST05-013
+			// ST05-003 & ST05-013
 			if (mo = t.match(/Choose 1 of your Units. Deal 1 damage to it. It gets AP\+(\d) during this turn.$/)) {
-				target = mySort(fu.filter(c => !c.rested && !c.sick && c.HP() > 1), c => c.AP())[0]
+				target = mySort(fu.filter(c => c !== u && !c.rested && !c.sick && c.HP() > 1), c => c.AP())[0]
 				if (!target) return false
 				if (hasText(t, "Rest this Unit")) {
 					if (u.rested) return false
@@ -3258,7 +3317,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				await run(p.base, "Activate･Main")
 				for (const c of p.battle) await run(c, "Activate･Main")
 
-				// attack
+				// Attack Step
 				considered = []
 				while (true) {
 					const can_attack = mySort(p.battle.filter(bc => !bc.rested && !bc.sick && !considered.includes(bc)), bc => -bc.AP())
@@ -3296,7 +3355,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 						}
 					}
 					// Base and shields also count as enemy player: https://www.gundam-gcg.com/en/cards/index.php?freeword=GD04-016#cards
-					let must_attack_unit = hasText(att.text, "This Unit can't choose the enemy player as its attack target")
+					let must_attack_unit = hasText(att.text, "This Unit can't choose the enemy player as its attack target") || att.hasTrait("must_attack_unit")
 
 					// TODO: Action can solve this in doBattle
 					if (att.level <= 4 && enemy.traits_eot.some(txt => txt.match(new RegExp(`noDmgShield enemy.unit.lv[${att.level}-9]`)))) {
@@ -3312,12 +3371,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 							let newdef = enemy.battle.filter(bc => bc.rested && bc.hasTrait("Maganac Corps"))[0]
 							def = newdef || def
 						}
-						log("🔫" + att + " attack " + def)
-						rest(att, false)
-						await sleep(500)
-						defender = def
-						await run(att, "Attack")
-						await doBattle(att, def)
+						await attackStep(att, def)
 						continue
 					}
 					if (must_attack_unit) {
@@ -3334,57 +3388,15 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 							log(`🛡️${enemy.base} would take no battle damage from ${att}`)
 							continue
 						}
-						let target = enemy.base
-						log("🔫" + att + " attack " + target)
-						rest(att, false)
-						await sleep(500)
-						defender = target
-						await run(att, "Attack")
-						await doBattle(att, target)
+						await attackStep(att, enemy.base)
 					} else {
-						if (enemy.shield.length < 1) {
-							log("🔫" + att + " attack " + enemy.name)
-							rest(att, false)
-							let blocked = false
-							for (const bc of enemy.battle) {
-								if (!bc.rested && bc.hasTrait("Blocker") && !att.hasTrait("High-Maneuver")) {
-									log(`🛡️${bc} blocks ${att}`)
-									rest(bc, false)
-									await sleep(500)
-									await run(att, "Attack")
-									defender = bc
-									await run(att, "", "blocked")
-									await doBattle(att, bc)
-									blocked = true
-									break
-								}
-							}
-							if (blocked) continue
-							await battle(att, enemy.hand[0] || enemy.resource[0])
-							log("💀" + enemy.name + " died")
-							boom.playbackRate = 0.5
-							boom.play().catch(ex => { })
-							await sleep(2000)
-							boom.playbackRate = 1
-							endGame(att.owner)
-							await render()
-							break
-						}
-						if (enemy.shield.slice(-1)[0].hasTrait("protection.enemy.units")) {
+						if (enemy.shield.length > 0 && enemy.shield.slice(-1)[0].hasTrait("protection.enemy.units")) {
 							log("🛡️" + enemy.name + " shield protected from enemy units")
 							continue
 						}
-						log("🔫" + att + " attacks " + enemy.name)
-						rest(att, false)
-						await battle(att, enemy.shield.slice(-1)[0])
-						let sup = att.hasTrait("Suppression")
-						if (sup) {
-							log("❌Suppression")
-						}
-						for (let i = 0; i < (sup ? 2 : 1); ++i) {
-							await enemy.breakShield()
-						}
+						await attackStep(att)
 					}
+
 					// Battle End
 					for (const c of p1.battle.concat(p2.battle)) {
 						c.ap_eob = 0
@@ -3520,7 +3532,10 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 		}
 
 		function toggleSearch() {
-			if (search.classList.contains('searchsmall')) search.classList.remove('searchsmall')
+			if (search.classList.contains('searchsmall')) {
+				search.classList.remove('searchsmall')
+				searchtext.focus()
+			}
 			else search.classList.add('searchsmall')
 		}
 		function toggleSettings() {
@@ -3536,7 +3551,6 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			let tosearch = Object.entries(cards)
 			let op = "AND"
 			for (const q of query.split(/ (AND|OR) /)) {
-				console.log(`q>${q}<`)
 				if (q === "AND") {
 					if (count === 0) break
 					op = "AND"
@@ -3549,9 +3563,12 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				}
 				count = 0
 				if (op === "AND") results = []
+				const invert = q.indexOf("NOT ") === 0
 				for (const entry of tosearch.toSorted()) {
 					const text = JSON.stringify(entry[1])
-					if (hasText(text, q)) {
+					let add = false
+					if (invert ? !hasText(text, q.slice(4)) : hasText(text, q)) {
+						if (results.includes(entry)) continue
 						results.push(entry)
 						++count
 					}
