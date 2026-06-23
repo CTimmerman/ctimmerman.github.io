@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-17</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-22</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -18,7 +18,7 @@
 			--PURPLE: #764A92;
 			--RED: #bb0055;
 			--GREEN: #62A43E;
-			--BROWN: #664400;
+			--BROWN: #C6A474;
 			background-color: var(--bgcolor);
 			color: var(--fgcolor);
 			scrollbar-color: var(--fgcolor) var(--bgcolor);
@@ -87,16 +87,11 @@
 			height: 100%;
 		}
 
-		#pricecheck {
+		.pricecheck {
+			float: right;
 			cursor: help;
-			top: 40vmin;
-			left: 60vmin;
-			position: absolute;
-			width: 10vmin;
-			height: 2vmin;
-			display: block;
-			font-size: 3vmin;
-			z-index: 9001;
+			width: 1vmin;
+			height: 0.5vmin;
 		}
 
 		#settings {
@@ -215,7 +210,8 @@
 	<div id="overlay"></div>
 	<div id="search" class="searchsmall">
 		<div onclick="toggleSearch()" class="icon" title="Search">🔎<label for="searchtext">Search</label></div>
-		<input id="searchtext" onchange="findCards(this.value)" placeholder="Case-sensitive. Supports AND, OR, and NOT.">
+		<input id="searchtext" onchange="findCards(this.value)"
+			placeholder="Case-sensitive. Supports AND, OR, and NOT.">
 		<div id="searchresults"></div>
 	</div>
 	<div id="battlefield"></div>
@@ -255,9 +251,6 @@
 		</div><br>
 		<div><button onclick="dlog.innerHTML=''">Clear log</button></div>
 	</div>
-	<div id="pricecheck"
-		onclick="window.open(`https://www.cardtrader.com/en/search?q=${escapeHTML(encodeURIComponent(zoomed && zoomed.getAttribute('name')))}`, '_blank'); event.stopPropagation();">
-		&nbsp;</div>
 	<script>
 		"use strict"
 		let zoomed = ""
@@ -559,7 +552,6 @@
 			event.preventDefault()
 			event.stopPropagation()
 			if (hasText(e.style.transform, "scale")) {
-				pricecheck.style.display = "none"
 				e.style.transform = e.old_transform
 				e.style.zIndex = e.old_zIndex
 				e.style.top = e.old_top
@@ -576,9 +568,6 @@
 				if (parseInt(e.old_top) < 40) e.style.top = "40vmin"
 				e.style.left = "40vmin"
 				window.pause = (window.pause || 0) + 1
-				pricecheck.style.left = `${parseFloat(e.style.left) + 19}vmin`
-				pricecheck.style.top = `${parseFloat(e.style.top) - 27}vmin`
-				pricecheck.style.display = "block"
 			}
 		}
 
@@ -842,8 +831,11 @@
 			}
 			toHTML(left, top, facedown = false, z = 0, raw = false) {
 				const id = this.id.split("_")[0]
-				if (raw) return `<div id="c${this.cid}" class="card ${this.rested ? "rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: var(--${this.color}); background-color: var(--${this.color});background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp); font-size: 1vmin; text-shadow: 0.1px 0.1px #08080888;" onclick='zoom(this)'><br>${this.level} ${this.cost} ${this.id}<div style="font-size:0.4vmin">${escapeHTML(this.name)}<br>${this.traits}<br>${escapeHTML(this.text)}</div>${this.link} ${this.ap} ${this.hp}</div>`
-				return `<div id="c${this.cid}" name="${escapeHTML(this.name)}" class="card ${this.rested ? "rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: var(--${this.color}); background-color: var(--${this.color});background-image: url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${this.AP()}/${this.HP()}${raw ? dict2str(this) : ""}</div>`
+				if (facedown) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""} facedown${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: black; background-color: white;" onclick='zoom(this)'></div>`
+
+				if (raw) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color});background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp); font-size: 1vmin; text-shadow: 0.1px 0.1px #08080888;" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://www.cardtrader.com/en/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.level} ${this.id}<br>${this.cost}<div style="font-size:0.5vmin">${escapeHTML(this.name)}<br>${this.traits}<br>${escapeHTML(this.text)}</div>${this.link} ${this.ap} ${this.hp}</div>`
+
+				return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color}); background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://www.cardtrader.com/en/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${this.AP()}/${this.HP()}</div>`
 			}
 
 			hasTrait(trait) {
@@ -1195,7 +1187,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			`# Cees's Vulture deck (P)
 4 GD04-127 Freeden Ⅱ
 1 ST05-013 With Iron and Blood
-1 GD04-113 Damage Control
+0 GD04-113 Damage Control
 3 GD04-094 Pala Sys
 4 GD04-096 Ennil El
 2 GD03-096 Jamil Neate
@@ -1212,7 +1204,30 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 1 GD03-066 Gundam Barbatos 5th Form (Ground Type)
 1 GD04-055 Heine's Gouf Ignited
 1 GD04-051 Gundam Airmaster Burst
-1 GD04-052 Gundam Leopard Destroy
+2 GD04-052 Gundam Leopard Destroy
+2 GD04-049 Gundam DX`,
+			`# Cees's Vulture deck 2 (P)
+4 GD04-127 Freeden Ⅱ
+0 ST05-013 With Iron and Blood
+1 GD04-115 Backup
+0 GD04-113 Damage Control
+3 GD04-094 Pala Sys
+4 GD04-096 Ennil El
+2 GD03-096 Jamil Neate
+1 GD03-097 Wistario Afam
+4 GD04-059 Daughtress High Mobility Command Wise Wallaby
+4 GD04-061 G-Falcon
+4 GD04-060 Esperansa
+4 GD03-068 Gundam Hajiroboshi
+4 GD04-058 Jamil's Gundam X
+1 GD04-062 Lunamaria's Gunner Zaku Warrior
+4 GD03-062 GX-Bit
+2 GD03-055 Gundam Hajiroboshi (2nd Form)
+1 GD04-056 Sword Impulse Gundam
+1 GD03-066 Gundam Barbatos 5th Form (Ground Type)
+1 GD04-055 Heine's Gouf Ignited
+1 GD04-051 Gundam Airmaster Burst
+2 GD04-052 Gundam Leopard Destroy
 2 GD04-049 Gundam DX`,
 			`# Cees's White deck (W)
 4 GD03-132 Radish
@@ -1641,8 +1656,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			attacker = att
 			defender = def
 			const enemy = att.owner === p1 ? p2 : p1
-			const name = def ? def.name : enemy.name
-			log("🔫" + att + " attack " + name)
+			log("🔫" + att + " attack " + (def ? "" + def : enemy.name))
 			rest(att, false)
 			await sleep(500)
 			await run(att, "Attack")
@@ -1758,6 +1772,12 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			return damage
 		}
 
+		function chooseDmgTarget(source, targets, amount = 1, mandatory = false, kill = true) {
+			targets = mySort(targets, c => kill ? c.HP() : -c.HP() - 9 * (c.damage < 1 && hasText(c.text, "is damaged")))
+			if (!mandatory) targets = targets.filter(c => kill ? source.canDamage(c) : !source.canDamage(c))
+			return (kill && mySort(targets.filter(c => c.HP() === amount), c => c.rested))[0] || targets[0]
+		}
+
 		async function doBattle(att, def) {
 			attacker = att
 			defender = def
@@ -1773,24 +1793,27 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				}
 			}
 			def = defender
-			// vfx to show defender
-			await battle(att, def)
 			if (def.HP() < 1) {
 				// Action or attack trigger could have killed it. TODO: vfx that instead?
 				return
 			}
-
 			// Damage Step
+			// vfx to show defender
+			await battle(att, def)
 			let afs = att.hasTrait("First Strike")
 			let dfs = def.hasTrait("First Strike")
 			let dmg_to_def = getDamage(att, def)
 			let dmg_to_att = getDamage(def, att)
-			// TODO deathtouch
 			if (dfs && !afs && dmg_to_att > att.HP()) {
+				// att dies before dealing battle damage
 			} else {
+				// CR 10-1-6-6. If multiple effects belonging to both you and your opponent trigger, 
+				// they do so simultaneously, and all of the active player’s triggered 
+				// effects are resolved first, after which all of the standby player’s 
+				// triggered effects are resolved.
 				if (dmg_to_def > 0) {
 					def.damage += dmg_to_def
-					if (dmg_to_att > 0) await run(def, "", "When this Unit deals battle damage")
+					await run(att, "", "When this Unit deals battle damage")
 				}
 				// TODO Undying etc.
 				if (def.owner.trash.includes(def) || def.HP() < 1) {
@@ -1810,23 +1833,33 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 					destroyer = att
 					await destroy(def)
 					// await run(att, "", "During your turn, when this Unit destroys an enemy Unit with battle damage, ")
-					await run(att, "", " destroys an enemy Unit with battle damage, ")
-					if (att.owner.base) await run(att.owner.base, "", " destroys an enemy Unit with battle damage, ")
-					for (const trait of att.owner.traits_eot) {
-						if (trait === "During this turn, if a friendly (Superpower Bloc)/(UN) Unit destroys an enemy Unit with battle damage, choose 1 rested friendly (Superpower Bloc)/(UN) Unit. Set it as active. It can't attack during this turn." && (att.hasTrait("Superpower Bloc") || att.hasTrait("UN"))) {
-							const target = att.owner.battle.filter(c => c.hasTrait("Superpower Bloc") || c.hasTrait("UN") && c.rested)[0]
-							if (target) {
-								activate(target)
-								target.sick = true
-							}
-						}
+					if (hasText(def.type, "UNIT")) {
+						await publish(" destroys an enemy Unit with battle damage, ", att.owner.base ? [att, att.owner.base] : [att])
+
+						// TODO: getSectionText should handle this
+						// for (const trait of att.owner.traits_eot) {
+						// 	if (trait === "During this turn, if a friendly (Superpower Bloc)/(UN) Unit destroys an enemy Unit with battle damage, choose 1 rested friendly (Superpower Bloc)/(UN) Unit. Set it as active. It can't attack during this turn." && (att.hasTrait("Superpower Bloc") || att.hasTrait("UN"))) {
+						// 		const target = att.owner.battle.filter(c => c.hasTrait("Superpower Bloc") || c.hasTrait("UN") && c.rested)[0]
+						// 		if (target) {
+						// 			activate(target)
+						// 			target.sick = true
+						// 		}
+						// 	}
+						// }
 					}
 				}
 			}
 			if (afs && def.hasTrait("dead")) dmg_to_att = 0
-			att.damage += dmg_to_att
-			if (dmg_to_att > 0) await run(def, "", "When this Unit deals battle damage")
-			if (att.HP() < 1 && !att.owner.trash.includes(att)) await destroy(att)
+			if (dmg_to_att > 0) {
+				att.damage += dmg_to_att
+				await run(def, "", "When this Unit deals battle damage")
+			}
+			if (att.HP() < 1 && !att.owner.trash.includes(att)) {
+				await destroy(att)
+				if (hasText(def.type, "UNIT")) {
+					await publish(" destroys an enemy Unit with battle damage, ", def.owner.base ? [def, def.owner.base] : [def])
+				}
+			}
 
 			// End of Battle Step
 			for (const c of p1.battle.concat(p2.battle)) {
@@ -1869,10 +1902,9 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			// 	log("FIXME: DEBUG " + act + " " + clause + " " + card)
 			// }
 			let mo = null
-			for (let line of card.text.split("<br>")) {
-				const rex = new RegExp("(.*?)" + (clause ? clause : ("【([^】]*?)" + act + "([^】]*?)】")) + "([^.].+?)(?:<br|$)")
-				if (mo = card.text.match(rex)) break
-			}
+			const rex = new RegExp("(.*?)" + (clause ? clause : ("【([^】]*?)" + act + "([^】]*?)】")) + "([^.].+?)(?:<br|$)")
+			for (let line of card.text.split("<br>")) if (mo = line.match(rex)) break
+			else for (let line of card.traits_eot) if (mo = line.match(rex)) break
 			if (!mo) return ""
 			const limits = mo[1]
 			if (hasText(limits, "During your turn") && !active_player === card.owner) return ""
@@ -1916,18 +1948,27 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			if (limit && once_per_turn.includes(text + card.cid)) return ""
 			return text
 		}
+		/** runs card and pilot text */
 		async function run(card, act = "Main", clause = "") {
 			if (!card) return false
 			if (card.type === "COMMAND") {
 				// log("DEBUG Running " + card + " " + act + " " + clause)
 			}
 			let rv = await runCard(card, act, clause)
-			if (card.pilot && card.pilot.type === "PILOT") rv = rv || await runCard(card.pilot, act, clause)
+			if (card.pilot && card.pilot.type === "PILOT") {
+				rv = rv | await runCard(card.pilot, act, clause)
+				// if (!rv && hasText(clause, " deals damage to an ")) {
+				// 	log("FIXME: SHOULD HAVE RAN " + card.pilot.name + " TEXT? act: " + act + " clause: " + clause + " text: " + getSectionText(card.pilot, act, clause) + " defender: " + defender)
+				// 	await runCard(card.pilot, act, clause)
+				// }
+			}
 			return rv
 		}
+		/** runs events */
 		async function publish(clause, cards) {
 			for (const c of cards) await run(c, "", clause)
 		}
+		/** logs ran */
 		async function runCard(card, act, clause) {
 			let t = getSectionText(card, act, clause)
 			if (!t) return false
@@ -2161,9 +2202,8 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 					t = t.slice(mo[0].length)
 				}
 				if (mo = t.match(/^[Cc]hoose 1 of your \(Titans\) Link Units battling an enemy Unit. /)) {
-					if (!defender || defender.type == "BASE") return false
-					target = fu.filter(c => c.hasTrait("Titans") && c.linked())[0]
-					if (!target) return false
+					if (!attacker || !attacker.hasTrait("Titans") || !attacker.linked() || !defender || eu.includes(defender)) return false
+					target = attacker
 					t = t.slice(mo[0].length)
 				}
 				if (t === "It won't be set as active during the start phase of your opponent's next turn.") {
@@ -2181,7 +2221,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				if (t === "Deal damage to it equal to the number of friendly Unit tokens in play.") {
 					const token_count = fu.filter(c => hasText(c.type, "TOKEN")).length
 					if (token_count < 1) return false
-					return await dealDamage(card, target, token_count)
+					return await dealDamage(card, chooseDmgTarget(u, targets, token_count), token_count)
 				} else if (t === "Destroy it.") {
 					await destroy(target)
 					return true
@@ -2191,10 +2231,9 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				} else if (t === "Set it as active.") {
 					activate(target)
 					return true
-				} else if (mo = t.match(/^Deal (\d) damage to it\./)) {
-					target = targets.toSorted(c => c.HP())[0]
-					if (!target) return false
-					return await dealDamage(u, target, parseInt(mo[1]))
+				} else if (mo = t.match(/^Deal (\d) damage to it\.$/)) {
+					const dmg = parseInt(mo[1])
+					return await dealDamage(u, chooseDmgTarget(u, targets, dmg), dmg)
 				}
 				if (mo = t.match(/^It gets AP-(\d) during this turn\./)) {
 					target = mySort(targets, c => -c.AP() - 10 * (myturn ? c.rested : !c.rested))[0]
@@ -2218,19 +2257,17 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 					return true
 				}
 				if (t === "Choose 1 of your Units and 1 enemy Unit. Deal 1 damage to them.") {
-					const target1 = mySort(fu, c => -c.HP())[0]
-					const target2 = mySort(eu, c => -c.HP())[0]
-					if (!target1 || !target2) return false
-					await dealDamage(card, target1, 1)
-					await dealDamage(card, target2, 1)
+					const mine = chooseDmgTarget(u, fu, 1, true, false)
+					const their = chooseDmgTarget(u, eu, 1, true)
+					if (!mine || !their) return false
+					await dealDamage(card, mine)
+					await dealDamage(card, their)
 					return true
 				}
 			}
 			if (t === "Choose 1 enemy Unit. Deal 1 damage to it. If a friendly (Mafty) Link Unit is in play, deal 2 damage instead.") {
-				target = mySort(eu, c => c.HP())[0]
-				if (!target) return false
-				await dealDamage(u, target, fu.some(c => c.hasTrait("Mafty") && c.linked()) ? 2 : 1)
-				return true
+				const dmg = fu.some(c => c.hasTrait("Mafty") && c.linked()) ? 2 : 1
+				return await dealDamage(u, chooseDmgTarget(u, eu, dmg), dmg)
 			}
 			if (t === "Choose 1 of your (CB) Units. During this turn, it may choose a damaged active enemy Unit as its attack target.") {
 				target = fu.filter(c => !c.rested && !c.sick && c.hasTrait("CB"))[0]
@@ -2248,18 +2285,43 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (hasText(t, `Choose 1 enemy Unit that is Lv.4 or lower. Deal 3 damage to it. If there are 2 or more cards with "Improved Technique" in their card name in your trash, choose 1 enemy Unit instead.`)) {
-				target = p.trash.filter(c => hasText(c.name, "Improved Technique")).length >= 2 ? mySort(eu, c => -c.HP())[0] : mySort(eu.filter(c => c.level <= 4), c => -c.HP())[0]
-				if (!target) return false
-				await dealDamage(card, target, 3)
-				return true
-			} else if (hasText(t, "choose 1 enemy Unit instead.")) {
-				log("FIXME: t===" + t)
+				target = p.trash.filter(c => hasText(c.name, "Improved Technique")).length >= 2 ? chooseDmgTarget(u, eu, 3) : chooseDmgTarget(u, eu.filter(c => c.level <= 4), 3)
+				return await dealDamage(card, target, 3)
 			}
-			// Main / battle Action
+			// Main
+			if (t === "Choose 1 of your Units. When it deals battle damage to an enemy Unit that is Lv.5 or lower during this turn, destroy that enemy Unit.") {
+				let trait = "When this Unit deals battle damage to an enemy Unit that is Lv.5 or lower, destroy that enemy Unit."
+				target = fu.filter(c => !c.rested && !c.sick && !c.hasTrait(trait))[0]
+				if (!target) return false
+				if (!eu.some(c => c.LEVEL() <= 5 && c.HP() > target.AP() && c.rested)) return false
+				target.traits_eot.push(trait)
+				return true
+			}
+			// battle damage trigger
+			mo = t.match(/^ to an enemy Unit that is Lv.(\d) or lower, /)
+			if (mo) {
+				if (!defender || !(defender.LEVEL() <= parseInt(mo[1]))) return false
+				t = t.slice(mo[0].length)
+				if (t === "destroy that enemy Unit.") {
+					await destroy(defender)
+					return true
+				}
+				if (t === "if you have a (CB) Pilot in play, destroy that enemy Unit.") {
+					if (!fu.some(c => c.pilot && c.pilot.hasTrait("CB"))) return false
+					await destroy(defender)
+					return true
+				}
+			}
+
 			if (t === "Choose 1 of your Units. During this battle, reduce battle damage it receives by 3.") {
-				if (attacker && attacker.owner == p && defender) {
+				if (attacker && attacker.owner === p && defender) {
 					log("🎯EOB DMG-3 " + attacker)
 					attacker.hp_eob += 3
+					return true
+				}
+				if (defender && defender.owner === p) {
+					log("🎯EOB DMG-3 " + defender)
+					defender.hp_eob += 3
 					return true
 				}
 				return false
@@ -2353,7 +2415,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			if (hasText(t, "Choose 1 active friendly Unit. Rest it. If you do, choose 1 enemy Unit whose Lv. is equal to or lower than the Unit rested with this ability. Deal 3 damage to it.")) {
 				const afu = fu.filter(c => !c.rested)[0]
 				if (!afu) return false
-				target = eu.filter(c => c.level <= afu.level)[0]
+				target = chooseDmgTarget(u, eu.filter(c => c.level <= afu.level), 3)
 				if (!target) return false
 				rest(afu)
 				await dealDamage(card, target, 3)
@@ -2371,16 +2433,6 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 
-			if (hasText(card.text, " to an enemy Unit that is Lv.5 or lower, destroy that enemy Unit.")) {
-				if (!defender || !defender.LEVEL() <= 5) return false
-				await destroy(defender)
-				return true
-			}
-			if (hasText(card.text, " to an enemy Unit that is Lv.5 or lower, if you have a (CB) Pilot in play, destroy that enemy Unit.")) {
-				if (!defender || !defender.level <= 5 || !fu.some(c => c.pilot && c.pilot.hasTrait("CB"))) return false
-				await destroy(defender)
-				return true
-			}
 			if (t === "this Unit recovers 2 HP.") {
 				return u.recover(2)
 			}
@@ -2638,10 +2690,10 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			if (t === "You may choose 1 enemy Unit. Deal 2 damage to it and this Unit.") {
 				if (eu.length < 1 || u.HP() <= 2) return false
 				if (defender && defender.HP() > u.AP()) target = defender
-				else target = eu.filter(c => c !== defender)[0]
+				else target = chooseDmgTarget(u, eu.filter(c => c !== defender), 2)
 				if (!target) return false
-				await dealDamage(card, target, 2)
-				await dealDamage(card, u, 2)
+				await dealDamage(u, target, 2)
+				await dealDamage(u, u, 2)
 				return true
 			}
 			if (t === "You may discard 1. If you do, draw 1.") {
@@ -2650,9 +2702,9 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				p.draw()
 				return true
 			}
-			// Same for Deploy, mandatory so says may.
+			// Same for Deploy, mandatory trigger so gives a choice.
 			if (t === "You may rest this Unit. If you do, choose 1 enemy Unit that is Lv.3 or lower. Deal 2 damage to it.") {
-				target = eu.filter(c => c.LEVEL() <= 3 && c.HP() <= 2 && u.canDamage(c))[0]
+				target = chooseDmgTarget(u, eu.filter(c => c.LEVEL() <= 3), 2)
 				if (!target) return false
 				rest(u)
 				await dealDamage(u, target, 2)
@@ -2715,7 +2767,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			}
 			// Activate･Main
 			if (t === "【Once per Turn】①, rest 1 friendly (CB) Unit：Choose 1 enemy Unit that is Lv.5 or lower. Deal 1 damage to it.") {
-				target = mySort(eu.filter(c => c.LEVEL() <= 5), c => c.HP())[0]
+				target = chooseDmgTarget(u, eu.filter(c => c.LEVEL() <= 5))
 				if (!target) return false
 				const mine = mySort(fu.filter(c => !c.rested && c.hasTrait("CB")), c => -c.sick || c.AP())[0]
 				if (!mine) return false
@@ -2726,7 +2778,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (t === "Choose 1 of your other Units. Deal 1 damage to it. It gets AP+1 during this turn.") {
-				target = mySort(fu.filter(c => c !== u && !c.rested && !c.sick && c.HP() > 1), c => c.AP())[0]
+				target = mySort(fu.filter(c => c !== u && (myturn ? !c.rested && !c.sick : c == defender || c.rested || c.hasTrait("Blocker")) && c.HP() > 1), c => c.AP())[0]
 				if (!target) return false
 				log("🎯Boosting " + target)
 				await dealDamage(card, target)
@@ -2734,13 +2786,16 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (hasText(t, "Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.")) {
-				target = mySort(fu, c => -c.AP())[0]
+				if (attacker && attacker.owner === p) target = attacker
+				else if (defender && defender.owner === p) target = defender
+				else return false
 				const enemies = eu.filter(c => c.AP() <= 2)
 				if (!target || enemies.length < 1) return false
 				log("🎯Protecting " + target)
 				target.traits_eob.push("noDmg enemy.unit.ap2min")
 				return true
 			}
+			// TODO: rest after attack event?
 			if (hasText(t, "Choose 1 to 2 friendly (Clan) Units. They get AP+2 during this turn.")) {
 				targets = mySort(fu.filter(c => !c.sick && !c.rested && c.hasTrait("Clan")), c => c.AP()).slice(0, 2)
 				if (targets.length < 1) return false
@@ -2876,34 +2931,29 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			}
 			if (t === "If this Unit is attacking an enemy Unit, choose 1 enemy Unit. Deal 1 damage to it.") {
 				if (!eu.includes(defender)) return false
-				targets = mySort(eu, c => c.HP())
-				let target = targets[0]
-				if (targets.length > 1) {
-					if (targets[0] === defender && u.AP() >= defender.HP()) target = targets[1]
-				}
+				target = chooseDmgTarget(u, u.AP() >= defender.HP() ? eu.filter(c => c === defender) : eu, 1, true)
 				await dealDamage(card, target)
 				return true
 			}
 			if (t === "Choose 1 enemy Unit with the highest Lv. Deal 3 damage to it.") {
-				target = mySort(eu, c => -c.level)[0]
+				target = mySort(eu, c => -c.LEVEL())[0]
 				if (!target) return false
-				return await dealDamage(card, target, 3)
+				return await dealDamage(card, eu.filter(c => c.LEVEL() === target.LEVEL()), 3)
 			}
 			if (t === "If this Unit has 5 or more AP, choose 1 enemy Unit that is Lv.5 or higher. Deal 3 damage to it.") {
 				if (u.AP() < 5) return false
-				target = mySort(eu.filter(c => c.HP() <= 3), c => -c.AP())[0]
-				return await dealDamage(card, target, 3)
+				return await dealDamage(card, chooseDmgTarget(u, eu.filter(c => c.LEVEL() >= 5), 3, true), 3)
 			}
 			if (mo = t.match(/eal 1 damage to all (enemy )?Units that are Lv.(\d) or lower.$/)) {
 				targets = mo[1] ? eu.filter(c => c.level <= mo[2]) : eu.concat(fu).filter(c => c.level <= mo[2])
 				if (targets.length < 1) return false
-				targets.forEach(async target => await dealDamage(card, target, 1))
+				targets.forEach(async target => await dealDamage(card, target))
 				return true
 			}
 			if (t === "If there are 5 or more purple cards in your trash, deal 2 damage to all Units with 5 or less AP.") {
 				targets = p.trash.filter(c => c.color === "PURPLE")
 				if (targets.length < 5) return false
-				eu.concat(fu).filter(c => c.AP() <= 5).forEach(async target => await dealDamage(card, target, 2))
+				eu.concat(fu).filter(c => c.AP() <= 5).forEach(async target => await dealDamage(u, target, 2))
 				return true
 			}
 			if (t == "If there are 10 or more (Zeon)/(Neo Zeon) Unit cards in your trash, deal 4 damage to all Units with <Blocker>.") {
@@ -2944,7 +2994,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (hasText(t, "Choose 1 damaged enemy Unit. Deal 3 damage to it.")) {
-				target = mySort(eu.filter(c => c.damage > 0), c => -c.AP())[0]
+				target = chooseDmgTarget(u, eu.filter(c => c.damage > 0), 3)
 				if (!target) return false
 				return await dealDamage(card, target, 3)
 			}
@@ -3022,11 +3072,11 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				return true
 			}
 			if (t === "Place the top 2 cards of your deck into your trash. If you do, choose 1 enemy Unit with 4 or less AP. Deal an amount of damage equal to the number of (Minerva Squad) cards placed with this effect to that enemy Unit.") {
-				if (card.owner.deck.length < 2) return false  // Maybe 5 is safer.
+				if (card.owner.deck.length < 2 || !eu.some(c => c.AP() <= 4)) return false
 				const top = card.owner.mill(2)
 				const dmg = top.filter(c => c.hasTrait("Minerva Squad")).length
 				if (dmg > 0) {
-					target = eu.filter(c => c.AP() <= 4)[0]
+					target = chooseDmgTarget(u, eu.filter(c => c.AP() <= 4), dmg)
 					if (!target) return true
 					await dealDamage(card, target, dmg)
 				}
@@ -3335,25 +3385,27 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 					enemy = p === p1 ? p2 : p1
 
 					// Battle Area
-					let prone = mySort(enemy.battle.filter(bc => bc.rested), def => def.HP())
+					let prone = enemy.battle.filter(bc => bc.rested)
 					if (att.traits_eot.includes("canAttack active.unit.damaged")) {
 						const extra = enemy.battle.filter(bc => !bc.rested && bc.damage > 0)
-						if (extra) prone = mySort(extra.concat(prone), def => def.HP())
+						if (extra) prone = extra.concat(prone)
 					}
 					if (att.traits_eot.includes("canAttack active.unit.apEqmin")) {
 						const extra = enemy.battle.filter(bc => !bc.rested && bc.ap <= att.ap)
-						if (extra) prone = mySort(extra.concat(prone), def => def.HP())
+						if (extra) prone = extra.concat(prone)
 					}
 					for (let i = 0; i <= 9; ++i) {
 						if (att.traits_eot.includes(`canAttack active.unit.ap${i}min`)) {
 							const extra = enemy.battle.filter(bc => !bc.rested && bc.AP() <= i)
-							if (extra) prone = mySort(extra.concat(prone), def => def.HP())
+							if (extra) prone = extra.concat(prone)
 						}
 						if (att.traits_eot.includes(`canAttack active.unit.lv${i}min`)) {
 							const extra = enemy.battle.filter(bc => !bc.rested && bc.level <= i)
-							if (extra) prone = mySort(extra.concat(prone), def => def.HP())
+							if (extra) prone = extra.concat(prone)
 						}
 					}
+					prone = mySort(prone, def => def.HP())
+
 					// Base and shields also count as enemy player: https://www.gundam-gcg.com/en/cards/index.php?freeword=GD04-016#cards
 					let must_attack_unit = hasText(att.text, "This Unit can't choose the enemy player as its attack target") || att.hasTrait("must_attack_unit")
 
@@ -3365,7 +3417,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 						must_attack_unit = true
 					}
 
-					if (prone.length > 0 && (must_attack_unit || enemy.shield.length > can_attack.length || ((att.getBreach() || rnd(1, 2) > 1) && prone.some(def => att.AP() >= def.HP())))) {
+					if (prone.length > 0 && (must_attack_unit || p.shield.length < enemy.shield.length || ((att.getBreach() || rnd(1, 2) > 1) && prone.some(def => att.AP() >= def.HP())))) {
 						let def = prone[0]
 						if (enemy.battle.some(bc => bc.text === "Enemy Units choose one of your rested (Maganac Corps) Units as their attack target if possible when attacking.")) {
 							let newdef = enemy.battle.filter(bc => bc.rested && bc.hasTrait("Maganac Corps"))[0]
@@ -3501,7 +3553,8 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			msg += `<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]}<br>\nDecks ranked by W/D/L:`
 			const stats = Object.entries(deck_stats).sort(sortStats)
 			for (let i = 0; i < stats.length; ++i) {
-				msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(stats[i][0])}\"); event.preventDefault()'>${stats[i][0]}</a>: ${stats[i][1]}`
+				const [name, s] = stats[i]
+				msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${s} ${(s[0] / (s[0] + s[1] + s[2]) * 100).toFixed(0)}%`
 			}
 			log(msg)
 			setSpeed()
@@ -3565,9 +3618,10 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 				if (op === "AND") results = []
 				const invert = q.indexOf("NOT ") === 0
 				for (const entry of tosearch.toSorted()) {
-					const text = JSON.stringify(entry[1])
+					const text = JSON.stringify(entry[1]).replaceAll(/(?<!\\)"/g, '').replaceAll('\\"', '"')
 					let add = false
-					if (invert ? !hasText(text, q.slice(4)) : hasText(text, q)) {
+					if ((invert ? !hasText(text, q.slice(4)) : hasText(text, q))
+						|| (invert ? !hasText(text, q.slice(4).replaceAll('"', '')) : hasText(text, q.replaceAll('"', '')))) {
 						if (results.includes(entry)) continue
 						results.push(entry)
 						++count
