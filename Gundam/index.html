@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-26</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-28</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -211,8 +211,7 @@
 	<div id="overlay"></div>
 	<div id="search" class="searchsmall">
 		<div onclick="toggleSearch()" class="icon" title="Search">🔎<label for="searchtext">Search</label></div>
-		<input id="searchtext" onchange="findCards(this.value)"
-			placeholder="Supports AND, OR, and NOT.">
+		<input id="searchtext" onchange="findCards(this.value)" placeholder="Supports AND, OR, and NOT.">
 		<div id="searchresults"></div>
 	</div>
 	<div id="battlefield"></div>
@@ -1083,6 +1082,22 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 3 GD01-049 Blitz Gundam
 4 GD01-054 Duel Gundam
 3 GD01-111 Battle of Aces`,
+			`# blurple deck winner of nats
+https://exburst.dev/gundam/deck/152946
+4 GD01-008
+4 GD02-013
+4 ST05-004
+4 GD01-018
+4 GD02-054
+4 ST02-016
+2 GD01-100
+4 GD03-056
+4 ST01-010
+4 ST01-001
+4 ST05-010
+4 ST05-014
+2 GD02-055
+2 GD03-001`,
 			`# Top deck (WU)
 4 GD04-121 Reineforce Jr.
 3 GD01-118 Overflowing Affection
@@ -2101,6 +2116,11 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			}
 
 			// Attack
+			if (t === "If this Unit is damaged, draw 1.") {
+				if (u.damage < 1) return false
+				p.draw()
+				return true
+			}
 			if (t === "You may choose 1 of your (Academy) Units. During this battle, battle damage this Unit would receive is dealt to that Unit instead.") {
 				if (!defender || defender.AP() < u.HP()) return false
 				target = fu.filter(c => c !== u && c.hasTrait("Academy") && c.HP() > defender.AP())[0]
@@ -2886,6 +2906,11 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 			}
 			// When Paired
 			// Unit
+			if (t === "Deal 1 damage to it. When this effect destroys an enemy Unit, draw 1.") {
+				await dealDamage(u, target)
+				if (!en.battle.includes(target)) p.draw()
+				return true
+			}
 			if (t === "Deploy 2 [Wire-Guided Arm]((Zeon)･AP2･HP1・This Unit can't be paired with a Pilot) Unit tokens.") {
 				await p.deploy(p.getToken("Wire-Guided Arm"))
 				await p.deploy(p.getToken("Wire-Guided Arm"))
@@ -3316,7 +3341,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 					return true
 				}
 				if (t === "① or more cost for one of your Units' effects, you may increase this Unit's AP during this turn by an amount equal to the cost paid.") {
-					if (!active_text || active_cost < 1 ||  hasText(active_unit.type, "UNIT") || active_unit.owner !== p) return false
+					if (!active_text || active_cost < 1 || hasText(active_unit.type, "UNIT") || active_unit.owner !== p) return false
 					eotAP(u, active_cost)
 					return true
 				}
