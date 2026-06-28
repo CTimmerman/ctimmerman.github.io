@@ -723,6 +723,7 @@
 			AP() {
 				let rv = this.ap + this.ap_eob + this.ap_eot
 				const t = this.text + (this.pilot && this.pilot.text || "")
+				
 				if (this.owner.resource.length >= 7 && hasText(t, "While you are Lv.7 or higher, this Unit gets AP+2.")) rv += 2
 				if (this.damage > 0 && hasText(t, "While this Unit is damaged, it gets AP+2.")) {
 					rv += 2
@@ -744,6 +745,9 @@
 				if (t === "During your turn, while you have a (CB) Pilot in play, this Unit gets AP+2." && active_player === this.owner && this.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) rv += 2
 				if (hasText(t, "【During Link】This Unit gets AP+2 for each of your rested (CB) Units.") && this.linked()) rv += this.owner.battle.filter(c => c.rested && c.hasTrait("CB")).length * 2
 				if (hasText(t, "While you have a Unit token in play, this Unit gets AP+1.") && this.owner.battle.some(c => hasText(c.type, "TOKEN"))) rv += 1
+				if (active_player === this.owner && hasText(this.type, "UNIT")) {
+					rv += this.owner.battle.filter(c => c.pilot && hasText(c.text, "【During Pair】During your turn, all your Units get AP+1.")).length
+				}
 				if (active_player !== this.owner && hasText(this.type, "TOKEN")) {
 					// "Friendly" instead of "your" implies team base counts too.
 					rv += this.owner.battle.filter(c => hasText(c.text, "All friendly Unit tokens get AP+1 during your opponent's turn.")).length
@@ -1082,22 +1086,22 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 3 GD01-049 Blitz Gundam
 4 GD01-054 Duel Gundam
 3 GD01-111 Battle of Aces`,
-			`# blurple deck winner of nats
+			`# blurple deck winner of nats (UP)
 https://exburst.dev/gundam/deck/152946
-4 GD01-008
-4 GD02-013
-4 ST05-004
-4 GD01-018
-4 GD02-054
-4 ST02-016
-2 GD01-100
-4 GD03-056
-4 ST01-010
-4 ST01-001
-4 ST05-010
-4 ST05-014
-2 GD02-055
-2 GD03-001`,
+4 ST02-016 Corsica Base
+4 ST05-014 Fatal Strike
+2 GD01-100 A Show of Resolve
+4 ST01-010 Amuro Ray
+4 ST05-010 Mikazuki Augus
+4 ST05-004 Graze Custom
+4 GD01-008 Guntank
+4 GD02-013 Hizack
+4 GD02-054 Gundam Barbatos 1st Form
+4 GD01-018 ReZEL
+4 GD03-056 Gundam Barbatos Adapt
+4 ST01-001 Gundam
+2 GD02-055 Gundam Gusion Rebake
+2 GD03-001 Gundam NT-1`,
 			`# Top deck (WU)
 4 GD04-121 Reineforce Jr.
 3 GD01-118 Overflowing Affection
