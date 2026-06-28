@@ -547,7 +547,7 @@
 				}
 			}
 			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
-<textarea id="tadecklist" onclick="event.stopPropagation()">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea></div>`
+<textarea id="tadecklist" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea></div>`
 		}
 
 		function zoom(e) {
@@ -1307,6 +1307,25 @@ https://exburst.dev/gundam/deck/152946
 1 GD04-022 Kikeroga (MS Mode) (GQ)
 1 GD01-027 Big Zam`,
 		]
+		
+		function addCustomDeck() {
+			let customDeck = localStorage.getItem("customDeck")
+			if (customDeck) decks.push(customDeck)
+			let deck_options = `<option value="-1">Random</option>`
+			for (let i = 0; i < decks.length; ++i) {
+				deck_options += `<option value="${i}">${decks[i].split("\n")[0].slice(2)}</option>`
+			}
+			p1deck.innerHTML = deck_options
+			p2deck.innerHTML = deck_options
+		}
+		addCustomDeck()
+
+		function saveCustomDeck(deck) {
+			if (!confirm("Save as your custom deck?")) return
+			localStorage.setItem("customDeck", "# Custom deck\n" + deck)
+			if (decks.slice(-1)[0].indexOf("# Custom deck\n") === 0) decks.pop()
+			addCustomDeck()
+		}
 
 		// card id on the battlefield, link to render element
 		let cid = 0
@@ -1598,13 +1617,6 @@ https://exburst.dev/gundam/deck/152946
 			// 	log("Cards: " + Object.keys(cards).length)
 			// 	localStorage.setItem("cards", JSON.stringify(cards))
 			// }
-
-			let deck_options = `<option value="-1">Random</option>`
-			for (let i = 0; i < decks.length; ++i) {
-				deck_options += `<option value="${i}">${decks[i].split("\n")[0].slice(2)}</option>`
-			}
-			p1deck.innerHTML = deck_options
-			p2deck.innerHTML = deck_options
 		}
 
 		async function render() {
@@ -3543,10 +3555,15 @@ https://exburst.dev/gundam/deck/152946
 							const extra = enemy.battle.filter(bc => !bc.rested && bc.AP() <= i)
 							if (extra) prone = extra.concat(prone)
 						}
-						if (att.traits_eot.includes(`canAttack active.unit.lv${i}min`)) {
+						if (att.traits_eot.includes(`canAttack active.unit.lv${i}min`)
+							|| hasText(att.text, "This Unit may choose an active enemy Unit that is Lv." + i + " or lower as its attack target.")) {
 							const extra = enemy.battle.filter(bc => !bc.rested && bc.level <= i)
 							if (extra) prone = extra.concat(prone)
 						}
+					}
+					if (att.text === "【During Pair･(Vulture) Pilot】If there are 7 or more cards in your trash, this Unit may choose an active enemy Unit with a keyword effect as its attack target." && att.pilot && att.pilot.hasTrait("Vulture") && p.trash.length >= 7) {
+						const extra = enemy.battle.filter(bc => !bc.rested && hasText(bc.text, "<"))
+						if (extra) prone = extra.concat(prone)
 					}
 					prone = mySort(prone, def => def.HP())
 
