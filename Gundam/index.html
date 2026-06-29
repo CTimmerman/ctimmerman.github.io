@@ -1912,6 +1912,9 @@ https://exburst.dev/gundam/deck/152946
 		}
 
 		async function doBattle(att, def) {
+			if (hasText(def.type, "UNIT") && !def.owner.battle.includes(def)) {
+				return
+			}
 			attacker = att
 			defender = def
 			for (const trait of def.traits_eot) {
@@ -2156,6 +2159,10 @@ https://exburst.dev/gundam/deck/152946
 
 			if (mo = t.match(/^[Dd]uring your turn, /)) {
 				if (!myturn) return false  // already checked in getSectionText
+				t = t.slice(mo[0].length)
+			}
+			// triggered by event and already found on card, meeting restrictions
+			if (mo = t.match(/^with battle damage, /)) {
 				t = t.slice(mo[0].length)
 			}
 
@@ -2644,7 +2651,7 @@ https://exburst.dev/gundam/deck/152946
 			if (t === "Choose 1 rested friendly (CB) Unit. Change the attack target of the battling enemy Unit to it.") {
 				if (myturn) return false
 				target = fu.filter(c => c.rested && c !== defender && c.hasTrait("CB"))[0]
-				if (!target) return false
+				if (!target || defender && defender.AP() >= attacker.HP() && target.AP() > defender.AP()) return false
 				log("🎯" + target + " is new attack target")
 				defender = target
 				return true
@@ -2810,10 +2817,8 @@ https://exburst.dev/gundam/deck/152946
 			// Pilot Attack
 			if (t === "This Unit gets AP+1 during this turn. If there are 7 or more (CB) cards in your trash, all your (CB) Units get AP+1 instead.") {
 				if (p.trash.filter(c => c.hasTrait("CB")).length >= 7) {
-					log("🎯AP+1 all my (CB) units")
 					fu.filter(c => c.hasTrait("CB")).forEach(c => eotAP(c, 1))
 				} else {
-					log("🎯AP+1 " + u)
 					eotAP(u, 1)
 				}
 				return true
@@ -3585,7 +3590,7 @@ https://exburst.dev/gundam/deck/152946
 							}
 						}
 						if (c.type === "BASE") {
-							log("🟨Deploy base " + c)
+							log("🏰Base " + c)
 							c.rested = false
 							p.base = c
 							await render()
