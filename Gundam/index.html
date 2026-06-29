@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-28</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-06-29</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -56,6 +56,17 @@
 
 		body {
 			margin: 0;
+		}
+
+		textarea {
+			position: absolute;
+			scrollbar-width: thin;
+			color: var(--fgcolor);
+			background-color: #08080888;
+			top: 70vmin;
+			left: 80vmin;
+			width: 30vmin;
+			height: 20vmin;
 		}
 
 		#battlefield {
@@ -125,17 +136,6 @@
 
 		#searchtext {
 			width: 42vmin;
-		}
-
-		#tadecklist {
-			width: 65vmin;
-			height: 20vmin;
-			position: absolute;
-			top: 70vmin;
-			left: 10vmin;
-			scrollbar-width: thin;
-			color: var(--fgcolor);
-			background-color: #08080888;
 		}
 
 		.searchsmall {
@@ -256,8 +256,12 @@
 		let zoomed = ""
 
 		function dict2str(d) {
+			const keys = []
+			for (const k in d) keys.push(k)
+			console.log(keys)
 			let s = ""
-			for (const k in d) s += "" + k + ": " + d[k] + ", ";
+			keys.sort()
+			for (const k of keys) s += "" + k + ": " + d[k] + "\n";
 			return s
 		}
 
@@ -523,6 +527,7 @@
 			let sumLevel = 0
 			let text = ""
 			let idcount = 0
+			let counts = {}
 			let oldc = null
 			for (const c of deck) {
 				if (!oldc || c.id !== oldc.id) {
@@ -530,6 +535,11 @@
 					idcount = 1
 					oldc = c
 				} else idcount += 1
+
+				const keys = ["Type " + c.type, "Color " + c.color, "Lv. " + c.level, "Cost " + c.cost, "AP " + c.ap, "HP " + c.hp]
+				for (const trait of c.traits) keys.push("Trait " + trait)
+				for (let k of keys) counts[k] = 1 + (counts[k] || 0)
+
 				sumCost += c.cost
 				sumLevel += c.level
 				if ((cols === "T" && spliton !== c.type)
@@ -547,7 +557,8 @@
 				}
 			}
 			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
-<textarea id="tadecklist" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea></div>`
+			<textarea style="top: 70vmin; left: 60vmin; width: 30vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
+<textarea id="tadecklist" style="top: 70vmin; left: 5vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea></div>`
 		}
 
 		function zoom(e) {
@@ -612,7 +623,7 @@
 		}
 
 		async function pair(unit, pilot) {
-			log(`🧑‍✈️Pair ${pilot.AP()}/${pilot.HP()} #${pilot.cid} ${getPilotName(pilot)} with ${unit}`)
+			log(`🧑‍✈️Pair ${pilot.AP()}/${pilot.HP()} #${pilot.cid} ${getPilotName(pilot)} & ${unit}`)
 			unit.pilot = pilot
 			pilot.unit = unit
 			await render()
@@ -689,7 +700,10 @@
 					if (this.text === "While you have no Units that are Lv.6 or higher in play, this card in your hand gets Lv. -1 and cost -1 for each enemy Unit in play." && !this.owner.battle.some(c => c.level >= 6)) {
 						rv -= (this.owner === p1 ? p2 : p1).battle.length
 					}
+					if (hasText(this.text, "When playing this card from your hand, you may discard 1 (G Generation) Unit card. If you do, play this card as if it has 2 Lv. and cost.") && this.owner.hand.some(c => c !== this && c.type === "UNIT" && c.hasTrait("G Generation"))) return 2
 				}
+				// TODO: Level and cost stick on the battlefield
+				//if (hasText(this.text, "When playing this card from your hand, you may discard 1 (G Generation) Unit card. If you do, play this card as if it has 2 Lv. and cost.") && this.traits_eoz.includes("level 2")) return 2
 				return rv
 			}
 			COST() {
@@ -713,6 +727,7 @@
 					if (this.text === "While you have no Units that are Lv.6 or higher in play, this card in your hand gets Lv. -1 and cost -1 for each enemy Unit in play." && !this.owner.battle.some(c => c.level >= 6)) {
 						rv -= (this.owner === p1 ? p2 : p1).battle.length
 					}
+					if (hasText(this.text, "When playing this card from your hand, you may discard 1 (G Generation) Unit card. If you do, play this card as if it has 2 Lv. and cost.") && this.owner.hand.some(c => c !== this && c.type === "UNIT" && c.hasTrait("G Generation"))) return 2
 				} else if (this.owner.trash.includes(this)) {
 					if (this.text === "This card in your trash gets cost -1.") {
 						rv -= 1
@@ -723,7 +738,7 @@
 			AP() {
 				let rv = this.ap + this.ap_eob + this.ap_eot
 				const t = this.text + (this.pilot && this.pilot.text || "")
-				
+
 				if (this.owner.resource.length >= 7 && hasText(t, "While you are Lv.7 or higher, this Unit gets AP+2.")) rv += 2
 				if (this.damage > 0 && hasText(t, "While this Unit is damaged, it gets AP+2.")) {
 					rv += 2
@@ -731,8 +746,8 @@
 				if (this.pilot) {
 					rv += this.pilot.ap
 					if (this.linked()) {
-						if (hasText(t, "【During Link】 This Unit gets AP+2.")) rv += 2
-						if (hasText(t, "【During Link】 This Unit gets AP+1 and HP+1.")) rv += 1
+						if (hasText(t, "[During Link] This Unit gets AP+2.")) rv += 2
+						if (hasText(t, "[During Link] This Unit gets AP+1 and HP+1.")) rv += 1
 					}
 				}
 				if (hasText(t, "While this Unit has <Repair>, it gets AP+1.") && this.getRepair() > 0) rv += 1
@@ -743,21 +758,21 @@
 				if (hasText(t, "While no enemy Base is in play, this Unit gets AP+1.") && !(this.owner == p1 ? p2 : p1).base) rv += 1
 				if (hasText(t, "While you have another (Jupitris) Unit in play, this Unit gets AP+1 and <Repair 1>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Jupitris"))) rv += 1
 				if (t === "During your turn, while you have a (CB) Pilot in play, this Unit gets AP+2." && active_player === this.owner && this.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) rv += 2
-				if (hasText(t, "【During Link】This Unit gets AP+2 for each of your rested (CB) Units.") && this.linked()) rv += this.owner.battle.filter(c => c.rested && c.hasTrait("CB")).length * 2
+				if (hasText(t, "[During Link]This Unit gets AP+2 for each of your rested (CB) Units.") && this.linked()) rv += this.owner.battle.filter(c => c.rested && c.hasTrait("CB")).length * 2
 				if (hasText(t, "While you have a Unit token in play, this Unit gets AP+1.") && this.owner.battle.some(c => hasText(c.type, "TOKEN"))) rv += 1
 				if (active_player === this.owner && hasText(this.type, "UNIT")) {
-					rv += this.owner.battle.filter(c => c.pilot && hasText(c.text, "【During Pair】During your turn, all your Units get AP+1.")).length
+					rv += this.owner.battle.filter(c => c.pilot && hasText(c.text, "[During Pair]During your turn, all your Units get AP+1.")).length
 				}
 				if (active_player !== this.owner && hasText(this.type, "TOKEN")) {
 					// "Friendly" instead of "your" implies team base counts too.
 					rv += this.owner.battle.filter(c => hasText(c.text, "All friendly Unit tokens get AP+1 during your opponent's turn.")).length
 				}
-				if (hasText(t, "While there are 4 or more Command cards in your trash, this Unit gets AP+1 and HP+1.<br>") && this.owner.trash.filter(c => c.type === "COMMAND").length >= 4) {
+				if (hasText(t, "While there are 4 or more Command cards in your trash, this Unit gets AP+1 and HP+1.") && this.owner.trash.filter(c => c.type === "COMMAND").length >= 4) {
 					rv += 1
 				}
 				// bonus from other units
 				for (const c of this.owner.battle) {
-					if (active_player == this.owner && this.owner.trash.length >= 7 && c !== this && this.hasTrait("Vulture") && hasText(t, "【During Link】During your turn, while there are 7 or more cards in your trash, all your other (Vulture) Units get AP+2.") && c.linked()) rv += 2
+					if (active_player == this.owner && this.owner.trash.length >= 7 && c !== this && this.hasTrait("Vulture") && hasText(t, "[During Link]During your turn, while there are 7 or more cards in your trash, all your other (Vulture) Units get AP+2.") && c.linked()) rv += 2
 				}
 				return rv
 			}
@@ -766,13 +781,13 @@
 				if (this.pilot) {
 					rv += this.pilot.hp
 					if (this.linked()) {
-						if (hasText(this.text, "【During Link】This Unit gets AP+1 and HP+1.")
-							|| hasText(this.text, "【During Link】This Unit gets HP+1.")) {
+						if (hasText(this.text, "[During Link]This Unit gets AP+1 and HP+1.")
+							|| hasText(this.text, "[During Link]This Unit gets HP+1.")) {
 							rv += 1
 						}
 					}
 				}
-				if (hasText(this.text, "While there are 4 or more Command cards in your trash, this Unit gets AP+1 and HP+1.<br>") && this.owner.trash.filter(c => c.type === "COMMAND").length >= 4) {
+				if (hasText(this.text, "While there are 4 or more Command cards in your trash, this Unit gets AP+1 and HP+1.") && this.owner.trash.filter(c => c.type === "COMMAND").length >= 4) {
 					rv += 1
 				}
 				return rv - this.damage
@@ -797,12 +812,12 @@
 			linked() {
 				return (this.pilot && linksWith(this, this.pilot)) || (this.unit && linksWith(this.unit, this))
 			}
-			recover(number) {
+			recover(number = 1) {
 				if (this.damage < 1 || number < 1) return false
 				log("🛠️Recover " + number + " " + this)
 				this.damage -= parseInt(number)
 				if (this.damage < 0) this.damage = 0
-				if (this.linked && !once_per_turn.includes(this.text + this.cid) && hasText(this.text, "【During Link】【Once per Turn】During your turn, when this Unit recovers HP, if you have 4 or less cards in your hand, draw 1.") && this.owner.hand.length <= 4) {
+				if (this.linked && !once_per_turn.includes(this.text + this.cid) && hasText(this.text, "[During Link][Once per Turn]During your turn, when this Unit recovers HP, if you have 4 or less cards in your hand, draw 1.") && this.owner.hand.length <= 4) {
 					this.owner.draw()
 					once_per_turn.push(this.text + this.cid)
 				}
@@ -814,7 +829,7 @@
 				if (this.type === "PILOT" && simple) return getPilotName(this)
 				let pilot_name = ""
 				if (this.pilot) pilot_name = getPilotName(this.pilot)
-				return rv + `${this.name}${pilot_name ? " + " + pilot_name : ""}`
+				return rv + `${this.name}${pilot_name ? " & " + pilot_name : ""}`
 			}
 			toDict() {
 				return {
@@ -840,7 +855,7 @@
 				const id = this.id.split("_")[0]
 				if (facedown) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""} facedown${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: black; background-color: white;" onclick='zoom(this)'></div>`
 
-				if (raw) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color});background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp); font-size: 1vmin; text-shadow: 0.1px 0.1px #08080888;" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://kaiofcards.com/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.level} ${this.id}<br>${this.cost}<div style="font-size:0.5vmin"><b>${escapeHTML(this.name)}</b><br>${this.traits}<br>${escapeHTML(this.text).replaceAll("&lt;br&gt;", "<br>")}</div>${this.link.length > 1 ? this.link : ""} ${this.ap || this.hp ? "" + this.ap + " " + this.hp : ""}</div>`
+				if (raw) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color});background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp); font-size: 1vmin; text-shadow: 0.1px 0.1px #08080888;" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://kaiofcards.com/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.level} ${this.id}<br>${this.cost}<div style="font-size:0.5vmin"><b>${escapeHTML(this.name)}</b><br>${this.traits}<br>${escapeHTML(this.text).replaceAll("\n", "<br>")}</div>${this.link.length > 1 ? this.link : ""} ${this.ap || this.hp ? "" + this.ap + " " + this.hp : ""}</div>`
 
 				return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color}); background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://kaiofcards.com/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${(this.AP() !== 0 || this.HP() !== 0) ? this.AP() + "/" + this.HP() : ""}</div>`
 			}
@@ -851,7 +866,7 @@
 				}
 				let t = this.text
 				if (this.pilot && this.pilot.type == "PILOT") {  // COMMANDs lack PILOT abilities.
-					t += "<br>" + this.pilot.text
+					t += "\n" + this.pilot.text
 				}
 				if (trait === "Blocker") {
 					if (t.indexOf("<Blocker>") === 0) return true
@@ -864,14 +879,15 @@
 
 					if (this.owner.battle.some(c => c.rested && hasText(c.text, "While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.")) && this.traits.concat(this.traits_eot).includes("League Militaire")) return true
 				}
+				if (trait === "Breach") return this.getBreach() > 0
 				if (trait === "First Strike") {
-					if (this.owner.resource.length >= 7 && hasText(t, "【During Link】While you are Lv.7 or higher, this Unit gains <First Strike>.") && this.linked()) return true
+					if (this.owner.resource.length >= 7 && hasText(t, "[During Link]While you are Lv.7 or higher, this Unit gains <First Strike>.") && this.linked()) return true
 					if (active_player === this.owner && hasText(t, "During your turn, while this Unit is battling an enemy Unit that is Lv.2 or lower, it gains <First Strike>.") && defender && defender.level <= 2 && hasText(defender.type, "UNIT")) return true
 				}
 				if (trait === "High-Maneuver") {
-					if (hasText(t, "【During Link】This Unit gains <High-Maneuver>.") && this.linked()) return true
+					if (hasText(t, "[During Link]This Unit gains <High-Maneuver>.") && this.linked()) return true
 				}
-
+				if (trait === "Repair") return this.getRepair() > 0
 				if (trait === "Suppression") {
 					if (hasText(t, "While this is damaged, it gains <Suppression>.")) return this.damage > 0
 					if (t.match(/<Suppression>/)) return true
@@ -889,11 +905,11 @@
 				let rv = (this.text + this.traits_eot).matchAll(/(?<!gains? <)Breach (\d)/g).map(mo => parseInt(mo[1])).reduce((tot, a) => tot + a, 0)
 				if (hasText(this.type, "TOKEN")) rv += this.owner.battle.filter(c => hasText(c.text, "All your Unit tokens gain <Breach 1>.")).length
 				const t = this.text + (this.pilot && this.pilot.text || "")
-				if (hasText(t, "【During Link】If this is an (AGE System) Unit, it gets AP+1 and <Breach 1>.") && this.hasTrait("AGE System") && this.linked()) rv += 1
+				if (hasText(t, "[During Link]If this is an (AGE System) Unit, it gets AP+1 and <Breach 1>.") && this.hasTrait("AGE System") && this.linked()) rv += 1
 				if (hasText(t, "While you have a green (Super Soldier) Pilot in play, this Unit gains <Breach 3>.") && this.owner.battle.some(c => c.pilot && c.pilot.color === "GREEN" && c.pilot.hasTrait("Super Soldier"))) rv += 3
-				if (hasText(t, "【Attack】If you are attacking a damaged enemy Unit, this Unit gains <Breach 3> during this battle.") && defender && defender.daamge > 0 && defender.type !== "BASE") rv += 3
+				if (hasText(t, "[Attack]If you are attacking a damaged enemy Unit, this Unit gains <Breach 3> during this battle.") && defender && defender.daamge > 0 && defender.type !== "BASE") rv += 3
 				if (hasText(t, "While this Unit is (Zeon), it gains <Breach 1>.") && this.hasTrait("Zeon")) rv += 1
-				if (hasText(t, "【During Pair】This Unit gains <Breach 3>.") && this.pilot) rv += 3
+				if (hasText(t, "[During Pair]This Unit gains <Breach 3>.") && this.pilot) rv += 3
 				if (hasText(t, "While another friendly (Zeon) Link Unit is in play, this Unit gains <Breach 5>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Zeon") && c.linked())) rv += 5
 				if (hasText(t, "While this Unit has 5 or more AP, it gains <Breach 3>.") && this.HP() >= 5) rv += 3
 				return rv
@@ -905,7 +921,7 @@
 				if (hasText(t, "While this Unit is blue, it gains <Repair 1>.") && this.color === "BLUE") rv += 1
 				if (hasText(t, "While a friendly white Base is in play, this Unit gains <Repair 1>.") && this.owner.base && this.owner.base.color === "WHITE") rv += 1
 				if (hasText(t, "While this Unit has 1 HP, it gains <Repair 3>.") && this.HP() === 1) rv += 3
-				if (hasText(t, "【During Pair】This Unit gains <Repair 2>") && this.pilot) rv += 2
+				if (hasText(t, "[During Pair]This Unit gains <Repair 2>") && this.pilot) rv += 2
 				if (hasText(t, "While you have another (Jupitris) Unit in play, this Unit gets AP+1 and <Repair 1>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Jupitris"))) rv += 1
 				return rv
 			}
@@ -1086,6 +1102,24 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 3 GD01-049 Blitz Gundam
 4 GD01-054 Duel Gundam
 3 GD01-111 Battle of Aces`,
+			`# Generation Pulse [ST10] (WU)
+Released 2026-06-26
+4 ST10-016 Luna Mana & Carry Base
+2 ST10-015 Diffuse Beam Cannon
+2 ST10-013 Tactical Training
+2 ST10-014 Unlocking the Development Diagram
+4 ST10-011 Kamille Bidan
+4 ST10-012 Mark Guilder
+4 ST10-005 Nemo
+4 ST10-003 Gundam Mk-II (AEUG)
+3 ST10-010 Mobile Worker (Tekkadan)
+4 ST10-009 Graze Duel Type
+4 ST10-008 Gundam Barbatos 1st Form
+3 ST10-004 Super Gundam
+2 ST10-006 Phoenix Gundam (Power Unleashed) (EX)
+3 ST10-002 Zeta Gundam
+3 ST10-007 Gundam Barbatos 4th Form
+2 ST10-001 Zeta Gundam (EX)`,
 			`# blurple deck winner of nats (UP)
 https://exburst.dev/gundam/deck/152946
 4 ST02-016 Corsica Base
@@ -1307,7 +1341,7 @@ https://exburst.dev/gundam/deck/152946
 1 GD04-022 Kikeroga (MS Mode) (GQ)
 1 GD01-027 Big Zam`,
 		]
-		
+
 		function addCustomDeck() {
 			let customDeck = localStorage.getItem("customDeck")
 			if (customDeck) decks.push(customDeck)
@@ -1417,7 +1451,7 @@ https://exburst.dev/gundam/deck/152946
 				activate(c)
 				await boom.play().catch(ex => { })
 				let toTrash = true
-				let t = /Burst】([^.]+)/.exec(c.text)
+				let t = /Burst\]([^.]+)/.exec(c.text)
 				if (t) {
 					t = t[1]
 					await run(c, "Burst")
@@ -1474,14 +1508,15 @@ https://exburst.dev/gundam/deck/152946
 				}
 			}
 
-			discard(number = 1) {
+			discard(number = 1, targets = null) {
 				number = parseInt(number)
+				if (targets) number = targets.length
 				for (let i = 0; i < number; ++i) {
-					const c = this.hand[Math.floor(Math.random() * this.hand.length)]
+					const c = (targets && targets[i]) || this.hand[Math.floor(Math.random() * this.hand.length)]
 					if (!c) return
-					log("🗑️" + this.name + " discards " + c)
+					log("🗑️" + this.name + " discard " + c)
 					this.hand = this.hand.filter(item => item !== c)
-					this.trash.push(c)
+					trash(c)
 				}
 			}
 
@@ -1494,7 +1529,7 @@ https://exburst.dev/gundam/deck/152946
 				}
 				const rv = Card.fromDict(d)
 				// DeckPlanet bug workarounds. See also cards.json.
-				rv.text = rv.text.replaceAll("<br />", "<br>").replaceAll("[action]", "【Action】").replaceAll("[br]", "<br>").replaceAll("[burst]", "【Burst】").replaceAll("[breach 3]", "【Breach 3】").replaceAll("[deploy]", "【Deploy】").replaceAll("[main]", "【Main】").replaceAll("[pilot]", "【Pilot】").replaceAll("[when paired]", "【When Paired】")
+				rv.text = rv.text.replaceAll(/<br ?\/?>/g, "\n").replaceAll("[action]", "[Action]").replaceAll("[br]", "\n").replaceAll("[burst]", "[Burst]").replaceAll("[breach 3]", "[Breach 3]").replaceAll("[deploy]", "[Deploy]").replaceAll("[main]", "[Main]").replaceAll("[pilot]", "[Pilot]").replaceAll("[when paired]", "[When Paired]").replaceAll(/\[(Blocker|Breach|First Strike|High-Maneuver|Repair|Support|Suppression)\]/g, "<$1>").replaceAll(/\[(\w+) (\d)\]/g, "<$1 $2>").replaceAll("white Base Team", "White Base Team")
 
 				cid += 1
 				rv.cid = cid
@@ -1554,19 +1589,8 @@ https://exburst.dev/gundam/deck/152946
 			}
 		}
 
-		// let gameInfo = {}
 		async function loadCards() {
 			log("⏳Loading " + document.title)
-			// localStorage.clear()
-			// gameInfo = JSON.parse(localStorage.getItem("gameInfo"))
-			// if (!gameInfo) {
-			// 	log("Fetching game info")
-			// 	// gameInfo = await fetch('https://raw.githubusercontent.com/CTimmerman/cgs/refs/heads/master/Gundam/cgs.json').then((response) => response.json())
-			// 	const response = await fetch('https://raw.githubusercontent.com/CTimmerman/cgs/refs/heads/master/Gundam/cgs.json')
-			// 	gameInfo = await response.json()
-			// 	localStorage.setItem("gameInfo", JSON.stringify(gameInfo))
-			// }
-			//cards = JSON.parse(localStorage.getItem("cards")) || {}
 			const response = await fetch("cards.json")
 			cards = await response.json()
 			if (Object.keys(cards).length > 1) {
@@ -1578,45 +1602,54 @@ https://exburst.dev/gundam/deck/152946
 						// ORB let card_data = await fetch(`https://gundamcard.gg/cards/${card.id}/`)
 					}
 				}
-				// localStorage.setItem("cards", JSON.stringify(cards))
 			}
-			// else {
-			// 	cards = {}
-			// 	let pages = 1
-			// 	let page = 0
-			// 	let data = JSON.parse(localStorage.getItem("data")) || []
-			// 	if (!data.length > 0) {
-			// 		do {
-			// 			++page
-			// 			const link = `${gameInfo.allCardsUrl}&page=${page}`
-			// 			log(`Loading ${link}`)
-			// 			const response = await fetch(link)
-			// 			const json = await response.json()
-			// 			pages = json.meta.page_count
-			// 			data = data.concat(json.data)
-			// 			await sleep(500)  // rate limit to be nice to server
-			// 		} while (page < pages)
-			// 		localStorage.setItem("data", JSON.stringify(data))
-			// 	}
-			// 	for (const card of data) {
-			// 		const id = card.card_number
-			// 		cards[id] = new Card(
-			// 			card.card_type,
-			// 			card.card_name,
-			// 			card.card_ap || card.card_ap_boost,
-			// 			card.card_hp || card.card_hp_boost,
-			// 			card.card_level,
-			// 			card.card_cost,
-			// 			card.card_text_unstyled,
-			// 			card.card_zones,
-			// 			card.card_traits,
-			// 			card.card_link_requirement,
-			// 			id,
-			// 			card.card_color).toDict()
-			// 	}
-			// 	log("Cards: " + Object.keys(cards).length)
-			// 	localStorage.setItem("cards", JSON.stringify(cards))
-			// }
+		}
+
+		async function loadNewCards() {
+			localStorage.clear()
+			let gameInfo = JSON.parse(localStorage.getItem("gameInfo"))
+			if (!gameInfo) {
+				log("Fetching game info")
+				// gameInfo = await fetch('https://raw.githubusercontent.com/CTimmerman/cgs/refs/heads/master/Gundam/cgs.json').then((response) => response.json())
+				const response = await fetch('https://raw.githubusercontent.com/CTimmerman/cgs/refs/heads/master/Gundam/cgs.json')
+				gameInfo = await response.json()
+				localStorage.setItem("gameInfo", JSON.stringify(gameInfo))
+			}
+			cards = {}
+			let pages = 1
+			let page = 0
+			let data = JSON.parse(localStorage.getItem("data")) || []
+			if (!data.length > 0) {
+				do {
+					++page
+					const link = `${gameInfo.allCardsUrl}&page=${page}`
+					log(`Loading ${link}`)
+					const response = await fetch(link)
+					const json = await response.json()
+					pages = json.meta.page_count
+					data = data.concat(json.data)
+					await sleep(500)  // rate limit to be nice to server
+				} while (page < pages)
+				localStorage.setItem("data", JSON.stringify(data))
+			}
+			for (const card of data) {
+				const id = card.card_number
+				cards[id] = new Card(
+					card.card_type,
+					card.card_name,
+					card.card_ap || card.card_ap_boost,
+					card.card_hp || card.card_hp_boost,
+					card.card_level,
+					card.card_cost,
+					card.card_text_unstyled,
+					card.card_zones,
+					card.card_traits,
+					card.card_link_requirement,
+					id,
+					card.card_color).toDict()
+			}
+			log("Cards: " + Object.keys(cards).length)
+			localStorage.setItem("cards", JSON.stringify(cards))
 		}
 
 		async function render() {
@@ -1773,6 +1806,7 @@ https://exburst.dev/gundam/deck/152946
 					}
 					for (let i = 0; i < (sup ? 2 : 1); ++i) {
 						await enemy.breakShield()
+						await publish(" destroys an enemy shield area card with battle damage, ", [att])
 					}
 				}
 				return
@@ -1829,7 +1863,7 @@ https://exburst.dev/gundam/deck/152946
 							p.hand = p.hand.filter(item => item !== c)
 							if (await run(c, "Action")) {
 								ran = true
-								c.owner.trash.push(c)
+								trash(c)
 								await render()
 								await p.paid(cost, c)  // log payment
 							} else {
@@ -1926,13 +1960,14 @@ https://exburst.dev/gundam/deck/152946
 							} else if (def.owner.shield.length > 0) {
 								log("➤Breach " + breach)
 								await def.owner.breakShield()
+								await publish(" destroys an enemy shield area card with battle damage, ", [att])
 							}
 						}
 					}
 					destroyer = att
 					await destroy(def)
 					if (hasText(def.type, "UNIT")) {
-						await publish(" destroys an enemy Unit with battle damage, ", att.owner.base ? [att, att.owner.base] : [att])
+						await publish(" destroys an enemy Unit ", att.owner.base ? [att, att.owner.base] : [att])
 
 						// TODO: getSectionText should handle this
 						for (const trait of att.owner.traits_eot) {
@@ -2000,8 +2035,8 @@ https://exburst.dev/gundam/deck/152946
 			// 	log("FIXME: DEBUG " + act + " " + clause + " " + card)
 			// }
 			let mo = null
-			const rex = new RegExp("(.*?)" + (clause ? clause : ("【([^】]*?)" + act + "([^】]*?)】")) + "([^.].+?)(?:<br|$)")
-			for (let line of card.text.split("<br>")) if (mo = line.match(rex)) break
+			const rex = new RegExp("(.*?)" + (clause ? clause : ("\\[([^\\]]*?)" + act + "([^\\]]*?)\\]")) + "([^.].+?)(?:\n|$)")
+			for (let line of card.text.split("\n")) if (mo = line.match(rex)) break
 			else for (let line of card.traits_eot) if (mo = line.match(rex)) break
 			if (!mo) return ""
 			const limits = mo[1]
@@ -2011,12 +2046,12 @@ https://exburst.dev/gundam/deck/152946
 			const limits2 = mo[2]
 			const limits3 = mo[3]
 			const text = mo.length === 3 ? mo[2] : mo[4]
-			// if ((act === "During Pair" || act === "During Link") && (text.indexOf("【") === 0 || text.indexOf("During") === 0 || text.indexOf("When") === 0)) return ""
+			// if ((act === "During Pair" || act === "During Link") && (text.indexOf("[") === 0 || text.indexOf("During") === 0 || text.indexOf("When") === 0)) return ""
 
 			let l3ok = !limits3
 			let mo2 = null
 			if (!l3ok) {
-				// 【When Paired･(Cyber-Newtype)/(Newtype) Pilot】
+				// [When Paired･(Cyber-Newtype)/(Newtype) Pilot]
 				mo2 = limits3.match(/^･\((.+)\) Pilot$/)
 				if (mo2 && (!card.pilot || !mo2[1].split(")/(").some(part => card.pilot.hasTrait(part)))) {
 					// log(`🚫No link; ${card.pilot.traits} not in ${mo2[1]}`)
@@ -2070,18 +2105,18 @@ https://exburst.dev/gundam/deck/152946
 		async function runCard(card, act, clause) {
 			let t = getSectionText(card, act, clause)
 			if (!t) return false
-			let rv = await runCard2(card, act, clause)
+			let rv = await runCard2(card, act, clause, t)
 			const context = (act && hasText(card.text, "Activate･" + act)) ? " " + card : ""
 			if (rv || act === "Burst") {
 				log(`⚡Ran${context} ${(act || clause)}: ${escapeHTML(t)}`)
-				if (card.type === "COMMAND" && ["Action", "Main"].includes(act)) await publish("When you activate a Command's 【Main】/【Action】 effect, ", card.owner.battle)
+				if (card.type === "COMMAND" && ["Action", "Main"].includes(act)) await publish("When you activate a Command's [Main]/[Action] effect, ", card.owner.battle)
 			}
 			return rv
 		}
-		async function runCard2(card, act, clause) {
-			let t = getSectionText(card, act, clause)
+		async function runCard2(card, act, clause, t = "") {
+			if (!t) t = getSectionText(card, act, clause)
 			if (!t) {
-				// if (clause || hasText(card.text, act)) log(`🚩No act ${act} or clause "${escapeHTML(clause)}" found in ${card.id} ${escapeHTML(card.text)}`)
+				if (clause || hasText(card.text, act)) log(`🚩No act ${act} or clause "${escapeHTML(clause)}" found in ${card.id} ${escapeHTML(card.text)}`)
 				return false
 			}
 			// if (t === "Add 1 of your Shields to your hand. Then, if it is your turn, look at the top 2 cards of your deck and return 1 to the top. Place the remaining card into your trash.") {
@@ -2167,7 +2202,7 @@ https://exburst.dev/gundam/deck/152946
 				if (!u.hasTrait(mo[1])) return false
 				t = t.slice(mo[0].length)
 			}
-			if (mo = t.match(/^If you have an? \((.+)\) Unit in play, /) || t.match(/^if a friendly \((.+)\) Unit is in play, /)) {
+			if (mo = t.match(/^If you have an? \((.+)\) Unit in play, /) || t.match(/^[Ii]f a friendly \((.+)\) Unit is in play, /)) {
 				if (!fu.some(c => c.hasTrait(mo[1]))) return false
 				t = t.slice(mo[0].length)
 			}
@@ -2190,6 +2225,12 @@ https://exburst.dev/gundam/deck/152946
 			}
 			if (mo = t.match(/^if there are (\d+) or more \((.+)\) cards in your trash, /)) {
 				if (!p.trash.filter(c => c.hasTrait(mo[2])).length < parseInt(mo[1])) return false
+				t = t.slice(mo[0].length)
+			}
+			if (mo = t.match(/^If 2 or more rested Units are in play, choose 1 enemy Unit whose Lv. is equal to or lower than this Unit. /)) {
+				if (fu.concat(eu).filter(c => c.rested).length < 2) return false
+				target = eu.filter(c => !c.rested && c.LEVEL() <= u.LEVEL())[0]
+				if (!target) return false
 				t = t.slice(mo[0].length)
 			}
 
@@ -2255,9 +2296,18 @@ https://exburst.dev/gundam/deck/152946
 				bounce(target.pilot)
 				return true
 			}
+			if (t === "You may exile the specified number of (G Generation) cards in your trash from the game. If you do, activate the following effect:") {
+				mo = u.text.match(/Development (\d+)/)
+				targets = p.trash.filter(c => c.hasTrait("G Generation")).slice(0, parseInt(mo[1]))
+				if (targets.length < parseInt(mo[1])) return false
+				let oldtrash = p.trash
+				exile(targets)
+				if (!runCard(card, "", "■")) p.trash = oldtrash
+				return true
+			}
 
 			// Burst - Optional, so why not Attack etc.?
-			if (t === "Activate this card's 【Main】.") {
+			if (t === "Activate this card's [Main].") {
 				await runCard(card, "Main")
 				return true
 			}
@@ -2346,21 +2396,20 @@ https://exburst.dev/gundam/deck/152946
 				} else if (t === "Set it as active.") {
 					activate(target)
 					return true
-				} else if (mo = t.match(/^Deal (\d) damage to it\.$/)) {
+				} else if (mo = t.match(/^Deal (\d+) damage to it\.$/)) {
 					const dmg = parseInt(mo[1])
 					return await dealDamage(u, chooseDmgTarget(u, targets, dmg), dmg)
 				}
-				if (mo = t.match(/^It gets AP-(\d) during this turn\./)) {
+				if (mo = t.match(/^It gets AP-(\d+) during this turn\./)) {
 					target = mySort(targets, c => -c.AP() - 10 * (myturn ? c.rested : !c.rested))[0]
 					if (!target) return false
 					log(`🎯AP-${mo[1]} EOT ${target}`)
 					eotAP(target, -parseInt(mo[1]))
 					return true
 				}
-				if (t === "It gets AP-2 during this battle.") {
-					target = mySort(targets, c => -c.AP())[0]
-					if (!target) return false
-					eobAP(target, -2)
+				if (mo = t.match(/^It gets AP-(\d+) during this battle./)) {
+					if (!defender || !hasText(defender.type, "UNIT")) return false
+					eobAP(defender, -2)
 					return true
 				}
 				if (t === "It won't be set as active during the start phase of your opponent's next turn.") {
@@ -2383,6 +2432,12 @@ https://exburst.dev/gundam/deck/152946
 					target = fu.filter(c => c.pilot && c.pilot.hasTrait("Super Soldier"))[0]
 					if (!target) return false
 					eotTrait(target, "canAttack active.unit.lv4min")
+					return true
+				}
+				if (t === "Choose 1 Command card that is Lv.4 or lower from your trash. Add it to your hand.") {
+					target = p.trash.filter(c => c.type === "COMMAND" && c.LEVEL() <= 4)[0]
+					if (!target) return false
+					toHand(target, true)
 					return true
 				}
 			}
@@ -2409,6 +2464,13 @@ https://exburst.dev/gundam/deck/152946
 				return await dealDamage(card, target, 3)
 			}
 			// Main
+			if (t === "Choose 1 (G Generation) Unit that is Lv.5 or higher. It recovers 2 HP and gets AP+2 during this turn.") {
+				target = fu.filter(c => c.LEVEL() >= 5 && c.hasTrait("G Generation") && c.damage > 0 && !c.rested && !c.sick)[0]
+				if (!target) return false
+				target.recover(2)
+				eotAP(target, 2)
+				return true
+			}
 			if (t === "Choose 1 of your Units. When it deals battle damage to an enemy Unit that is Lv.5 or lower during this turn, destroy that enemy Unit.") {
 				let trait = "When this Unit deals battle damage to an enemy Unit that is Lv.5 or lower, destroy that enemy Unit."
 				target = fu.filter(c => !c.rested && !c.sick && !c.hasTrait(trait))[0]
@@ -2461,13 +2523,13 @@ https://exburst.dev/gundam/deck/152946
 				eotAP(target, support)
 				return true
 			}
-			if (t === "【Once per Turn】④：Set this Unit as active.") {
+			if (t === "[Once per Turn]④：Set this Unit as active.") {
 				if (!u.rested || !await p.pay(4, c, true, t)) return false
 				once_per_turn.push(t + card.cid)
 				activate(u)
 				return true
 			}
-			if (t === "【Once per Turn】Exile 3 (Titans) cards from your trash: This Unit gains <Breach 4> during this turn.") {
+			if (t === "[Once per Turn]Exile 3 (Titans) cards from your trash: This Unit gains <Breach 4> during this turn.") {
 				if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
 				targets = p.trash.filter(c => c.hasTrait("Titans")).slice(0, 3)
 				if (targets.length < 3) return false
@@ -2476,7 +2538,7 @@ https://exburst.dev/gundam/deck/152946
 				eotTrait(u, "Breach 4")
 				return true
 			}
-			if (t === "【Once per Turn】Rest 1 of your (Earth Federation) Units：Choose 1 enemy Unit that is Lv.3 or lower. Rest it.") {
+			if (t === "[Once per Turn]Rest 1 of your (Earth Federation) Units：Choose 1 enemy Unit that is Lv.3 or lower. Rest it.") {
 				target = eu.filter(c => c.LEVEL <= 3)[0]
 				if (!target) return false
 				target2 = fu.filter(c => !c.rested && c.hasTrait("Earth Federation"))[0]
@@ -2501,6 +2563,11 @@ https://exburst.dev/gundam/deck/152946
 				targets = p.trash.filter(c => c.color === "BLUE").slice(0, 3)
 				if (targets.length < 3) return false
 				exile(targets)
+				eotTrait(u, "must_attack_unit")
+				activate(u)
+				return true
+			}
+			if (t === "set it as active. It can't choose the same enemy player or enemy team as its attack target during this turn.") {
 				eotTrait(u, "must_attack_unit")
 				activate(u)
 				return true
@@ -2560,7 +2627,7 @@ https://exburst.dev/gundam/deck/152946
 			if (t === "this Unit recovers 2 HP.") {
 				return u.recover(2)
 			}
-			if (t === "【Once per Turn】②：Choose 1 of your Units. It recovers 2 HP.") {
+			if (t === "[Once per Turn]②：Choose 1 of your Units. It recovers 2 HP.") {
 				target = mySort(fu.filter(c => c.damage > 0), c => -c.damage)[0]
 				if (!target) return false
 				if (!await p.pay(2, u, true, t)) return false
@@ -2613,6 +2680,10 @@ https://exburst.dev/gundam/deck/152946
 				await render()
 				return true
 			}
+			if (t === "all friendly (G Generation) Units recover 1 HP.") {
+				fu.filter(c => c.hasTrait("G Generation") && c.recover())
+				return true
+			}
 			if (t === "Rest this Base：Choose 1 friendly Unit. It gets AP+1 during this turn.") {
 				if (card.rested) return false
 				target = fu.filter(c => !c.rested && !c.sick)[0]
@@ -2640,7 +2711,7 @@ https://exburst.dev/gundam/deck/152946
 				eotAP(target, 2)
 				return true
 			}
-			if (t === "【Once per Turn】②：Deploy 1 [Gundam]((White Base Team)･AP3･HP3) Unit token if you have no Units in play, deploy 1 [Guncannon]((White Base Team)･AP2･HP2) Unit token if you have only 1 Unit in play, or deploy 1 [Guntank]((White Base Team)･AP1･HP1) Unit token if you have 2 or more Units in play.") {
+			if (t === "[Once per Turn]②：Deploy 1 [Gundam]((White Base Team)･AP3･HP3) Unit token if you have no Units in play, deploy 1 [Guncannon]((White Base Team)･AP2･HP2) Unit token if you have only 1 Unit in play, or deploy 1 [Guntank]((White Base Team)･AP1･HP1) Unit token if you have 2 or more Units in play.") {
 				if (!await p.pay(2, u, true, t)) return false
 				once_per_turn.push(t + card.cid)
 				if (fu.length === 0) {
@@ -2652,7 +2723,7 @@ https://exburst.dev/gundam/deck/152946
 				}
 				return true
 			}
-			if (t === "【Once per Turn】②：Choose 1 friendly Unit with <Blocker>. Set it as active. It can't attack during this turn.") {
+			if (t === "[Once per Turn]②：Choose 1 friendly Unit with <Blocker>. Set it as active. It can't attack during this turn.") {
 				target = fu.filter(c => c.rested && c.hasTrait("Blocker"))[0]
 				if (!target || !await p.pay(2, u, true, t)) return false
 				once_per_turn.push(t + card.cid)
@@ -2722,7 +2793,7 @@ https://exburst.dev/gundam/deck/152946
 				await publish("When you place an EX Resource, ", p.battle.concat(p.base))
 				return true
 			}
-			if (t === "【Once per Turn】Choose 1 of your Resources. Set it as active.") {
+			if (t === "[Once per Turn]Choose 1 of your Resources. Set it as active.") {
 				for (const c of p.resource) {
 					if (c.rested) {
 						once_per_turn.push(t + card.cid)
@@ -2783,7 +2854,7 @@ https://exburst.dev/gundam/deck/152946
 				eotAP(target, 2)
 				return true
 			}
-			if (clause == " Unit links, " && hasText(card.text, "【Once per Turn】When a friendly (Clan) Unit links, it gains <Breach 3> during this turn.")) {
+			if (clause == " Unit links, " && hasText(card.text, "[Once per Turn]When a friendly (Clan) Unit links, it gains <Breach 3> during this turn.")) {
 				if (active_unit.owner !== u.owner || !active_unit.hasTrait("Clan")) return false
 				once_per_turn.push(t + card.cid)
 				eotTrait(active_unit, "Breach 3")
@@ -2880,7 +2951,7 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			// Activate･Main
-			if (t === "【Once per Turn】①, rest 1 friendly (CB) Unit：Choose 1 enemy Unit that is Lv.5 or lower. Deal 1 damage to it.") {
+			if (t === "[Once per Turn]①, rest 1 friendly (CB) Unit：Choose 1 enemy Unit that is Lv.5 or lower. Deal 1 damage to it.") {
 				target = chooseDmgTarget(u, eu.filter(c => c.LEVEL() <= 5))
 				if (!target) return false
 				const mine = mySort(fu.filter(c => !c.rested && c.hasTrait("CB")), c => -c.sick || c.AP())[0]
@@ -3003,7 +3074,7 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 
-			// 【Main】/【Action】
+			// [Main]/[Action]
 			if (hasText(t, "If you have no (Earth Alliance) Unit tokens in play,")) {
 				if (fu.filter(c => hasText(c.type, "TOKEN") && c.hasTrait("Earth Alliance")).length > 0) return false
 				if (hasText(t, "deploy 1 [Sword Strike Gundam]((Earth Alliance)･AP4･HP2･<Blocker>) or 1 [Launcher Strike Gundam]((Earth Alliance)･AP2･HP4･<Blocker>) Unit token.")) {
@@ -3028,7 +3099,7 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			// Attack trigger
-			if (t === "【Once per Turn】If this Unit is attacking the enemy player, reveal 1 (Earth Federation) Unit card from your hand. Return it to the bottom of your deck. If you do, draw 2.") {
+			if (t === "[Once per Turn]If this Unit is attacking the enemy player, reveal 1 (Earth Federation) Unit card from your hand. Return it to the bottom of your deck. If you do, draw 2.") {
 				if (eu.includes(defender)) return false
 				target = p.hand.filter(c => c.hasTrait("Earth Federation"))[0]
 				if (!target) return false
@@ -3183,6 +3254,13 @@ https://exburst.dev/gundam/deck/152946
 				}
 				if (target !== null) return true
 			}
+			if (t === "Draw a number of cards equal to the number of enemy players. Then, discard the same number of cards you drew with this effect.") {
+				// TODO: 3+ players
+				if (p.hand.length < 1) return false
+				p.draw()
+				p.discard(1)
+				return true
+			}
 			if (t === "Place the top 2 cards of your deck into your trash. If you place a (CB) card with this effect, draw 1.") {
 				const top = card.owner.mill(2)
 				if (top.some(c => c.hasTrait("CB"))) p.draw()
@@ -3239,11 +3317,11 @@ https://exburst.dev/gundam/deck/152946
 				if (t === "and return 1 to the top. Place the remaining card into your trash.") {
 					if (!p.canUse(targets[1])) {
 						log("🗑️" + p.name + " trashes " + targets[1])
-						p.trash.push(targets[1])
+						trash(targets[1])
 						p.deck = p.deck.slice(0, -1)
 					} else {
 						log("🗑️" + p.name + " trashes " + targets[0])
-						p.trash.push(targets[0])
+						trash(targets[0])
 						p.deck = p.deck.slice(0, -2).concat(targets[1])
 					}
 					return true
@@ -3452,7 +3530,7 @@ https://exburst.dev/gundam/deck/152946
 					let empty_units = p.getPairableUnits()
 					let doPair = false
 					if (empty_units.length < 1 && c.type === "PILOT") continue
-					if (empty_units.length > 0 && (c.type === "PILOT" || hasText(c.text, "【Pilot】"))) {
+					if (empty_units.length > 0 && (c.type === "PILOT" || hasText(c.text, "[Pilot]"))) {
 						doPair = true
 						empty_units.sort(u => !linksWith(u, c))
 						if ((!linksWith(empty_units[0], c) && p.hand.filter(bc => linksWith(empty_units[0], bc)).length > 0)) {
@@ -3471,8 +3549,12 @@ https://exburst.dev/gundam/deck/152946
 						await sleep(300)
 						if (c.type === "COMMAND") {
 							// Do pilot part of command 2/3 of the time.
-							if ((!doPair || !hasText(c.text, "【Pilot】") || rnd(1, 3) > 2) && await run(c)) {
-								p.trash.push(c)
+							if ((!doPair || !hasText(c.text, "[Pilot]") || rnd(1, 3) > 2) && await run(c)) {
+								if (hasText(c.text, "When playing this card from your hand, you may discard 1 (G Generation) Unit card. If you do, play this card as if it has 2 Lv. and cost.")) {
+									let target = p.hand.filter(c2 => c2 !== c && c2.type === "UNIT" && c.hasTrait("G Generation"))[0]
+									if (target) p.discard(1, [target])
+								}
+								trash(c)
 								await render()
 								await p.paid(cost, c)  // TODO: Paid before activate events?
 								await sleep(800)
@@ -3561,8 +3643,12 @@ https://exburst.dev/gundam/deck/152946
 							if (extra) prone = extra.concat(prone)
 						}
 					}
-					if (att.text === "【During Pair･(Vulture) Pilot】If there are 7 or more cards in your trash, this Unit may choose an active enemy Unit with a keyword effect as its attack target." && att.pilot && att.pilot.hasTrait("Vulture") && p.trash.length >= 7) {
-						const extra = enemy.battle.filter(bc => !bc.rested && hasText(bc.text, "<"))
+					if (att.text === "[During Pair･(Vulture) Pilot]If there are 7 or more cards in your trash, this Unit may choose an active enemy Unit with a keyword effect as its attack target." && att.pilot && att.pilot.hasTrait("Vulture") && p.trash.length >= 7) {
+						const extra = enemy.battle.filter(bc => {
+							if (bc.rested) return false
+							let mo = bc.text.match(/(?<!with )<(\w+)/)
+							return mo && bc.hasTrait(mo[1])
+						})
 						if (extra) prone = extra.concat(prone)
 					}
 					prone = mySort(prone, def => def.HP())
