@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-03</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-05</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -858,7 +858,7 @@
 			}
 			toHTML(left, top, facedown = false, z = 0, raw = false) {
 				const id = this.id.split("_")[0]
-				if (facedown) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""} facedown${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: black; background-color: white;" onclick='zoom(this)'></div>`
+				if (facedown) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""} facedown${hasStr(this.type, "RESOURCE") ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color: black; background-color: white;" onclick='zoom(this)'></div>`
 
 				if (raw) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color});background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp); font-size: 1vmin; text-shadow: 0.1px 0.1px 3px #08080888;" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://kaiofcards.com/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.level} ${this.id}<br>${this.cost}<div style="font-size:0.5vmin"><b>${escapeHTML(this.name)}</b><br>${this.traits}<br>${escapeHTML(this.text).replaceAll("\n", "<br>")}</div>${this.link.length > 1 ? this.link : ""} ${this.ap || this.hp ? "" + this.ap + " " + this.hp : ""}</div>`
 
@@ -1729,17 +1729,19 @@ https://exburst.dev/gundam/deck/152946
 					html += p.resource_deck[i].toHTML(left, top, true)
 				}
 				// Shield Area
+				// Shields
 				y = 0
 				for (const c of p.shield) {
 					left = 70
-					top = 0.5 + y
+					top = 1 + y
 					if (p === p2) {
 						left = 4
-						top = 85 - y
+						top = 86 - y
 					}
 					html += c.toHTML(left, top, true)
 					y += 4
 				}
+				// Base
 				if (p.base) {
 					left = 72
 					top = 33
@@ -3364,8 +3366,10 @@ https://exburst.dev/gundam/deck/152946
 
 				if (t === "and return 1 to the top and 1 to the bottom.") {
 					if (!p.canUse(targets[1])) {
+						log("Top to bottom")
 						p.deck = [targets[1]].concat(p.deck.slice(0, -1))
 					} else {
+						log("2nd to bottom")
 						p.deck = [targets[0]].concat(p.deck.slice(0, -2)).concat(targets[1])
 					}
 					return true
@@ -3715,7 +3719,7 @@ https://exburst.dev/gundam/deck/152946
 						})
 						if (extra) prone = extra.concat(prone)
 					}
-					prone = mySort(prone, def => def.HP())
+					prone = mySort(prone, def => -def.HP())
 
 					// Base and shields also count as enemy player: https://www.gundam-gcg.com/en/cards/index.php?freeword=GD04-016#cards
 					let must_attack_unit = hasStr(att.text, "This Unit can't choose the enemy player as its attack target") || att.hasKw("must_attack_unit")
