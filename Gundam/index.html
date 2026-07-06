@@ -3428,7 +3428,7 @@ https://exburst.dev/gundam/deck/152946
 				}
 
 				if (target) {
-					log(`🎴${p.name} reveals from top ${look}: ${target}`)
+					if (hasStr(t, "reveal")) log(`🎴${p.name} reveals from top ${look}: ${target}`)
 					if (hasStr(t, "add it to your hand")) {
 						toHand(target)
 					} else if (hasStr(t, "You may deploy")) {
