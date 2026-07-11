@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-10</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-12</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -253,6 +253,9 @@
 	</div>
 	<script>
 		"use strict"
+		const BANLIST = ["GD01-020"]
+		const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
+		const RESTRICTED = {"ST02-016": 2}
 		let zoomed = ""
 
 		function dict2str(d) {
@@ -1391,24 +1394,32 @@ https://exburst.dev/gundam/deck/152946
 				const lines = deck.split("\n")
 				const colors = []
 				const counts = {}
+				const basic_lv2s = []
 				for (const line of lines) {
 					if (line.indexOf("# ") === 0) {
 						this.deckname = line.slice(2)
 						log(`🎴${this.name} deck: <a href="#" onclick='showDeck(\"${escapeHTML(this.deckname)}\"); event.preventDefault()'>${this.deckname}</a>`)
 					}
 					const [count, id] = line.split(" ")
+					if (BANLIST.includes(id)) log("🚩Banned card: " + id)
 					if (count >= 1) {
 						for (let i = 0; i < count; ++i) {
 							const c = this.getCard(id)
 							c.owner = this
+							if (c.level === 2 && c.cost === 1 && c.ap === 2 && c.hp === 2 && c.text === "" && !basic_lv2s.includes(id)) basic_lv2s.push(id)
 							this.deck.push(c)
 							this.fulldeck.push(this.getCard(id))
 							if (!colors.includes(c.color)) colors.push(c.color)
 							counts[id] = (counts[id] || 0) + 1
 							if (counts[id] > 4) throw Error("Max 4 of " + id)
+							if (counts[id] > RESTRICTED[id]) log(`🚩${id} restricted to ${RESTRICTED[id]}`)
 						}
 					}
 				}
+				for (const pair of BANNED_PAIRS) {
+					if (this.deck.some(c => c.id === pair[0]) && this.deck.some(c => c.id === pair[1])) log("🚩Banned pair: " + pair)
+				}
+				if (basic_lv2s.length > 1) log("🚩Only 1 basic lv2 kind allowed: " + basic_lv2s)
 				if (colors.length > 2) throw Error("Deck colors > 2: " + colors)
 				if (this.deck.length !== 50) throw Error("Deck length not 50: " + this.deck.length)
 				shuffle(this.deck)
