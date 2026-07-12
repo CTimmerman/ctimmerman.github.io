@@ -249,13 +249,13 @@
 				<option value="CTLN">Cost, Type, Level, Name</option>
 			</select>
 		</div><br>
-		<div><button onclick="dlog.innerHTML=''">Clear log</button></div>
+		<div><button onclick="mutateDeck()">Save P1 mutant</button> <button onclick="dlog.innerHTML=''">Clear log</button></div>
 	</div>
 	<script>
 		"use strict"
 		const BANLIST = ["GD01-020"]
 		const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
-		const RESTRICTED = {"ST02-016": 2}
+		const RESTRICTED = { "ST02-016": 2 }
 		let zoomed = ""
 
 		function dict2str(d) {
@@ -292,7 +292,7 @@
 		let destroyer = null
 		let once_per_turn = []
 
-		let cards = {}
+		let CARDS = {}
 		// Why doesn't upstream list EXR promos like other promos?
 		// "EXR-001_PR", "EXR-001_PR2", "EXR-001_PR3", "EXR-001_PR4", "EXR-001_PR5"
 		const EX_RESOURCES = ["EXR-001", "EXRP-001", "EXRP-002"]
@@ -476,6 +476,78 @@
 			overlay.style.display = "none"
 		}
 
+		function mutateDeck(decklist = "") {
+			let old_delay = delay
+			delay = 1
+			if (!decklist) decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
+			let lines = decklist.split("\n")
+			log(`Mutating ${lines[0]}`)
+			let fulldeck = []
+			let alerts = []
+			let deckname = ""
+			let tries = 0
+			let delta = 0
+			let dl = ""
+			do {
+				tries += 1
+				let i = rnd(0, lines.length - 1)
+				if (lines[i].indexOf("# ") === 0) continue
+				let [count, id] = lines[i].split(" ")
+				count = parseInt(count)
+				if (!(count >= 0)) continue
+				const d = delta ? -delta : rndPick([-1, 1])
+				if (count + d < 0) continue
+				else if (count + d > 4) continue
+				log(`${count} -> ${count + d} ${id}`)
+				count += d
+				lines[i] = `${count} ${id}`
+				dl = lines.join("\n")
+				;[fulldeck, alerts, deckname] = parseDecklist(dl)
+				if (alerts.length < 1) break
+				else log(alerts)
+				delta = d
+			} while (tries < 100)
+			localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
+			addCustomDeck()
+			log(`Mutated ${decklist.split("\n")[0]} in ${tries} cycles: ${dl} ${alerts}`)
+			delay = old_delay
+			return dl
+		}
+
+		function parseDecklist(decklist, strict = false, p = p1) {
+			let alerts = []
+			const basic_lv2s = []
+			const colors = []
+			const counts = {}
+			let deckname = "Anonymous deck"
+			const fulldeck = []
+			const lines = decklist.split("\n")
+			if (lines.length > 0) deckname = lines[0].slice(2)
+			for (const line of lines) {
+				const [count, id] = line.split(" ")
+				if (BANLIST.includes(id)) alerts.push("🚩Banned card: " + id)
+				if (count >= 1) {
+					for (let i = 0; i < count; ++i) {
+						const c = p.getCard(id)
+						fulldeck.push(c)
+						if (c.level === 2 && c.cost === 1 && c.ap === 2 && c.hp === 2 && c.text === "" && !basic_lv2s.includes(id)) basic_lv2s.push(id)
+						if (!colors.includes(c.color)) colors.push(c.color)
+						counts[id] = (counts[id] || 0) + 1
+						if (counts[id] > 4) alerts.push("🚩Max 4 of " + id)
+						if (counts[id] > RESTRICTED[id]) alerts.push(`🚩${id} restricted to ${RESTRICTED[id]}`)
+					}
+				}
+			}
+			for (const pair of BANNED_PAIRS) {
+				if (fulldeck.some(c => c.id === pair[0]) && fulldeck.some(c => c.id === pair[1])) alerts.push("🚩Banned pair: " + pair)
+			}
+			if (basic_lv2s.length > 1) alerts.push("🚩Only 1 basic Lv.2 kind allowed: " + basic_lv2s)
+			if (colors.length > 2) alerts.push("🚩Deck colors > 2: " + colors)
+			if (fulldeck.length !== 50) alerts.push("🚩Deck length not 50: " + fulldeck.length)
+			if (alerts.length > 0 && strict) log(alerts.join("<br>"))
+			return [fulldeck, alerts, deckname]
+		}
+
 		function showDeck(name) {
 			window.pause = (window.pause || 0) + 1
 			let html = `<div onclick="overlay.style.display = 'none'; window.pause = 0" style="width:100%; height:100%; background-color: #08080888">`
@@ -487,28 +559,9 @@
 				}
 			}
 			let oldcid = cid
-			let fulldeck = []
-			let deckname = "Anonymous deck"
-
-			const lines = decklist.split("\n")
-			const colors = []
-			for (const line of lines) {
-				if (line.indexOf("# ") === 0) {
-					deckname = line.slice(2)
-				}
-				const [count, id] = line.split(" ")
-				if (count >= 1) {
-					for (let i = 0; i < count; ++i) {
-						const c = p1.getCard(id)
-						fulldeck.push(p1.getCard(id))
-						if (!colors.includes(c.color)) colors.push(c.color)
-					}
-				}
-			}
+			let [fulldeck, alerts, deckname] = parseDecklist(decklist, true)
+			if (alerts.length > 0) alert(alerts.join("\n"))
 			html += deckname
-			if (colors.length > 2) alert("Deck colors > 2: " + colors)
-			if (fulldeck.length !== 50) alert("Deck length not 50: " + fulldeck.length)
-
 			let deck = fulldeck.toSorted(
 				(a, b) => {
 					for (const c of deckOrder.value) {
@@ -964,7 +1017,7 @@
 			}
 		}
 
-		const decks = [
+		const DECKS = [
 			`# Heroic Beginnings [ST01] (WU)
 2 ST01-001 Gundam
 4 ST01-002 Gundam (MA Form)
@@ -1359,7 +1412,12 @@ https://exburst.dev/gundam/deck/152946
 1 GD01-027 Big Zam`,
 		]
 
+		let decks = DECKS.slice()
+
 		function addCustomDeck() {
+			decks = DECKS.slice()
+			let mutantDeck = localStorage.getItem("mutantDeck")
+			if (mutantDeck) decks.push(mutantDeck)
 			let customDeck = localStorage.getItem("customDeck")
 			if (customDeck) decks.push(customDeck)
 			let deck_options = `<option value="-1">Random</option>`
@@ -1374,7 +1432,6 @@ https://exburst.dev/gundam/deck/152946
 		function saveCustomDeck(deck) {
 			if (!confirm("Save as your custom deck?")) return
 			localStorage.setItem("customDeck", "# Custom deck\n" + deck)
-			if (decks.slice(-1)[0].indexOf("# Custom deck\n") === 0) decks.pop()
 			addCustomDeck()
 		}
 
@@ -1394,42 +1451,15 @@ https://exburst.dev/gundam/deck/152946
 
 		let pid = 0
 		class Player {
-			loadDeck(deck) {
-				this.deckname = "Anonymous deck"
-				this.deck = []
-				this.fulldeck = []
-				const lines = deck.split("\n")
-				const colors = []
-				const counts = {}
-				const basic_lv2s = []
-				for (const line of lines) {
-					if (line.indexOf("# ") === 0) {
-						this.deckname = line.slice(2)
-						log(`🎴${this.name} deck: <a href="#" onclick='showDeck(\"${escapeHTML(this.deckname)}\"); event.preventDefault()'>${this.deckname}</a>`)
-					}
-					const [count, id] = line.split(" ")
-					if (BANLIST.includes(id)) log("🚩Banned card: " + id)
-					if (count >= 1) {
-						for (let i = 0; i < count; ++i) {
-							const c = this.getCard(id)
-							c.owner = this
-							if (c.level === 2 && c.cost === 1 && c.ap === 2 && c.hp === 2 && c.text === "" && !basic_lv2s.includes(id)) basic_lv2s.push(id)
-							this.deck.push(c)
-							this.fulldeck.push(this.getCard(id))
-							if (!colors.includes(c.color)) colors.push(c.color)
-							counts[id] = (counts[id] || 0) + 1
-							if (counts[id] > 4) throw Error("Max 4 of " + id)
-							if (counts[id] > RESTRICTED[id]) log(`🚩${id} restricted to ${RESTRICTED[id]}`)
-						}
-					}
-				}
-				for (const pair of BANNED_PAIRS) {
-					if (this.deck.some(c => c.id === pair[0]) && this.deck.some(c => c.id === pair[1])) log("🚩Banned pair: " + pair)
-				}
-				if (basic_lv2s.length > 1) log("🚩Only 1 basic Lv.2 kind allowed: " + basic_lv2s)
-				if (colors.length > 2) throw Error("Deck colors > 2: " + colors)
-				if (this.deck.length !== 50) throw Error("Deck length not 50: " + this.deck.length)
+			loadDeck(decklist) {
+				let [fulldeck, alerts, deckname] = parseDecklist(decklist, true, this)
+				this.deckname = deckname
+				// To draw from
+				this.deck = fulldeck
+				// Copy for viewing
+				this.fulldeck = fulldeck.filter(c => true)
 				shuffle(this.deck)
+				log(`🎴${this.name} deck: <a href="#" onclick='showDeck(\"${escapeHTML(this.deckname)}\"); event.preventDefault()'>${this.deckname}</a>`)
 			}
 
 			constructor(name) {
@@ -1549,7 +1579,7 @@ https://exburst.dev/gundam/deck/152946
 			}
 
 			getCard(id) {
-				const d = cards[id]
+				const d = CARDS[id]
 				if (!d) {
 					const msg = "Card not found: " + id
 					log(msg)
@@ -1603,7 +1633,7 @@ https://exburst.dev/gundam/deck/152946
 
 			getToken(name) {
 				// Yes, names are not unique.
-				for (const k in cards) if (cards[k].name === name && inStr(cards[k].type, "TOKEN")) return this.getCard(k)
+				for (const k in CARDS) if (CARDS[k].name === name && inStr(CARDS[k].type, "TOKEN")) return this.getCard(k)
 			}
 
 			mill(number) {
@@ -1669,11 +1699,11 @@ https://exburst.dev/gundam/deck/152946
 		async function loadCards() {
 			log("⏳Loading " + document.title)
 			const response = await fetch("cards.json")
-			cards = await response.json()
-			if (Object.keys(cards).length > 1) {
-				log(`Loaded ${Object.keys(cards).length} cards`)
-				for (const k in cards) {
-					const card = cards[k]
+			CARDS = await response.json()
+			if (Object.keys(CARDS).length > 1) {
+				log(`Loaded ${Object.keys(CARDS).length} cards`)
+				for (const k in CARDS) {
+					const card = CARDS[k]
 					if (card.cost < 1 && !card.id.match(/^[TRE]/)) {
 						log("🚩🚩FIXME: Card cost < 1: " + card.id)
 						// ORB let card_data = await fetch(`https://gundamcard.gg/cards/${card.id}/`)
@@ -1692,7 +1722,7 @@ https://exburst.dev/gundam/deck/152946
 				gameInfo = await response.json()
 				localStorage.setItem("gameInfo", JSON.stringify(gameInfo))
 			}
-			cards = {}
+			CARDS = {}
 			let pages = 1
 			let page = 0
 			let data = JSON.parse(localStorage.getItem("data")) || []
@@ -1711,7 +1741,7 @@ https://exburst.dev/gundam/deck/152946
 			}
 			for (const card of data) {
 				const id = card.card_number
-				cards[id] = new Card(
+				CARDS[id] = new Card(
 					card.card_type,
 					card.card_name,
 					card.card_ap || card.card_ap_boost,
@@ -1725,8 +1755,8 @@ https://exburst.dev/gundam/deck/152946
 					id,
 					card.card_color).toDict()
 			}
-			log("Cards: " + Object.keys(cards).length)
-			localStorage.setItem("cards", JSON.stringify(cards))
+			log("Cards: " + Object.keys(CARDS).length)
+			localStorage.setItem("cards", JSON.stringify(CARDS))
 		}
 
 		async function render() {
@@ -2282,7 +2312,7 @@ https://exburst.dev/gundam/deck/152946
 				return targets.length > 0
 			}
 			// During your turn is already checked in getSectionText
-			if (t ===  " a (Dawn of Fold) Command card using an EX Resource, draw 1.") {
+			if (t === " a (Dawn of Fold) Command card using an EX Resource, draw 1.") {
 				if (!active_card.traits.includes("Dawn of Fold") || spent.length < 1) return false
 				await p.draw()
 				return true
@@ -3204,7 +3234,7 @@ https://exburst.dev/gundam/deck/152946
 
 			if (clause === "play and activate") {
 				if (t === " an (Academy) Command card using an EX Resource, if you have no remaining EX Resources, place 1 rested EX Resource.") {
-					if (spent.length < 1 || !active_card.traits.includes("Academy") || p.resource.filter(c => inStr(c.name, "EX")). length > 0) return false
+					if (spent.length < 1 || !active_card.traits.includes("Academy") || p.resource.filter(c => inStr(c.name, "EX")).length > 0) return false
 					await p.placeEXResource()
 					return true
 				}
@@ -3374,7 +3404,7 @@ https://exburst.dev/gundam/deck/152946
 				rest(target)
 				return true
 			}
-			
+
 			// if (t === "If you have 2 or more other (Gjallarhorn)/(Tekkadan) Units in play, choose 1 enemy Unit with 3 or less HP. Rest it.") {
 			// 	if (fu.filter(c => c !== card && (c.hasTrait("Gjallarhorn") || c.hasTrait("Tekkadan"))).length < 2) return false
 			// 	target = mySort(eu.filter(c => c.HP() <= 3), c => -c.AP())[0]
@@ -4010,7 +4040,7 @@ https://exburst.dev/gundam/deck/152946
 		}
 
 		async function playGames() {
-			if (Object.keys(cards).length < 1) await loadCards()
+			if (Object.keys(CARDS).length < 1) await loadCards()
 			window.games_start = new Date()
 			while (!stop && game < games) {
 				setSpeed()
@@ -4050,7 +4080,7 @@ https://exburst.dev/gundam/deck/152946
 			let oldcid = cid
 			let count = 0
 			let results = []
-			let tosearch = Object.entries(cards)
+			let tosearch = Object.entries(CARDS)
 			let op = "AND"
 			for (let q of query.split(/ (AND|OR) /)) {
 				if (q === "AND") {
