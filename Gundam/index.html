@@ -488,6 +488,7 @@
 			let tries = 0
 			let delta = 0
 			let dl = ""
+			let changes = 0
 			do {
 				tries += 1
 				let i = rnd(0, lines.length - 1)
@@ -505,8 +506,9 @@
 				;[fulldeck, alerts, deckname] = parseDecklist(dl)
 				if (alerts.length < 1) break
 				else log(alerts)
+				changes += 1
 				delta = d
-			} while (tries < 100)
+			} while (changes < 4 && tries < 100)
 			localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 			addCustomDeck()
 			log(`Mutated ${decklist.split("\n")[0]} in ${tries} cycles: ${dl} ${alerts}`)
@@ -1410,6 +1412,23 @@ https://exburst.dev/gundam/deck/152946
 1 GD04-017 Zeong
 1 GD04-022 Kikeroga (MS Mode) (GQ)
 1 GD01-027 Big Zam`,
+			`# Roemer's deck
+2 GD01-039
+4 ST03-008
+4 GD01-035
+3 ST03-006
+4 ST03-011
+4 GD01-030
+3 GD01-092
+2 ST03-016
+4 GD01-026
+4 GD03-092
+4 GD01-031
+3 GD03-048
+2 GD01-125
+3 GD01-023
+2 GD03-035
+2 GD04-017`,
 		]
 
 		let decks = DECKS.slice()
@@ -1636,7 +1655,7 @@ https://exburst.dev/gundam/deck/152946
 				for (const k in CARDS) if (CARDS[k].name === name && inStr(CARDS[k].type, "TOKEN")) return this.getCard(k)
 			}
 
-			mill(number) {
+			mill(number = 1) {
 				const top = this.deck.slice(-number)
 				this.deck = this.deck.slice(0, -number)
 				this.trash = this.trash.concat(top)
@@ -2473,6 +2492,13 @@ https://exburst.dev/gundam/deck/152946
 				await runCard(card, "Main")
 				return true
 			}
+			if (t === "If there are 3 or less enemy Shields, deploy 1 rested [GFreD]((Zeon)･AP4･HP3) Unit token.") {
+				if (en.shield.length > 3) return false
+				target = p.getToken("GFreD")
+				target.rested = true
+				await p.deploy(target)
+				return true
+			}
 
 			// triggered
 			if (t === "if this is a blue Unit, it gains <High-Maneuver> during this turn.") {
@@ -2695,8 +2721,25 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			if (t === "④：Set this Unit as active.") {
-				if (!u.rested || !await p.pay(4, c, true, t)) return false
+				if (!u.rested || !await p.pay(4, card, true, t)) return false
 				activate(u)
+				return true
+			}
+			if (t === "①, exile 1 Pilot card from your trash: Deal 1 damage to all enemy Units.") {
+				// Guess no COMMAND with [Pilot]
+				target = p.trash.filter(c => c.type === "PILOT")[0]
+				if (!target || eu.length < 1 || !await p.pay(1, card, true, t)) return false
+				eu.forEach(async c => await dealDamage(card, c))
+				return true
+			}
+			if (t === "Discard 1 (Zeon)/(Neo Zeon) Unit card：If a Pilot is not paired with this Unit, choose 1 (Newtype) Pilot card that is Lv.3 or lower from your trash. Pair it with this Unit.") {
+				if (u.pilot) return false
+				target = p.trash.filter(c => c.type === "PILOT" && c.traits.includes("Newtype") && c.LEVEL() <= 3)[0]
+				if (!target) return false
+				targets = p.hand.filter(c => c.type === "UNIT" && (c.traits.includes("Zeon") || c.traits.includes("Neo Zeon"))).slice(0,1)
+				if (targets.length < 1) return false
+				p.discard(1, targets)
+				pair(u, target)
 				return true
 			}
 			if (t === "Exile 3 (Titans) cards from your trash: This Unit gains <Breach 4> during this turn.") {
@@ -3206,6 +3249,16 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			// When Linked
+			if (t === "Place the top card of your deck into your trash. If you placed a (Zeon)/(Clan) card with this effect, choose 1 enemy Unit. Deal 1 damage to it.") {
+				target = p.mill()[0]
+				if (target.hasTrait("Zeon") || target.hasTrait("Neo Zeon")) {
+					target = chooseDmgTarget(u, eu)
+					if (!target) return false
+					await dealDamage(u, target)
+					return true
+				}
+				return false
+			}
 			if (t === "This Unit gains <Suppression> during this turn.") {
 				// TODO: Test; why wasn't this rule marked as missing?
 				eotKw(u, "Suppression")
@@ -3362,6 +3415,13 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			// Deploy
+			if (t === "you may deploy 1 (Zeon) Unit card that is Lv.4 or lower from your hand.") {
+				if (fu.length > 5) return false
+				target = p.hand.filter(c => c.isUnit() && c.hasTrait("Zeon") && c.LEVEL <= 4)[0]
+				if (!target) return false
+				await p.deploy(target)
+				return true
+			}
 			if (t === "You may choose 1 to 2 of your other active (CB) Units. Rest them. If you do, deal damage equal to the number of Units rested with this effect to all enemy Units that are Lv.6 or lower.") {
 				targets = mySort(eu.filter(c => c.LEVEL <= 6), c => -c.HP())
 				if (targets.length < 1) return false
