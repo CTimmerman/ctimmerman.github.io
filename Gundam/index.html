@@ -461,7 +461,7 @@
 			return document.getElementById("c" + card.cid)
 		}
 
-		function activate(card, effect = false) {
+		async function activate(card, effect = false) {
 			if (card.stunned) {
 				card.stunned = false
 				return
@@ -470,7 +470,7 @@
 			if (card.pilot) card.pilot.rested = false
 			if (effect) {
 				log("🎯Activate " + card)
-				run(card, "", " is set as active by an effect, ")
+				await run(card, "", " is set as active by an effect, ")
 			}
 
 			if (delay === 0) return
@@ -1588,7 +1588,7 @@ https://exburst.dev/gundam/deck/152946
 				const c = this.shield.pop()
 				if (!c) return false
 				log(`💥Broke shield ${this.shield.length + 1}: ${c}`)
-				activate(c)
+				await activate(c)
 				await boom.play().catch(ex => { })
 				let toTrash = true
 				let t = /Burst\]([^.]+)/.exec(c.text)
@@ -2091,7 +2091,7 @@ https://exburst.dev/gundam/deck/152946
 							}
 							await render()
 							for (let i = 0; i < cost; ++i) {
-								activate(p.resource[i])
+								await activate(p.resource[i])
 							}
 						}
 						p.hand.push(c)
@@ -2186,7 +2186,7 @@ https://exburst.dev/gundam/deck/152946
 							if (kw === "During this turn, if a friendly (Superpower Bloc)/(UN) Unit destroys an enemy Unit with battle damage, choose 1 rested friendly (Superpower Bloc)/(UN) Unit. Set it as active. It can't attack during this turn." && (att.hasTrait("Superpower Bloc") || att.hasTrait("UN"))) {
 								const target = att.owner.battle.filter(c => c.rested && (c.hasTrait("Superpower Bloc") || c.hasTrait("UN")))[0]
 								if (target) {
-									activate(target)
+									await activate(target)
 									target.sick = true
 								}
 							}
@@ -2412,7 +2412,7 @@ https://exburst.dev/gundam/deck/152946
 				if (spent.length < 1 || !inStr(active_card.text, "[Pilot]")) return false
 				target = p.getPairableUnits().filter(c => inStr(c.name, "Gundam Lfrith"))[0]
 				if (!target) return false
-				pair(target, active_card)
+				await pair(target, active_card)
 				return true
 			}
 
@@ -2555,7 +2555,7 @@ https://exburst.dev/gundam/deck/152946
 				if (targets.length < parseInt(mo[1])) return false
 				let oldtrash = p.trash
 				exile(targets)
-				if (!runCard(card, "", "■")) p.trash = oldtrash
+				if (!await runCard(card, "", "■")) p.trash = oldtrash
 				return true
 			}
 
@@ -2660,7 +2660,7 @@ https://exburst.dev/gundam/deck/152946
 					rest(target)
 					return true
 				} else if (t === "Set it as active.") {
-					activate(target)
+					await activate(target)
 					return true
 				} else if (mo = t.match(/^Deal (\d+) damage to it\.$/)) {
 					const dmg = parseInt(mo[1])
@@ -2789,12 +2789,12 @@ https://exburst.dev/gundam/deck/152946
 				if (!target) return false
 				rest(u)
 				eotAP(target, support)
-				publish("When you use this Unit's <Support> to increase a (ZAFT) Unit's AP, ", p.battle)
+				await publish("When you use this Unit's <Support> to increase a (ZAFT) Unit's AP, ", p.battle)
 				return true
 			}
 			if (t === "④：Set this Unit as active.") {
 				if (!u.rested || !await p.pay(4, card, true, t)) return false
-				activate(u)
+				await activate(u)
 				return true
 			}
 			if (t === "①, exile 1 Pilot card from your trash: Deal 1 damage to all enemy Units.") {
@@ -2811,7 +2811,7 @@ https://exburst.dev/gundam/deck/152946
 				targets = p.hand.filter(c => c.type === "UNIT" && (c.traits.includes("Zeon") || c.traits.includes("Neo Zeon"))).slice(0,1)
 				if (targets.length < 1) return false
 				await p.discard(1, targets)
-				pair(u, target)
+				await pair(u, target)
 				return true
 			}
 			if (t === "Exile 3 (Titans) cards from your trash: This Unit gains <Breach 4> during this turn.") {
@@ -2849,12 +2849,12 @@ https://exburst.dev/gundam/deck/152946
 				if (targets.length < 3) return false
 				exile(targets)
 				eotKw(u, "must_attack_unit")
-				activate(u)
+				await activate(u)
 				return true
 			}
 			if (t === "set it as active. It can't choose the same enemy player or enemy team as its attack target during this turn.") {
 				eotKw(u, "must_attack_unit")
-				activate(u)
+				await activate(u)
 				return true
 			}
 			if (t === `②, return this Unit to the bottom of its owner's deck：Choose 1 Unit card with "Impulse Gundam" in its card name that is Lv.4 or higher from your trash. Deploy it.`) {
@@ -3011,7 +3011,7 @@ https://exburst.dev/gundam/deck/152946
 			if (t === "②：Choose 1 friendly Unit with <Blocker>. Set it as active. It can't attack during this turn.") {
 				target = fu.filter(c => c.rested && c.hasTrait("Blocker"))[0]
 				if (!target || !await p.pay(2, u, true, t)) return false
-				activate(target, true)
+				await activate(target, true)
 				target.sick = true
 				return true
 			}
@@ -3081,7 +3081,7 @@ https://exburst.dev/gundam/deck/152946
 			if (t === "Choose 1 of your Resources. Set it as active.") {
 				for (const c of p.resource) {
 					if (c.rested) {
-						activate(c, true)
+						await activate(c, true)
 						return true
 					}
 				}
@@ -3194,7 +3194,7 @@ https://exburst.dev/gundam/deck/152946
 				if (!target2) return false
 				exile(target)
 				exile(target2)
-				activate(u)
+				await activate(u)
 				u.sick = true
 				return true
 			}
@@ -3242,7 +3242,7 @@ https://exburst.dev/gundam/deck/152946
 				if (!mine) return false
 				if (!await p.pay(1, u, true, t)) return false
 				rest(mine)
-				dealDamage(u, target)
+				await dealDamage(u, target)
 				return true
 			}
 			if (t === "Choose 1 of your other Units. Deal 1 damage to it. It gets AP+1 during this turn.") {
@@ -3307,7 +3307,7 @@ https://exburst.dev/gundam/deck/152946
 			}
 			if (t === "choose 1 of your Resources. Set it as active.") {
 				targets = p.resource.filter(c => c.rested)
-				if (targets.length > 0) activate(targets[0], true)
+				if (targets.length > 0) await activate(targets[0], true)
 				return true
 			}
 			if (inStr(t, "Deploy 1 [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.")) {
@@ -3432,7 +3432,7 @@ https://exburst.dev/gundam/deck/152946
 			// At the end of the turn
 			if (t === "when this Unit is paired with a Pilot, set it as active.") {
 				if (!u.pilot || !u.rested) return false
-				activate(u, true)
+				await activate(u, true)
 				return true
 			}
 			// Attack trigger
@@ -3835,12 +3835,12 @@ https://exburst.dev/gundam/deck/152946
 				let yes = false
 				// Start phase
 				// Active Step
-				if (p.base !== null) activate(p.base)
+				if (p.base !== null) await activate(p.base)
 				for (const c of p.resource) {
-					if (c.rested) activate(c)
+					if (c.rested) await activate(c)
 				}
 				for (const c of p.battle) {
-					if (c.rested) activate(c)
+					if (c.rested) await activate(c)
 					c.sick = false
 				}
 				await sleep(1000)
@@ -3957,7 +3957,7 @@ https://exburst.dev/gundam/deck/152946
 									}
 									await render()
 									for (let i = 0; i < cost; ++i) {
-										activate(p.resource[i])
+										await activate(p.resource[i])
 									}
 								}
 								spent = []
