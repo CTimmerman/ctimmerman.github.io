@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-12</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-21</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -34,6 +34,10 @@
 
 		button:disabled {
 			opacity: 75%;
+		}
+
+		input[type=checkbox] {
+			vertical-align: middle;
 		}
 
 		input[type=range] {
@@ -87,6 +91,16 @@
 			scrollbar-width: thin;
 			background-color: #08080888;
 			border: 1px solid grey;
+		}
+
+		#dtimeleft {
+			background-color: #08080888;
+			border: 4px solid yellow;
+			display: none;
+			padding: 5px;
+			position: absolute;
+			top: 47vmin;
+			left: 40vmin;
 		}
 
 		#overlay {
@@ -195,6 +209,10 @@
 			background-color: white !important;
 		}
 
+		.glow {
+			border: 4px solid yellow !important;
+		}
+
 		.rested {
 			transform: rotate(90deg);
 			margin-top: -1.4vmin;
@@ -238,9 +256,11 @@
 		<div>
 			<label for="p1deck">P1 deck</label>
 			<select id="p1deck" value="-1"></select>
+			<input id="p1ai" type="checkbox" checked="checked"><label for="p1ai">AI</label>
 			<br>
 			<label for="p2deck">P2 deck</label>
-			<select id="p2deck" value="0"></select>
+			<select id="p2deck" value="-1"></select>
+			<input id="p2ai" type="checkbox" checked="checked"><label for="p2ai">AI</label>
 			<br>
 			<label for="deckOrder">Decklist order</label>
 			<select id="deckOrder" value="TLCN">
@@ -251,6 +271,7 @@
 		</div><br>
 		<div><button onclick="mutateDeck()">Save P1 mutant</button> <button onclick="dlog.innerHTML=''">Clear log</button></div>
 	</div>
+	<div id="dtimeleft" onclick="chosen = false"></div>
 	<script>
 		"use strict"
 		const BANLIST = ["GD01-020"]
@@ -296,6 +317,39 @@
 		// Why doesn't upstream list EXR promos like other promos?
 		// "EXR-001_PR", "EXR-001_PR2", "EXR-001_PR3", "EXR-001_PR4", "EXR-001_PR5"
 		const EX_RESOURCES = ["EXR-001", "EXRP-001", "EXRP-002"]
+		let chosen = null
+
+		/** TODO: top of deck */
+		async function chooseCard(targets) {
+			chosen = null
+			if (targets.length < 1) return null
+			await render()
+			targets.forEach(c => getel(c).classList.add("glow"))
+			let time_left = 60
+			while (chosen === null) {
+				await sleep(1000)
+				time_left -= 1
+				dtimeleft.innerHTML = "⏳" + time_left + "s [Skip]"
+				dtimeleft.style.display = "block"
+				if (time_left <= 0) break
+			}
+			dtimeleft.style.display = "none"
+			targets.forEach(c => getel(c).classList.remove("glow"))
+			if (!chosen) return null
+			const cid = parseInt(chosen.slice(1))
+			chosen = cid2card(cid)
+			// log(`🎯Chose ${chosen}`)
+			return chosen
+		}
+
+		function cid2card(cid) {
+			let rv = null
+			for (let arr of [p1.battle, p2.battle, p1.hand, p2.hand, [p1.base], [p2.base], p1.trash, p2.trash]) {
+				rv = arr.filter(c => c && c.cid === cid)[0]
+				if (rv) break
+			}
+			return rv
+		}
 
 		function countStr(body, str) {
 			if (!body) return 0
@@ -489,9 +543,12 @@
 			let delta = 0
 			let dl = ""
 			let changes = 0
+			let lastline = -1
 			do {
 				tries += 1
 				let i = rnd(0, lines.length - 1)
+				if (i === lastline) continue
+				lastline = i
 				if (lines[i].indexOf("# ") === 0) continue
 				let [count, id] = lines[i].split(" ")
 				count = parseInt(count)
@@ -622,8 +679,8 @@
 				}
 			}
 			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
-			<textarea style="top: 70vmin; left: 60vmin; width: 30vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
-<textarea id="tadecklist" style="top: 70vmin; left: 5vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea></div>`
+			<textarea id="tastats" style="top: 70vmin; left: 60vmin; width: 30vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
+<textarea id="tadecklist" style="top: 70vmin; left: 5vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 5vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
 		}
 
 		function zoom(e) {
@@ -929,7 +986,7 @@
 
 				if (raw) return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color});background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp); font-size: 1vmin; text-shadow: #000 0 0 1px" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://kaiofcards.com/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.level} ${this.id}<br>${this.cost}<div style="font-size:0.5vmin"><b>${escapeHTML(this.name)}</b><br>${this.traits}<br>${escapeHTML(this.text).replaceAll("\n", "<br>")}</div>${this.link.length > 1 ? this.link : ""} ${this.ap || this.hp ? "" + this.ap + " " + this.hp : ""}</div>`
 
-				return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color}); background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick='zoom(this)'><div class="pricecheck" onclick="window.open(\`https://kaiofcards.com/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${(this.AP() !== 0 || this.HP() !== 0) ? this.AP() + "/" + this.HP() : ""}</div>`
+				return `<div id="c${this.cid}" class="card${this.rested ? " rested" : ""}${facedown ? " facedown" : ""}${this.type === "RESOURCE" ? " resource" : ""}" style="z-index:${z}; left:${left}vmin; top:${top}vmin; border-color:var(--${this.color}); background-color:var(--${this.color}); background-image:url(https://exburst.dev/gundam/cards/sd/${id}.webp);" onclick="zoom(this)" oncontextmenu="if (this.classList.contains('glow')) { event.preventDefault(); chosen = this.id; }"><div class="pricecheck" onclick="window.open(\`https://kaiofcards.com/search?q=${escapeHTML(encodeURIComponent(this.name))}\`, '_blank'); event.stopPropagation();"></div>${this.cid} ${this.damage ? '<div style="color: red">' + this.damage + " DMG</div>" : ""} ${this.sick ? '<div style="color: red">not ready</div>' : ""}${(this.AP() !== 0 || this.HP() !== 0) ? this.AP() + "/" + this.HP() : ""}</div>`
 			}
 
 			isUnit() {
@@ -1435,22 +1492,28 @@ https://exburst.dev/gundam/deck/152946
 
 		function addCustomDeck() {
 			decks = DECKS.slice()
+			let p1v = p1deck.value || -1
+			let p2v = p2deck.value || -1
 			let mutantDeck = localStorage.getItem("mutantDeck")
 			if (mutantDeck) decks.push(mutantDeck)
-			let customDeck = localStorage.getItem("customDeck")
-			if (customDeck) decks.push(customDeck)
+			for (let slot of ["", "2"]) {
+				let customDeck = localStorage.getItem("customDeck" + slot)
+				if (customDeck) decks.push(customDeck)
+			}
 			let deck_options = `<option value="-1">Random</option>`
 			for (let i = 0; i < decks.length; ++i) {
 				deck_options += `<option value="${i}">${decks[i].split("\n")[0].slice(2)}</option>`
 			}
 			p1deck.innerHTML = deck_options
+			p1deck.value = p1v
 			p2deck.innerHTML = deck_options
+			p2deck.value = p2v
 		}
 		addCustomDeck()
 
-		function saveCustomDeck(deck) {
-			if (!confirm("Save as your custom deck?")) return
-			localStorage.setItem("customDeck", "# Custom deck\n" + deck)
+		function saveCustomDeck(deck, slot = "") {
+			if (!confirm(`Save as your custom${slot} deck?`)) return
+			localStorage.setItem("customDeck" + slot, `# Custom deck ${slot}\n` + deck)
 			addCustomDeck()
 		}
 
@@ -1585,11 +1648,12 @@ https://exburst.dev/gundam/deck/152946
 				}
 			}
 
-			discard(number = 1, targets = null) {
+			async discard(number = 1, targets = null) {
 				number = parseInt(number)
 				if (targets) number = targets.length
+				let ai = (active_player === p1 ? p1ai.checked : p2ai.checked)
 				for (let i = 0; i < number; ++i) {
-					const c = (targets && targets[i]) || this.hand[Math.floor(Math.random() * this.hand.length)]
+					const c = (targets && targets[i]) || ai && this.hand[Math.floor(Math.random() * this.hand.length)] || !ai && await chooseCard(this.hand)
 					if (!c) return
 					log("🗑️" + this.name + " discard " + c)
 					this.hand = this.hand.filter(item => item !== c)
@@ -1979,6 +2043,7 @@ https://exburst.dev/gundam/deck/152946
 			await render()
 			let p = active_player
 			let pass = 0
+			let ai = (p === p1 ? p1ai.checked : p2ai.checked)
 			while (pass < 2) {
 				p = (p === p1 ? p2 : p1)
 				let level = p.resource.length
@@ -1987,13 +2052,14 @@ https://exburst.dev/gundam/deck/152946
 				shuffle(targets)
 				for (const c of targets) {
 					if (!c) continue
+					let t = c.text + (c.pilot ? c.pilot.text : "")
 					let cost = c.COST()
 					let refund = false
 					if (c.type === "COMMAND") {
 						if (c.LEVEL() > level || cost > level) continue
 						if (await p.pay(cost, c, false)) {
 							p.hand = p.hand.filter(item => item !== c)
-							if (await run(c, "Action")) {
+							if (inStr(t, "Action") && (ai || confirm(`Action ${c}?`)) && await run(c, "Action")) {
 								ran = true
 								trash(c)
 								await render()
@@ -2006,7 +2072,13 @@ https://exburst.dev/gundam/deck/152946
 							}
 						}
 					} else {
-						await run(c, "Activate･Action")
+						if (inStr(t, "Activate･Action")) {
+							if (ai) await run(c, "Activate･Action")
+							else {
+								c = await chooseCard([c])
+								if (c) await run(c, "Activate･Action")
+							}
+						}
 					}
 					if (refund) {
 						// No useful target, so don't play this and roll back payment.
@@ -2738,7 +2810,7 @@ https://exburst.dev/gundam/deck/152946
 				if (!target) return false
 				targets = p.hand.filter(c => c.type === "UNIT" && (c.traits.includes("Zeon") || c.traits.includes("Neo Zeon"))).slice(0,1)
 				if (targets.length < 1) return false
-				p.discard(1, targets)
+				await p.discard(1, targets)
 				pair(u, target)
 				return true
 			}
@@ -2995,7 +3067,7 @@ https://exburst.dev/gundam/deck/152946
 			}
 			if (mo = t.match(/^[Dd]raw (\d). Then, discard (\d).$/)) {
 				await p.draw(mo[1])
-				p.discard(mo[2])
+				await p.discard(mo[2])
 				return true
 			}
 			if (t.slice(1) === "lace 1 EX Resource.") {
@@ -3533,7 +3605,7 @@ https://exburst.dev/gundam/deck/152946
 				// TODO: 3+ players
 				if (p.hand.length < 1) return false
 				await p.draw()
-				p.discard(1)
+				await p.discard(1)
 				return true
 			}
 			if (t === "Place the top 2 cards of your deck into your trash. If you place a (CB) card with this effect, draw 1.") {
@@ -3760,6 +3832,7 @@ https://exburst.dev/gundam/deck/152946
 			while (true) {
 				turn += 1
 				active_player = p
+				let yes = false
 				// Start phase
 				// Active Step
 				if (p.base !== null) activate(p.base)
@@ -3774,11 +3847,11 @@ https://exburst.dev/gundam/deck/152946
 				log("")
 				// Start Step
 				// Effects that specify “at the start of the turn” activate.
-				// During
-				for (const c of p1.battle.concat(p2.battle)) {
+				// None of those exist yet.
+				//for (const c of p1.battle.concat(p2.battle)) {
 					// await run(c, "During Pair")
 					// await run(c, "During Link")
-				}
+				//}
 
 				// Draw phase
 				try {
@@ -3795,23 +3868,42 @@ https://exburst.dev/gundam/deck/152946
 					await render()
 					await sleep(1500)
 				}
+				let ai = (p === p1 ? p1ai.checked : p2ai.checked)
 				let level = p.resource.length
 				log("📈Turn " + turn + " " + p.name + " level " + level)
 				// Main phase
 				let considered = []
 				while (true) {
+					level = p.resource.length
+					let res = p.resource.filter(bc => !bc.rested).length || 0
+
 					let to_play = mySort(p.hand.filter(c => !considered.includes(c)), c => ["BASE", "UNIT", "PILOT", "COMMAND"].indexOf(c.type) * 10 + c.COST())
 					if (to_play.length < 1) break
-					const c = to_play[0]
+					let c = to_play[0]
+					if (!ai) {
+						c = await chooseCard(p.hand.filter(c => c.LEVEL() <= level && c.COST() <= res))
+						if (!c) break
+					}
 					considered.push(c)
-					// if (!p.canUse(c)) continue // only goes for link
-					let cost = c.COST()
-					if (c.LEVEL() > level || cost > level) continue
-					// already have a base
-					if (c.type === "BASE" && p.base !== null) continue
-					// max 6 units
-					if (c.type === "UNIT" && p.battle.length >= 6) continue
 
+					// if (!p.canUse(c)) continue // only goes for link
+					let clevel = c.LEVEL()
+					let cost = c.COST()
+					if (inStr(c.text, "When playing this card from your hand, you may discard 1 (G Generation) Unit card. If you do, play this card as if it has 2 Lv. and cost.")) {
+						let target = p.hand.filter(c2 => c2 !== c && c2.type === "UNIT" && c.hasTrait("G Generation"))[0]
+						if (target && (ai || confirm(`Discard ${target} to play ${c} for 2?`))) {
+							await p.discard(1, [target])
+							clevel = 2
+							cost = 2
+						}
+					}
+					if (clevel > level || cost > level) continue
+					if (ai) {
+						// already have a base
+						if (c.type === "BASE" && p.base !== null) continue
+						// max 6 units
+						if (c.type === "UNIT" && p.battle.length >= 6) continue
+					}
 					let empty_units = p.getPairableUnits()
 					let doPair = false
 					if (empty_units.length < 1 && c.type === "PILOT") continue
@@ -3824,10 +3916,11 @@ https://exburst.dev/gundam/deck/152946
 						}
 					}
 					// log(`🤔Considering ${c.type} #${c.cid} ${c.id} ${c.name}`)
-					let free_res_count = p.resource.filter(bc => bc.type.indexOf("EX") < 0).length || 0
-					let ex_res_count = p.resource.filter(bc => inStr(bc.type, "EX")).length || 0
 					// ensure cards have HTML elements
 					await render()
+					if (!ai) {
+						if (doPair && c.type === "COMMAND") doPair = confirm(`Pair ${c}?`)
+					}
 					if (await p.pay(cost, c, false)) {
 						// Remove card from hand
 						p.hand = p.hand.filter(item => item !== c)
@@ -3835,10 +3928,7 @@ https://exburst.dev/gundam/deck/152946
 						if (c.type === "COMMAND") {
 							// Do pilot part of command 2/3 of the time.
 							if ((!doPair || !inStr(c.text, "[Pilot]") || rnd(1, 3) > 2) && await run(c)) {
-								if (inStr(c.text, "When playing this card from your hand, you may discard 1 (G Generation) Unit card. If you do, play this card as if it has 2 Lv. and cost.")) {
-									let target = p.hand.filter(c2 => c2 !== c && c2.type === "UNIT" && c.hasTrait("G Generation"))[0]
-									if (target) p.discard(1, [target])
-								}
+								// Command
 								trash(c)
 								await render()
 								await p.paid(cost, c)  // TODO: Paid before activate events?
@@ -3848,8 +3938,11 @@ https://exburst.dev/gundam/deck/152946
 								active_card = null
 								continue
 							} else {
+								// [Pilot]
 								if (doPair) {
-									await pair(empty_units[0], c)
+									let unit = empty_units[0]
+									if (!ai) unit = await chooseCard(empty_units)
+									await pair(unit, c)
 									await render()
 									await p.paid(cost, c)
 									continue
@@ -3889,9 +3982,12 @@ https://exburst.dev/gundam/deck/152946
 						await sleep(800)
 					}
 				}
-
-				await run(p.base, "Activate･Main")
-				for (const c of p.battle) await run(c, "Activate･Main")
+				yes = p.base && inStr(p.base.text, "Activate･Main") && (ai || await chooseCard([p.base]))
+				if (yes) await run(p.base, "Activate･Main")
+				for (const c of p.battle) {
+					yes = inStr(c.text + (c.pilot ? c.pilot.text : ""), "Activate･Main") && (ai || await chooseCard([c]))
+					if (yes) await run(c, "Activate･Main")
+				}
 
 				// Attack Step
 				considered = []
@@ -3900,7 +3996,7 @@ https://exburst.dev/gundam/deck/152946
 					if (can_attack.length < 1) break
 					const att = can_attack[0]
 					considered.push(att)
-					if (att.AP() < 1) continue
+					if (ai && att.AP() < 1) continue
 
 					enemy = p === p1 ? p2 : p1
 					// Battle Area
@@ -3959,7 +4055,8 @@ https://exburst.dev/gundam/deck/152946
 							if (!must_attack_unit && enemy.shield.length + !!enemy.base < 1) attack_unit = false
 
 							if (attack_unit) {
-								await attackStep(att, def)
+								yes = ai || await chooseCard([def])
+								if (yes) await attackStep(att, def)
 								continue
 							}
 						}
@@ -3979,13 +4076,15 @@ https://exburst.dev/gundam/deck/152946
 							log(`🛡️${enemy.base} would take no battle damage from ${att}`)
 							continue
 						}
-						await attackStep(att, enemy.base)
+						yes = ai || await chooseCard([enemy.base])
+						if (yes) await attackStep(att, enemy.base)
 					} else {
 						if (enemy.shield.length > 0 && enemy.shield.slice(-1)[0].hasKw("protection.enemy.units")) {
 							log("🛡️" + enemy.name + " shield protected from enemy units")
 							continue
 						}
-						await attackStep(att)
+						yes = ai || await chooseCard([att])
+						if (yes) await attackStep(att)
 					}
 
 					// Battle End
@@ -4007,7 +4106,7 @@ https://exburst.dev/gundam/deck/152946
 
 				// End phase
 				await actionStep()
-				while (p.hand.length > 10) p.discard()
+				while (p.hand.length > 10) await p.discard()
 				for (const c of p1.battle.concat(p2.battle)) {
 					await run(c, "", "At the end of the turn ")
 					if (c.damage > 0) {
@@ -4114,7 +4213,7 @@ https://exburst.dev/gundam/deck/152946
 					delay = 1
 					await render()
 					if (games <= 10) await sleep(3000)
-					else await sleep(350)
+					else await sleep(100)
 				}
 			}
 			stop = false
