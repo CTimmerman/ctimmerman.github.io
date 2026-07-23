@@ -245,13 +245,13 @@
 			<input id="volume" type="range" value="0.1" min="0" max="1" step="0.1" onchange="setVolume()" /><br>
 		</div>
 		<div>
-			<button id="bstop" onclick="stop = true; setGameOver(true); log(`⛔Stop by user input`)">Stop</button>
-			<button id="bstart" disabled="true"
-				onclick="if (game_over) { setTimeout(playGames, 0) } else alert('Game in progress')">Start</button>
 			<label for="ngames">Games</label> <input id="ngames" type="number" value="1" min="1" max="9999"
 				style="width: 45px;" onchange="games = this.value" oninput="clamp(this)" />
 			<label for="ndelay">Speed</label> <input id="ndelay" type="number" value="50" min="0" max="100"
 				style="width: 40px;" onchange="setSpeed()" oninput="clamp(this)" />%
+			<button id="bstop" onclick="stop = true; setGameOver(true); log(`⛔Stop by user input`)">Stop</button>
+			<button id="bstart" disabled="true"
+				onclick="if (game_over) { setTimeout(playGames, 0) } else alert('Game in progress')">Start</button>
 		</div><br>
 		<div>
 			<label for="p1deck">P1 deck</label>
@@ -530,6 +530,7 @@
 			overlay.style.display = "none"
 		}
 
+		/** TODO: +20% W over 100 games should suffice */
 		function mutateDeck(decklist = "") {
 			let old_delay = delay
 			delay = 1
@@ -660,6 +661,7 @@
 
 				const keys = ["Type " + c.type, "Color " + c.color, "Lv. " + c.level, "Cost " + c.cost, "AP " + c.ap, "HP " + c.hp]
 				for (const trait of c.traits) keys.push("Trait " + trait)
+				for (const link of c.link.split(" / ")) keys.push("Link " + link)
 				for (let k of keys) counts[k] = 1 + (counts[k] || 0)
 
 				sumCost += c.cost
@@ -1318,9 +1320,10 @@ https://exburst.dev/gundam/deck/152946
 4 GD04-021 Gundam Lfrith Thorn
 3 GD04-018 Gundam Pharact
 4 GD04-024 Gundam Aerial Rebuild`,
-			`# Cees's CB deck (G)
+			`# Cees's CB deck (RG)
 4 GD03-125 Peacemillion
-3 ST07-012 Allelujah Haptism
+2 ST07-012 Allelujah Haptism*
+1 GD04-090 Hallelujah Haptism*
 3 ST07-011 Lockon Stratos (Neil)
 4 ST07-008 Gundam Kyrios (Flight Mode)
 4 GD03-028 Auda's Maganac
@@ -1332,9 +1335,11 @@ https://exburst.dev/gundam/deck/152946
 2 ST07-005 Gundam Dynames
 4 GD03-026 Gundam Dynames
 4 ST02-003 Gundam Heavyarms
-2 GD04-023 Gundam Kyrios (Tail Booster)
+0 GD04-023 Gundam Kyrios (Tail Booster)
+2 GD04-046 Gundam Dynames
 4 GD04-019 GN Armor Type-D (Trans-Am)
-1 GD03-029 Gundam Heavyarms Custom`,
+0 GD03-029 Gundam Heavyarms Custom
+1 GD04-037 Gundam Kyrios (Trans-Am)`,
 			`# Cees's Minerva deck (PR)
 4 ST09-010 Minerva
 2 ST04-016 Vesalius
@@ -1355,25 +1360,29 @@ https://exburst.dev/gundam/deck/152946
 2 ST09-002 Force Impulse Gundam
 2 GD04-050 Destiny Gundam`,
 			`# Cees's Red CB deck (PR)
-3 GD04-126 Izuma Colony
+0 GD04-126 Izuma Colony
 4 ST07-015 Ptolemaios
-2 GD04-125 Trinity Warship
-3 GD01-111 Battle of Aces
-2 ST07-013 Armed Intervention
-1 GD04-111 Trinity
-2 GD04-090 Hallelujah Haptism
+4 GD04-125 Trinity Warship
+0 GD01-111 Battle of Aces
+0 GD04-089 Nena Trinity
+1 GD04-092 Michael Trinity
+0 GD04-111 Trinity
 3 ST07-009 Setsuna F. Seiei
 3 ST07-010 Tieria Erde
 4 GD03-063 0 Gundam
-2 GD04-047 Gundam Virtue
+0 GD04-064 Gundam Exia
+4 GD04-047 Gundam Virtue
+3 GD04-038 Gundam Exia
 3 ST07-004 Gundam Virtue
+0 GD04-063 GN Armor Type-E
 4 ST07-002 Gundam Exia
-2 GD04-045 Gundam Throne Zwei
-2 GD04-041 Gundam Throne Drei
+2 GD04-057 Gundam Nadleeh
+4 GD04-045 Gundam Throne Zwei
+3 GD04-041 Gundam Throne Drei
 4 ST07-003 Gundam Virtue
-3 GD04-046 Gundam Dynames
 2 ST07-001 Gundam Exia
-1 GD04-036 Gundam Throne Eins`,
+2 GD04-036 Gundam Throne Eins
+0 GD04-054 Gundam Virtue (Trans-Am)`,
 			`# Cees's Red ZAFT deck (R)
 4 GD03-127 Jachin Due
 4 ST04-011 Athrun Zala
@@ -1427,9 +1436,9 @@ https://exburst.dev/gundam/deck/152946
 2 GD03-055 Gundam Hajiroboshi (2nd Form)
 1 GD04-056 Sword Impulse Gundam
 1 GD03-066 Gundam Barbatos 5th Form (Ground Type)
-1 GD04-055 Heine's Gouf Ignited
+0 GD04-055 Heine's Gouf Ignited
 2 GD04-051 Gundam Airmaster Burst
-2 GD04-052 Gundam Leopard Destroy
+3 GD04-052 Gundam Leopard Destroy
 2 GD04-049 Gundam DX`,
 			`# Cees's White deck (W)
 4 GD03-132 Radish
@@ -2256,8 +2265,8 @@ https://exburst.dev/gundam/deck/152946
 
 		function getSectionText(card, act = "Main", clause = "", limit = true) {
 			// debug card
-			// if (card.id === "GD04-087" && act == "Attack") {
-			// 	log("FIXME: DEBUG " + act + " " + clause + " " + card)
+			// if (card.id === "GD04-036" && act == "Deploy") {
+			//  	log("FIXME: DEBUG " + act + " " + clause + " " + card)
 			// }
 			let mo = null
 			const rex = new RegExp("(.*?)" + (clause ? clause : ("\\[([^\\]]*?)" + act + "([^\\]]*?)\\]")) + "([^.].+?)(?:\n|$)")
@@ -2483,6 +2492,10 @@ https://exburst.dev/gundam/deck/152946
 				if (!target) return false
 				t = t.slice(mo[0].length)
 			}
+			if (mo = t.match(/^If 2 or more enemy Units are in play, /)) {
+				if (eu.length < 2) return false
+				t = t.slice(mo[0].length)
+			}
 
 			if (t === "this gains <First Strike> during this turn.") {
 				// Only hit is ST06-001 and When Linked is mandatory.
@@ -2626,6 +2639,12 @@ https://exburst.dev/gundam/deck/152946
 					if (!target) return false
 					t = t.slice(mo[0].length)
 				}
+				if (mo = t.match(/^Choose 1 enemy Unit that is Lv.1 or lower or has 1 or less AP. /)) {
+					targets = eu.filter(c => c.LEVEL() <= 1 || c.AP() <= 1)
+					target = targets[0]
+					if (!target) return false
+					t = t.slice(mo[0].length)
+				}
 				if (mo = t.match(/^Choose 1 enemy Unit with no paired Pilot. /)) {
 					targets = eu.filter(c => !c.pilot)
 					target = targets[0]
@@ -2693,6 +2712,10 @@ https://exburst.dev/gundam/deck/152946
 					return true
 				}
 				// Deploy
+				if (t === "During this turn, reduce its AP by an amount equal to the number of Unit cards with \"Gundam Virtue\" in their card names in your trash.") {
+					target.ap_eot -= p.trash.filter(c => inStr(c.name, "Gundam Virtue")).length
+					return true
+				}
 				if (t === "Choose 1 of your Units paired with a (Super Soldier) Pilot. During this turn, it may choose an active enemy Unit that is Lv.4 or lower as its attack target.") {
 					target = fu.filter(c => c.pilot && c.pilot.hasTrait("Super Soldier"))[0]
 					if (!target) return false
@@ -2745,6 +2768,12 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			// battle damage trigger
+			if (t === " to an enemy Unit, destroy that enemy Unit.") {
+				target = (u === defender ? attacker : defender)
+				if (eu.includes(target)) return false
+				await destroy(target)
+				return true
+			}
 			mo = t.match(/^ to an enemy Unit that is Lv.(\d) or lower, /)
 			if (mo) {
 				target = (u === defender ? attacker : defender)
@@ -2825,9 +2854,9 @@ https://exburst.dev/gundam/deck/152946
 			// Base
 			if (t === "Rest 1 of your (Earth Federation) Units：Choose 1 enemy Unit that is Lv.3 or lower. Rest it.") {
 				if (myturn && fua.length < 2) return false
-				target = eu.filter(c => c.LEVEL <= 3 && !c.rested)[0]
+				target = eu.filter(c => c.LEVEL() <= 3 && !c.rested)[0]
 				if (!target) return false
-				target2 = fu.filter(c => !c.rested && c.hasTrait("Earth Federation"))[0]
+				let target2 = fu.filter(c => !c.rested && c.hasTrait("Earth Federation"))[0]
 				if (!target2) return false
 				rest(target2)
 				rest(target)
@@ -3489,13 +3518,13 @@ https://exburst.dev/gundam/deck/152946
 			// Deploy
 			if (t === "you may deploy 1 (Zeon) Unit card that is Lv.4 or lower from your hand.") {
 				if (fu.length > 5) return false
-				target = p.hand.filter(c => c.isUnit() && c.hasTrait("Zeon") && c.LEVEL <= 4)[0]
+				target = p.hand.filter(c => c.isUnit() && c.hasTrait("Zeon") && c.LEVEL() <= 4)[0]
 				if (!target) return false
 				await p.deploy(target)
 				return true
 			}
 			if (t === "You may choose 1 to 2 of your other active (CB) Units. Rest them. If you do, deal damage equal to the number of Units rested with this effect to all enemy Units that are Lv.6 or lower.") {
-				targets = mySort(eu.filter(c => c.LEVEL <= 6), c => -c.HP())
+				targets = mySort(eu.filter(c => c.LEVEL() <= 6), c => -c.HP())
 				if (targets.length < 1) return false
 				const maxDamage = targets[0].HP()
 				const mine = fu.filter(c => c !== u && !c.rested && c.hasTrait("CB")).slice(0, maxDamage < 2 ? 1 : 2)
@@ -3517,10 +3546,11 @@ https://exburst.dev/gundam/deck/152946
 				rest(target)
 				return true
 			}
-			if (inStr(t, "Choose 1 damaged enemy Unit. Deal 3 damage to it.")) {
-				target = chooseDmgTarget(u, eu.filter(c => c.damage > 0), 3)
+			if (mo = t.match(/Choose 1 damaged enemy Unit. Deal (\d) damage to it./)) {
+				let amount = parseInt(mo[1])
+				target = chooseDmgTarget(u, eu.filter(c => c.damage > 0), amount)
 				if (!target) return false
-				return await dealDamage(card, target, 3)
+				return await dealDamage(card, target, amount)
 			}
 			if (mo = t.match(/^Choose 1 enemy Unit with (\d) or less HP. Rest it.$/)) {
 				target = mySort(eu.filter(c => c.HP() <= mo[1] && !c.rested), c => -c.AP())[0]
@@ -4031,10 +4061,11 @@ https://exburst.dev/gundam/deck/152946
 							const dhp = def.HP() + def.hp_eob + def.hp_eot
 							const afs = att.hasKw("First Strike")
 							const dfs = def.hasKw("First Strike")
-							const first_strike = afs && !dfs
 							// TODO: consider effect damage & (de)buffs
-							let we_die = ahp <= dap && !(afs && !dfs && aap >= dhp)
-							let they_die = dhp <= aap && !(dfs && !afs && dap >= ahp)
+							let we_die = ahp <= dap || def.text === "When this Unit deals battle damage to an enemy Unit, destroy that enemy Unit."
+							let they_die = dhp <= aap || att.text === "When this Unit deals battle damage to an enemy Unit, destroy that enemy Unit."
+							if (afs && !dfs && they_die) we_die = false
+							if (dfs && !afs && we_die) they_die = false
 
 							// Free kill helps a little, even with Suppression: 5012 vs 4987. TODO: Limit to breach?
 							const free_kill = they_die && !we_die
@@ -4168,11 +4199,19 @@ https://exburst.dev/gundam/deck/152946
 			log(`🏁Game ${game}/${games} end: ${new Date().toISOString().replace('T', ' ')} in ${Math.round((new Date() - game_start) / 1000)}s`)
 		}
 
+		/** Sort function for win stats */
 		function sortWDL(a, b) {
+			let winrate_a = a[0] / (a[0] + a[1] + a[2])
+			let winrate_b = b[0] / (b[0] + b[1] + b[2])
+			if (winrate_a > winrate_b) return -1
+			if (winrate_a < winrate_b) return 1
+			// W
 			if (a[0] > b[0]) return -1
 			if (a[0] < b[0]) return 1
+			// D
 			if (a[1] > b[1]) return -1
 			if (a[1] < b[1]) return 1
+			// L
 			if (a[2] > b[2]) return 1
 			if (a[2] < b[2]) return -1
 			return 0
@@ -4188,11 +4227,11 @@ https://exburst.dev/gundam/deck/152946
 			const m = Number((new Date() - games_start) / 60000)
 			let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${(m / game * 60).toFixed(2) + "s/game"}`
 			if (game < games) msg += "; " + ((games - game) * m / game).toFixed(2) + "m left"
-			msg += `<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]}<br>\nDecks ranked by W/D/L:`
+			msg += `<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]}<br>\nDecks ranked by W% W/D/L:`
 			const stats = Object.entries(deck_stats).sort(sortStats)
 			for (let i = 0; i < stats.length; ++i) {
 				const [name, s] = stats[i]
-				msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${s} ${(s[0] / (s[0] + s[1] + s[2]) * 100).toFixed(0)}%`
+				msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${(s[0] / (s[0] + s[1] + s[2]) * 100).toFixed(0)}% ${s}`
 			}
 			log(msg)
 			setSpeed()
