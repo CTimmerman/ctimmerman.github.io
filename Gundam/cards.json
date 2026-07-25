@@ -1606,14 +1606,12 @@
         "hp": 3,
         "id": "EXB-001",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "EX Base",
         "text": "(At the start of the game, place 1 active EX Base into your shield area.)",
         "traits": [],
         "type": "EX BASE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "EXBP-001": {
         "ap": 0,
@@ -1622,14 +1620,12 @@
         "hp": 3,
         "id": "EXBP-001",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "EX Base",
         "text": "(At the start of the game, place 1 active EX Base as your shield area's base.)",
         "traits": [],
         "type": "EX BASE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "EXBP-002": {
         "ap": 0,
@@ -1638,14 +1634,12 @@
         "hp": 3,
         "id": "EXBP-002",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "EX Base",
         "text": "(At the start of the game, place 1 active EX Base as your shield area's base.)",
         "traits": [],
         "type": "EX BASE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "EXR-001": {
         "ap": 0,
@@ -1654,14 +1648,12 @@
         "hp": 0,
         "id": "EXR-001",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "EX Resource",
         "text": "(At the start of the game, the second-turn player places 1 active EX Resource into their resource area.)\n(Rest an EX Resource then remove it from the game when paying a cost.)",
         "traits": [],
         "type": "EX RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "EXRP-001": {
         "ap": 0,
@@ -1670,14 +1662,12 @@
         "hp": 0,
         "id": "EXRP-001",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "EX Resource",
         "text": "(At the start of the game, the second-turn player places 1 EX Resource into their resource area.)\n(Rest an EX Resource then exile it from the game when paying a cost.)",
         "traits": [],
         "type": "EX RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "EXRP-002": {
         "ap": 0,
@@ -1686,14 +1676,12 @@
         "hp": 0,
         "id": "EXRP-002",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "EX Resource",
         "text": "(At the start of the game, the second-turn player places 1 active EX Resource into their resource area.)\n(Rest an EX Resource then exile it from the game when paying a cost.)",
         "traits": [],
         "type": "EX RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "GD01-001": {
         "ap": 3,
@@ -1836,7 +1824,7 @@
         "hp": 2,
         "id": "GD01-008",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Guntank",
         "text": "[Deploy]Choose 1 rested enemy Unit. Deal 1 damage to it.",
         "traits": [
@@ -1973,7 +1961,7 @@
         "hp": 1,
         "id": "GD01-015",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Ball",
         "text": "[Attack]Choose 1 of your Units. It recovers 1 HP.",
         "traits": [
@@ -1991,7 +1979,7 @@
         "hp": 3,
         "id": "GD01-016",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Jegan",
         "text": "While you have 2 or more (Earth Federation) Units in play, this card in your hand gets cost -1.",
         "traits": [
@@ -2029,7 +2017,7 @@
         "hp": 3,
         "id": "GD01-018",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "ReZEL",
         "text": "",
         "traits": [
@@ -2048,7 +2036,7 @@
         "hp": 4,
         "id": "GD01-019",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Byarlant Custom",
         "text": "While 4 or more enemy Units are in play, this Unit gains <Blocker>.\n(Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -2067,7 +2055,7 @@
         "hp": 3,
         "id": "GD01-020",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Anksha",
         "text": "[Deploy]Choose 1 rested enemy Unit. Deal 1 damage to it.",
         "traits": [
@@ -2085,7 +2073,7 @@
         "hp": 2,
         "id": "GD01-021",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Pisces",
         "text": "",
         "traits": [
@@ -2103,7 +2091,7 @@
         "hp": 3,
         "id": "GD01-022",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Cancer",
         "text": "",
         "traits": [
@@ -2251,7 +2239,7 @@
         "hp": 3,
         "id": "GD01-030",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Rick Dom",
         "text": "<Breach 2> (When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
         "traits": [
@@ -2343,7 +2331,7 @@
         "hp": 2,
         "id": "GD01-035",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Zaku Ⅱ",
         "text": "",
         "traits": [
@@ -2362,7 +2350,7 @@
         "hp": 2,
         "id": "GD01-036",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Gouf",
         "text": "",
         "traits": [
@@ -2380,7 +2368,7 @@
         "hp": 3,
         "id": "GD01-037",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Gogg",
         "text": "",
         "traits": [
@@ -2416,7 +2404,7 @@
         "hp": 1,
         "id": "GD01-039",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Dopp",
         "text": "[Deploy]Look at the top card of your deck. Return it to the top or bottom of your deck.",
         "traits": [
@@ -2659,7 +2647,7 @@
         "hp": 4,
         "id": "GD01-052",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Geara Zulu (Guards Type)",
         "text": "[Deploy]Choose 1 enemy Unit. Deal 1 damage to it.",
         "traits": [
@@ -2678,7 +2666,7 @@
         "hp": 2,
         "id": "GD01-053",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Geara Doga (Heavy Armed Type)",
         "text": "[Activate･Main][Once per Turn]①：Choose 1 enemy Unit with 2 or less AP. Deal 1 damage to it.",
         "traits": [
@@ -2716,7 +2704,7 @@
         "hp": 3,
         "id": "GD01-055",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "BuCUE",
         "text": "[Activate･Main]<Support 2> (Rest this Unit. 1 other friendly Unit gets AP+(specified amount) during this turn.)",
         "traits": [
@@ -2734,7 +2722,7 @@
         "hp": 3,
         "id": "GD01-056",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Geara Doga (Sleeves)",
         "text": "[Destroyed]Choose 1 enemy Unit with 5 or less AP. Deal 1 damage to it.",
         "traits": [
@@ -2753,7 +2741,7 @@
         "hp": 3,
         "id": "GD01-057",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Dreissen (Sleeves)",
         "text": "",
         "traits": [
@@ -2772,7 +2760,7 @@
         "hp": 2,
         "id": "GD01-058",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Galluss-K",
         "text": "[Activate･Action][Once per Turn]①：Choose 1 Unit that is Lv.4 or higher. It gets AP+1 during this battle.",
         "traits": [
@@ -2791,7 +2779,7 @@
         "hp": 2,
         "id": "GD01-059",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Zee Zulu",
         "text": "[Attack]If you are attacking the enemy player, this Unit gets AP+2 during this battle.",
         "traits": [
@@ -2809,7 +2797,7 @@
         "hp": 2,
         "id": "GD01-060",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Zaku Mariner",
         "text": "",
         "traits": [
@@ -2827,7 +2815,7 @@
         "hp": 2,
         "id": "GD01-061",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "ZuOOT",
         "text": "[Activate･Main]<Support 1> (Rest this Unit. 1 other friendly Unit gets AP+(specified amount) during this turn.)",
         "traits": [
@@ -2845,7 +2833,7 @@
         "hp": 2,
         "id": "GD01-062",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "GOOhN",
         "text": "",
         "traits": [
@@ -2881,7 +2869,7 @@
         "hp": 2,
         "id": "GD01-064",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "DINN",
         "text": "",
         "traits": [
@@ -3146,7 +3134,7 @@
         "hp": 1,
         "id": "GD01-078",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Mistral",
         "text": "[Deploy]Choose 1 enemy Unit. It gets AP-1 during this turn.",
         "traits": [
@@ -3200,7 +3188,7 @@
         "hp": 2,
         "id": "GD01-081",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "M1 Astray",
         "text": "While you have another (Triple Ship Alliance) Unit in play, this Unit gets AP+1 and <Blocker>.\n (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -3257,7 +3245,7 @@
         "hp": 3,
         "id": "GD01-084",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Beguir-Pente",
         "text": "",
         "traits": [
@@ -3276,7 +3264,7 @@
         "hp": 2,
         "id": "GD01-085",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Demi Garrison",
         "text": "",
         "traits": [
@@ -3295,7 +3283,7 @@
         "hp": 4,
         "id": "GD01-086",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Gundam Lfrith",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -3314,7 +3302,7 @@
         "hp": 1,
         "id": "GD01-087",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Sayla Mass",
         "text": "[Burst]Add this card to your hand.\nWhile this Unit is blue, it gains <Repair 1>.\n(At the end of your turn, this Unit recovers the specified number of HP.)",
         "traits": [
@@ -3332,7 +3320,7 @@
         "hp": 2,
         "id": "GD01-088",
         "level": 5,
-        "link": "-",
+        "link": "",
         "name": "Banagher Links",
         "text": "[Burst]Add this card to your hand.\n[When Linked]Draw 1.",
         "traits": [
@@ -3349,7 +3337,7 @@
         "hp": 1,
         "id": "GD01-089",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Riddhe Marcenas",
         "text": "[Burst]Add this card to your hand.\nWhile this Unit has <Repair>, it gets AP+1.",
         "traits": [
@@ -3365,7 +3353,7 @@
         "hp": 2,
         "id": "GD01-090",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Duo Maxwell",
         "text": "[Burst]Add this card to your hand.\n[During Link]This Unit's AP can't be reduced by enemy effects.",
         "traits": [
@@ -3381,7 +3369,7 @@
         "hp": 1,
         "id": "GD01-091",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Chang Wufei",
         "text": "[Burst]Add this card to your hand.\nDuring your turn, while this Unit has <Breach>, it can't receive battle damage from enemy Units with 3 or less AP.",
         "traits": [
@@ -3397,7 +3385,7 @@
         "hp": 1,
         "id": "GD01-092",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "M'Quve",
         "text": "[Burst]Add this card to your hand.\nWhile this Unit is (Zeon), it gains <Breach 1>.\n(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
         "traits": [
@@ -3413,7 +3401,7 @@
         "hp": 1,
         "id": "GD01-093",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Marida Cruz",
         "text": "[Burst]Add this card to your hand.\n[During Link][Attack]Choose 1 enemy Unit whose Lv. is equal to or lower than this Unit. Deal 1 damage to it.",
         "traits": [
@@ -3430,7 +3418,7 @@
         "hp": 1,
         "id": "GD01-094",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Yzak Jule",
         "text": "[Burst]Add this card to your hand.\n[Once per Turn] When an enemy Link Unit is destroyed with damage while this Unit is attacking, draw 1.",
         "traits": [
@@ -3447,7 +3435,7 @@
         "hp": 1,
         "id": "GD01-095",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Dearka Elthman",
         "text": "[Burst]Add this card to your hand.\n[When Linked]Discard 1. If you do, draw 1.",
         "traits": [
@@ -3464,7 +3452,7 @@
         "hp": 1,
         "id": "GD01-096",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Cagalli Yula Athha",
         "text": "[Burst]Add this card to your hand.\nWhile this Unit is white, it gains <Blocker>.\n(Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -3480,7 +3468,7 @@
         "hp": 1,
         "id": "GD01-097",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Guel Jeturk",
         "text": "[Burst]Add this card to your hand.\n[Activate･Main][Once per Turn]If your opponent has 8 or more cards in their hand, set this Unit as active. It can't attack during this turn.",
         "traits": [
@@ -3496,7 +3484,7 @@
         "hp": 1,
         "id": "GD01-098",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Elan Ceres (Enhanced Person Number 4)",
         "text": "[Burst]Add this card to your hand.\n[Activate･Action][Once per Turn]If an enemy Unit with 1 or less AP is in play, this Unit recovers 1 HP.",
         "traits": [
@@ -3512,7 +3500,7 @@
         "hp": 0,
         "id": "GD01-099",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Intercept Orders",
         "text": "[Burst]Choose 1 enemy Unit with 5 or less HP. Rest it.\n[Main]/[Action]Choose 1 to 2 enemy Units with 3 or less HP. Rest them.",
         "traits": [],
@@ -3526,7 +3514,7 @@
         "hp": 0,
         "id": "GD01-100",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "A Show of Resolve",
         "text": "[Main]Draw 2.",
         "traits": [],
@@ -3540,7 +3528,7 @@
         "hp": 0,
         "id": "GD01-101",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Deep Devotion",
         "text": "[Main]/[Action]Choose 1 friendly Link Unit. It recovers 3 HP.\n[Pilot][Lucrezia Noin]",
         "traits": [
@@ -3556,7 +3544,7 @@
         "hp": 0,
         "id": "GD01-102",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Securing the Supply Line",
         "text": "[Main]All friendly Units that are Lv.4 or lower recover 2 HP.",
         "traits": [],
@@ -3570,7 +3558,7 @@
         "hp": 1,
         "id": "GD01-103",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "The Stubborn Cog",
         "text": "[Main]Choose 1 active friendly (Earth Federation) Unit and 1 active enemy Unit. Rest them.\n[Pilot][Daguza Mackle]",
         "traits": [
@@ -3586,7 +3574,7 @@
         "hp": 0,
         "id": "GD01-104",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Signs of a Revolution",
         "text": "[Burst]Draw 1.\n[Main]Choose 1 rested enemy Unit. Deal 2 damage to it.",
         "traits": [],
@@ -3600,7 +3588,7 @@
         "hp": 0,
         "id": "GD01-105",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Citizens, Take a Stand!",
         "text": "[Burst]Add this card to your hand.\n[Main]All your Units get AP+2 during this turn.",
         "traits": [],
@@ -3614,7 +3602,7 @@
         "hp": 0,
         "id": "GD01-106",
         "level": 5,
-        "link": "-",
+        "link": "",
         "name": "Fortress Defense",
         "text": "[Main]Deploy 2 [Zaku Ⅱ]((Zeon)･AP1･HP1) Unit tokens.\n[Pilot][Dozle Zabi]",
         "traits": [
@@ -3630,7 +3618,7 @@
         "hp": 0,
         "id": "GD01-107",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "First Contact",
         "text": "[Burst]Place 1 EX Resource.\n[Main]Place 1 rested Resource.",
         "traits": [],
@@ -3644,7 +3632,7 @@
         "hp": 0,
         "id": "GD01-108",
         "level": 6,
-        "link": "-",
+        "link": "",
         "name": "Strategic Arms",
         "text": "[Main]Deal 2 damage to all Units with <Blocker>.",
         "traits": [],
@@ -3658,7 +3646,7 @@
         "hp": 0,
         "id": "GD01-109",
         "level": 5,
-        "link": "-",
+        "link": "",
         "name": "The Path to Victory or Defeat",
         "text": "[Main]Look at the top 5 cards of your deck. You may reveal 1 (Operation Meteor)/(G Team) Unit card/Pilot card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.",
         "traits": [],
@@ -3672,7 +3660,7 @@
         "hp": 1,
         "id": "GD01-110",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Rasid's Orders",
         "text": "[Main]/[Action]Choose 1 Unit that is Lv.4 or higher. During this turn, it may choose an active enemy Unit with 6 or less AP as its attack target.\n[Pilot][Rasid Kurama]",
         "traits": [
@@ -3688,7 +3676,7 @@
         "hp": 0,
         "id": "GD01-111",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Battle of Aces",
         "text": "[Burst]Choose 1 enemy Unit. Deal 2 damage to it.\n[Main]/[Action]Choose 1 damaged enemy Unit. Deal 3 damage to it.",
         "traits": [],
@@ -3702,7 +3690,7 @@
         "hp": 0,
         "id": "GD01-112",
         "level": 6,
-        "link": "-",
+        "link": "",
         "name": "Extreme Hatred",
         "text": "[Main]Choose 2 of your active Units. Rest them. If you do, choose 1 enemy Unit. Deal 3 damage to it.\n[Pilot][Loni Garvey]",
         "traits": [
@@ -3719,7 +3707,7 @@
         "hp": 0,
         "id": "GD01-113",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "The Desert Tiger",
         "text": "[Main]/[Action]Choose 1 friendly (ZAFT) Unit. It gets AP+3 during this turn.\n[Pilot][Andrew Waldfeld]",
         "traits": [
@@ -3736,7 +3724,7 @@
         "hp": 0,
         "id": "GD01-114",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Assault on Torrington Base",
         "text": "[Action]Choose 2 friendly Units. They get AP+1 during this turn.\n[Pilot][Yonem Kirks]",
         "traits": [
@@ -3752,7 +3740,7 @@
         "hp": 0,
         "id": "GD01-115",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Zeon Remnant Forces",
         "text": "[Main]/[Action]Choose 1 enemy Unit. Deal 1 damage to it.",
         "traits": [],
@@ -3766,7 +3754,7 @@
         "hp": 1,
         "id": "GD01-116",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Stealth Stratagem",
         "text": "[Main]/[Action]Choose 1 enemy Unit with 2 or less AP. Deal 2 damage to it.\n[Pilot][Nicol Amarfi]",
         "traits": [
@@ -3783,7 +3771,7 @@
         "hp": 0,
         "id": "GD01-117",
         "level": 5,
-        "link": "-",
+        "link": "",
         "name": "The Witch and the Bride",
         "text": "[Burst]Activate this card's [Main].\n[Main]/[Action]Choose 1 enemy Unit with 5 or less HP. Return it to its owner's hand.",
         "traits": [],
@@ -3797,7 +3785,7 @@
         "hp": 0,
         "id": "GD01-118",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Overflowing Affection",
         "text": "[Main]Draw 2. Then, discard 1.",
         "traits": [],
@@ -3811,7 +3799,7 @@
         "hp": 0,
         "id": "GD01-119",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Iron-Fisted Discipline",
         "text": "[Main]/[Action]Choose 1 enemy Unit that is Lv.4 or lower. It gets AP-2 during this turn.\n[Pilot][Chuatury Panlunch]",
         "traits": [
@@ -3827,7 +3815,7 @@
         "hp": 0,
         "id": "GD01-120",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Naval Bombardment",
         "text": "[Burst]Choose 1 enemy Unit. It gets AP-3 during this turn.\n[Action]Choose 1 friendly Unit with <Blocker>. It gets AP+3 during this turn.",
         "traits": [],
@@ -3841,7 +3829,7 @@
         "hp": 0,
         "id": "GD01-121",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Midair Modifications",
         "text": "[Burst]Activate this card's [Main].\n[Main]Choose 1 rested Unit with <Blocker>. Set it as active. It can't attack during this turn.",
         "traits": [],
@@ -3855,7 +3843,7 @@
         "hp": 0,
         "id": "GD01-122",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Covert Operative",
         "text": "[Main]Choose 1 enemy Unit with 2 or less HP. Return it to its owner's hand. If you have a Link Unit in play, choose 1 enemy Unit with 4 or less HP instead.\n[Pilot][Shaddiq Zenelli]",
         "traits": [
@@ -3871,7 +3859,7 @@
         "hp": 5,
         "id": "GD01-123",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Nahel Argama",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand. Then, choose 1 enemy Unit with 3 or less HP. Rest it.",
         "traits": [
@@ -3891,7 +3879,7 @@
         "hp": 4,
         "id": "GD01-124",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Side 7",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main]Rest this Base：Choose 1 friendly Unit. It recovers 1 HP.",
         "traits": [
@@ -3910,7 +3898,7 @@
         "hp": 5,
         "id": "GD01-125",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Zanzibar",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand. Then, if it is your turn, you may deploy 1 (Zeon) Unit card that is Lv.4 or lower from your hand.",
         "traits": [
@@ -3930,7 +3918,7 @@
         "hp": 6,
         "id": "GD01-126",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Underground Desert Base",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.",
         "traits": [
@@ -3949,7 +3937,7 @@
         "hp": 5,
         "id": "GD01-127",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Gamow",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Action]Rest this Base：Choose 1 friendly (ZAFT) Unit with 5 or more AP. It gains <Breach 3> during this battle.\n(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
         "traits": [
@@ -3968,7 +3956,7 @@
         "hp": 6,
         "id": "GD01-128",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Mining Asteroid Palau",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.",
         "traits": [
@@ -3987,7 +3975,7 @@
         "hp": 4,
         "id": "GD01-129",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Kusanagi",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand. Then, choose 1 enemy Unit with 3 or less HP. Return it to its owner's hand.",
         "traits": [
@@ -4006,7 +3994,7 @@
         "hp": 5,
         "id": "GD01-130",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "13th Tactical Testing Sector",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main]Rest this Base：If a friendly (Academy) Unit is in play, choose 1 enemy Unit. It gets AP-1 during this turn.",
         "traits": [
@@ -11170,14 +11158,12 @@
         "hp": 0,
         "id": "R-001",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-002": {
         "ap": 0,
@@ -11186,14 +11172,12 @@
         "hp": 0,
         "id": "R-002",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-003": {
         "ap": 0,
@@ -11202,14 +11186,12 @@
         "hp": 0,
         "id": "R-003",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-004": {
         "ap": 0,
@@ -11218,14 +11200,12 @@
         "hp": 0,
         "id": "R-004",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-005": {
         "ap": 0,
@@ -11234,14 +11214,12 @@
         "hp": 0,
         "id": "R-005",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-006": {
         "ap": 0,
@@ -11250,14 +11228,12 @@
         "hp": 0,
         "id": "R-006",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-007": {
         "ap": 0,
@@ -11266,14 +11242,12 @@
         "hp": 0,
         "id": "R-007",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-008": {
         "ap": 0,
@@ -11282,14 +11256,12 @@
         "hp": 0,
         "id": "R-008",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "R-009": {
         "ap": 0,
@@ -11298,14 +11270,12 @@
         "hp": 0,
         "id": "R-009",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "RP-001": {
         "ap": 0,
@@ -11314,14 +11284,12 @@
         "hp": 0,
         "id": "RP-001",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "RP-004": {
         "ap": 0,
@@ -11330,14 +11298,12 @@
         "hp": 0,
         "id": "RP-004",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "RP-009": {
         "ap": 0,
@@ -11346,14 +11312,12 @@
         "hp": 0,
         "id": "RP-009",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Resource",
         "text": "(Rest a Resource when paying a cost.)",
         "traits": [],
         "type": "RESOURCE",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "ST01-001": {
         "ap": 3,
@@ -11403,7 +11367,7 @@
         "level": 3,
         "link": "[Kai Shiden]",
         "name": "Guncannon",
-        "text": "-",
+        "text": "",
         "traits": [
             "Earth Federation",
             "White Base Team"
@@ -11441,9 +11405,9 @@
         "hp": 2,
         "id": "ST01-005",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "GM",
-        "text": "-",
+        "text": "",
         "traits": [
             "Earth Federation"
         ],
@@ -11498,7 +11462,7 @@
         "hp": 1,
         "id": "ST01-008",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Demi Trainer",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -11536,7 +11500,7 @@
         "hp": 1,
         "id": "ST01-010",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Amuro Ray",
         "text": "[Burst]Add this card to your hand.\n[When Paired]Choose 1 enemy Unit with 5 or less HP. Rest it.",
         "traits": [
@@ -11554,7 +11518,7 @@
         "hp": 2,
         "id": "ST01-011",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Suletta Mercury",
         "text": "[Burst]Add this card to your hand.\n[Attack][Once per Turn]Choose 1 of your Resources. Set it as active.",
         "traits": [
@@ -11570,7 +11534,7 @@
         "hp": 1,
         "id": "ST01-012",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Thoroughly Damaged",
         "text": "[Main]Choose 1 rested enemy Unit. Deal 1 damage to it.\n[Pilot][Hayato Kobayashi]",
         "traits": [
@@ -11587,7 +11551,7 @@
         "hp": 0,
         "id": "ST01-013",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Kai's Resolve",
         "text": "[Main]Choose 1 friendly Unit. It recovers 3 HP.\n[Pilot][Kai Shiden]",
         "traits": [
@@ -11618,7 +11582,7 @@
         "hp": 5,
         "id": "ST01-015",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "White Base",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main][Once per Turn]②：Deploy 1 [Gundam]((White Base Team)･AP3･HP3) Unit token if you have no Units in play, deploy 1 [Guncannon]((White Base Team)･AP2･HP2) Unit token if you have only 1 Unit in play, or deploy 1 [Guntank]((White Base Team)･AP1･HP1) Unit token if you have 2 or more Units in play.",
         "traits": [
@@ -11639,7 +11603,7 @@
         "hp": 5,
         "id": "ST01-016",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Asticassia School of Technology, Earth House",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main]Rest this Base：All friendly Link Units get AP+1 during this turn.",
         "traits": [
@@ -11732,7 +11696,7 @@
         "hp": 2,
         "id": "ST02-005",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Maganac",
         "text": "",
         "traits": [
@@ -11789,7 +11753,7 @@
         "hp": 1,
         "id": "ST02-008",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Aries",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -11825,7 +11789,7 @@
         "hp": 1,
         "id": "ST02-010",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Heero Yuy",
         "text": "[Burst]Add this card to your hand.\n[During Link]This Unit gets AP+1 and HP+1.",
         "traits": [
@@ -11841,7 +11805,7 @@
         "hp": 1,
         "id": "ST02-011",
         "level": 5,
-        "link": "-",
+        "link": "",
         "name": "Zechs Merquise",
         "text": "[Burst]Add this card to your hand.\n[During Link]During your turn, when this Unit destroys an enemy Unit with battle damage, draw 1.",
         "traits": [
@@ -11857,7 +11821,7 @@
         "hp": 1,
         "id": "ST02-012",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Simultaneous Fire",
         "text": "[Main]Choose 1 of your Units. It gains <Breach 3> during this turn.\n(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)\n[Pilot][Trowa Barton]",
         "traits": [
@@ -11873,7 +11837,7 @@
         "hp": 1,
         "id": "ST02-013",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Peaceful Timbre",
         "text": "[Action]During this battle, your shield area cards can't receive damage from enemy Units that are Lv.4 or lower.\n[Pilot][Quatre Raberba Winner]",
         "traits": [
@@ -11889,7 +11853,7 @@
         "hp": 0,
         "id": "ST02-014",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Siege Ploy",
         "text": "[Burst]Activate this card's [Main].\n[Main]/[Action]Choose 1 enemy Unit with 5 or less HP. Rest it.",
         "traits": [],
@@ -11903,7 +11867,7 @@
         "hp": 5,
         "id": "ST02-015",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Saint Gabriel Institute",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand. Then, look at the top 2 cards of your deck and return 1 to the top and 1 to the bottom.",
         "traits": [
@@ -11922,7 +11886,7 @@
         "hp": 5,
         "id": "ST02-016",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Corsica Base",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand. Then, if it is your turn, deploy 1 [Tallgeese]((OZ)･AP4･HP2) Unit token. If it is your turn and a card with \"Corsica Base\" in its card name is in your trash, deploy 2 [Leo]((OZ)･AP1･HP1) Unit tokens instead.",
         "traits": [
@@ -11998,7 +11962,7 @@
         "hp": 1,
         "id": "ST03-004",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Gaza D (Sleeves)",
         "text": "[Activate･Main]<Support 2> (Rest this Unit. 1 other friendly Unit gets AP+(specified amount) during this turn.)",
         "traits": [
@@ -12054,7 +12018,7 @@
         "hp": 2,
         "id": "ST03-007",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Zaku Ⅰ",
         "text": "",
         "traits": [
@@ -12073,7 +12037,7 @@
         "hp": 2,
         "id": "ST03-008",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Zaku Ⅱ",
         "text": "[Attack]This Unit gets AP+2 during this turn.",
         "traits": [
@@ -12127,7 +12091,7 @@
         "hp": 1,
         "id": "ST03-011",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Char Aznable",
         "text": "[Burst]Add this card to your hand.\n[Attack]During this turn, this Unit gets AP+1 and, if it is a Link Unit, it gains <High-Maneuver>.\n(This Unit can't be blocked.)",
         "traits": [
@@ -12144,7 +12108,7 @@
         "hp": 0,
         "id": "ST03-012",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Indignation",
         "text": "[Main]/[Action]Choose 1 friendly Unit. It gets AP+2 during this turn.\n[Pilot][Angelo Sauper]",
         "traits": [
@@ -12160,7 +12124,7 @@
         "hp": 0,
         "id": "ST03-013",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Close Combat",
         "text": "[Burst]Activate this card's [Main].\n[Main]/[Action]Choose 1 enemy Unit. Deal 2 damage to it.",
         "traits": [],
@@ -12174,7 +12138,7 @@
         "hp": 1,
         "id": "ST03-014",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "The Blue Giant",
         "text": "[Action]Choose 1 friendly Unit. It can't receive battle damage from enemy Units with 2 or less AP during this battle.\n[Pilot][Ramba Ral]",
         "traits": [
@@ -12190,7 +12154,7 @@
         "hp": 5,
         "id": "ST03-015",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Rewloola",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand. Then, choose 1 enemy Unit with 5 or less AP. Deal 1 damage to it.",
         "traits": [
@@ -12209,7 +12173,7 @@
         "hp": 5,
         "id": "ST03-016",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Falmel",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand. Then, if it is your turn, deploy 1 rested [Char's Zaku Ⅱ]((Zeon)･AP3･HP1) Unit token.",
         "traits": [
@@ -12284,7 +12248,7 @@
         "hp": 1,
         "id": "ST04-004",
         "level": 1,
-        "link": "-",
+        "link": "",
         "name": "Moebius",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -12302,7 +12266,7 @@
         "hp": 2,
         "id": "ST04-005",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Strike Dagger",
         "text": "",
         "traits": [
@@ -12397,7 +12361,7 @@
         "hp": 1,
         "id": "ST04-010",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Kira Yamato",
         "text": "[Burst]Add this card to your hand.\n[Attack]Choose 1 enemy Unit. It gets AP-2 during this battle.",
         "traits": [
@@ -12414,7 +12378,7 @@
         "hp": 2,
         "id": "ST04-011",
         "level": 4,
-        "link": "-",
+        "link": "",
         "name": "Athrun Zala",
         "text": "[Burst]Add this card to your hand.\n[When Linked]During this turn, this Unit may choose an active enemy Unit that is Lv.5 or lower as its attack target.",
         "traits": [
@@ -12445,7 +12409,7 @@
         "hp": 0,
         "id": "ST04-013",
         "level": 2,
-        "link": "-",
+        "link": "",
         "name": "Hawk of Endymion",
         "text": "[Main]/[Action]Choose 1 enemy Unit with 3 or less HP. Return it to its owner's hand.\n[Pilot][Mu La Flaga]",
         "traits": [
@@ -12461,7 +12425,7 @@
         "hp": 1,
         "id": "ST04-014",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "The Magic Bullet of Dusk",
         "text": "[Main]/[Action]Choose 1 friendly Unit that is Lv.2 or lower. It gains <First Strike> during this turn.\n(While this Unit is attacking, it deals damage before the enemy Unit.)\n[Pilot][Miguel Ayman]",
         "traits": [
@@ -12478,7 +12442,7 @@
         "hp": 5,
         "id": "ST04-015",
         "level": 3,
-        "link": "-",
+        "link": "",
         "name": "Archangel",
         "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main][Once per Turn]②：Choose 1 friendly Unit with <Blocker>. Set it as active. It can't attack during this turn.",
         "traits": [
@@ -14079,7 +14043,7 @@
         "hp": 3,
         "id": "T-001",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Gundam",
         "text": "",
         "traits": [
@@ -14095,7 +14059,7 @@
         "hp": 2,
         "id": "T-002",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Guncannon",
         "text": "",
         "traits": [
@@ -14111,7 +14075,7 @@
         "hp": 1,
         "id": "T-003",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Guntank",
         "text": "",
         "traits": [
@@ -14127,7 +14091,7 @@
         "hp": 1,
         "id": "T-004",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Leo",
         "text": "",
         "traits": [
@@ -14143,7 +14107,7 @@
         "hp": 2,
         "id": "T-005",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Tallgeese",
         "text": "",
         "traits": [
@@ -14159,7 +14123,7 @@
         "hp": 1,
         "id": "T-006",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Char's Zaku Ⅱ",
         "text": "",
         "traits": [
@@ -14175,7 +14139,7 @@
         "hp": 1,
         "id": "T-007",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Zaku Ⅱ",
         "text": "",
         "traits": [
@@ -14191,7 +14155,7 @@
         "hp": 3,
         "id": "T-008",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Aile Strike Gundam",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -14207,7 +14171,7 @@
         "hp": 4,
         "id": "T-009",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Launcher Strike Gundam",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -14223,7 +14187,7 @@
         "hp": 2,
         "id": "T-010",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Sword Strike Gundam",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
@@ -14239,16 +14203,14 @@
         "hp": 2,
         "id": "T-011",
         "level": 0,
-        "link": "-",
+        "link": "",
         "name": "Fatum-00",
         "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
         "traits": [
             "(Triple Ship Alliance)"
         ],
         "type": "UNIT TOKEN",
-        "zones": [
-            "-"
-        ]
+        "zones": []
     },
     "T-012": {
         "ap": 0,

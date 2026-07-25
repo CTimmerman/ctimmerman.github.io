@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-21</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-25</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -659,9 +659,12 @@
 					oldc = c
 				} else idcount += 1
 
-				const keys = ["Type " + c.type, "Color " + c.color, "Lv. " + c.level, "Cost " + c.cost, "AP " + c.ap, "HP " + c.hp]
+				const keys = ["Type " + c.type, "Color " + c.color, "Level " + c.level, "Cost " + c.cost, "AP " + c.ap, "HP " + c.hp]
+				for (const zone of c.zones) keys.push("Zone " + zone)
 				for (const trait of c.traits) keys.push("Trait " + trait)
-				for (const link of c.link.split(" / ")) keys.push("Link " + link)
+				for (const link of c.link.split(" / ")) link && keys.push("Link " + link)
+				let pn = getPilotName(c)
+				if (pn) keys.push("Pilot " + pn)
 				for (let k of keys) counts[k] = 1 + (counts[k] || 0)
 
 				sumCost += c.cost
@@ -1495,6 +1498,21 @@ https://exburst.dev/gundam/deck/152946
 3 GD01-023
 2 GD03-035
 2 GD04-017`,
+//			`# Geicokiller's RW GundamFighter
+// # tcgtopdecks-hq.com
+// 4 GD05-042
+// 4 GD05-069
+// 4 GD05-066
+// 4 GD05-072
+// 4 GD05-033
+// 4 GD05-097
+// 4 GD05-089
+// 4 GD05-111
+// 4 GD01-118
+// 4 GD05-121
+// 4 GD05-110
+// 2 GD05-120
+// 4 GD05-128 Gundam Fight`,
 		]
 
 		let decks = DECKS.slice()
@@ -2713,7 +2731,7 @@ https://exburst.dev/gundam/deck/152946
 				}
 				// Deploy
 				if (t === "During this turn, reduce its AP by an amount equal to the number of Unit cards with \"Gundam Virtue\" in their card names in your trash.") {
-					target.ap_eot -= p.trash.filter(c => inStr(c.name, "Gundam Virtue")).length
+					eotAP(target, -p.trash.filter(c => inStr(c.name, "Gundam Virtue")).length)
 					return true
 				}
 				if (t === "Choose 1 of your Units paired with a (Super Soldier) Pilot. During this turn, it may choose an active enemy Unit that is Lv.4 or lower as its attack target.") {
