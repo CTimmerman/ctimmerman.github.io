@@ -684,8 +684,8 @@
 				}
 			}
 			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
-			<textarea id="tastats" style="top: 70vmin; left: 60vmin; width: 30vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
-<textarea id="tadecklist" style="top: 70vmin; left: 5vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 5vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
+			<textarea id="tastats" style="top: 70vmin; left: 52vmin; width: 34vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
+<textarea id="tadecklist" style="top: 70vmin; left: 0vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 10vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
 		}
 
 		function zoom(e) {
@@ -745,8 +745,11 @@
 				if (brace > -1) return card.name.slice(0, brace)
 				return card.name
 			}
-			let rv = getSectionText(card, "Pilot")
-			return rv.slice(1, rv.indexOf(" ("))
+			if (card.type === "COMMAND") {
+				let rv = getSectionText(card, "Pilot")
+				return rv.slice(1, rv.indexOf(" ("))
+			}
+			return ""
 		}
 
 		async function pair(unit, pilot) {
@@ -4194,6 +4197,7 @@ https://exburst.dev/gundam/deck/152946
 
 		let deck_stats = {}
 		let player_wins = [0, 0]
+		/** TODO: avg win turn */
 		function endGame(winner) {
 			setGameOver(true)
 			if (winner) {
