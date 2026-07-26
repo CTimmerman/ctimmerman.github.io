@@ -320,7 +320,7 @@
 		let chosen = null
 
 		/** TODO: top of deck */
-		async function chooseCard(targets) {
+		async function chooseCard(targets, prompt = "") {
 			chosen = null
 			if (targets.length < 1) return null
 			await render()
@@ -329,7 +329,7 @@
 			while (chosen === null) {
 				await sleep(1000)
 				time_left -= 1
-				dtimeleft.innerHTML = "⏳" + time_left + "s [Skip]"
+				dtimeleft.innerHTML = prompt + "⏳" + time_left + "s [Skip]"
 				dtimeleft.style.display = "block"
 				if (time_left <= 0) break
 			}
@@ -395,6 +395,11 @@
 			card.kw_eot = []
 			card.pilot = null
 			card.unit = null
+			if (card.id === "GD05-089") {
+				card.type = "PILOT"
+				card.ap = 2
+				card.hp = 2
+			}
 		}
 
 		function toHand(card, fromTrash = false) {
@@ -604,7 +609,7 @@
 			if (basic_lv2s.length > 1) alerts.push("🚩Only 1 basic Lv.2 kind allowed: " + basic_lv2s)
 			if (colors.length > 2) alerts.push("🚩Deck colors > 2: " + colors)
 			if (fulldeck.length !== 50) alerts.push("🚩Deck length not 50: " + fulldeck.length)
-			if (alerts.length > 0 && strict) log(alerts.join("<br>"))
+			if (alerts.length > 0 && strict) log(alerts.join("<br>"), false)
 			return [fulldeck, alerts, deckname]
 		}
 
@@ -712,9 +717,9 @@
 			}
 		}
 
-		function log(s = "") {
+		function log(s = "", escape = true) {
 			if (delay > 0 || inStr(s, " start:")) {
-				dlog.innerHTML += s + "<br>"
+				dlog.innerHTML += (escape ? escapeHTML(s) : s) + "<br>"
 				dlog.scrollTop = dlog.scrollHeight
 			}
 			if (inStr("" + s, "FIXME")
@@ -1484,38 +1489,38 @@ https://exburst.dev/gundam/deck/152946
 1 GD04-017 Zeong
 1 GD04-022 Kikeroga (MS Mode) (GQ)
 1 GD01-027 Big Zam`,
+			`# Geicokiller's RW GundamFighter
+# tcgtopdecks-hq.com
+4 GD05-128 Gundam Fight
+4 GD05-111 Airframe​ Seizure
+4 GD01-118 Overflowing Affection
+4 GD05-121 Cyclone Punch
+4 GD05-110 Darkness Finger
+2 GD05-120 Shining Finger
+4 GD05-097 Domon Kasshu
+4 GD05-089 Master Asia
+4 GD05-042 Shining Gundam
+4 GD05-069 Gundam Maxter
+4 GD05-072 Rising Gundam
+4 GD05-066 Shining Gundam
+4 GD05-033 Master Gundam`,
 			`# Roemer's deck
-2 GD01-039
-4 ST03-008
-4 GD01-035
-3 ST03-006
-4 ST03-011
-4 GD01-030
-3 GD01-092
-2 ST03-016
-4 GD01-026
-4 GD03-092
-4 GD01-031
-3 GD03-048
-2 GD01-125
-3 GD01-023
-2 GD03-035
-2 GD04-017`,
-//			`# Geicokiller's RW GundamFighter
-// # tcgtopdecks-hq.com
-// 4 GD05-042
-// 4 GD05-069
-// 4 GD05-066
-// 4 GD05-072
-// 4 GD05-033
-// 4 GD05-097
-// 4 GD05-089
-// 4 GD05-111
-// 4 GD01-118
-// 4 GD05-121
-// 4 GD05-110
-// 2 GD05-120
-// 4 GD05-128 Gundam Fight`,
+2 ST03-016 Falmel
+2 GD01-125 Zanzibar
+4 ST03-011 Char Aznable
+3 GD01-092 M'Quve
+4 GD03-092 Nyaan
+2 GD01-039 Dopp
+4 ST03-008 Zaku Ⅱ
+4 GD01-035 Zaku Ⅱ
+3 ST03-006 Char's Zaku Ⅱ
+4 GD01-026 Char's Zaku Ⅱ
+4 GD01-030 Rick Dom
+3 GD03-048 GFreD
+4 GD01-031 Gelgoog
+3 GD01-023 Char's Gelgoog
+2 GD03-035 GFreD
+2 GD04-017 Zeong`,
 		]
 
 		let decks = DECKS.slice()
@@ -1571,7 +1576,7 @@ https://exburst.dev/gundam/deck/152946
 				// Copy for viewing
 				this.fulldeck = fulldeck.filter(c => true)
 				shuffle(this.deck)
-				log(`🎴${this.name} deck: <a href="#" onclick='showDeck(\"${escapeHTML(this.deckname)}\"); event.preventDefault()'>${this.deckname}</a>`)
+				log(`🎴${this.name} deck: <a href="#" onclick='showDeck(\"${escapeHTML(this.deckname)}\"); event.preventDefault()'>${this.deckname}</a>`, false)
 			}
 
 			constructor(name) {
@@ -1681,14 +1686,17 @@ https://exburst.dev/gundam/deck/152946
 			async discard(number = 1, targets = null) {
 				number = parseInt(number)
 				if (targets) number = targets.length
+				let discarded = []
 				let ai = (active_player === p1 ? p1ai.checked : p2ai.checked)
 				for (let i = 0; i < number; ++i) {
 					const c = (targets && targets[i]) || ai && this.hand[Math.floor(Math.random() * this.hand.length)] || !ai && await chooseCard(this.hand)
-					if (!c) return
+					if (!c) return discarded
+					discarded.push(c)
 					log("🗑️" + this.name + " discard " + c)
 					this.hand = this.hand.filter(item => item !== c)
 					trash(c)
 				}
+				return discarded
 			}
 
 			getCard(id) {
@@ -1825,6 +1833,7 @@ https://exburst.dev/gundam/deck/152946
 			}
 		}
 
+		/** 937 cards with GD05 on 2026-07-26 */
 		async function loadNewCards() {
 			localStorage.clear()
 			let gameInfo = JSON.parse(localStorage.getItem("gameInfo"))
@@ -1861,10 +1870,10 @@ https://exburst.dev/gundam/deck/152946
 					card.card_hp || card.card_hp_boost,
 					card.card_level,
 					card.card_cost,
-					card.card_text_unstyled,
-					card.card_zones,
+					card.card_text_unstyled.replaceAll("\\\\", "\\").replaceAll(/[\[<]br ?\/?[\]>]/g, "\n").replaceAll(/\[(Blocker|Breach|First Strike|High-Maneuver|Repair|Support|Suppression)\]/g, "<$1>").replaceAll(/\[(\w+) (\d)\]/g, "<$1 $2>").replace(/\n$/, "").replaceAll("white Base Team", "White Base Team"), // DeckPlanet bug workarounds.
+					card.card_zones.filter(z => z !== "-"),
 					card.card_traits,
-					card.card_link_requirement,
+					["", "-"].includes(card.card_link_requirement) ? "" : card.card_link_requirement,
 					id,
 					card.card_color).toDict()
 			}
@@ -2331,7 +2340,7 @@ https://exburst.dev/gundam/deck/152946
 			}
 
 			if (act != "Pilot") {
-				if ((mo.length > 3 && limits2 && limits2 !== "Activate･") || !l3ok) log(`🚩FIXME: ${card} ACT${act}/CLAUSE${escapeHTML(clause)} LIMITS2` + escapeHTML(limits2) + "LIMITS3" + escapeHTML(limits3) + " MO" + escapeHTML("" + mo) + " TEXT" + text + " MO2" + mo2)
+				if ((mo.length > 3 && limits2 && limits2 !== "Activate･") || !l3ok) log(`🚩FIXME: ${card} ACT${act}/CLAUSE${clause} LIMITS2` + limits2 + "LIMITS3" + limits3 + " MO" + mo + " TEXT" + text + " MO2" + mo2)
 			}
 			// TODO: Full text line?
 			if (inStr(limits, "[Once per Turn]")) text = "[Once per Turn]" + text
@@ -2359,21 +2368,24 @@ https://exburst.dev/gundam/deck/152946
 			for (const c of cards) await run(c, "", clause)
 		}
 		/** logs ran */
-		async function runCard(card, act, clause) {
+		async function runCard(card, act, clause = "") {
 			let t = getSectionText(card, act, clause)
 			if (!t) return false
 			let rv = await runCard2(card, act, clause, t)
 			if (rv) {
 				if (inStr(t, "[Once per Turn]")) once_per_turn.push(t + card.cid)
-				log(`⚡${card.owner.name} ran ${card} ${(act || clause)}: ${escapeHTML(t)}`)
-				if (card.type === "COMMAND" && ["Action", "Main"].includes(act)) await publish("When you activate a Command's [Main]/[Action] effect, ", card.owner.battle)
+				log(`⚡${card.owner.name} ran ${card} ${(act || clause)}: ${t}`)
+				if (card.type === "COMMAND" && ["Action", "Main"].includes(act)) {
+					if (card.hasTrait("Special Move")) card.owner.kw_eot.push("GD05-089")
+					await publish("When you activate a Command's [Main]/[Action] effect, ", card.owner.battle)
+				}
 			}
 			return rv
 		}
-		async function runCard2(card, act, clause, t = "") {
+		async function runCard2(card, act, clause = "", t = "") {
 			if (!t) t = getSectionText(card, act, clause)
 			if (!t) {
-				if (clause || inStr(card.text, act)) log(`🚩No act ${act} or clause "${escapeHTML(clause)}" found in ${card.id} ${escapeHTML(card.text)}`)
+				if (clause || inStr(card.text, act)) log(`🚩No act ${act} or clause "${clause}" found in ${card.id} ${card.text}`)
 				return false
 			}
 			// if (t === "Add 1 of your Shields to your hand. Then, if it is your turn, look at the top 2 cards of your deck and return 1 to the top. Place the remaining card into your trash.") {
@@ -2460,8 +2472,29 @@ https://exburst.dev/gundam/deck/152946
 				u.kw_eob.push("redirect_battle_damage " + target.cid)
 				return true
 			}
+			if (t === "You may choose 2 (Special Move) Command cards from your trash. Exile them from the game. If you do, deal 5 damage to the first card in your opponent's shield area.") {
+				targets = p.trash.filter(c => c.type === "COMMAND" && c.hasTrait("Special Move")).slice(0, 2)
+				if (targets.length < 2 || (!en.base && en.shield.length < 1)) return false
+				exile(targets)
+				if (en.base) await dealDamage(card, en.base, 5)
+				else await dealDamage(card, en.shield, 5)
+				return true
+			}
+			// Deploy
+			if (t === "You may choose 2 (MF) Unit cards from your trash. Exile them from the game. If you do, choose 1 (Special Move) Command card from your trash. Add it to your hand.") {
+				targets = p.trash.filter(c => c.type === "UNIT" && c.hasTrait("MF")).slice(0, 2)
+				target = p.trash.filter(c => c.type === "COMMAND" && c.hasTrait("Special Move"))[0]
+				if (!target || targets.length < 2) return false
+				exile(targets)
+				toHand(target, true)
+				return true
+			}
 
 			// trim ifs
+			if (mo = t.match(/^If you have activated a \(Special Move\) Command card's \[Main\]\/\[Action\] during this turn, /)) {
+				if (!p.kw_eot.includes("GD05-089")) return false
+				t = t.slice(mo[0].length)
+			}
 			if (mo = t.match(/^If you deploy this Unit from your trash, /)) {
 				if (!card.from_trash) return false
 				t = t.slice(mo[0].length)
@@ -2605,7 +2638,12 @@ https://exburst.dev/gundam/deck/152946
 				await p.deploy(target)
 				return true
 			}
-
+			// Attack
+			if (t === "Activate [Main] on the card paired with this Unit.") {
+				if (!u.pilot) return false
+				await runCard(u.pilot, "Main")
+				return true
+			}
 			// triggered
 			if (t === "if this is a blue Unit, it gains <High-Maneuver> during this turn.") {
 				if (u.color !== "BLUE") return false
@@ -2677,6 +2715,12 @@ https://exburst.dev/gundam/deck/152946
 					target = attacker
 					t = t.slice(mo[0].length)
 				}
+				if (mo = t.match(/^Choose 1 of your rested Resources. /)) {
+					target = p.resource.filter(r => r.rested)[0]
+					if (!target) return false
+					t = t.slice(mo[0].length)
+				}
+
 				if (t === "It won't be set as active during the start phase of your opponent's next turn.") {
 					target.stunned = true
 					return true
@@ -2706,6 +2750,14 @@ https://exburst.dev/gundam/deck/152946
 					const dmg = parseInt(mo[1])
 					return await dealDamage(u, chooseDmgTarget(u, targets, dmg), dmg)
 				}
+				if (t === "Deal 2 damage to it. Then, if you have a Unit with \"Master Gundam\" in its card name in play, draw 1.") {
+					target = chooseDmgTarget(card, targets, 2)
+					if (!target) return false
+					await dealDamage(card, target, 2)
+					if (fu.some(c => inStr(c.name, "Master Gundam"))) await p.draw()
+					return true
+				}
+
 				if (mo = t.match(/^It gets AP-(\d+) during this turn\./)) {
 					target = mySort(targets, c => -c.AP() - 10 * (myturn ? c.rested : !c.rested))[0]
 					if (!target) return false
@@ -2749,6 +2801,13 @@ https://exburst.dev/gundam/deck/152946
 					toHand(target, true)
 					return true
 				}
+			}
+			if (t === "Rest it. Then, you may choose 1 of your Units with \"Shining Gundam\" in its card name. It gets <First Strike> during this turn.") {
+				rest(target)
+				let boon_target = (myturn ? fua : defender)
+				if (!boon_target || !inStr(boon_target.name, "Shining Gundam")) return true
+				eotKw(boon_target, "First Strike")
+				return true
 			}
 			if (t === "Choose 1 enemy Unit. Deal 1 damage to it. If a friendly (Mafty) Link Unit is in play, deal 2 damage instead.") {
 				const dmg = fu.some(c => c.hasTrait("Mafty") && c.linked()) ? 2 : 1
@@ -3008,6 +3067,16 @@ https://exburst.dev/gundam/deck/152946
 			if (t === "Add this card to your hand.") {
 				return toHand(card)
 			}
+			if (t === "Add this card to your hand. If there are 3 or more (MF) cards in your trash, you may deploy it as an (AP3・HP3) Unit instead. (Don't treat it as a Pilot.)") {
+				if (p.trash.filter(c => c.hasTrait("MF")).length >= 3) {
+					card.type = "UNIT"
+					card.ap = 3
+					card.hp = 3
+					p.deploy(card)
+					return true
+				}
+				return toHand(card)
+			}
 			if (t === "Rest this Base：All friendly Link Units get AP+1 during this turn.") {
 				if (card.rested) return false
 				// Main ability so check for can attack.
@@ -3039,8 +3108,8 @@ https://exburst.dev/gundam/deck/152946
 				eotAP(target, 2)
 				return true
 			}
-			if (t === "Rest this Base：If a friendly (Clan) Link Unit is in play, choose 1 friendly Unit. It gets AP+2 during this turn.") {
-				if (card.rested || !fu.some(c => c.hasTrait("Clan") && c.linked())) return false
+			if (mo = t.match(/Rest this Base：If a friendly \(([^)]+?)\) Link Unit is in play, choose 1 friendly Unit. It gets AP\+2 during this turn./)) {
+				if (card.rested || !fu.some(c => c.hasTrait(mo[1]) && c.linked())) return false
 				target = fu.filter(c => !c.rested && !c.sick)[0]
 				if (!target) return false
 				rest(card)
@@ -3116,8 +3185,23 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			if (mo = t.match(/^[Dd]raw (\d). Then, discard (\d).$/)) {
+				// Attack/Deploy/Destroyed is not optional?! TODO: Maybe don't attack/deploy if low on cards.
+				// if (p.hand.length + mo[1] - mo[2] <= 0) return false
 				await p.draw(mo[1])
 				await p.discard(mo[2])
+				return true
+			}
+			// When Paired
+			if (t === "Draw 1. Then, discard 1. If you discard a (Special Move) Command card with this effect, you may activate its [Main].") {
+				await p.draw()
+				targets = p.hand.filter(c => c.hasTrait("Special Move") && inStr(c.text, "[Main]"))
+				target = targets[0]
+				let discarded = await p.discard([target])
+				for (let c of discarded) {
+					if (targets.includes(c)) {
+						if (ai || chooseCard([c], "Activate Main?")) await runCard(c, "Main")
+					}
+				}
 				return true
 			}
 			if (t.slice(1) === "lace 1 EX Resource.") {
@@ -3215,10 +3299,11 @@ https://exburst.dev/gundam/deck/152946
 				await dealDamage(u, u, 2)
 				return true
 			}
-			if (t === "You may discard 1. If you do, draw 1.") {
-				if (p.hand.length < 1) return false
-				trash(p.hand.pop())
-				await p.draw()
+			if (mo = t.match(/(You may )?[Dd]iscard (\d). If you do, draw (\d)./)) {
+				let to_discard = parseInt(mo[2])
+				if (p.hand.length < to_discard) return false
+				await p.discard(to_discard)
+				await p.draw(mo[3])
 				return true
 			}
 			// Same for Deploy, mandatory trigger so gives a choice.
@@ -3736,7 +3821,11 @@ https://exburst.dev/gundam/deck/152946
 						if (target) break
 					}
 				}
-				if (mo = t.match(/You may deploy 1 \((.+?)\) Unit card that is Lv.4 or lower among them./)) {
+				// TODO: target = for non-ai
+				if (mo = t.match(/You may reveal 1 \(([^)]+?)\) (Base|Command|Pilot|Unit) card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck./)) {
+					target = targets.filter(c => c.type === mo[2].toUpperCase() && c.hasTrait(mo[1]))[0]
+				}
+				else if (mo = t.match(/You may deploy 1 \((.+?)\) Unit card that is Lv.4 or lower among them./)) {
 					target = targets.filter(c => c.level <= 4 && c.hasTrait(mo[1]))[0]
 				}
 				else if (inStr(t, "You may reveal 1 Pilot card among them and add it to your hand.")) {
@@ -3775,7 +3864,7 @@ https://exburst.dev/gundam/deck/152946
 							|| (c.type === "PILOT" && fu.some(c2 => !c2.pilot && linksWith(c, c2)))
 						)) target = c
 				} else if (target === null) {
-					log(`🚩🚩FIXME No target for ${card.type} ${card.id} ${act}${clause} "${escapeHTML(t)}". p battle length: ${p.battle.length}`)
+					log(`🚩🚩FIXME No target for ${card.type} ${card.id} ${act}${clause} "${t}". p battle length: ${p.battle.length}`)
 					return false
 				}
 
@@ -3841,7 +3930,7 @@ https://exburst.dev/gundam/deck/152946
 				}
 			}
 
-			log(`🚩🚩FIXME Not implemented ${card.type} ${card.id} ${act}${clause} "${escapeHTML(t)}". p battle length: ${p.battle.length}`)
+			log(`🚩🚩FIXME Not implemented ${card.type} ${card.id} ${act}${clause} "${t}". p battle length: ${p.battle.length}`)
 			return false
 		}
 
@@ -3868,7 +3957,7 @@ https://exburst.dev/gundam/deck/152946
 			if (game > 0) showStats()
 			game += 1
 			game_start = new Date()
-			log(`\n<br>🏁Game ${game}/${games} start: ${game_start.toISOString().replace('T', ' ')}`)
+			log(`\n<br>🏁Game ${game}/${games} start: ${game_start.toISOString().replace('T', ' ')}`, false)
 			setGameOver(false)
 			pid = 0
 			cid = 0
@@ -4255,7 +4344,7 @@ https://exburst.dev/gundam/deck/152946
 				const [name, s] = stats[i]
 				msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${(s[0] / (s[0] + s[1] + s[2]) * 100).toFixed(0)}% ${s}`
 			}
-			log(msg)
+			log(msg, false)
 			setSpeed()
 		}
 

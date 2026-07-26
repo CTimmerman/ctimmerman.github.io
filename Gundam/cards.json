@@ -11151,6 +11151,2399 @@
             "Space"
         ]
     },
+    "GD05-001": {
+        "ap": 4,
+        "color": "BLUE",
+        "cost": 4,
+        "hp": 5,
+        "id": "GD05-001",
+        "level": 6,
+        "link": "[Üso Ewin]",
+        "name": "V2 Gundam",
+        "text": "<Repair 2> (At the end of your turn, this Unit recovers the specified number of HP.)\n[Activate･Main][Once per Turn]Rest 2 of your Units：Set this Unit as active.",
+        "traits": [
+            "League Militaire",
+            "Victory Type"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-002": {
+        "ap": 5,
+        "color": "BLUE",
+        "cost": 6,
+        "hp": 6,
+        "id": "GD05-002",
+        "level": 8,
+        "link": "[Kira Yamato]",
+        "name": "Strike Freedom Gundam",
+        "text": "[Deploy] Choose 1 to 2 of your Units. During this turn, when they destroy an enemy card with battle damage, draw 1.\n[During Pair][Attack]You may discard 2. If you do, choose 1 enemy Unit with the lowest Lv. Return it to the bottom of its owner's deck.",
+        "traits": [
+            "Orb"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-003": {
+        "ap": 2,
+        "color": "BLUE",
+        "cost": 2,
+        "hp": 4,
+        "id": "GD05-003",
+        "level": 3,
+        "link": "[Andrew Waldfeld]",
+        "name": "Waldfeld's Murasame",
+        "text": "[Destroyed]If you have an (Orb) Pilot in play, draw 1.",
+        "traits": [
+            "Orb"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-004": {
+        "ap": 4,
+        "color": "BLUE",
+        "cost": 6,
+        "hp": 4,
+        "id": "GD05-004",
+        "level": 6,
+        "link": "(Orb) Trait",
+        "name": "Akatsuki (Oowashi)",
+        "text": "While you have no Units that are Lv.6 or higher in play, this card in your hand gets Lv. -1 and cost -1 for each of your (Orb) Units in play.\n[When Linked]Choose 1 enemy Unit that is Lv.4 or lower. Return it to its owner's hand.",
+        "traits": [
+            "Orb"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-005": {
+        "ap": 3,
+        "color": "BLUE",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-005",
+        "level": 4,
+        "link": "(Orb) Trait",
+        "name": "Strike Rouge (Ootori)",
+        "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
+        "traits": [
+            "Orb"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-006": {
+        "ap": 5,
+        "color": "BLUE",
+        "cost": 6,
+        "hp": 6,
+        "id": "GD05-006",
+        "level": 7,
+        "link": "",
+        "name": "Hashmal",
+        "text": "[Once per Turn]During your turn, when this Unit destroys an enemy card with battle damage, deploy 1 [Pluma]((Calamity War)･AP2･HP1) Unit token.\nThis Unit gains the same number of <Repair 1> as the number of (Calamity War) Unit tokens you have in play.\n(At the end of your turn, this Unit recovers the specified number of HP.)",
+        "traits": [
+            "Calamity War"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-007": {
+        "ap": 1,
+        "color": "BLUE",
+        "cost": 2,
+        "hp": 4,
+        "id": "GD05-007",
+        "level": 3,
+        "link": "(Titans) Trait",
+        "name": "Asshimar",
+        "text": "[During Link]This Unit gets AP+2 and <Repair 1>.\n(At the end of your turn, this Unit recovers the specified number of HP.)",
+        "traits": [
+            "Titans"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Earth"
+        ]
+    },
+    "GD05-008": {
+        "ap": 3,
+        "color": "BLUE",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-008",
+        "level": 4,
+        "link": "[Amuro Ray]",
+        "name": "Dijeh",
+        "text": "While you have a non-blue (Newtype) Pilot in play, this card in your hand gets cost -2.",
+        "traits": [
+            "Karaba"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Earth"
+        ]
+    },
+    "GD05-009": {
+        "ap": 3,
+        "color": "BLUE",
+        "cost": 2,
+        "hp": 4,
+        "id": "GD05-009",
+        "level": 4,
+        "link": "(League Militaire) Trait",
+        "name": "Gun Blaster",
+        "text": "",
+        "traits": [
+            "League Militaire"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-010": {
+        "ap": 3,
+        "color": "BLUE",
+        "cost": 2,
+        "hp": 4,
+        "id": "GD05-010",
+        "level": 4,
+        "link": "(Orb) Trait/[Kira Yamato]",
+        "name": "Kira's Strike Rouge",
+        "text": "",
+        "traits": [
+            "Orb"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-011": {
+        "ap": 4,
+        "color": "BLUE",
+        "cost": 4,
+        "hp": 4,
+        "id": "GD05-011",
+        "level": 5,
+        "link": "(Biological CPU) Trait",
+        "name": "Calamity Gundam & Raider Gundam",
+        "text": "[Deploy]You may choose 1 of your other active (Earth Alliance) Units. Rest it. If you do, choose 1 rested enemy Unit. Deal 2 damage to it.",
+        "traits": [
+            "Earth Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-012": {
+        "ap": 3,
+        "color": "BLUE",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-012",
+        "level": 4,
+        "link": "(Biological CPU) Trait",
+        "name": "Forbidden Gundam",
+        "text": "[When Linked]Choose 1 rested enemy Unit that is Lv.3 or lower. Return it to its owner's hand.",
+        "traits": [
+            "Earth Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-013": {
+        "ap": 2,
+        "color": "BLUE",
+        "cost": 2,
+        "hp": 1,
+        "id": "GD05-013",
+        "level": 2,
+        "link": "",
+        "name": "Gun EZ",
+        "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
+        "traits": [
+            "League Militaire",
+            "Shrike Team"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-014": {
+        "ap": 2,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-014",
+        "level": 2,
+        "link": "",
+        "name": "Javelin",
+        "text": "",
+        "traits": [
+            "Earth Federation",
+            "League Militaire"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-015": {
+        "ap": 1,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-015",
+        "level": 2,
+        "link": "",
+        "name": "M1 Astray Shrike",
+        "text": "[Deploy]Choose 1 rested enemy Unit. Deal 1 damage to it.",
+        "traits": [
+            "Orb"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-016": {
+        "ap": 2,
+        "color": "BLUE",
+        "cost": 2,
+        "hp": 4,
+        "id": "GD05-016",
+        "level": 3,
+        "link": "",
+        "name": "Murasame",
+        "text": "When one of your (Orb) Units is deployed, this Unit gains <High-Maneuver> during this turn.\n(This Unit can't be blocked.)",
+        "traits": [
+            "Orb"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-017": {
+        "ap": 5,
+        "color": "GREEN",
+        "cost": 5,
+        "hp": 5,
+        "id": "GD05-017",
+        "level": 7,
+        "link": "[Amuro Ray]",
+        "name": "Nu Gundam",
+        "text": "<Breach 5> (During your turn, when this Unit destroys an enemy Unit with battle damage, deal the specified amount of damage to the first card in that opponent's shield area.)\n[When Paired]You may choose 3 (Londo Bell) cards from your trash. Exile them from the game. If you do, choose 1 enemy Unit. Begin a battle between this Unit and it and only perform the damage step.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-018": {
+        "ap": 7,
+        "color": "GREEN",
+        "cost": 7,
+        "hp": 5,
+        "id": "GD05-018",
+        "level": 8,
+        "link": "[Suletta Mercury]",
+        "name": "Gundam Calibarn",
+        "text": "When one of your EX Resources is exiled from the game, you may choose 1 of your Units. During this turn, when it receives enemy damage, reduce it by 3.\n[Deploy]Place 3 EX Resources.",
+        "traits": [
+            "Academy"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-019": {
+        "ap": 4,
+        "color": "GREEN",
+        "cost": 3,
+        "hp": 2,
+        "id": "GD05-019",
+        "level": 4,
+        "link": "(Londo Bell) Trait/[Amuro Ray]",
+        "name": "Re-GZ",
+        "text": "[Destroyed]Look at the top 3 cards of your deck. You may reveal 1 (Londo Bell) Unit card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-020": {
+        "ap": 4,
+        "color": "GREEN",
+        "cost": 4,
+        "hp": 4,
+        "id": "GD05-020",
+        "level": 5,
+        "link": "[Amuro Ray]",
+        "name": "Nu Gundam",
+        "text": "[During Pair]This Unit gains <Breach 3>.\n(During your turn, when this Unit destroys an enemy Unit with battle damage, deal the specified amount of damage to the first card in that opponent's shield area.)\n[Deploy]If there are 2 or more (Londo Bell) cards in your trash, place 1 EX Resource.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-021": {
+        "ap": 4,
+        "color": "GREEN",
+        "cost": 5,
+        "hp": 5,
+        "id": "GD05-021",
+        "level": 6,
+        "link": "[Asemu Asuno]",
+        "name": "Gundam AGE-2 Double Bullet",
+        "text": "[Activate･Action][Once per Turn]①：This Unit gets AP+4 during this battle.\n[Once per Turn]When this Unit receives enemy damage, if you have an (Earth Federation) Pilot in play, reduce it by 2.",
+        "traits": [
+            "Earth Federation",
+            "AGE System"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-022": {
+        "ap": 5,
+        "color": "GREEN",
+        "cost": 5,
+        "hp": 4,
+        "id": "GD05-022",
+        "level": 6,
+        "link": "(Academy) Trait",
+        "name": "Gundam Schwarzette",
+        "text": "<Breach 3> (During your turn, when this Unit destroys an enemy Unit with battle damage, deal the specified amount of damage to the first card in that opponent's shield area.)\n[Activate･Action]Exile 2 Command cards in your trash from the game：During this battle, when this Unit receives enemy damage, reduce it by 2.",
+        "traits": [
+            "Academy"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-023": {
+        "ap": 2,
+        "color": "GREEN",
+        "cost": 3,
+        "hp": 2,
+        "id": "GD05-023",
+        "level": 3,
+        "link": "(Londo Bell) Trait/[Amuro Ray]",
+        "name": "Re-GZ BWS",
+        "text": "[Deploy]Place 1 EX Resource.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-024": {
+        "ap": 4,
+        "color": "GREEN",
+        "cost": 3,
+        "hp": 3,
+        "id": "GD05-024",
+        "level": 5,
+        "link": "[Asemu Asuno]",
+        "name": "Gundam AGE-2 Normal (SP Ver.)",
+        "text": "[Destroyed]Choose 1 green (Earth Federation) Pilot card from your trash. Add it to your hand. If you do, discard 1.",
+        "traits": [
+            "Earth Federation",
+            "AGE System"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-025": {
+        "ap": 3,
+        "color": "GREEN",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-025",
+        "level": 4,
+        "link": "[Chuatury Panlunch]",
+        "name": "Demi Barding",
+        "text": "[Deploy]Look at the top 3 cards of your deck. You may reveal 1 Command card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.",
+        "traits": [
+            "Academy"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-026": {
+        "ap": 3,
+        "color": "GREEN",
+        "cost": 3,
+        "hp": 5,
+        "id": "GD05-026",
+        "level": 5,
+        "link": "[Prospera Mercury]/[Ericht Samaya]",
+        "name": "Gundam Aerial Rebuild",
+        "text": "Count up the number of your Units with \"Gundam Lfrith\"/\"Gundnode\" in their card name, plus this Unit. All enemy Units whose Lv. is equal to or lower than that number are deployed rested.",
+        "traits": [
+            "Quiet Zero"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-027": {
+        "ap": 2,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-027",
+        "level": 2,
+        "link": "",
+        "name": "Jegan",
+        "text": "",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-028": {
+        "ap": 2,
+        "color": "GREEN",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-028",
+        "level": 3,
+        "link": "[Kayra Su]",
+        "name": "Kayra's Jegan",
+        "text": "[Deploy]Choose 1 of your (Londo Bell) Units. During this turn, it may choose an active enemy Unit with 4 or less AP as its attack target.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-029": {
+        "ap": 3,
+        "color": "GREEN",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-029",
+        "level": 3,
+        "link": "[Kayra Su]",
+        "name": "Kayra's Re-GZ",
+        "text": "[Deploy]Look at the top card of your deck. Return it to the top or bottom of your deck.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-030": {
+        "ap": 3,
+        "color": "GREEN",
+        "cost": 3,
+        "hp": 3,
+        "id": "GD05-030",
+        "level": 4,
+        "link": "[Shaddiq Zenelli]",
+        "name": "Michaelis",
+        "text": "On the turn this Unit is deployed, it may choose a rested enemy Unit as its attack target and attack it.",
+        "traits": [
+            "Academy"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-031": {
+        "ap": 4,
+        "color": "GREEN",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-031",
+        "level": 5,
+        "link": "(Academy) Trait",
+        "name": "Guel's Dilanza",
+        "text": "",
+        "traits": [
+            "Academy"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-032": {
+        "ap": 4,
+        "color": "GREEN",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-032",
+        "level": 4,
+        "link": "(Dawn of Fold) Trait",
+        "name": "Desultor",
+        "text": "",
+        "traits": [
+            "Dawn of Fold"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-033": {
+        "ap": 5,
+        "color": "RED",
+        "cost": 5,
+        "hp": 5,
+        "id": "GD05-033",
+        "level": 7,
+        "link": "[Master Asia]",
+        "name": "Master Gundam",
+        "text": "[Attack]You may choose 2 (Special Move) Command cards from your trash. Exile them from the game. If you do, deal 5 damage to the first card in your opponent's shield area.",
+        "traits": [
+            "MF",
+            "DG Cells"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-034": {
+        "ap": 3,
+        "color": "RED",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-034",
+        "level": 3,
+        "link": "[Stellar Loussier]",
+        "name": "Gaia Gundam",
+        "text": "[During Pair][Once per Turn]When this Unit destroys an enemy shield area card with battle damage, that enemy player may discard 1. If they don't discard with this effect, you may deploy 1 (Phantom Pain) Unit card that is Lv.4 or lower from your hand.",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-035": {
+        "ap": 4,
+        "color": "RED",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-035",
+        "level": 5,
+        "link": "[Sai Saici]",
+        "name": "Dragon Gundam",
+        "text": "[Once per Turn]When this Unit destroys an enemy shield area card with damage, choose 1 enemy Unit with 3 or less AP. Deal 2 damage to it.\n[During Link][Attack]Activate [Main] on the card paired with this Unit.",
+        "traits": [
+            "MF",
+            "Shuffle Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-036": {
+        "ap": 4,
+        "color": "RED",
+        "cost": 4,
+        "hp": 4,
+        "id": "GD05-036",
+        "level": 6,
+        "link": "[Master Asia]",
+        "name": "Haow Gundam",
+        "text": "[When Paired]You may choose 1 of your other active (MF) Units. Rest it. If you do, deal 2 damage to all enemy Units whose Lv. is equal to or lower than that Unit.",
+        "traits": [
+            "MF"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-037": {
+        "ap": 6,
+        "color": "RED",
+        "cost": 8,
+        "hp": 6,
+        "id": "GD05-037",
+        "level": 9,
+        "link": "(Biological CPU) Trait",
+        "name": "Destroy Gundam",
+        "text": "While an enemy player has 7 or more cards in their trash, this card in your hand gets Lv. -3 and cost -3.\n[During Link]This Unit gains <Breach 3>.\n(During your turn, when this Unit destroys an enemy Unit with battle damage, deal the specified amount of damage to the first card in that opponent's shield area.)",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-038": {
+        "ap": 6,
+        "color": "RED",
+        "cost": 5,
+        "hp": 4,
+        "id": "GD05-038",
+        "level": 7,
+        "link": "(Trinity) Trait",
+        "name": "Gundam Throne Eins (GN High Mega Launcher)",
+        "text": "[During Link]This Unit gains <Suppression>.\n(Damage to Shields by an attack is dealt to the first 2 cards simultaneously.)\n[Activate･Main][Once per Turn]Rest 3 of your (CB) Units：Choose 1 enemy Unit. Deal 4 damage to it.",
+        "traits": [
+            "CB",
+            "Trinity"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-039": {
+        "ap": 4,
+        "color": "RED",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-039",
+        "level": 3,
+        "link": "[Sting Oakley]",
+        "name": "Chaos Gundam",
+        "text": "[Attack]Choose 1 of your (Phantom Pain) Linked Units. It gains <High-Maneuver> during this turn.\n(This Unit can't be blocked.)",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-040": {
+        "ap": 2,
+        "color": "RED",
+        "cost": 2,
+        "hp": 4,
+        "id": "GD05-040",
+        "level": 3,
+        "link": "[Auel Neider]",
+        "name": "Abyss Gundam",
+        "text": "[Activate･Main]<Support 2> (Rest this Unit. 1 other friendly Unit gets AP+(specified amount) during this turn.)",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-041": {
+        "ap": 4,
+        "color": "RED",
+        "cost": 3,
+        "hp": 3,
+        "id": "GD05-041",
+        "level": 4,
+        "link": "[Stellar Loussier]",
+        "name": "Gaia Gundam (MA Mode)",
+        "text": "During a turn where your opponent has discarded due to one of your effects, this card in your hand gets cost -2.",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-042": {
+        "ap": 2,
+        "color": "RED",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-042",
+        "level": 2,
+        "link": "",
+        "name": "Shining Gundam",
+        "text": "",
+        "traits": [
+            "MF",
+            "Shuffle Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-043": {
+        "ap": 3,
+        "color": "RED",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-043",
+        "level": 2,
+        "link": "",
+        "name": "Neros Gundam",
+        "text": "",
+        "traits": [
+            "MF"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-044": {
+        "ap": 3,
+        "color": "RED",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-044",
+        "level": 3,
+        "link": "[George de Sand]",
+        "name": "Gundam Rose",
+        "text": "[During Link][Attack]Activate [Main] on the card paired with this Unit.",
+        "traits": [
+            "MF",
+            "Shuffle Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-045": {
+        "ap": 3,
+        "color": "RED",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-045",
+        "level": 4,
+        "link": "[Sting Oakley]",
+        "name": "Chaos Gundam (MA Mode)",
+        "text": "<Breach 3> (During your turn, when this Unit destroys an enemy Unit with battle damage, deal the specified amount of damage to the first card in that opponent's shield area.)",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-046": {
+        "ap": 3,
+        "color": "RED",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-046",
+        "level": 4,
+        "link": "[Auel Neider]",
+        "name": "Abyss Gundam (MA Mode)",
+        "text": "[When Paired･(Phantom Pain) Pilot]Choose 1 enemy player with 4 or more cards in their hand. They discard 1.",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Earth"
+        ]
+    },
+    "GD05-047": {
+        "ap": 4,
+        "color": "RED",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-047",
+        "level": 3,
+        "link": "(Earth Alliance) Trait",
+        "name": "Exass",
+        "text": "",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space"
+        ]
+    },
+    "GD05-048": {
+        "ap": 3,
+        "color": "RED",
+        "cost": 2,
+        "hp": 1,
+        "id": "GD05-048",
+        "level": 3,
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
+        "name": "Gundam Kyrios (Flight Mode)",
+        "text": "On the turn this Unit is deployed, it may choose a rested enemy Unit as its attack target and attack it.",
+        "traits": [
+            "CB",
+            "GN Drive"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-049": {
+        "ap": 5,
+        "color": "PURPLE",
+        "cost": 5,
+        "hp": 5,
+        "id": "GD05-049",
+        "level": 7,
+        "link": "[Char Aznable]",
+        "name": "Sazabi",
+        "text": "<Suppression> (Damage to Shields by an attack is dealt to the first 2 cards simultaneously.)\n[Attack]You may choose 1 of your Units. Destroy it. If you do, all enemy players each choose 1 of their non-battling Units. Destroy them.",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-050": {
+        "ap": 2,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-050",
+        "level": 2,
+        "link": "[Setsuna F. Seiei]",
+        "name": "Gundam Exia Repair",
+        "text": "When this Unit deals battle damage to an enemy Unit that is Lv.4 or lower that has no paired Pilot, destroy that enemy Unit.\n[Destroyed]Place the top 2 cards of your deck into your trash.",
+        "traits": [
+            "CB",
+            "GN Drive"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-051": {
+        "ap": 4,
+        "color": "PURPLE",
+        "cost": 6,
+        "hp": 6,
+        "id": "GD05-051",
+        "level": 7,
+        "link": "[Mikazuki Augus]",
+        "name": "Gundam Barbatos Lupus Rex",
+        "text": "Increase this Unit's AP by an amount equal to the amount of damage it has received.\nAt the end of your turn, you may choose 1 of your (Tekkadan) Units. Deal 1 damage to it. Set it as active.",
+        "traits": [
+            "Tekkadan",
+            "Gundam Frame"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-052": {
+        "ap": 5,
+        "color": "PURPLE",
+        "cost": 4,
+        "hp": 4,
+        "id": "GD05-052",
+        "level": 5,
+        "link": "[Char Aznable]",
+        "name": "Sazabi",
+        "text": "[Deploy]You may choose 1 of your other Units. Destroy it. If you do, place the top 3 cards of your deck into your trash. Add 1 (Neo Zeon) Unit card you placed from your deck with this effect to your hand.",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-053": {
+        "ap": 3,
+        "color": "PURPLE",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-053",
+        "level": 3,
+        "link": "[Quess Paraya]",
+        "name": "Quess's Jagd Doga",
+        "text": "[Destroyed]If this Unit is destroyed by one of your (Neo Zeon) card's effects, add it from your trash to your hand.",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-054": {
+        "ap": 6,
+        "color": "PURPLE",
+        "cost": 7,
+        "hp": 5,
+        "id": "GD05-054",
+        "level": 8,
+        "link": "[Quess Paraya]",
+        "name": "Alpha Azieru",
+        "text": "<Blocker> (Rest this Unit to change the attack target to it.)\n[Once per Turn]When one of your Units is destroyed by an effect, draw 1.",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space"
+        ]
+    },
+    "GD05-055": {
+        "ap": 5,
+        "color": "PURPLE",
+        "cost": 7,
+        "hp": 6,
+        "id": "GD05-055",
+        "level": 8,
+        "link": "[Shinn Asuka]",
+        "name": "Destiny Gundam",
+        "text": "<First Strike> (While this Unit is attacking, it deals damage before the enemy Unit.)\n[Once per Turn]When this Unit receives enemy battle damage, reduce it by 2.",
+        "traits": [
+            "ZAFT",
+            "Minerva Squad"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-056": {
+        "ap": 3,
+        "color": "PURPLE",
+        "cost": 2,
+        "hp": 4,
+        "id": "GD05-056",
+        "level": 4,
+        "link": "(Neo Zeon) Trait",
+        "name": "Rezin's Geara Doga",
+        "text": "",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-057": {
+        "ap": 4,
+        "color": "PURPLE",
+        "cost": 3,
+        "hp": 3,
+        "id": "GD05-057",
+        "level": 4,
+        "link": "[Gyunei Guss]",
+        "name": "Gyunei's Jagd Doga",
+        "text": "[Activate･Main][Once per Turn]Choose 1 of your other Units. Destroy it. If you do, set this Unit as active. It can't choose the enemy player as its attack target during this turn.",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-058": {
+        "ap": 4,
+        "color": "PURPLE",
+        "cost": 3,
+        "hp": 3,
+        "id": "GD05-058",
+        "level": 4,
+        "link": "(Tekkadan) Trait",
+        "name": "Shiden Custom (Ryusei-Go)",
+        "text": "<Blocker> (Rest this Unit to change the attack target to it.)",
+        "traits": [
+            "Tekkadan"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-059": {
+        "ap": 5,
+        "color": "PURPLE",
+        "cost": 4,
+        "hp": 4,
+        "id": "GD05-059",
+        "level": 6,
+        "link": "[Mikazuki Augus]",
+        "name": "Gundam Barbatos Lupus",
+        "text": "[Attack]Choose 1 of your active (Gjallarhorn) Units. Rest it. If you do, draw 1. This Unit gains <High-Maneuver> during this turn.\n(This Unit can't be blocked.)",
+        "traits": [
+            "Tekkadan",
+            "Gundam Frame"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-060": {
+        "ap": 5,
+        "color": "PURPLE",
+        "cost": 4,
+        "hp": 3,
+        "id": "GD05-060",
+        "level": 5,
+        "link": "(Tekkadan) Trait",
+        "name": "Gundam Flauros (Ryusei-Go)",
+        "text": "[Deploy]/[Attack]Choose 1 enemy Unit that is Lv.2 or lower. Destroy it.",
+        "traits": [
+            "Tekkadan",
+            "Gundam Frame"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-061": {
+        "ap": 3,
+        "color": "PURPLE",
+        "cost": 2,
+        "hp": 1,
+        "id": "GD05-061",
+        "level": 2,
+        "link": "",
+        "name": "Geara Doga",
+        "text": "While you have another (Neo Zeon) Unit in play, this Unit gains <Blocker>.\n(Rest this Unit to change the attack target to it.)",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-062": {
+        "ap": 2,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-062",
+        "level": 2,
+        "link": "",
+        "name": "Hobby Hizack",
+        "text": "",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-063": {
+        "ap": 3,
+        "color": "PURPLE",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-063",
+        "level": 3,
+        "link": "(Neo Zeon) Trait",
+        "name": "Gyunei's Jagd Doga",
+        "text": "",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-064": {
+        "ap": 3,
+        "color": "PURPLE",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-064",
+        "level": 4,
+        "link": "[Lunamaria Hawke]",
+        "name": "Force Impulse Gundam",
+        "text": "[Deploy]If you deploy this Unit from your trash, choose 1 Pilot card with \"Shinn Asuka\" in its card name from your trash. Add it to your hand.",
+        "traits": [
+            "ZAFT",
+            "Minerva Squad"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-065": {
+        "ap": 1,
+        "color": "PURPLE",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-065",
+        "level": 2,
+        "link": "(Tekkadan) Trait",
+        "name": "Landman Rodi",
+        "text": "[During Link]This Unit gets AP+2 during your turn.",
+        "traits": [
+            "Tekkadan"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-066": {
+        "ap": 3,
+        "color": "WHITE",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-066",
+        "level": 4,
+        "link": "[Domon Kasshu]",
+        "name": "Shining Gundam",
+        "text": "[Deploy]You may choose 2 (MF) Unit cards from your trash. Exile them from the game. If you do, choose 1 (Special Move) Command card from your trash. Add it to your hand.\n[Attack][Once per Turn]Choose 1 of your rested Resources. Set it as active.",
+        "traits": [
+            "MF",
+            "Shuffle Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-067": {
+        "ap": 5,
+        "color": "WHITE",
+        "cost": 5,
+        "hp": 4,
+        "id": "GD05-067",
+        "level": 6,
+        "link": "[Heero Yuy]",
+        "name": "Wing Gundam Zero (EW)",
+        "text": "While a rested enemy Unit is in play, this Unit gains <Suppression>.\n(Damage to Shields by an attack is dealt to the first 2 cards simultaneously.)\n[Attack]Choose 1 enemy Unit. Rest it.",
+        "traits": [
+            "G Team"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-068": {
+        "ap": 4,
+        "color": "WHITE",
+        "cost": 5,
+        "hp": 5,
+        "id": "GD05-068",
+        "level": 6,
+        "link": "[Domon Kasshu]",
+        "name": "Shining Gundam (Super Mode)",
+        "text": "When you activate a (Special Move) Command's [Main]/[Action], this Unit gains <Suppression> during this turn.\n(Damage to Shields by an attack is dealt to the first 2 cards simultaneously.)\n[During Link][Attack]This Unit gets AP+2 during this battle.",
+        "traits": [
+            "MF",
+            "Shuffle Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-069": {
+        "ap": 3,
+        "color": "WHITE",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-069",
+        "level": 3,
+        "link": "[Chibodee Crocket]",
+        "name": "Gundam Maxter",
+        "text": "During your turn, when this Unit destroys an enemy Unit with battle damage, look at the top 4 cards of your deck. You may reveal 1 (Special Move) Command card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.\n[During Link][Attack]Activate [Main] on the card paired with this Unit.",
+        "traits": [
+            "MF",
+            "Shuffle Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-070": {
+        "ap": 4,
+        "color": "WHITE",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-070",
+        "level": 5,
+        "link": "[Zechs Merquise]",
+        "name": "Tallgeese Ⅲ",
+        "text": "[Once per Turn]During your turn, when this Unit destroys an enemy Unit with battle damage, choose 1 of your rested (Preventer)/(G Team) Link Units. Set it as active. It can't attack during this turn.",
+        "traits": [
+            "Preventer"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-071": {
+        "ap": 3,
+        "color": "WHITE",
+        "cost": 3,
+        "hp": 4,
+        "id": "GD05-071",
+        "level": 4,
+        "link": "[Quatre Raberba Winner]",
+        "name": "Gundam Sandrock Custom (EW)",
+        "text": "[Attack]If you have another (G Team)/(Preventer) Unit in play, choose 1 enemy Unit. It gets AP-2 during this turn.",
+        "traits": [
+            "G Team"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-072": {
+        "ap": 4,
+        "color": "WHITE",
+        "cost": 3,
+        "hp": 3,
+        "id": "GD05-072",
+        "level": 4,
+        "link": "(Gundam Fighter) Trait",
+        "name": "Rising Gundam",
+        "text": "[When Linked]Choose 1 enemy Unit with 4 or less HP. Rest it.",
+        "traits": [
+            "MF"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-073": {
+        "ap": 5,
+        "color": "WHITE",
+        "cost": 5,
+        "hp": 5,
+        "id": "GD05-073",
+        "level": 7,
+        "link": "[Chang Wufei]",
+        "name": "Altron Gundam (EW)",
+        "text": "[Deploy]Choose 1 rested enemy Unit. It won't be set as active during the start phase of your opponent's next turn.",
+        "traits": [
+            "G Team",
+            "Mariemaia Army"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-074": {
+        "ap": 3,
+        "color": "WHITE",
+        "cost": 2,
+        "hp": 1,
+        "id": "GD05-074",
+        "level": 2,
+        "link": "(Preventer) Trait/[Lucrezia Noin]",
+        "name": "Noin's Taurus",
+        "text": "[Destroyed]Draw 1. Then, discard 1.",
+        "traits": [
+            "Preventer"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-075": {
+        "ap": 3,
+        "color": "WHITE",
+        "cost": 2,
+        "hp": 2,
+        "id": "GD05-075",
+        "level": 2,
+        "link": "",
+        "name": "Royal Gundam",
+        "text": "<Blocker> (Rest this Unit to change the attack target to it.)\nThis Unit can't choose the enemy player as its attack target.",
+        "traits": [
+            "MF"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-076": {
+        "ap": 4,
+        "color": "WHITE",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-076",
+        "level": 4,
+        "link": "[Argo Gulskii]",
+        "name": "Bolt Gundam",
+        "text": "[During Link][Attack]Activate [Main] on the card paired with this Unit.",
+        "traits": [
+            "MF",
+            "Shuffle Alliance"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-077": {
+        "ap": 2,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-077",
+        "level": 2,
+        "link": "",
+        "name": "Leo",
+        "text": "",
+        "traits": [
+            "G Team"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-078": {
+        "ap": 5,
+        "color": "WHITE",
+        "cost": 4,
+        "hp": 2,
+        "id": "GD05-078",
+        "level": 5,
+        "link": "[Duo Maxwell]",
+        "name": "Gundam Deathscythe Hell (EW)",
+        "text": "On the turn this Unit is deployed, it may choose a rested enemy Unit as its attack target and attack it.",
+        "traits": [
+            "G Team"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-079": {
+        "ap": 3,
+        "color": "WHITE",
+        "cost": 2,
+        "hp": 3,
+        "id": "GD05-079",
+        "level": 3,
+        "link": "[Trowa Barton]",
+        "name": "Gundam Heavyarms Custom (EW)",
+        "text": "[Activate･Main][Once per Turn]If you have another (G Team)/(Preventer) Unit in play, choose 1 enemy Unit that is Lv.4 or lower. It gets AP-1 during this turn.",
+        "traits": [
+            "G Team"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-080": {
+        "ap": 1,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 3,
+        "id": "GD05-080",
+        "level": 3,
+        "link": "[Gavane Goonny]",
+        "name": "Gavane's Borjarnon",
+        "text": "",
+        "traits": [
+            "Militia"
+        ],
+        "type": "UNIT",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-081": {
+        "ap": 2,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-081",
+        "level": 5,
+        "link": "",
+        "name": "Kira Yamato",
+        "text": "[Burst]Add this card to your hand.\n[When Linked]If this is an (Orb)/(Triple Ship Alliance) Unit, draw 1.",
+        "traits": [
+            "Orb",
+            "Coordinator"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-082": {
+        "ap": 2,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-082",
+        "level": 4,
+        "link": "",
+        "name": "Andrew Waldfeld",
+        "text": "[Burst]Add this card to your hand.\n[During Link]This Unit gains <Repair 2>.\n(At the end of your turn, this Unit recovers the specified number of HP.)",
+        "traits": [
+            "Orb",
+            "Coordinator"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-083": {
+        "ap": 1,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-083",
+        "level": 3,
+        "link": "",
+        "name": "Cagalli Yula Athha",
+        "text": "[Burst]Add this card to your hand.\n[When Paired]Choose 1 enemy Unit with 1 HP. Return it to its owner's hand.",
+        "traits": [
+            "Orb"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-084": {
+        "ap": 2,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-084",
+        "level": 3,
+        "link": "",
+        "name": "Odelo Henrik",
+        "text": "[Burst]Add this card to your hand.\nWhen one of your (League Militaire) Unit tokens receives enemy effect damage, reduce it by 1.",
+        "traits": [
+            "League Militaire"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-085": {
+        "ap": 2,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-085",
+        "level": 5,
+        "link": "",
+        "name": "Amuro Ray",
+        "text": "[Burst]Add this card to your hand.\nDuring your turn, when this Unit destroys an enemy Unit with battle damage, this Unit recovers 2 HP.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell",
+            "Newtype"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-086": {
+        "ap": 1,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-086",
+        "level": 3,
+        "link": "",
+        "name": "Kayra Su",
+        "text": "[Burst]Add this card to your hand.\n[During Link]Enemy Units other than Link Units choose this rested Unit as their attack target if possible when attacking.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-087": {
+        "ap": 1,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-087",
+        "level": 3,
+        "link": "",
+        "name": "Lauda Neill",
+        "text": "[Burst]Add this card to your hand.\nWhile this Unit is (Academy), it gains <High-Maneuver>.\n(This Unit can't be blocked.)",
+        "traits": [
+            "Academy"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-088": {
+        "ap": 1,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-088",
+        "level": 5,
+        "link": "",
+        "name": "Prospera Mercury",
+        "text": "[Burst]Add this card to your hand.\nThis Unit and all your Units with \"Gundam Lfrith\" or \"Gundnode\" in their card name get AP+1.",
+        "traits": [
+            "Quiet Zero"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-089": {
+        "ap": 2,
+        "color": "RED",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-089",
+        "level": 6,
+        "link": "",
+        "name": "Master Asia",
+        "text": "[Burst]Add this card to your hand. If there are 3 or more (MF) cards in your trash, you may deploy it as an (AP3・HP3) Unit instead. (Don't treat it as a Pilot.)\n[During Link][Attack]If you have activated a (Special Move) Command card's [Main]/[Action] during this turn, choose 1 enemy Unit. Deal 2 damage to it.",
+        "traits": [
+            "Gundam Fighter"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-090": {
+        "ap": 2,
+        "color": "RED",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-090",
+        "level": 3,
+        "link": "",
+        "name": "Stellar Loussier",
+        "text": "[Burst]Add this card to your hand.\n[Destroyed]Look at the top card of your deck. If it is a (Phantom Pain) card, you may reveal it and add it to your hand. Return any remaining card to the bottom of your deck.",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain",
+            "Biological CPU"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-091": {
+        "ap": 1,
+        "color": "RED",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-091",
+        "level": 3,
+        "link": "",
+        "name": "Sting Oakley",
+        "text": "[Burst]Add this card to your hand.\nWhile an enemy player has 7 or more cards in their trash, this Unit gets AP+1 and HP+1.",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain",
+            "Biological CPU"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-092": {
+        "ap": 1,
+        "color": "RED",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-092",
+        "level": 3,
+        "link": "",
+        "name": "Auel Neider",
+        "text": "[Burst]Add this card to your hand.\n[During Link][Attack]If you are attacking the enemy player, this Unit gets AP+2 during this battle.",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain",
+            "Biological CPU"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-093": {
+        "ap": 2,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-093",
+        "level": 5,
+        "link": "",
+        "name": "Char Aznable",
+        "text": "[Burst]Add this card to your hand.\n[When Linked]You may choose 1 (Neo Zeon) Base card from your trash. Deploy it.",
+        "traits": [
+            "Neo Zeon",
+            "Newtype"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-094": {
+        "ap": 1,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-094",
+        "level": 3,
+        "link": "",
+        "name": "Quess Paraya",
+        "text": "[Burst]Add this card to your hand.\n[Destroyed]Choose 1 of your (Neo Zeon) Units. During this turn, when it receives enemy battle damage, reduce it by 2.",
+        "traits": [
+            "Neo Zeon",
+            "Newtype"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-095": {
+        "ap": 2,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-095",
+        "level": 4,
+        "link": "",
+        "name": "Gyunei Guss",
+        "text": "[Burst]Add this card to your hand.\nWhile this Unit is (Neo Zeon), it gains <Blocker>.\n(Rest this Unit to change the attack target to it.)",
+        "traits": [
+            "Neo Zeon",
+            "Cyber-Newtype"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-096": {
+        "ap": 0,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-096",
+        "level": 3,
+        "link": "",
+        "name": "Chad Chadan",
+        "text": "[Burst]Add this card to your hand.\n[Attack]You may deal 1 damage to this Unit. If you do, choose 1 of your other (Tekkadan) Units. It recovers 1 HP.",
+        "traits": [
+            "Tekkadan",
+            "Alaya-Vijnana"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-097": {
+        "ap": 2,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-097",
+        "level": 4,
+        "link": "",
+        "name": "Domon Kasshu",
+        "text": "[Burst]Add this card to your hand.\n[When Paired]Draw 1. Then, discard 1. If you discard a (Special Move) Command card with this effect, you may activate its [Main].",
+        "traits": [
+            "Gundam Fighter",
+            "Shuffle Alliance"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-098": {
+        "ap": 2,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-098",
+        "level": 4,
+        "link": "",
+        "name": "Heero Yuy",
+        "text": "[Burst]Add this card to your hand.\nWhen this Unit destroys an enemy shield area card with damage, choose 1 enemy Unit. It gets AP-2 during this turn.",
+        "traits": [
+            "G Team",
+            "Operation Meteor"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-099": {
+        "ap": 1,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-099",
+        "level": 4,
+        "link": "",
+        "name": "Trowa Barton",
+        "text": "[Burst]Add this card to your hand.\nDuring your turn, when this Unit destroys an enemy Unit with battle damage, draw 1. Then, discard 1.",
+        "traits": [
+            "G Team",
+            "Operation Meteor"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-100": {
+        "ap": 2,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-100",
+        "level": 4,
+        "link": "",
+        "name": "Quatre Raberba Winner",
+        "text": "[Burst]Add this card to your hand.\n[When Paired]Choose 1 enemy Unit that is Lv.5 or lower. Rest it.",
+        "traits": [
+            "G Team",
+            "Operation Meteor"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-101": {
+        "ap": 1,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-101",
+        "level": 3,
+        "link": "",
+        "name": "Gavane Goonny",
+        "text": "[Burst]Add this card to your hand.\n[Once per Turn]When you pay ① or more for one of your Unit's effects, if this is a (Militia) Unit, it may recover 2 HP.",
+        "traits": [
+            "Militia"
+        ],
+        "type": "PILOT",
+        "zones": []
+    },
+    "GD05-102": {
+        "ap": 0,
+        "color": "BLUE",
+        "cost": 2,
+        "hp": 0,
+        "id": "GD05-102",
+        "level": 5,
+        "link": "",
+        "name": "Wings of Light",
+        "text": "[Action]When playing this card, choose 1 of the following effects and activate it:\n■Choose 1 enemy Unit with 5 or less HP. Return it to its owner's hand.\n■Choose 1 Unit. It recovers 3 HP.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-103": {
+        "ap": 1,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-103",
+        "level": 4,
+        "link": "",
+        "name": "Not with Scattershot!",
+        "text": "[Main]/[Action]Choose 1 friendly Unit. It recovers 1 HP and gets AP+2 during this turn.\n[Pilot][Buran Blutarch]",
+        "traits": [
+            "Titans"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-104": {
+        "ap": 1,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-104",
+        "level": 3,
+        "link": "",
+        "name": "At the Risk of One's Life",
+        "text": "[Action]Choose 1 friendly (Shrike Team) Unit. It gains the following effect during this turn:\n■[During Link][Destroyed]Choose 1 friendly (League Militaire) Unit. Set it as active.\n[Pilot][Helen Jackson]",
+        "traits": [
+            "League Militaire",
+            "Shrike Team"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-105": {
+        "ap": 0,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-105",
+        "level": 2,
+        "link": "",
+        "name": "Exclusively Defense-Oriented Policy",
+        "text": "[Burst]Activate this card's [Main].\n[Main]/[Action]Choose 1 enemy Unit that is Lv.3 or lower. Return it to its owner's hand.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-106": {
+        "ap": 0,
+        "color": "GREEN",
+        "cost": 3,
+        "hp": 0,
+        "id": "GD05-106",
+        "level": 3,
+        "link": "",
+        "name": "Mutual Attraction",
+        "text": "[Main]When playing this card, choose 1 of the following effects and activate it:\n■Place 1 rested Resource.\n■Choose 1 Pilot card that is Lv.5 or higher from your trash. Add it to your hand.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-107": {
+        "ap": 0,
+        "color": "GREEN",
+        "cost": 10,
+        "hp": 0,
+        "id": "GD05-107",
+        "level": 10,
+        "link": "",
+        "name": "Interwoven Blessings",
+        "text": "[Burst]Place 1 EX Resource.\n[Main]Choose 1 enemy player. Destroy the first 2 cards in that player's shield area.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-108": {
+        "ap": 1,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-108",
+        "level": 3,
+        "link": "",
+        "name": "Overcoming Hardships",
+        "text": "[Action]Choose 1 friendly rested (Academy) Unit. Change a battling enemy Unit's attack target to it.\n[Pilot][Guel Jeturk]",
+        "traits": [
+            "Academy"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-109": {
+        "ap": 0,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-109",
+        "level": 3,
+        "link": "",
+        "name": "Felsi's Plea",
+        "text": "[Action]Choose 1 friendly (Academy) Unit. It recovers 2 HP. Then, if it is paired with a Pilot that is Lv.3 or lower, draw 1.\n[Pilot][Felsi Rollo]",
+        "traits": [
+            "Academy"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-110": {
+        "ap": 0,
+        "color": "RED",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-110",
+        "level": 4,
+        "link": "",
+        "name": "Darkness Finger",
+        "text": "[Burst]Activate this card's [Main].\n[Main]/[Action]Choose 1 enemy Unit. Deal 2 damage to it. Then, if you have a Unit with \"Master Gundam\" in its card name in play, draw 1.",
+        "traits": [
+            "Special Move"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-111": {
+        "ap": 0,
+        "color": "RED",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-111",
+        "level": 1,
+        "link": "",
+        "name": "Airframe​ Seizure",
+        "text": "[Main]Discard 1. If you do, draw 2.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-112": {
+        "ap": 2,
+        "color": "RED",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-112",
+        "level": 4,
+        "link": "",
+        "name": "Hoka Kyoten Juzetsujin",
+        "text": "[Main]Choose 1 of your (MF) Units without <Breach>. It gains <Breach 3> during this turn. After activating this card's [Main], you may pair this card from your trash with one of your (MF) Units.\n[Pilot][Sai Saici]",
+        "traits": [
+            "Gundam Fighter",
+            "Shuffle Alliance",
+            "Special Move"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-113": {
+        "ap": 1,
+        "color": "RED",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-113",
+        "level": 3,
+        "link": "",
+        "name": "Rose Screamer",
+        "text": "[Main]Choose 1 of your (MF) Units with 4 or less AP. It gets AP+2 during this turn. After activating this card's [Main], you may pair this card from your trash with one of your (MF) Units.\n[Pilot][George de Sand]",
+        "traits": [
+            "Gundam Fighter",
+            "Shuffle Alliance",
+            "Special Move"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-114": {
+        "ap": 0,
+        "color": "PURPLE",
+        "cost": 6,
+        "hp": 0,
+        "id": "GD05-114",
+        "level": 6,
+        "link": "",
+        "name": "Widespread Annihilation",
+        "text": "[Main]Destroy all Units that are Lv.4 or lower.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-115": {
+        "ap": 0,
+        "color": "PURPLE",
+        "cost": 2,
+        "hp": 0,
+        "id": "GD05-115",
+        "level": 6,
+        "link": "",
+        "name": "Newtype Labs Director",
+        "text": "[Burst]Draw 1.\n[Main]Choose 1 (Neo Zeon) Pilot card from your trash. Add it to your hand.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-116": {
+        "ap": 1,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-116",
+        "level": 2,
+        "link": "",
+        "name": "Veteran's Pride",
+        "text": "[Main]/[Action]Choose 1 enemy Unit that is Lv.2 or lower. Destroy it.\n[Pilot][Rezin Schnyder]",
+        "traits": [
+            "Neo Zeon"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-117": {
+        "ap": 0,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-117",
+        "level": 3,
+        "link": "",
+        "name": "Become a Shield",
+        "text": "[Main]/[Action]Choose 1 of your Units and 1 enemy Unit. Deal 1 damage to them.\n[Pilot][Ride Mass]",
+        "traits": [
+            "Tekkadan",
+            "Alaya-Vijnana"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-118": {
+        "ap": 0,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-118",
+        "level": 3,
+        "link": "",
+        "name": "Incendiary Spark",
+        "text": "[Main]Choose 1 enemy Unit. It gets AP-2 during this turn. If you use an EX Resource to play this card, rest the enemy Unit.",
+        "traits": [],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-119": {
+        "ap": 1,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-119",
+        "level": 5,
+        "link": "",
+        "name": "A Wind Against Fires",
+        "text": "[Action]Choose 1 enemy Unit that is battling one of your Units that is Lv.5 or higher. It gets AP-3 during this battle.\n[Pilot][Zechs Merquise]",
+        "traits": [
+            "Preventer"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-120": {
+        "ap": 0,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 0,
+        "id": "GD05-120",
+        "level": 4,
+        "link": "",
+        "name": "Shining Finger",
+        "text": "[Burst]Add this card to your hand.\n[Main]/[Action]Choose 1 enemy Unit with 4 or less HP. Rest it. Then, you may choose 1 of your Units with \"Shining Gundam\" in its card name. It gets <First Strike> during this turn.\n(While this Unit is attacking, it deals damage before the enemy Unit.)",
+        "traits": [
+            "Shuffle Alliance",
+            "Special Move"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-121": {
+        "ap": 1,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 1,
+        "id": "GD05-121",
+        "level": 3,
+        "link": "",
+        "name": "Cyclone Punch",
+        "text": "[Main]Choose 1 enemy Unit. It gets AP-2 during this turn. After activating this card's [Main], you may pair this card from your trash with one of your (MF) Units.\n[Pilot][Chibodee Crocket]",
+        "traits": [
+            "Gundam Fighter",
+            "Shuffle Alliance",
+            "Special Move"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-122": {
+        "ap": 0,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 2,
+        "id": "GD05-122",
+        "level": 4,
+        "link": "",
+        "name": "Graviton Hammer",
+        "text": "[Main]Choose 1 enemy Unit that is Lv.4 or lower. Rest it. After activating this card's [Main], you may pair this card from your trash with one of your (MF) Units.\n[Pilot][Argo Gulskii]",
+        "traits": [
+            "Gundam Fighter",
+            "Shuffle Alliance",
+            "Special Move"
+        ],
+        "type": "COMMAND",
+        "zones": []
+    },
+    "GD05-123": {
+        "ap": 0,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 5,
+        "id": "GD05-123",
+        "level": 2,
+        "link": "",
+        "name": "Archangel",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\nDuring your opponent's turn, friendly (Orb) Units can't receive 2 or less enemy effect damage.",
+        "traits": [
+            "Orb",
+            "Warship"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-124": {
+        "ap": 0,
+        "color": "BLUE",
+        "cost": 1,
+        "hp": 5,
+        "id": "GD05-124",
+        "level": 2,
+        "link": "",
+        "name": "White Ark",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\nDuring your turn, when you would rest a Unit with a friendly (League Militaire) Unit's effect, you may rest this Base instead.",
+        "traits": [
+            "League Militaire",
+            "Warship"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Space",
+            "Earth"
+        ]
+    },
+    "GD05-125": {
+        "ap": 0,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 5,
+        "id": "GD05-125",
+        "level": 3,
+        "link": "",
+        "name": "Ra Cailum",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main]Rest this Base：Choose 1 friendly (Londo Bell) Unit. During this turn, when it receives enemy damage, reduce it by 1.",
+        "traits": [
+            "Earth Federation",
+            "Londo Bell",
+            "Warship"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Space"
+        ]
+    },
+    "GD05-126": {
+        "ap": 0,
+        "color": "GREEN",
+        "cost": 1,
+        "hp": 6,
+        "id": "GD05-126",
+        "level": 6,
+        "link": "",
+        "name": "Quiet Zero",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main][Once per Turn]②：If you have a Unit with \"Gundam Aerial\" in its card name that is Lv.5 or higher in play, deploy 1 [Gundnode]((Quiet Zero)･AP2･HP2･<Breach 1>) Unit token.",
+        "traits": [
+            "Quiet Zero",
+            "Stronghold"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Space"
+        ]
+    },
+    "GD05-127": {
+        "ap": 0,
+        "color": "RED",
+        "cost": 1,
+        "hp": 5,
+        "id": "GD05-127",
+        "level": 2,
+        "link": "",
+        "name": "Girty Lue",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Once per Turn]When a friendly (Phantom Pain) Unit links, choose 1 enemy Unit. It can't activate <Blocker> during this turn.",
+        "traits": [
+            "Earth Alliance",
+            "Phantom Pain",
+            "Warship"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Space"
+        ]
+    },
+    "GD05-128": {
+        "ap": 0,
+        "color": "RED",
+        "cost": 1,
+        "hp": 5,
+        "id": "GD05-128",
+        "level": 3,
+        "link": "",
+        "name": "Gundam Fight",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main]Rest this Base：If a friendly (MF) Link Unit is in play, choose 1 friendly Unit. It gets AP+2 during this turn.",
+        "traits": [
+            "Stronghold"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Earth"
+        ]
+    },
+    "GD05-129": {
+        "ap": 0,
+        "color": "PURPLE",
+        "cost": 1,
+        "hp": 6,
+        "id": "GD05-129",
+        "level": 4,
+        "link": "",
+        "name": "Axis",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Activate･Main]Rest this Base：If one of your Units has been destroyed by one of your (Neo Zeon) card's effects during this turn, deploy 1 (Neo Zeon) Unit card that is Lv.3 or lower from your hand.",
+        "traits": [
+            "Neo Zeon",
+            "Stronghold"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Space"
+        ]
+    },
+    "GD05-130": {
+        "ap": 0,
+        "color": "WHITE",
+        "cost": 1,
+        "hp": 5,
+        "id": "GD05-130",
+        "level": 2,
+        "link": "",
+        "name": "Presidential Office",
+        "text": "[Burst]Deploy this card.\n[Deploy]Add 1 of your Shields to your hand.\n[Destroyed]You may exile this card in your trash from the game. If you do, you may deploy 1 Base card with \"Presidential Office\" in its card name from your hand.",
+        "traits": [
+            "Earth Sphere Unified Nation",
+            "Stronghold"
+        ],
+        "type": "BASE",
+        "zones": [
+            "Earth"
+        ]
+    },
     "R-001": {
         "ap": 0,
         "color": "BROWN",
@@ -14431,6 +16824,38 @@
         "name": "Gundam Exia",
         "text": "",
         "traits": [],
+        "type": "UNIT TOKEN",
+        "zones": []
+    },
+    "T-026": {
+        "ap": 2,
+        "color": "BROWN",
+        "cost": 0,
+        "hp": 2,
+        "id": "T-026",
+        "level": 0,
+        "link": "",
+        "name": "Gundnode",
+        "text": "<Breach 1> (During your turn, when this Unit destroys an enemy Unit with battle damage, deal the specified amount of damage to the first card in that opponent's shield area.)",
+        "traits": [
+            "Quiet Zero"
+        ],
+        "type": "UNIT TOKEN",
+        "zones": []
+    },
+    "T-027": {
+        "ap": 2,
+        "color": "BROWN",
+        "cost": 0,
+        "hp": 1,
+        "id": "T-027",
+        "level": 0,
+        "link": "",
+        "name": "Pluma",
+        "text": "",
+        "traits": [
+            "Calamity War"
+        ],
         "type": "UNIT TOKEN",
         "zones": []
     }
