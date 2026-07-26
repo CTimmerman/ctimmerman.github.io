@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-25</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-26</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -1702,7 +1702,7 @@ https://exburst.dev/gundam/deck/152946
 			getCard(id) {
 				const d = CARDS[id]
 				if (!d) {
-					const msg = "Card not found: " + id
+					const msg = `Card not found: ${id}. Hard reload (Ctrl+Shift+R) this page to update the database.`
 					log(msg)
 					throw Error(msg)
 				}
