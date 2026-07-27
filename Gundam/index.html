@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-26</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-27</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -269,7 +269,8 @@
 				<option value="CTLN">Cost, Type, Level, Name</option>
 			</select>
 		</div><br>
-		<div><button onclick="mutateDeck()">Save P1 mutant</button> <button onclick="dlog.innerHTML=''">Clear log</button></div>
+		<div><button onclick="mutateDeck()">Save P1 mutant</button> <button onclick="dlog.innerHTML=''">Clear
+				log</button></div>
 	</div>
 	<div id="dtimeleft" onclick="chosen = false"></div>
 	<script>
@@ -372,9 +373,11 @@
 				.replaceAll(">", "&gt;")
 				.replaceAll('"', "&quot;")
 				.replaceAll("'", "&#039;")
+				.replaceAll("\n", "<br>")
 		}
 		function unescapeHTML(unsafe) {
 			return (unsafe || "")
+				.replaceAll(/<br ?\/?>/g, "\n")
 				.replaceAll("&amp;", "&")
 				.replaceAll("&lt;", "<")
 				.replaceAll("&gt;", ">")
@@ -554,27 +557,26 @@
 				tries += 1
 				let i = rnd(0, lines.length - 1)
 				if (i === lastline) continue
-				lastline = i
 				if (lines[i].indexOf("# ") === 0) continue
-				let [count, id] = lines[i].split(" ")
+				let [count, id, ...rest] = lines[i].split(" ")
 				count = parseInt(count)
 				if (!(count >= 0)) continue
 				const d = delta ? -delta : rndPick([-1, 1])
 				if (count + d < 0) continue
 				else if (count + d > 4) continue
-				log(`${count} -> ${count + d} ${id}`)
+				let oldcount = count
+				lastline = i
 				count += d
-				lines[i] = `${count} ${id}`
+				lines[i] = `${count} ${id} ${rest.join(" ")}`
+				log(`${oldcount} -> ${lines[i]}`)
 				dl = lines.join("\n")
-				;[fulldeck, alerts, deckname] = parseDecklist(dl)
-				if (alerts.length < 1) break
-				else log(alerts)
+					;[fulldeck, alerts, deckname] = parseDecklist(dl)
 				changes += 1
 				delta = d
-			} while (changes < 4 && tries < 100)
+			} while (changes < 2 && tries < 100)
 			localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 			addCustomDeck()
-			log(`Mutated ${decklist.split("\n")[0]} in ${tries} cycles: ${dl} ${alerts}`)
+			log(`Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
 			delay = old_delay
 			return dl
 		}
@@ -718,12 +720,13 @@
 		}
 
 		function log(s = "", escape = true) {
+			s = "" + s
 			if (delay > 0 || inStr(s, " start:")) {
 				dlog.innerHTML += (escape ? escapeHTML(s) : s) + "<br>"
 				dlog.scrollTop = dlog.scrollHeight
 			}
-			if (inStr("" + s, "FIXME")
-				|| inStr("" + s, "o link")
+			if (inStr(s, "FIXME")
+				|| inStr(s, "o link")
 			) console.log(s)
 		}
 
@@ -872,7 +875,7 @@
 			}
 			AP() {
 				let rv = this.ap + this.ap_eob + this.ap_eot
-				const t = this.text + (this.pilot && this.pilot.text || "")
+				let t = this.text + (this.pilot && this.pilot.text || "")
 
 				if (inStr(t, "Increase this Unit's AP by an amount equal to the number of (Cyclops Team) Pilot cards/Command cards with unique names in your trash.")) {
 					rv += Set(this.owner.trash.filter(c => ["COMMAND", "PILOT"].includes(c.type) && c.traits.includes("Cyclops Team"))).size
@@ -883,6 +886,7 @@
 				}
 				if (this.pilot) {
 					rv += this.pilot.ap
+					if (inStr(t, "[During Pair･Red Pilot]This Unit gets AP+2.") && this.pilot.color === "RED") rv += 2
 					if (this.linked()) {
 						if (inStr(t, "[During Link] This Unit gets AP+2.")) rv += 2
 						if (inStr(t, "[During Link] This Unit gets AP+1 and HP+1.")) rv += 1
@@ -893,7 +897,7 @@
 				if (inStr(t, "While you have another (Triple Ship Alliance) Unit in play, this Unit gets AP+1 and <Blocker>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Triple Ship Alliance"))) rv += 1
 				if (inStr(t, "While you have another Unit with <High-Maneuver> in play, this Unit gets AP+1.") && this.owner.battle.some(c => c !== this && c.hasTrait("High-Maneuver"))) rv += 1
 				if (inStr(t, "While there is a friendly white Base in play, this Unit gets AP+2.") && this.owner.base && this.owner.base.color === "WHITE") rv += 2
-				if (inStr(t, "While no enemy Base is in play, this Unit gets AP+1.") && !(this.owner == p1 ? p2 : p1).base) rv += 1
+				if (inStr(t, "While no enemy Base is in play, this Unit gets AP+1.") && !(this.owner === p1 ? p2 : p1).base) rv += 1
 				if (inStr(t, "While you have another (Jupitris) Unit in play, this Unit gets AP+1 and <Repair 1>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Jupitris"))) rv += 1
 				if (t === "During your turn, while you have a (CB) Pilot in play, this Unit gets AP+2." && active_player === this.owner && this.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) rv += 2
 				if (inStr(t, "[During Link]This Unit gets AP+2 for each of your rested (CB) Units.") && this.linked()) rv += this.owner.battle.filter(c => c.rested && c.hasTrait("CB")).length * 2
@@ -908,9 +912,18 @@
 				if (inStr(t, "While there are 4 or more Command cards in your trash, this Unit gets AP+1 and HP+1.") && this.owner.trash.filter(c => c.type === "COMMAND").length >= 4) {
 					rv += 1
 				}
+
 				// bonus from other units
 				for (const c of this.owner.battle) {
-					if (active_player == this.owner && this.owner.trash.length >= 7 && c !== this && this.hasTrait("Vulture") && inStr(t, "[During Link]During your turn, while there are 7 or more cards in your trash, all your other (Vulture) Units get AP+2.") && c.linked()) rv += 2
+					t = c.text + (c.pilot && c.pilot.text || "")
+					if (active_player === this.owner) {
+						if (c.pilot) {
+							if (inStr(t, "[During Pair]During your turn, all your Units get AP+1.")) rv += 1
+
+							if (c.pilot.hasTrait("ZAFT") && this.type === "UNIT" && this.hasTrait("ZAFT") && inStr(t, "[During Pair･(ZAFT) Pilot]During your turn, all your (ZAFT) Units get AP+2.")) rv += 2
+						}
+						if (this.owner.trash.length >= 7 && c !== this && this.hasTrait("Vulture") && inStr(t, "[During Link]During your turn, while there are 7 or more cards in your trash, all your other (Vulture) Units get AP+2.") && c.linked()) rv += 2
+					}
 				}
 				return rv
 			}
@@ -1018,7 +1031,7 @@
 					return true
 				}
 				let t = this.text
-				if (this.pilot && this.pilot.type == "PILOT") {  // COMMANDs lack PILOT abilities.
+				if (this.pilot && this.pilot.type === "PILOT") {  // COMMANDs lack PILOT abilities.
 					t += "\n" + this.pilot.text
 				}
 				if (kw === "Blocker") {
@@ -1027,8 +1040,9 @@
 						if (this.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) return true
 					}
 					if (inStr(t, "While you have another (Triple Ship Alliance) Unit in play, this Unit gets AP+1 and <Blocker>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Triple Ship Alliance"))) return true
-					if (inStr(t, "While 3 or more enemy Units are in play, this Unit gains <Blocker>.") && (this.owner == p1 ? p2 : p1).battle.length >= 3) return true
+					if (inStr(t, "While 3 or more enemy Units are in play, this Unit gains <Blocker>.") && (this.owner === p1 ? p2 : p1).battle.length >= 3) return true
 					if (inStr(t, "While this Unit has 5 or more AP, it gains <Blocker>.") && this.AP() >= 5) return true
+					if (this.pilot && inStr(t, "[During Pair]While there are 4 or more Command cards in your trash, this Unit gains <Blocker>.") && this.owner.trash.filter(c => c.type === "COMMAND").length >= 4) return true
 
 					if (this.owner.battle.some(c => c.rested && inStr(c.text, "While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.")) && this.hasTrait("League Militaire") && this.isUnit() && this.isToken()) return true
 				}
@@ -1038,6 +1052,7 @@
 					if (active_player === this.owner && inStr(t, "During your turn, while this Unit is battling an enemy Unit that is Lv.2 or lower, it gains <First Strike>.") && defender && defender.level <= 2 && defender.isUnit()) return true
 				}
 				if (kw === "High-Maneuver") {
+					if (inStr(t, "[During Pair]This Unit gains <High-Maneuver>.") && this.pilot) return true
 					if (inStr(t, "[During Link]This Unit gains <High-Maneuver>.") && this.linked()) return true
 				}
 				if (kw === "Repair") return this.getRepair() > 0
@@ -1065,15 +1080,17 @@
 
 			getBreach() {
 				let rv = (this.text + this.kw_eot).matchAll(/(?<!gains? <)Breach (\d)/g).map(mo => parseInt(mo[1])).reduce((tot, a) => tot + a, 0)
+
 				if (this.isToken()) rv += this.owner.battle.filter(c => inStr(c.text, "All your Unit tokens gain <Breach 1>.")).length
 				const t = this.text + (this.pilot && this.pilot.text || "")
-				if (inStr(t, "[During Link]If this is an (AGE System) Unit, it gets AP+1 and <Breach 1>.") && this.hasTrait("AGE System") && this.linked()) rv += 1
-				if (inStr(t, "While you have a green (Super Soldier) Pilot in play, this Unit gains <Breach 3>.") && this.owner.battle.some(c => c.pilot && c.pilot.color === "GREEN" && c.pilot.hasTrait("Super Soldier"))) rv += 3
 				if (inStr(t, "[Attack]If you are attacking a damaged enemy Unit, this Unit gains <Breach 3> during this battle.") && defender && defender.daamge > 0 && defender.type !== "BASE") rv += 3
-				if (inStr(t, "While this Unit is (Zeon), it gains <Breach 1>.") && this.hasTrait("Zeon")) rv += 1
 				if (inStr(t, "[During Pair]This Unit gains <Breach 3>.") && this.pilot) rv += 3
+				if (inStr(t, "[During Link]If this is an (AGE System) Unit, it gets AP+1 and <Breach 1>.") && this.hasTrait("AGE System") && this.linked()) rv += 1
 				if (inStr(t, "While another friendly (Zeon) Link Unit is in play, this Unit gains <Breach 5>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Zeon") && c.linked())) rv += 5
 				if (inStr(t, "While this Unit has 5 or more AP, it gains <Breach 3>.") && this.HP() >= 5) rv += 3
+				if (inStr(t, "While this Unit is (Zeon), it gains <Breach 1>.") && this.hasTrait("Zeon")) rv += 1
+				if (inStr(t, "While you have a green (Super Soldier) Pilot in play, this Unit gains <Breach 3>.") && this.owner.battle.some(c => c.pilot && c.pilot.color === "GREEN" && c.pilot.hasTrait("Super Soldier"))) rv += 3
+
 				return rv
 			}
 
@@ -1090,7 +1107,7 @@
 		}
 
 		const DECKS = [
-			`# Heroic Beginnings [ST01] (WU)
+			`# ST01 Heroic Beginnings (WU)
 2 ST01-001 Gundam
 4 ST01-002 Gundam (MA Form)
 4 ST01-003 Guncannon
@@ -1107,7 +1124,7 @@
 2 ST01-014 Unforeseen Incident
 3 ST01-015 White Base
 3 ST01-016 Asticassia School of Technology, Earth House`,
-			`# Wings of Advance [ST02] (UG)
+			`# ST02 Wings of Advance (UG)
 2 ST02-001 Wing Gundam
 4 ST02-002 Wing Gundam (Bird Mode)
 4 ST02-003 Gundam Heavyarms
@@ -1124,7 +1141,7 @@
 2 ST02-014 Siege Ploy
 3 ST02-015 Saint Gabriel Institute
 3 ST02-016 Corsica Base`,
-			`# Zeon's Rush [ST03] (RG)
+			`# ST03 Zeon's Rush (RG)
 2 ST03-001 Sinanju
 4 ST03-002 Angelo's Geara Zulu
 4 ST03-003 Geara Zulu
@@ -1141,7 +1158,7 @@
 2 ST03-014 The Blue Giant
 3 ST03-015 Rewloola
 3 ST03-016 Falmel`,
-			`# SEED Strike [ST04] (WR)
+			`# ST04 SEED Strike (WR)
 2 ST04-001 Aile Strike Gundam
 4 ST04-002 Strike Gundam
 4 ST04-003 Moebius Zero
@@ -1158,7 +1175,7 @@
 2 ST04-014 The Magic Bullet of Dusk
 3 ST04-015 Archangel
 3 ST04-016 Vesalius`,
-			`# Iron Bloom [ST05] (WP)
+			`# ST05 Iron Bloom (WP)
 2 ST01-014 Unforeseen Incident
 2 ST05-001 Gundam Barbatos 4th Form
 4 ST05-002 Gundam Barbatos 2nd Form
@@ -1175,7 +1192,7 @@
 2 ST05-013 With Iron and Blood
 2 ST05-014 Fatal Strike
 4 ST05-015 Isaribi`,
-			`# Clan Unity [ST06] (RG)
+			`# ST06 Clan Unity (RG)
 2 ST03-013 Close Combat  # Listed last on https://x.com/GUNDAM_GCG_ENG/status/1976623748871811321/photo/1
 2 ST06-001 GQuuuuuuX (Omega Psycommu)
 4 ST06-002 GQuuuuuuX (Omega Psycommu)
@@ -1192,7 +1209,7 @@
 2 ST06-013 Fierce Unity
 2 ST06-014 Clan Battle
 2 ST06-015 Kaneban Co., Ltd.`,
-			`# Celestial Drive [ST07] (PG)
+			`# ST07 Celestial Drive (PG)
 2 ST07-001 Gundam Exia
 4 ST07-002 Gundam Exia
 4 ST07-003 Gundam Virtue
@@ -1209,8 +1226,8 @@
 4 ST07-014 Tactical Visionary
 4 ST07-015 Ptolemaios
 2 ST05-014 Fatal Strike`,
-			`# Flash of Radiance [ST08] (UR)
-	# January 16, 2026. ＄15.99
+			`# ST08 Flash of Radiance (UR)
+January 16, 2026. ＄15.99
 2 ST08-001 Ξ Gundam
 4 ST08-002 Ξ Gundam
 3 ST08-003 Messer (Type-F Naked) (Commander Type)
@@ -1227,7 +1244,7 @@
 3 ST08-014 Valiant
 2 ST08-015 Davao
 2 ST02-014 Siege Ploy`,
-			`# Destiny Ignition [ST09] (PW)
+			`# ST09 Destiny Ignition (PW)
 March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 3 ST01-014 Unforeseen Incident
 4 ST04-002 Strike Gundam
@@ -1246,7 +1263,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 2 ST09-009 Giant Killing
 4 ST09-010 Minerva
 2 GD02-110 Awakened Power`,
-			`# Destiny Ignition [ST09] (PR)
+			`# ST09 Destiny Ignition (PR)
 2 ST09-001 Impulse Gundam
 2 ST09-002 Force Impulse Gundam
 4 ST09-005 Zaku Warrior
@@ -1264,7 +1281,7 @@ March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
 3 GD01-049 Blitz Gundam
 4 GD01-054 Duel Gundam
 3 GD01-111 Battle of Aces`,
-			`# Generation Pulse [ST10] (WU)
+			`# ST10 Generation Pulse (WU)
 Released 2026-06-26
 4 ST10-016 Luna Mana & Carry Base
 2 ST10-015 Diffuse Beam Cannon
@@ -1282,7 +1299,7 @@ Released 2026-06-26
 3 ST10-002 Zeta Gundam
 3 ST10-007 Gundam Barbatos 4th Form
 2 ST10-001 Zeta Gundam (EX)`,
-			`# blurple deck winner of nats (UP)
+			`# Blurple deck winner of nats (UP)
 https://exburst.dev/gundam/deck/152946
 4 ST02-016 Corsica Base
 4 ST05-014 Fatal Strike
@@ -1298,7 +1315,7 @@ https://exburst.dev/gundam/deck/152946
 4 ST01-001 Gundam
 2 GD02-055 Gundam Gusion Rebake
 2 GD03-001 Gundam NT-1`,
-			`# Top deck (WU)
+			`# Some top deck (WU)
 4 GD04-121 Reineforce Jr.
 3 GD01-118 Overflowing Affection
 2 GD01-100 A Show of Resolve
@@ -1489,7 +1506,7 @@ https://exburst.dev/gundam/deck/152946
 1 GD04-017 Zeong
 1 GD04-022 Kikeroga (MS Mode) (GQ)
 1 GD01-027 Big Zam`,
-			`# Geicokiller's RW GundamFighter
+			`# Geicokiller's GundamFighter (WR)
 # tcgtopdecks-hq.com
 4 GD05-128 Gundam Fight
 4 GD05-111 Airframe​ Seizure
@@ -1504,7 +1521,7 @@ https://exburst.dev/gundam/deck/152946
 4 GD05-072 Rising Gundam
 4 GD05-066 Shining Gundam
 4 GD05-033 Master Gundam`,
-			`# Roemer's deck
+			`# Roemer's deck (RG)
 2 ST03-016 Falmel
 2 GD01-125 Zanzibar
 4 ST03-011 Char Aznable
@@ -1521,6 +1538,9 @@ https://exburst.dev/gundam/deck/152946
 3 GD01-023 Char's Gelgoog
 2 GD03-035 GFreD
 2 GD04-017 Zeong`,
+			`# Test Red Pilot (P)
+12 GD02-034
+12 GD05-089 Master Asia`,
 		]
 
 		let decks = DECKS.slice()
@@ -1655,7 +1675,7 @@ https://exburst.dev/gundam/deck/152946
 					const weakest = mySort(this.battle, c => c.AP())[0]
 					await destroy(weakest)
 				}
-				if (card.LEVEL() <= 3 && card.type == "UNIT" && p1.battle.concat(p2.battle).some(c => inStr(c.text, "All Units that are Lv.3 or lower other than Unit tokens are deployed rested.") && c.linked())) card.rested = true
+				if (card.LEVEL() <= 3 && card.type === "UNIT" && p1.battle.concat(p2.battle).some(c => inStr(c.text, "All Units that are Lv.3 or lower other than Unit tokens are deployed rested.") && c.linked())) card.rested = true
 				log(`🚀Deploy ${card.rested ? "rested " : ""}${card}`)
 				card.sick = true
 				card.damage = 0
@@ -1676,8 +1696,10 @@ https://exburst.dev/gundam/deck/152946
 				log("🎴" + this.name + " draw " + number)
 				for (let i = 0; i < number; ++i) {
 					if (this.deck.length < 1) {
+						let msg = "💀" + this.name + " lost by empty deck: " + this.deckname + " vs " + (this === p1 ? p2 : p1).deckname
+						log(msg)
 						endGame(this === p1 ? p2 : p1)
-						throw Error("💀" + this.name + " lost by empty deck")
+						throw Error(msg)
 					}
 					this.hand.push(this.deck.pop())
 				}
@@ -1702,7 +1724,7 @@ https://exburst.dev/gundam/deck/152946
 			getCard(id) {
 				const d = CARDS[id]
 				if (!d) {
-					const msg = `Card not found: ${id}. Hard reload (Ctrl+Shift+R) this page to update the database.`
+					const msg = `Card not found: ${id}. Hard reload (Ctrl+Shift+R) this page to update the database. NOTE: Might lose custom/mutant decks, or that was due to Chromium's tantrum when disk space was low.`
 					log(msg)
 					throw Error(msg)
 				}
@@ -2168,7 +2190,7 @@ https://exburst.dev/gundam/deck/152946
 				const mo = kw.match(/redirect_battle_damage (\d+)/)
 				if (mo) {
 					for (const c of def.owner.battle) {
-						if (c.cid == mo[1]) {
+						if (c.cid === mo[1]) {
 							log("↪Damage redirect to " + c)
 							defender = c
 						}
@@ -2295,7 +2317,7 @@ https://exburst.dev/gundam/deck/152946
 
 		function getSectionText(card, act = "Main", clause = "", limit = true) {
 			// debug card
-			// if (card.id === "GD04-036" && act == "Deploy") {
+			// if (card.id === "GD04-036" && act === "Deploy") {
 			//  	log("FIXME: DEBUG " + act + " " + clause + " " + card)
 			// }
 			let mo = null
@@ -2334,8 +2356,8 @@ https://exburst.dev/gundam/deck/152946
 				l3ok = true
 			}
 			if (!l3ok) {
-				mo2 = limits3.match(/^･Lv.(White|Blue|Purple|Red|Green) Pilot$/)
-				if (mo2 && !card.pilot.color === mo2[1]) return ""
+				mo2 = limits3.match(/^･(White|Blue|Purple|Red|Green) Pilot$/)
+				if (mo2 && !card.pilot.color === mo2[1].toUpperCase()) return ""
 				l3ok = true
 			}
 
@@ -2404,7 +2426,7 @@ https://exburst.dev/gundam/deck/152946
 			let mo = null
 
 			// debug card rules
-			if (card.id === "GD04-025" && act == "Destroyed") {
+			if (card.id === "GD04-025" && act === "Destroyed") {
 				// breakpoint here
 				// log("FIXME: DEBUG " + act + " " + clause + " " + card)
 			}
@@ -2429,8 +2451,16 @@ https://exburst.dev/gundam/deck/152946
 				if (!myturn) return false  // already checked in getSectionText
 				t = t.slice(mo[0].length)
 			}
+			if (t === "this Unit recovers the specified number of HP.)") {
+				// Handled in End Phase; not all cards have the keyword.
+				return false
+			}
 			// triggered by event and already found on card, meeting restrictions
 			if (mo = t.match(/^with battle damage, /)) {
+				t = t.slice(mo[0].length)
+			}
+			if (mo = t.match(/^If there are 3 or more \(Teiwaz\)\/\(Tekkadan\) cards in your trash, /)) {
+				if (p.trash.filter(c => c.hasTrait("Teiwaz") || c.hasTrait("Tekkadan")).length < 3) return false
 				t = t.slice(mo[0].length)
 			}
 
@@ -2762,12 +2792,28 @@ https://exburst.dev/gundam/deck/152946
 					target = mySort(targets, c => -c.AP() - 10 * (myturn ? c.rested : !c.rested))[0]
 					if (!target) return false
 					eotAP(target, -parseInt(mo[1]))
-					return true
+					t = t.slice(mo[0].length)
+					if (t === "") return true
+					if (t === " If you use an EX Resource to play this card, rest the enemy Unit.") {
+						if (spent.length > 0) rest(target)
+						return true
+					}
+					if (t === " After activating this card's [Main], you may pair this card from your trash with one of your (MF) Units.") {
+						if (act === "Main") {
+							target = p.getPairableUnits().filter(c => c.hasTrait("MF"))[0]
+							if (!target) return true
+							p.trash = p.trash.filter(c => c !== card)
+							await pair(target, card)
+							return true
+						}
+						return true
+					}
 				}
 				if (mo = t.match(/^It gets AP-(\d+) during this battle./)) {
 					if (!defender || !defender.isUnit()) return false
 					eobAP(defender, -parseInt(mo[1]))
-					return true
+					t = t.slice(mo[0].length)
+					if (t === "") return true
 				}
 				if (t === "It won't be set as active during the start phase of your opponent's next turn.") {
 					target = mySort(eu.filter(c => c.level <= 2), c => c.HP())[0]
@@ -2917,7 +2963,7 @@ https://exburst.dev/gundam/deck/152946
 				if (u.pilot) return false
 				target = p.trash.filter(c => c.type === "PILOT" && c.traits.includes("Newtype") && c.LEVEL() <= 3)[0]
 				if (!target) return false
-				targets = p.hand.filter(c => c.type === "UNIT" && (c.traits.includes("Zeon") || c.traits.includes("Neo Zeon"))).slice(0,1)
+				targets = p.hand.filter(c => c.type === "UNIT" && (c.traits.includes("Zeon") || c.traits.includes("Neo Zeon"))).slice(0, 1)
 				if (targets.length < 1) return false
 				await p.discard(1, targets)
 				await pair(u, target)
@@ -3270,7 +3316,7 @@ https://exburst.dev/gundam/deck/152946
 				eotAP(target, 2)
 				return true
 			}
-			if (clause == " Unit links, " && inStr(card.text, "When a friendly (Clan) Unit links, it gains <Breach 3> during this turn.")) {
+			if (clause === " Unit links, " && inStr(card.text, "When a friendly (Clan) Unit links, it gains <Breach 3> during this turn.")) {
 				if (active_unit.owner !== u.owner || !active_unit.hasTrait("Clan")) return false
 				eotKw(active_unit, "Breach 3")
 				return true
@@ -3381,7 +3427,7 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			if (t === "Choose 1 of your other Units. Deal 1 damage to it. It gets AP+1 during this turn.") {
-				target = mySort(fu.filter(c => c !== u && (myturn ? !c.rested && !c.sick : c == defender || c.rested || c.hasTrait("Blocker")) && c.HP() > 1), c => c.AP())[0]
+				target = mySort(fu.filter(c => c !== u && (myturn ? !c.rested && !c.sick : c === defender || c.rested || c.hasTrait("Blocker")) && c.HP() > 1), c => c.AP())[0]
 				if (!target) return false
 				await dealDamage(card, target)
 				eotAP(target, 1)
@@ -3499,7 +3545,7 @@ https://exburst.dev/gundam/deck/152946
 					return true
 				}
 			}
-			if (clause === "receives battle damage" && t == " from an enemy Unit with 3 or less AP, deal 1 damage to that Unit.") {
+			if (clause === "receives battle damage" && t === " from an enemy Unit with 3 or less AP, deal 1 damage to that Unit.") {
 				if (!attacker || attacker.AP() > 3) return false
 				await dealDamage(u, attacker)
 				return true
@@ -3607,7 +3653,7 @@ https://exburst.dev/gundam/deck/152946
 				eu.concat(fu).filter(c => c.AP() <= 5).forEach(async target => await dealDamage(u, target, 2))
 				return true
 			}
-			if (t == "If there are 10 or more (Zeon)/(Neo Zeon) Unit cards in your trash, deal 4 damage to all Units with <Blocker>.") {
+			if (t === "If there are 10 or more (Zeon)/(Neo Zeon) Unit cards in your trash, deal 4 damage to all Units with <Blocker>.") {
 				targets = p.trash.filter(c => c.hasTrait("Zeon") || c.hasTrait("Neo Zeon"))
 				if (targets.length < 10) return false
 				eu.concat(fu).filter(c => c.hasKw("Blocker")).forEach(async target => await dealDamage(card, target, 4))
@@ -3730,7 +3776,7 @@ https://exburst.dev/gundam/deck/152946
 					target = p.trash.filter(c => c.type === "PILOT" && c.hasTrait("Cyclops Team"))[0]
 				}
 				else if (t === "Choose 1 purple Unit card with <Suppression> from your trash. Add it to your hand.") {
-					target = p.trash.filter(c => c.type === "UNIT" && c.color == "PURPLE" && c.hasKw("Suppression"))[0]
+					target = p.trash.filter(c => c.type === "UNIT" && c.color === "PURPLE" && c.hasKw("Suppression"))[0]
 				}
 				if (target) {
 					return toHand(target, true)
@@ -3855,7 +3901,7 @@ https://exburst.dev/gundam/deck/152946
 				}
 				else if (inStr(t, "You may reveal 1 (Operation Meteor)/(G Team) Unit card/Pilot card among them and add it to your hand.")) {
 					target = targets.filter(c => (c.hasTrait("Operation Meteor") || c.hasTrait("G Team")) && (c.type === "UNIT" || c.type === "PILOT"))[0]
-				} else if (t == "Return it to the top or bottom of your deck.") {
+				} else if (t === "Return it to the top or bottom of your deck.") {
 					const c = targets[0]
 					// TODO: Untapped resource length?
 					if ((c.LEVEL() < p.resource.length && c.COST() < p.resource.length) &&
@@ -3939,6 +3985,7 @@ https://exburst.dev/gundam/deck/152946
 		let game_start = new Date()
 		let game_over = false
 		let stop = false
+		let turn = 0
 		let p1 = null
 		let p2 = null
 
@@ -3968,7 +4015,7 @@ https://exburst.dev/gundam/deck/152946
 			let enemy = p === p1 ? p2 : p1
 			enemy.resource.push(enemy.getCard(rndPick(EX_RESOURCES)))
 			await render()
-			let turn = 0
+			turn = 0
 			while (true) {
 				turn += 1
 				active_player = p
@@ -3989,8 +4036,8 @@ https://exburst.dev/gundam/deck/152946
 				// Effects that specify “at the start of the turn” activate.
 				// None of those exist yet.
 				//for (const c of p1.battle.concat(p2.battle)) {
-					// await run(c, "During Pair")
-					// await run(c, "During Link")
+				// await run(c, "During Pair")
+				// await run(c, "During Link")
 				//}
 
 				// Draw phase
@@ -4245,11 +4292,13 @@ https://exburst.dev/gundam/deck/152946
 				}
 				if (game_over) break
 
-				// End phase
+				// End Phase
+				// Step 1 Action
 				await actionStep()
-				while (p.hand.length > 10) await p.discard()
+				// Step 2 Resolve effects
 				for (const c of p1.battle.concat(p2.battle)) {
 					await run(c, "", "At the end of the turn ")
+					if (active_player === c.owner) await run(c, "", "At the end of your turn, ")
 					if (c.damage > 0) {
 						const repair = c.getRepair()
 						if (repair) {
@@ -4258,18 +4307,19 @@ https://exburst.dev/gundam/deck/152946
 							if (c.damage < 0) c.damage = 0
 						}
 					}
+				}
+				// Step 3 Discard to 10
+				while (p.hand.length > 10) await p.discard()
+				// Step 4 Reset temporary effects
+				for (const c of p1.battle.concat(p2.battle).concat(p1.trash).concat(p2.trash).concat(p1.hand).concat(p2.hand)) {
 					c.ap_eot = 0
 					c.hp_eot = 0
 					c.kw_eot = []
 				}
-				for (const c of p1.trash.concat(p2.trash).concat(p1.hand).concat(p2.hand)) {
-					c.ap_eot = 0
-					c.hp_eot = 0
-					c.kw_eot = []
-				}
-
 				p.kw_eot = []
 				once_per_turn = []
+
+				// Pass turn
 				// wait for untap animation
 				await sleep(400)
 				await render()
@@ -4285,8 +4335,9 @@ https://exburst.dev/gundam/deck/152946
 		}
 
 		let deck_stats = {}
+		let deck_winturns = {}
 		let player_wins = [0, 0]
-		/** TODO: avg win turn */
+		/** End game and update stats. */
 		function endGame(winner) {
 			setGameOver(true)
 			if (winner) {
@@ -4296,6 +4347,9 @@ https://exburst.dev/gundam/deck/152946
 				let wdl = deck_stats[winner.deckname] || [0, 0, 0]
 				wdl[0] += 1
 				deck_stats[winner.deckname] = wdl
+
+				if (deck_winturns[winner.deckname]) deck_winturns[winner.deckname].push(turn)
+				else deck_winturns[winner.deckname] = [turn]
 
 				wdl = deck_stats[loser.deckname] || [0, 0, 0]
 				wdl[2] += 1
@@ -4342,7 +4396,7 @@ https://exburst.dev/gundam/deck/152946
 			const stats = Object.entries(deck_stats).sort(sortStats)
 			for (let i = 0; i < stats.length; ++i) {
 				const [name, s] = stats[i]
-				msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${(s[0] / (s[0] + s[1] + s[2]) * 100).toFixed(0)}% ${s}`
+				msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${(s[0] / (s[0] + s[1] + s[2]) * 100).toFixed(0)}% ${s}${!deck_winturns[name] ? "" : " avg W turn " + Math.ceil(deck_winturns[name].reduce((tot, a) => tot + a, 0) / (deck_winturns[name].length) / 2)}`
 			}
 			log(msg, false)
 			setSpeed()
@@ -4350,13 +4404,18 @@ https://exburst.dev/gundam/deck/152946
 
 		async function playGames() {
 			if (Object.keys(CARDS).length < 1) await loadCards()
+			game = 0
+			deck_stats = {}
+			deck_winturns = {}
+			player_wins = [0, 0]
+			stop = false
 			window.games_start = new Date()
 			while (!stop && game < games) {
 				setSpeed()
 				try {
 					await playGame()
 				} catch (ex) {
-					log("🚩FIXME: " + ex + " " + ex.stack)
+					if (!inStr("" + ex, "💀")) log("🚩FIXME: " + ex + " " + ex.stack)
 				}
 				if (game > 1 && delay > 0 || game >= games) showStats()
 				if (delay > 0) {
@@ -4366,10 +4425,6 @@ https://exburst.dev/gundam/deck/152946
 					else await sleep(100)
 				}
 			}
-			stop = false
-			game = 0
-			deck_stats = {}
-			player_wins = [0, 0]
 		}
 
 		function toggleSearch() {
