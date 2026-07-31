@@ -496,7 +496,7 @@
 		function rest(card, effect = true) {
 			if (effect) {
 				let base = card.owner.base
-				if (card.type === "UNIT" && active_player === card.owner && base && !base.rested && inStr(base.text, "During your turn, when you would rest a Unit with a friendly (League Militaire) Unit's effect, you may rest this Base instead.") && active_card.type === "UNIT" && active_card.hasTrait("League Militaire")) {
+				if (card.type === "UNIT" && active_player === card.owner && base && !base.rested && inStr(base.text, "During your turn, when you would rest a Unit with a friendly (League Militaire) Unit's effect, you may rest this Base instead.") && running_card && running_card.type === "UNIT" && running_card.hasTrait("League Militaire")) {
 					card = base
 				}
 				log("💤Rest " + card)
