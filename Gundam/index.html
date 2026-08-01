@@ -3123,7 +3123,7 @@ https://exburst.dev/gundam/deck/152946
 				if (!target) return false
 				rest(u)
 				eotAP(target, support)
-				await publish("When you use this Unit's <Support> to increase a (ZAFT) Unit's AP, ", p.battle)
+				if (target.hasTrait("ZAFT")) await publish("When you use this Unit's <Support> to increase a (ZAFT) Unit's AP, ", [u])
 				return true
 			}
 			if (t === "④：Set this Unit as active.") {
