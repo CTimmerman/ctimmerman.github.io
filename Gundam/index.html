@@ -3119,7 +3119,7 @@ https://exburst.dev/gundam/deck/152946
 			if (mo = t.match(/^<Support (\d)>/)) {
 				let support = parseInt(mo[1])
 				if (u.rested || !u.sick && u.AP() > support) return false
-				target = mySort(fu.filter(c => !c.rested && !c.sick), c => c.AP())[0]
+				target = mySort(fu.filter(c => c !== u && !c.rested && !c.sick), c => c.AP())[0]
 				if (!target) return false
 				rest(u)
 				eotAP(target, support)
