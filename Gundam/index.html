@@ -795,7 +795,7 @@
 				if (part === `[${pilot.name}]`) return true // (Machu)
 				if (pilot_name === "Quattro Bajeena" && part === "Char Aznable") return true
 				if (inStr(part, " Trait")) part = part.slice(0, -6)
-				if (unit.hasTrait(part.slice(1, -1))) return true
+				if (pilot.hasTrait(part.slice(1, -1))) return true
 			}
 			return false
 		}
