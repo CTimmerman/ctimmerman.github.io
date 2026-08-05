@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-07-31</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-08-05</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -25,6 +25,21 @@
 			scrollbar-width: thin;
 			font-family: monospace;
 			height: 1.5em;
+		}
+
+		select::-webkit-scrollbar {
+			width: 12px;
+			height: 12px;
+		}
+
+		select::-webkit-scrollbar-track {
+			background-color: var(--bgcolor);
+		}
+
+		select::-webkit-scrollbar-thumb {
+			background-color: var(--fgcolor);
+			border: 4px solid var(--bgcolor);
+			border-radius: 12px;
 		}
 
 		a {
@@ -249,9 +264,9 @@
 				style="width: 45px;" onchange="games = this.value" oninput="clamp(this)" />
 			<label for="ndelay">Speed</label> <input id="ndelay" type="number" value="50" min="0" max="100"
 				style="width: 40px;" onchange="setSpeed()" oninput="clamp(this)" />%
-			<button id="bstop" onclick="stop = true; setGameOver(true); log(`⛔Stop by user input`)">Stop</button>
+			<button id="bstop" onclick="stop = true; setGameOver(true); log(`⛔Stop by user input`)">End</button>
 			<button id="bstart" disabled="true"
-				onclick="if (game_over) { setTimeout(playGames, 0) } else alert('Game in progress')">Start</button>
+				onclick="if (game_over) { setTimeout(playGames, 0) } else alert('Game in progress')">Begin</button>
 		</div><br>
 		<div>
 			<label for="p1deck">P1 deck</label>
@@ -269,8 +284,7 @@
 				<option value="CTLN">Cost, Type, Level, Name</option>
 			</select>
 		</div><br>
-		<div><button onclick="mutateDeck()">Save P1 mutant</button> <button onclick="dlog.innerHTML=''">Clear
-				log</button></div>
+		<div><button onclick="mutateDeck()">Test P1 mutant</button> <button onclick="compareDecks()">Compare decks</button></div>
 	</div>
 	<div id="dtimeleft" onclick="chosen = false"></div>
 	<script>
@@ -547,8 +561,18 @@
 			overlay.style.display = "none"
 		}
 
-		/** TODO: +20% W over 100 games should suffice */
-		function mutateDeck(decklist = "") {
+		function compareDecks() {
+			const deck1 = decks[p1deck.value]
+			const deck2 = decks[p2deck.value]
+			log(`Deck 1: ${deck1}\nDeck 2: ${deck2}`)
+		}
+		
+		/** +20% W over 100 games should suffice */
+		async function mutateDeck(decklist = "") {
+			if (!game_over) {
+				alert("Please end the current games before testing.")
+				return
+			}
 			let old_delay = delay
 			delay = 1
 			if (!decklist) decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
@@ -562,6 +586,7 @@
 			let dl = ""
 			let changes = 0
 			let lastline = -1
+			let changelog = []
 			do {
 				tries += 1
 				let i = rnd(0, lines.length - 1)
@@ -577,7 +602,9 @@
 				lastline = i
 				count += d
 				lines[i] = `${count} ${id} ${rest.join(" ")}`
-				log(`${oldcount} -> ${lines[i]}`)
+				let change = `${oldcount} -> ${lines[i]}`
+				log(change)
+				changelog.push(change)
 				dl = lines.join("\n")
 					;[fulldeck, alerts, deckname] = parseDecklist(dl)
 				changes += 1
@@ -586,6 +613,25 @@
 			localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 			addCustomDeck()
 			log(`Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
+			if (game_over) {
+				p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
+				games = 100
+				ngames.value = games
+				ndelay.value = 100
+				volume.value = 0
+				setVolume()
+				await playGames()
+				delay = 1
+				let win_perc = (player_wins[1] + 1) / (player_wins[0] + 1) * 100
+				log(changelog.join("\n"))
+				log(`Mutant vs original: ${win_perc.toFixed(2)}%`)
+				if (win_perc > 120) {
+					log("Saving mutant as custom deck 3")
+					localStorage.setItem("customDeck3", `# Custom deck 3\n` + dl)
+					addCustomDeck()
+				}
+				// TODO: Loop
+			}
 			delay = old_delay
 			return dl
 		}
@@ -701,7 +747,7 @@
 			}
 			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
 			<textarea id="tastats" style="top: 70vmin; left: 52vmin; width: 34vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
-<textarea id="tadecklist" style="top: 70vmin; left: 0vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()" onchange="saveCustomDeck(this.value)">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 10vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
+<textarea id="tadecklist" style="top: 70vmin; left: 0vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 10vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
 		}
 
 		function zoom(e) {
@@ -1048,6 +1094,7 @@
 			 * Note that Support is also a Trait.
 			 */
 			hasKw(kw) {
+				const en =  (this.owner === p1 ? p2 : p1)
 				if (kw === "protection.enemy.units" && this.facedown && this.owner.battle.filter(c => c.rested && inStr(c.text, "While this Unit is rested, friendly Shields can't receive battle damage from enemy Units.")).length > 0) {
 					return true
 				}
@@ -1055,8 +1102,8 @@
 				if (this.pilot && this.pilot.type === "PILOT") {  // COMMANDs lack PILOT abilities.
 					t += "\n" + this.pilot.text
 				}
+				const myturn = (active_player === this.owner)
 				if (kw === "Blocker") {
-					const en =  (this.owner === p1 ? p2 : p1)
 					let mo = null
 					if (t.indexOf("<Blocker>") === 0) return true
 					if (inStr(t, "If there are 2 or more enemy players, this Unit gains <Blocker>.")) return false
@@ -1070,29 +1117,36 @@
 					if (inStr(t, "While a friendly Base is in play, this Unit gains <Blocker>.") && this.owner.base) return true
 					if (inStr(t, "While this Unit has 5 or more AP, it gains <Blocker>.") && this.AP() >= 5) return true
 					if (inStr(t, "While this Unit is (Neo Zeon), it gains <Blocker>.") && this.hasTrait("Neo Zeon")) return true
-					if (inStr(t, "While this Unit is White, it gains <Blocker>.") && this.color === "WHITE") return true
+					if (inStr(t, "While this Unit is white, it gains <Blocker>.") && this.color === "WHITE") return true
 					if (this.pilot && inStr(t, "[During Pair]While there are 4 or more Command cards in your trash, this Unit gains <Blocker>.") && this.owner.trash.filter(c => c.type === "COMMAND").length >= 4) return true
 
 					if (this.owner.battle.some(c => c.rested && inStr(c.text, "While this Unit is rested, all your (League Militaire) Unit tokens gain <Blocker>.")) && this.hasTrait("League Militaire") && this.isUnit() && this.isToken()) return true
 				}
 				if (kw === "Breach") return this.getBreach() > 0
 				if (kw === "First Strike") {
+					if (myturn && inStr(t, "[During Link]During your turn, while this Unit is battling an enemy Unit with a [Destroyed] effect, it gains <First Strike>.") && this.linked() && defender && defender.isUnit() && inStr(defender.text + (defender.pilot ? defender.pilot.text : ""), "[Destroyed]")) return true
 					if (this.owner.resource.length >= 7 && inStr(t, "[During Link]While you are Lv.7 or higher, this Unit gains <First Strike>.") && this.linked()) return true
-					if (active_player === this.owner && inStr(t, "During your turn, while this Unit is battling an enemy Unit that is Lv.2 or lower, it gains <First Strike>.") && defender && defender.level <= 2 && defender.isUnit()) return true
+					if (myturn && this.isUnit() && defender && inStr(defender.text, "During your opponent's turn, the enemy Unit battling this Unit gains <First Strike>.")) return true
+					if (myturn && inStr(t, "During your turn, while this Unit is battling an enemy Unit that is Lv.2 or lower, it gains <First Strike>.") && defender && defender.level <= 2 && defender.isUnit()) return true
+					if (inStr(t, "While you have a red (Super Soldier) Pilot in play, this Unit gains <First Strike>.") && this.owner.battle.some(c => c.pilot && c.pilot.color === "RED" && c.pilot.hasTrait("Super Soldier"))) return true
 				}
 				if (kw === "High-Maneuver") {
 					if (inStr(t, "[During Pair]This Unit gains <High-Maneuver>.") && this.pilot) return true
 					if (inStr(t, "[During Link]This Unit gains <High-Maneuver>.") && this.linked()) return true
+					if (inStr(t, "While this Unit is (Academy), it gains <High-Maneuver>.") && this.hasTrait("Academy")) return true
 				}
 				if (kw === "Repair") return this.getRepair() > 0
 				if (kw === "Support") {
 					if (t.indexOf("[Activate･Main]<Support ") === 0) return true
 				}
 				if (kw === "Suppression") {
+					if (t.match(/^<Suppression>/)) return true
+					if (inStr(t, "[During Link]This Unit gains <Suppression>.") && this.linked()) return true
 					if (inStr(t, "While a friendly Base in play, this Unit gains <Suppression>.") && this.owner.base) return true
 					if (inStr(t, "While a friendly (G Generation) Unit with <Blocker> is in play, this Unit gains <Suppression>.") && this.owner.battle.some(c => c.hasTrait("G Generation") && c.hasKw("Blocker"))) return true
+					if (inStr(t, "While a rested enemy Unit is in play, this Unit gains <Suppression>.") && en.battle.some(c => c.rested)) return true
 					if (inStr(t, "While this is damaged, it gains <Suppression>.")) return this.damage > 0
-					if (t.match(/^<Suppression>/)) return true
+					
 				}
 
 				// Find missing rules.
@@ -1617,7 +1671,7 @@ https://exburst.dev/gundam/deck/152946
 			let p2v = p2deck.value || -1
 			let mutantDeck = localStorage.getItem("mutantDeck")
 			if (mutantDeck) decks.push(mutantDeck)
-			for (let slot of ["", "2"]) {
+			for (let slot of ["", "2", "3"]) {
 				let customDeck = localStorage.getItem("customDeck" + slot)
 				if (customDeck) decks.push(customDeck)
 			}
@@ -2398,10 +2452,20 @@ https://exburst.dev/gundam/deck/152946
 			//  	log("FIXME: DEBUG " + act + " " + clause + " " + card)
 			// }
 			let mo = null
-			const rex = new RegExp("(.*?)" + (clause ? clause : ("\\[([^\\]]*?)" + act + "([^\\]]*?)\\]")) + "([^.].+?)(?:\n|$)")
-			for (let line of card.text.split("\n")) if (mo = line.match(rex)) break
-			else for (let line of card.kw_eot) if (mo = line.match(rex)) break
+			const rex = new RegExp("([^\n]*?)" + (clause ? clause : ("\\[([^\\]]*?)" + act + "([^\\]]*?)\\]")) + "([^.].+?)(?:\n|$)")
+			let i = 0
+			for (let line of card.text.split("\n")) {
+				if (mo = line.match(rex)) break
+				++i
+			}
+			if (!mo) {
+				for (let line of card.kw_eot) {
+					if (mo = line.match(rex)) break
+				}
+			}
 			if (!mo) return ""
+			if (!CARDS[card.id].covered_lines) CARDS[card.id].covered_lines = {}
+			CARDS[card.id].covered_lines[i] = (CARDS[card.id].covered_lines[i] || 0) + 1
 			const limits = mo[1]
 			if (limits && limits[0] === "(") return ""  // No reminder text.
 			if (inStr(limits, "During your turn") && active_player !== card.owner) return ""
@@ -2478,7 +2542,10 @@ https://exburst.dev/gundam/deck/152946
 				if (inStr(t, "[Once per Turn]")) once_per_turn.push(t + card.cid)
 				log(`⚡${card.owner.name} ran ${card} ${(act || clause)}: ${t}`)
 				if (card.type === "COMMAND" && ["Action", "Main"].includes(act)) {
-					if (card.hasTrait("Special Move")) card.owner.kw_eot.push("GD05-089")
+					if (card.hasTrait("Special Move")) {
+						card.owner.kw_eot.push("GD05-089")
+						await publish("When you activate a (Special Move) Command's [Main]/[Action], ", card.owner.battle)
+					}
 					await publish("When you activate a Command's [Main]/[Action] effect, ", card.owner.battle)
 				}
 			}
@@ -4628,6 +4695,15 @@ https://exburst.dev/gundam/deck/152946
 					await render()
 					if (games <= 10) await sleep(3000)
 					else await sleep(100)
+				}
+			}
+			for (const card of Object.keys(CARDS)) {
+				if (card.covered_lines) {
+					let covered = Object.keys(card.covered_lines).length
+					let expected  = card.text.split("\n")
+					if (covered !== expected) {
+						log(`🚩FIXME: ${card.id} only covered ${covered}/${expected}: ${Object.keys(card.covered_lines)}`)
+					}
 				}
 			}
 		}
