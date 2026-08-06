@@ -562,78 +562,85 @@
 		}
 
 		function compareDecks() {
-			const deck1 = decks[+p1deck.value]
-			const deck2 = decks[+p2deck.value]
-			log(`Deck 1: ${deck1}\nDeck 2: ${deck2}`)
+			let old_delay = delay
+			delay = 1
+			const deck1 = decks[p1deck.value].split("\n")
+			const deck2 = decks[p2deck.value].split("\n")
+			log(`Deck 1: ${decks[p1deck.value]}\nDeck 2: ${decks[p2deck.value]}`)
+			for (let i in deck1) {
+				if (deck1[i] !== deck2[i]) log(`${deck1[i]} !== ${deck2[i]}`)
+			}
+			delay = old_delay
 		}
-		
-		/** +20% W over 100 games should suffice */
-		async function mutateDeck(decklist = "") {
+
+		/** Tries to save mutant deck as custom deck 3 if 20% better. */
+		async function mutateDeck() {
 			if (!game_over) {
 				alert("Please end the current games before testing.")
 				return
 			}
-			let old_delay = delay
-			delay = 1
-			if (!decklist) decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
-			let lines = decklist.split("\n")
-			log(`Mutating ${lines[0]}`)
-			let fulldeck = []
-			let alerts = []
-			let deckname = ""
-			let tries = 0
-			let delta = 0
-			let dl = ""
-			let changes = 0
-			let lastline = -1
-			let changelog = []
-			do {
-				tries += 1
-				let i = rnd(0, lines.length - 1)
-				if (i === lastline) continue
-				if (lines[i].indexOf("# ") === 0) continue
-				let [count, id, ...rest] = lines[i].split(" ")
-				count = parseInt(count)
-				if (!(count >= 0)) continue
-				const d = delta ? -delta : rndPick([-1, 1])
-				if (count + d < 0) continue
-				else if (count + d > 4) continue
-				let oldcount = count
-				lastline = i
-				count += d
-				lines[i] = `${count} ${id} ${rest.join(" ")}`
-				let change = `${oldcount} -> ${lines[i]}`
-				log(change)
-				changelog.push(change)
-				dl = lines.join("\n")
-					;[fulldeck, alerts, deckname] = parseDecklist(dl)
-				changes += 1
-				delta = d
-			} while (changes < 2 && tries < 100)
-			localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
-			addCustomDeck()
-			log(`Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
-			if (game_over) {
+			let version = 0
+			while (version < 50) {
+				++version
+				delay = 1
+				let decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
+				let lines = decklist.split("\n")
+				log(`\nMutating ${lines[0]}, v${version}`)
+				let fulldeck = []
+				let alerts = []
+				let deckname = ""
+				let tries = 0
+				let delta = 0
+				let dl = ""
+				let changes = 0
+				let lastline = -1
+				let changelog = []
+				do {
+					tries += 1
+					let i = rnd(0, lines.length - 1)
+					if (i === lastline) continue
+					if (lines[i].indexOf("# ") === 0) continue
+					let [count, id, ...rest] = lines[i].split(" ")
+					count = parseInt(count)
+					if (!(count >= 0)) continue
+					const d = delta ? -delta : rndPick([-1, 1])
+					if (count + d < 0) continue
+					else if (count + d > 4) continue
+					let oldcount = count
+					lastline = i
+					count += d
+					lines[i] = `${count} ${id} ${rest.join(" ")}`
+					let change = `${oldcount} -> ${lines[i]}`
+					log(change)
+					changelog.push(change)
+					dl = lines.join("\n")
+						;[fulldeck, alerts, deckname] = parseDecklist(dl)
+					changes += 1
+					delta = d
+				} while (changes < 2 && tries < 100)
+				localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
+				addCustomDeck()
+				log(`Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
 				p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
 				games = 100
 				ngames.value = games
 				ndelay.value = 100
 				volume.value = 0
 				setVolume()
+				await sleep(5500)
 				await playGames()
 				delay = 1
 				let win_perc = (player_wins[1] + 1) / (player_wins[0] + 1) * 100
 				log(changelog.join("\n"))
-				log(`Mutant vs original: ${win_perc.toFixed(2)}%`)
-				if (win_perc > 120) {
+				log(`Mutant ${version} vs original: ${win_perc.toFixed(2)}%`)
+				if (win_perc >= 120) {
 					log("Saving mutant as custom deck 3")
 					localStorage.setItem("customDeck3", `# Custom deck 3\n` + dl)
 					addCustomDeck()
+					break
 				}
-				// TODO: Loop
+				delay = 1
 			}
-			delay = old_delay
-			return dl
 		}
 
 		function parseDecklist(decklist, strict = false, p = p1) {
@@ -1493,23 +1500,88 @@ https://exburst.dev/gundam/deck/152946
 1 GD05-037 Destroy Gundam`,
 			`# Cees's Minerva deck (PR)
 4 ST09-010 Minerva
-2 ST04-016 Vesalius
-4 GD04-116 Reliable Big Brother
-1 GD04-095 Lunamaria Hawke
-2 ST06-004 Gelgoog (GQ)
+0 ST04-016 Vesalius
+0 GD04-128 Armory One
+0 GD04-113 Damage Control
+0 ST09-009 Giant Killing
+0 GD02-110 Awakened Power
+0 GD04-115 Backup
+3 GD04-116 Reliable Big Brother
+2 GD04-095 Lunamaria Hawke
 2 GD04-093 Rey Za Burrel
 4 ST09-008 Shinn Asuka
 4 ST09-005 Zaku Warrior
 2 ST09-001 Impulse Gundam
 4 GD04-062 Lunamaria's Gunner Zaku Warrior
+2 ST05-006 Hyakuren
+0 ST04-007 Aegis Gundam (Ma Mode)
+0 GD01-054 Duel Gundam
+0 GD04-109 Overwhelming Pressure
 4 ST09-006 Sword Impulse Gundam
 2 GD04-056 Sword Impulse Gundam
-2 ST05-006 Hyakuren
-1 GD04-053 Rey's Blaze Zaku Phantom
+2 GD04-053 Rey's Blaze Zaku Phantom
 4 ST09-007 Blast Impulse Gundam
 4 GD04-055 Heine's Gouf Ignited
 2 ST09-002 Force Impulse Gundam
-2 GD04-050 Destiny Gundam`,
+1 GD05-064 Force Impulse Gundam
+2 GD04-050 Destiny Gundam
+2 ST09-003 Saviour Gundam`,
+			`# Cees's Minerva deck 2 (PR)
+4 ST09-010 Minerva
+0 ST04-016 Vesalius
+0 GD04-128 Armory One
+0 GD04-113 Damage Control
+0 ST09-009 Giant Killing
+0 GD02-110 Awakened Power
+1 GD04-115 Backup
+3 GD04-116 Reliable Big Brother
+2 GD04-095 Lunamaria Hawke
+2 GD04-093 Rey Za Burrel
+4 ST09-008 Shinn Asuka
+4 ST09-005 Zaku Warrior
+2 ST09-001 Impulse Gundam
+4 GD04-062 Lunamaria's Gunner Zaku Warrior
+2 ST05-006 Hyakuren
+0 ST04-007 Aegis Gundam (Ma Mode)
+0 GD01-054 Duel Gundam
+0 GD04-109 Overwhelming Pressure
+4 ST09-006 Sword Impulse Gundam
+1 GD04-056 Sword Impulse Gundam
+2 GD04-053 Rey's Blaze Zaku Phantom
+4 ST09-007 Blast Impulse Gundam
+4 GD04-055 Heine's Gouf Ignited
+2 ST09-002 Force Impulse Gundam
+1 GD05-064 Force Impulse Gundam
+2 GD04-050 Destiny Gundam
+2 ST09-003 Saviour Gundam`,
+			`# Cees's Minerva deck 3 (PR)
+4 ST09-010 Minerva
+0 ST04-016 Vesalius
+0 GD04-128 Armory One
+0 GD04-113 Damage Control
+0 ST09-009 Giant Killing
+0 GD02-110 Awakened Power
+1 GD04-115 Backup
+3 GD04-116 Reliable Big Brother
+2 GD04-095 Lunamaria Hawke
+2 GD04-093 Rey Za Burrel
+4 ST09-008 Shinn Asuka
+4 ST09-005 Zaku Warrior
+2 ST09-001 Impulse Gundam
+4 GD04-062 Lunamaria's Gunner Zaku Warrior
+2 ST05-006 Hyakuren
+0 ST04-007 Aegis Gundam (Ma Mode)
+0 GD01-054 Duel Gundam
+1 GD04-109 Overwhelming Pressure
+4 ST09-006 Sword Impulse Gundam
+1 GD04-056 Sword Impulse Gundam
+2 GD04-053 Rey's Blaze Zaku Phantom
+4 ST09-007 Blast Impulse Gundam
+3 GD04-055 Heine's Gouf Ignited
+2 ST09-002 Force Impulse Gundam
+1 GD05-064 Force Impulse Gundam
+2 GD04-050 Destiny Gundam
+2 ST09-003 Saviour Gundam`,
 			`# Cees's Red CB deck (PR)
 0 GD04-126 Izuma Colony
 4 ST07-015 Ptolemaios
