@@ -47,6 +47,11 @@
 			font-family: monospace;
 		}
 
+		button,
+		span {
+			cursor: pointer;
+		}
+
 		button:disabled {
 			opacity: 75%;
 		}
@@ -271,10 +276,12 @@
 		<div>
 			<label for="p1deck">P1 deck</label>
 			<select id="p1deck" value="-1"></select>
+			<span onclick='showDeck(p1deck.options[p1deck.selectedIndex].text); event.preventDefault()'>👀</span>
 			<input id="p1ai" type="checkbox" checked="checked"><label for="p1ai">AI</label>
 			<br>
 			<label for="p2deck">P2 deck</label>
 			<select id="p2deck" value="-1"></select>
+			<span onclick='showDeck(p2deck.options[p2deck.selectedIndex].text); event.preventDefault()'>👀</span>
 			<input id="p2ai" type="checkbox" checked="checked"><label for="p2ai">AI</label>
 			<br>
 			<label for="deckOrder">Decklist order</label>
@@ -657,7 +664,7 @@
 				log(changelog.join("\n"), true, true)
 				log(`Mutant ${version} vs original: ${win_perc.toFixed(0)}%`, true, true)
 				// Save
-				if (win_perc > 117) {
+				if (win_perc >= 118) {
 					log("✅Saving mutant as custom deck 3")
 					localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 					addCustomDeck()
@@ -674,7 +681,7 @@
 		async function honeDeck(upgrades = 10) {
 			bhone.disabled = true
 			const deckname = p1deck.options[p1deck.selectedIndex].text
-			log(`Honing ${deckname} ${new Date()}...`, true, true)	
+			log(`Honing ${deckname} ${new Date()}...`, true, true)
 			for (var i = 1; !stop && i <= upgrades - 1; ++i) {
 				bhone.innerHTML = `Hone P1 deck ${i}/${upgrades}`
 				if (!await mutateDeck()) {
@@ -1689,6 +1696,7 @@ https://exburst.dev/gundam/deck/152946
 4 GD03-108 How Many Miles to the Battlefield?
 4 ST03-014 The Blue Giant
 3 GD03-090 Mikhail Kaminsky
+0 GD02-090 Challia Bull (GQ)
 2 GD04-088 Tokwan
 1 GD03-032 Zaku (Four Snake Eyes') [YETI] (GQ)
 4 ST03-008 Zaku Ⅱ
@@ -1696,10 +1704,10 @@ https://exburst.dev/gundam/deck/152946
 4 GD03-024 Hy-Gogg
 4 GD03-027 Z’Gok E
 4 ST03-009 Gouf
-4 GD04-027 Bigro
+3 GD04-027 Bigro
 4 GD04-032 Xavier's Gyan Hakuji-Packs (GQ)
 1 GD04-017 Zeong
-1 GD04-022 Kikeroga (MS Mode) (GQ)
+2 GD04-022 Kikeroga (MS Mode) (GQ)
 1 GD01-027 Big Zam`,
 			`# Geicokiller's GundamFighter (WR)
 # tcgtopdecks-hq.com
@@ -3342,7 +3350,7 @@ https://exburst.dev/gundam/deck/152946
 				eotAP(target, -1)
 				return true
 			}
-			
+
 			// Base
 			if (t === "Rest 1 of your (Earth Federation) Units：Choose 1 enemy Unit that is Lv.3 or lower. Rest it.") {
 				if (myturn && fua.length < 2) return false
