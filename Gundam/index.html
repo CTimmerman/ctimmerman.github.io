@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-08-08</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-08-11</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -270,8 +270,8 @@
 			<label for="ndelay">Speed</label> <input id="ndelay" type="number" value="50" min="0" max="100"
 				style="width: 40px;" onchange="setSpeed()" oninput="clamp(this)" />%
 			<button id="bstart" disabled="true"
-				onclick="stop = false; if (game_over) { setTimeout(playGames, 0) } else alert('Game in progress')">Begin</button>
-			<button id="bstop" onclick="stop = true; setGameOver(true); log(`⛔Stop by user input`)">End</button>
+				onclick="stop = false; if (game_over) { setTimeout(playGames, 0) } else alert('Game in progress')">▶Begin</button>
+			<button id="bstop" onclick="stop = true; setGameOver(true); log(`⛔Stop by user input`)">◼End</button>
 		</div><br>
 		<div>
 			<label for="p1deck">P1 deck</label>
@@ -292,9 +292,8 @@
 			</select>
 		</div><br>
 		<div>
-			<button id="btest" onclick="stop = false; mutateDeck()">Hone P1 deck</button>
-			<button id="bhone" onclick="stop = false; honeDeck()">10x Hone P1 deck</button>
-			<button onclick="compareDecks()">Compare decks</button>
+			<button id="bhone" onclick="stop = false; honeDeck(parseInt(nhone.value))">⚔️Hone P1 deck</button>x<input id="nhone" type="number" value="1" min="0" max="99" style="width: 32px;" oninput="clamp(this)" />
+			<button onclick="compareDecks()">⇄Compare decks</button>
 		</div>
 	</div>
 	<div id="dtimeleft" onclick="chosen = false"></div>
@@ -490,7 +489,7 @@
 		async function sleep(ms = 1000) {
 			do {
 				await new Promise(r => setTimeout(r, delay * ms))
-			} while (delay === maxDelay)
+			} while (delay === maxDelay && !stop)
 		}
 
 		function getel(card) {
@@ -605,17 +604,16 @@
 				alert("Please end the current games before testing.")
 				return
 			}
-			btest.disabled = true
-			bhone.disabled = true
 			let version = 0
 			let better = false
+			// let old_win_perc = 0
+			// let wp_history = []
 			while (version < 50 && !stop) {
 				++version
-				btest.innerHTML = `Test P1 mutant ${version}/50`
 				delay = 1
 				let decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
 				let lines = decklist.split("\n")
-				log(`\nMutating ${lines[0]}, v${version}`)
+				log(`\n🧪Mutating ${lines[0]}, v${version}`)
 				let fulldeck = []
 				let alerts = []
 				let deckname = ""
@@ -650,21 +648,25 @@
 				} while (changes < 2 && tries < 100)
 				localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 				addCustomDeck()
-				log(`Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
+				log(`🧪Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
 				// Test
 				p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
-				games = 100
+				games = 150  // 100 isn't stable enough for Academy.
 				ngames.value = games
 				ndelay.value = 100
 				volume.value = 0
 				await sleep(5000)
 				await playGames()
 				delay = 1
-				let win_perc = (player_wins[1] + 1) / (player_wins[0] + 1) * 100
+				let win_perc = (player_wins[1]) / (player_wins[0] + 0.000001) * 100
 				log(changelog.join("\n"), true, true)
-				log(`Mutant ${version} vs original: ${win_perc.toFixed(0)}%`, true, true)
+				log(`🧪Mutant ${version} vs original: ${win_perc.toFixed(0)}%`, true, true)
+				// old_win_perc = win_perc
+				// wp_history.push(win_perc)
+				// log("WPH:" + wp_history, false, true)
+				// if (Math.abs(win_perc - old_win_perc) < 5) log("Seems stable.")
 				// Save
-				if (win_perc >= 118) {
+				if (win_perc >= 120) {
 					log("✅Saving mutant as custom deck 3")
 					localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 					addCustomDeck()
@@ -672,27 +674,34 @@
 					break
 				}
 			}
-			btest.innerHTML = `Hone P1 deck`
-			btest.disabled = false
-			bhone.disabled = false
 			return better
 		}
 
 		async function honeDeck(upgrades = 10) {
 			bhone.disabled = true
+			nhone.disabled = true
 			const deckname = p1deck.options[p1deck.selectedIndex].text
-			log(`Honing ${deckname} ${new Date()}...`, true, true)
-			for (var i = 1; !stop && i <= upgrades - 1; ++i) {
-				bhone.innerHTML = `Hone P1 deck ${i}/${upgrades}`
+			const hone_start = new Date()
+			let better = false
+			log(`⚔️Honing ${deckname} ${hone_start}, ETA ${upgrades * 3}m`, true, true)
+			for (var i = 1; !stop && i <= upgrades; ++i) {
+				bhone.innerHTML = `⚔️Honing P1 deck ${i}/${upgrades}`
 				if (!await mutateDeck()) {
 					log(`${deckname} seems optimal. Try adding 0-count cards to consider.`, true, true)
 					break
 				}
-				log(`${i}/${upgrades} upgrades`, true, true)
-				p1deck.value = [...p2deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
+				better = true
+				const mspent = (new Date() - hone_start) / 60000
+				log(`⚔️${i}/${upgrades} upgrades in ${(mspent).toFixed(2)}m  ETA ${(mspent / i * (upgrades - i)).toFixed(2)}m`, true, true)
+				p1deck.value = [...p1deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 			}
-			if (i > 1) log(`Honed ${deckname} as Custom deck 3 on ${new Date()}`, true, true)
-			bhone.innerHTML = `10x Hone P1 deck`
+			p1deck.value = [...p1deck.options].filter(o => o.innerText === deckname)[0].value
+			if (better) {
+				log(`⚔️Honed ${deckname} as Custom deck 3 on ${new Date()}`, true, true)
+				compareDecks()
+			}
+			bhone.innerHTML = `⚔️Hone P1 deck`
+			nhone.disabled = false
 			bhone.disabled = false
 			return true
 		}
@@ -1002,7 +1011,7 @@
 				const en = (this.owner === p1 ? p2 : p1)
 
 				if (inStr(t, "Increase this Unit's AP by an amount equal to the number of (Cyclops Team) Pilot cards/Command cards with unique names in your trash.")) {
-					rv += Set(this.owner.trash.filter(c => ["COMMAND", "PILOT"].includes(c.type) && c.traits.includes("Cyclops Team"))).size
+					rv += new Set(this.owner.trash.filter(c => ["COMMAND", "PILOT"].includes(c.type) && c.traits.includes("Cyclops Team"))).size
 				}
 				if (this.owner.resource.length >= 7 && inStr(t, "While you are Lv.7 or higher, this Unit gets AP+2.")) rv += 2
 				if (this.damage > 0 && inStr(t, "While this Unit is damaged, it gets AP+2.")) {
@@ -1479,21 +1488,27 @@ https://exburst.dev/gundam/deck/152946
 4 GD04-006 V-Dash Gundam
 4 GD04-065 Unicorn Gundam 02 Banshee Norn (Destroy Mode)`,
 			`# Cees's Academy deck (G)
-4 GD04-124 9th Tactical Testing Sector
+3 GD04-124 9th Tactical Testing Sector
 2 GD04-123 A Baoa Qu
-2 GD04-108 Witches from Earth
-2 GD04-106 Indiscriminate Violence
-1 GD04-087 Elan Ceres (Enhanced Person Number 5)
-4 GD04-085 Suletta Mercury
+3 GD04-108 Witches from Earth
+2 GD04-085 Suletta Mercury
+1 GD04-106 Indiscriminate Violence
+2 GD04-087 Elan Ceres (Enhanced Person Number 5)
+0 GD05-109 Felsi's Plea
+0 GD05-108 Overcoming Hardships
 4 ST03-007 Zaku Ⅰ
 4 GD04-031 Heindree
 4 GD04-028 Zakrello
+1 GD05-032 Desultor
+1 GD05-025 Demi Barding
+0 GD05-031 Guel's Dilanza
 4 GD04-030 Chuchu's Demi Trainer
 4 GD04-025 Gundvölva
 4 GD04-020 Gundam Lfrith Ur
 4 GD04-021 Gundam Lfrith Thorn
 3 GD04-018 Gundam Pharact
-4 GD04-024 Gundam Aerial Rebuild`,
+4 GD04-024 Gundam Aerial Rebuild
+0 GD05-018 Gundam Calibarn`,
 			`# Cees's CB deck (RG)
 4 GD03-125 Peacemillion
 2 ST07-012 Allelujah Haptism*
@@ -1697,9 +1712,11 @@ https://exburst.dev/gundam/deck/152946
 4 ST03-014 The Blue Giant
 3 GD03-090 Mikhail Kaminsky
 0 GD02-090 Challia Bull (GQ)
-2 GD04-088 Tokwan
+1 GD04-088 Tokwan
+2 GD03-089 Bernard W
 1 GD03-032 Zaku (Four Snake Eyes') [YETI] (GQ)
 4 ST03-008 Zaku Ⅱ
+0 GD03-020 Zaku II FZ
 4 GD04-028 Zakrello
 4 GD03-024 Hy-Gogg
 4 GD03-027 Z’Gok E
@@ -1707,7 +1724,7 @@ https://exburst.dev/gundam/deck/152946
 3 GD04-027 Bigro
 4 GD04-032 Xavier's Gyan Hakuji-Packs (GQ)
 1 GD04-017 Zeong
-2 GD04-022 Kikeroga (MS Mode) (GQ)
+1 GD04-022 Kikeroga (MS Mode) (GQ)
 1 GD01-027 Big Zam`,
 			`# Geicokiller's GundamFighter (WR)
 # tcgtopdecks-hq.com
@@ -2695,6 +2712,10 @@ https://exburst.dev/gundam/deck/152946
 				if (p.battle.filter(c => c.hasTrait(mo[2])).length < mo[1]) return false
 				t = t.slice(mo[0].length)
 			}
+			if (mo = t.match(/^If there are (\d+) or more \(([^)]+?)\) cards in your trash, /)) {
+				if (p.trash.filter(c => c.hasTrait(mo[2])).length < mo[1]) return false
+				t = t.slice(mo[0].length)
+			}
 			if (mo = t.match(/^If there are (\d+) or more \(([^)]+)\)\/\(([^)]+)\) cards in your trash, /)) {
 				if (p.trash.filter(c => c.hasTrait(mo[2]) || c.hasTrait(mo[3])).length < mo[1]) return false
 				t = t.slice(mo[0].length)
@@ -3464,7 +3485,7 @@ https://exburst.dev/gundam/deck/152946
 				return true
 			}
 			// battle Action command
-			if (t === "Choose 1 rested friendly (CB) Unit. Change the attack target of the battling enemy Unit to it.") {
+			if (t === "Choose 1 rested friendly (CB) Unit. Change the attack target of the battling enemy Unit to it." || t === "Choose 1 friendly rested (Academy) Unit. Change a battling enemy Unit's attack target to it.") {
 				if (myturn || !attacker) return false
 				// TODO goodBattle(att, def) or first strike
 				const aap = attacker.AP()
@@ -3472,7 +3493,8 @@ https://exburst.dev/gundam/deck/152946
 				const dap = defender && defender.AP() || 0
 				const dhp = defender && defender.HP() || 0
 				if (dhp > aap || dap >= ahp) return false
-				target = fu.filter(c => c.rested && c !== defender && c.hasTrait("CB") && (c.HP() > aap || c.AP() >= ahp))[0]
+				let trait = inStr(t, "(Academy)") ? "Academy" : "CB"
+				target = fu.filter(c => c.rested && c !== defender && c.hasTrait(trait) && (c.HP() > aap || c.AP() >= ahp))[0]
 				if (!target) return
 				log("🎯" + target + " is new attack target")
 				defender = target
@@ -3698,6 +3720,13 @@ https://exburst.dev/gundam/deck/152946
 				if (!target) return false
 				return await target.recover(3)
 			}
+			if (t === "Choose 1 friendly (Academy) Unit. It recovers 2 HP. Then, if it is paired with a Pilot that is Lv.3 or lower, draw 1.") {
+				target = mySort(fu.filter(c => c.damage > 0 && c.hasTrait("Academy")), c => -c.damage)[0]
+				if (!target) return false
+				await target.recover(2)
+				if (target.pilot && target.pilot.LEVEL() <= 3) await p.draw()
+				return true
+			}
 			if (inStr(t, "Choose 1 friendly Unit. It gets AP+2 during this turn.")) {
 				target = mySort(fu.filter(c => !c.rested && !c.sick), c => c.AP())[0]
 				if (!target) return false
@@ -3857,6 +3886,10 @@ https://exburst.dev/gundam/deck/152946
 				await p.deploy(p.getToken("Wire-Guided Arm"))
 				return true
 			}
+			if (t === "deploy 2 rested [Ad Balloon]((Civilian)･AP0･HP1･This Unit can't be set as active or paired with a Pilot) Unit tokens.") {
+				[..."12"].forEach(async c => { let b = p.getToken("Ad Balloon"); b.rested = true; await p.deploy(b) })
+				return true
+			}
 			if (t === "Return it to its owner's hand.") {
 				target = mySort(targets, c => -c.cost + c.rested)[0]
 				bounce(target)
@@ -3966,6 +3999,11 @@ https://exburst.dev/gundam/deck/152946
 					await p.placeEXResource()
 					return true
 				}
+			}
+			
+			if (mo = t.match(/^Place (\d) EX Resources?\.$/)) {
+				for (let i = 0; i < mo[1]; ++i) await p.placeEXResource()
+				return true
 			}
 
 			if (t === "If you have another (Cyclops Team) Unit in play, deploy 1 rested [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.") {
@@ -4260,8 +4298,8 @@ https://exburst.dev/gundam/deck/152946
 				else if (mo = t.match(/You may deploy 1 \((.+?)\) Unit card that is Lv.4 or lower among them./)) {
 					target = targets.filter(c => c.level <= 4 && c.hasTrait(mo[1]))[0]
 				}
-				else if (inStr(t, "You may reveal 1 Pilot card among them and add it to your hand.")) {
-					target = targets.filter(c => c.type === "PILOT")[0]
+				else if (mo = t.match(/You may reveal 1 (Base|Command|Pilot|Unit) card among them and add it to your hand./)) {
+					target = targets.filter(c => c.type === mo[1].toUpperCase())[0]
 				}
 				else if (inStr(t, "You may reveal 1 (Academy) Unit card/Command card among them and add it to your hand.")) {
 					target = targets.filter(c => (c.type === "UNIT" || c.type === "COMMAND") && c.hasTrait("Academy"))[0]
@@ -4720,6 +4758,7 @@ https://exburst.dev/gundam/deck/152946
 				// log(structuredClone(p))  // clone to keep current lists state
 				p = p === p1 ? p2 : p1
 			}
+			setGameOver(true)
 		}
 
 		function setGameOver(b) {
@@ -4785,9 +4824,9 @@ https://exburst.dev/gundam/deck/152946
 			delay = 1
 			const m = Number((new Date() - games_start) / 60000)
 			let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${(m / game * 60).toFixed(2) + "s/game"}`
-			if (game < games) msg += "; " + ((games - game) * m / game).toFixed(2) + "m left"
+			if (game < games) msg += "; ETA " + ((games - game) * m / game).toFixed(2) + "m"
 
-			let win_perc = (player_wins[1] + 1) / (player_wins[0] + 1) * 100
+			let win_perc = (player_wins[1]) / (player_wins[0] + 0.000001) * 100
 			msg += `<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]} ${win_perc.toFixed(0)}%<br>\nDecks ranked by W% W/D/L avg win turn:`
 			const stats = Object.entries(deck_stats).sort(sortStats)
 			for (let i = 0; i < stats.length; ++i) {
@@ -4800,6 +4839,7 @@ https://exburst.dev/gundam/deck/152946
 
 		async function playGames() {
 			if (Object.keys(CARDS).length < 1) await loadCards()
+			games = parseInt(ngames.value)
 			game = 0
 			deck_stats = {}
 			deck_winturns = {}
