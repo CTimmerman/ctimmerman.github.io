@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-08-11</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-08-15</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -608,7 +608,7 @@
 			let better = false
 			// let old_win_perc = 0
 			// let wp_history = []
-			while (version < 50 && !stop) {
+			while (version < 100 && !stop) {
 				++version
 				delay = 1
 				let decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
@@ -645,13 +645,13 @@
 						;[fulldeck, alerts, deckname] = parseDecklist(dl)
 					changes += 1
 					delta = d
-				} while (changes < 2 && tries < 100)
+				} while (changes < 4 && tries < 100)
 				localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 				addCustomDeck()
 				log(`🧪Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
 				// Test
 				p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
-				games = 150  // 100 isn't stable enough for Academy.
+				games = 200  // 150 isn't stable enough for Red CB.
 				ngames.value = games
 				ndelay.value = 100
 				volume.value = 0
@@ -660,13 +660,13 @@
 				delay = 1
 				let win_perc = (player_wins[1]) / (player_wins[0] + 0.000001) * 100
 				log(changelog.join("\n"), true, true)
-				log(`🧪Mutant ${version} vs original: ${win_perc.toFixed(0)}%`, true, true)
+				log(`🧪Mutant ${version}/100 vs original: ${win_perc.toFixed(0)}%`, true, true)
 				// old_win_perc = win_perc
 				// wp_history.push(win_perc)
 				// log("WPH:" + wp_history, false, true)
 				// if (Math.abs(win_perc - old_win_perc) < 5) log("Seems stable.")
 				// Save
-				if (win_perc >= 120) {
+				if (win_perc >= 127) {
 					log("✅Saving mutant as custom deck 3")
 					localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 					addCustomDeck()
@@ -677,13 +677,18 @@
 			return better
 		}
 
+		/** Autoupgrade deck as custom deck 3.
+		 * 2 changes, 200 games, 127% treshold:
+		 * 37/50 upgrades in 1094.73m ETA 384.64m
+		 * ~= +50% winrate in 37*30 minutes.
+		*/
 		async function honeDeck(upgrades = 10) {
 			bhone.disabled = true
 			nhone.disabled = true
 			const deckname = p1deck.options[p1deck.selectedIndex].text
 			const hone_start = new Date()
 			let better = false
-			log(`⚔️Honing ${deckname} ${hone_start}, ETA ${upgrades * 3}m`, true, true)
+			log(`⚔️Honing ${deckname} ${hone_start}, ETA ${upgrades * 30}m`, true, true)
 			for (var i = 1; !stop && i <= upgrades; ++i) {
 				bhone.innerHTML = `⚔️Honing P1 deck ${i}/${upgrades}`
 				if (!await mutateDeck()) {
@@ -697,6 +702,7 @@
 			}
 			p1deck.value = [...p1deck.options].filter(o => o.innerText === deckname)[0].value
 			if (better) {
+				p2deck.value = [...p2deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 				log(`⚔️Honed ${deckname} as Custom deck 3 on ${new Date()}`, true, true)
 				compareDecks()
 			}
@@ -1509,6 +1515,53 @@ https://exburst.dev/gundam/deck/152946
 3 GD04-018 Gundam Pharact
 4 GD04-024 Gundam Aerial Rebuild
 0 GD05-018 Gundam Calibarn`,
+			`# Cees's AI CB deck
+0 GD03-022
+2 GD03-026
+0 GD03-030
+0 GD03-049
+1 GD03-052
+2 GD03-057
+3 GD03-063
+1 GD04-019
+0 GD04-023
+3 GD04-029
+0 GD04-034
+1 GD04-036
+0 GD04-037
+0 GD04-038
+0 GD04-041
+0 GD04-045
+1 GD04-046
+4 GD04-047
+0 GD04-054
+0 GD04-057
+1 GD04-063
+1 GD04-064
+0 GD04-071
+0 GD04-089
+0 GD04-090
+0 GD04-092
+0 GD04-111
+4 GD04-125
+0 GD05-038
+0 GD05-048
+4 GD05-050
+1 ST07-001
+4 ST07-002
+2 ST07-003
+4 ST07-004
+0 ST07-005
+4 ST07-006
+2 ST07-007
+4 ST07-008
+1 ST07-009
+0 ST07-010
+0 ST07-011
+0 ST07-012
+0 ST07-013
+0 ST07-014
+0 ST07-015`,
 			`# Cees's CB deck (RG)
 4 GD03-125 Peacemillion
 2 ST07-012 Allelujah Haptism*
@@ -1596,6 +1649,10 @@ https://exburst.dev/gundam/deck/152946
 2 GD04-050 Destiny Gundam
 2 ST09-003 Saviour Gundam`,
 			`# Cees's Red CB deck (PR)
+0 GD04-090 Hallelujah Haptism
+0 GD04-043 Zssa (sleeves)
+0 GD04-037 Gundam Kyrios (Trans-Am)
+0 GD04-038 Gundam Exia
 0 GD04-126 Izuma Colony
 4 ST07-015 Ptolemaios
 4 GD04-125 Trinity Warship
@@ -3198,6 +3255,15 @@ https://exburst.dev/gundam/deck/152946
 					await dealDamage(card, target, 2)
 					return true
 				}
+				if (t === "Rest 3 of your (CB) Units：Choose 1 enemy Unit. Deal 4 damage to it.") {
+					let mine = fu.filter(c => !c.rested && c.hasTrait("CB")).slice(0, 3)
+					if (mine.length < 3) return false
+					target = chooseDmgTarget(card, eu, 4)
+					if (!target) return false
+					mine.forEach(async c => await rest(c))
+					await dealDamage(card, target, 4)
+					return true
+				}
 				if (t === "You may choose 1 of your other Units. Destroy it. If you do, place the top 3 cards of your deck into your trash. Add 1 (Neo Zeon) Unit card you placed from your deck with this effect to your hand.") {
 					target = fu.filter(c => c !== u && c.rested)[0]
 					if (!target) return false
@@ -3280,9 +3346,12 @@ https://exburst.dev/gundam/deck/152946
 				await destroy(target)
 				return true
 			}
-			mo = t.match(/^ to an enemy Unit that is Lv.(\d) or lower, /)
+			mo = t.match(/^ to an enemy Unit that is Lv.(\d) or lower( [^)]+)?, /)
 			if (mo) {
 				target = (u === defender ? attacker : defender)
+				if (mo[2] === " that has no paired Pilot") {
+					if (target.pilot) return false
+				}
 				if (!target || !(target.LEVEL() <= parseInt(mo[1]))) return false
 				if (eu.includes(target)) return false
 				t = t.slice(mo[0].length)
@@ -4214,6 +4283,10 @@ https://exburst.dev/gundam/deck/152946
 				await p.discard(1)
 				return true
 			}
+			if (mo = t.match(/^Place the top (\d+) cards of your deck into your trash\.$/)) {
+				p.mill(mo[1])
+				return true
+			}
 			if (t === "Place the top 2 cards of your deck into your trash. If you place a (CB) card with this effect, draw 1.") {
 				const top = card.owner.mill(2)
 				if (top.some(c => c.hasTrait("CB"))) await p.draw()
@@ -4921,7 +4994,7 @@ https://exburst.dev/gundam/deck/152946
 			else {
 				count = 0
 				cid = oldcid
-				html = "" + results.length + " results:<br>"
+				html = `${results.length} results: <input type="text" value="${results.map(o => o[0])}"/><br>`
 				for (const entry of results) {
 					let left = 5 + (count % 10) * 11
 					let top = 10 + Math.floor(count / 10) * 15
@@ -4930,6 +5003,7 @@ https://exburst.dev/gundam/deck/152946
 				}
 			}
 			searchresults.innerHTML = html
+			return results
 		}
 
 		playGames()
