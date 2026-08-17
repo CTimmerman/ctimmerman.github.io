@@ -292,7 +292,8 @@
 			</select>
 		</div><br>
 		<div>
-			<button id="bhone" onclick="stop = false; honeDeck(parseInt(nhone.value))">⚔️Hone P1 deck</button>x<input id="nhone" type="number" value="1" min="0" max="99" style="width: 32px;" oninput="clamp(this)" />
+			<button id="bhone" onclick="stop = false; honeDeck(parseInt(nhone.value))">⚔️Hone P1 deck</button>x<input
+				id="nhone" type="number" value="1" min="0" max="99" style="width: 32px;" oninput="clamp(this)" />
 			<button onclick="compareDecks()">⇄Compare decks</button>
 		</div>
 	</div>
@@ -472,6 +473,7 @@
 			if (card.pilot) trash(card.pilot)
 			// tokens don't go to trash
 			if (card.type.indexOf("TOKEN") < 0 && card.type.indexOf("EX") !== 0) trash(card)
+			if (delay < 1) return true
 			await render()
 			await boom.play().catch(ex => { })
 			await sleep(500)
@@ -487,6 +489,7 @@
 		}
 		setSpeed()
 		async function sleep(ms = 1000) {
+			if (delay < 1) return
 			do {
 				await new Promise(r => setTimeout(r, delay * ms))
 			} while (delay === maxDelay && !stop)
@@ -608,7 +611,7 @@
 			let better = false
 			// let old_win_perc = 0
 			// let wp_history = []
-			while (version < 100 && !stop) {
+			while (version < 500 && !stop) {
 				++version
 				delay = 1
 				let decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
@@ -660,12 +663,11 @@
 				delay = 1
 				let win_perc = (player_wins[1]) / (player_wins[0] + 0.000001) * 100
 				log(changelog.join("\n"), true, true)
-				log(`🧪Mutant ${version}/100 vs original: ${win_perc.toFixed(0)}%`, true, true)
-				// old_win_perc = win_perc
-				// wp_history.push(win_perc)
-				// log("WPH:" + wp_history, false, true)
-				// if (Math.abs(win_perc - old_win_perc) < 5) log("Seems stable.")
-				// Save
+				log(`🧪Mutant ${version} vs original: ${win_perc.toFixed(0)}%`, true, true)
+				// Over 200 games:
+				// >=127 = +50%/1200 games?
+				// >=126 = -1%/9999 games
+				// >=125 = +5%/9999 games.
 				if (win_perc >= 127) {
 					log("✅Saving mutant as custom deck 3")
 					localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
@@ -678,10 +680,10 @@
 		}
 
 		/** Autoupgrade deck as custom deck 3.
-		 * 2 changes, 200 games, 127% treshold:
-		 * 37/50 upgrades in 1094.73m ETA 384.64m
-		 * ~= +50% winrate in 37*30 minutes.
-		*/
+		 * 
+		 * 2 changes per mutant, 200 games, 127% treshold:
+		 * 37 upgrades in 1094.73m
+		 */
 		async function honeDeck(upgrades = 10) {
 			bhone.disabled = true
 			nhone.disabled = true
@@ -792,7 +794,7 @@
 			let oldc = null
 			for (const c of deck) {
 				if (!oldc || c.id !== oldc.id) {
-					if (oldc && oldc.id !== c.id) text += `${idcount} ${oldc.id} ${oldc.name}\n`
+					if (oldc && oldc.id !== c.id) text += `${idcount} ${oldc.id} ${oldc.color[0]}L${oldc.level}C${oldc.cost} ${oldc.name}\n`
 					idcount = 1
 					oldc = c
 				} else idcount += 1
@@ -823,7 +825,7 @@
 			}
 			overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
 			<textarea id="tastats" style="top: 70vmin; left: 52vmin; width: 34vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
-<textarea id="tadecklist" style="top: 70vmin; left: 0vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()">${text}${idcount} ${oldc.id} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 10vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
+<textarea id="tadecklist" style="top: 70vmin; left: 0vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()">${text}${idcount} ${oldc.id} ${oldc.color[0]}L${oldc.level}C${oldc.cost} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 10vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
 		}
 
 		function zoom(e) {
@@ -1522,7 +1524,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD03-049
 1 GD03-052
 2 GD03-057
-3 GD03-063
+4 GD03-063
 1 GD04-019
 0 GD04-023
 3 GD04-029
@@ -1531,7 +1533,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD04-037
 0 GD04-038
 0 GD04-041
-0 GD04-045
+1 GD04-045
 1 GD04-046
 4 GD04-047
 0 GD04-054
@@ -1549,12 +1551,12 @@ https://exburst.dev/gundam/deck/152946
 4 GD05-050
 1 ST07-001
 4 ST07-002
-2 ST07-003
+1 ST07-003
 4 ST07-004
 0 ST07-005
 4 ST07-006
 2 ST07-007
-4 ST07-008
+3 ST07-008
 1 ST07-009
 0 ST07-010
 0 ST07-011
@@ -1562,6 +1564,54 @@ https://exburst.dev/gundam/deck/152946
 0 ST07-013
 0 ST07-014
 0 ST07-015`,
+			`# Cees's AI CB deck (G)
+4 GD03-022
+4 GD03-026
+4 GD03-030
+4 GD04-019
+4 GD04-023
+4 GD04-029
+4 ST07-005
+4 ST07-006
+4 ST07-007
+4 ST07-008
+4 ST07-011
+4 ST07-012
+2 ST07-014`,
+			`# Cees's AI CB deck (R)
+4 GD04-034
+4 GD04-036
+4 GD04-037
+4 GD04-038
+4 GD04-041
+4 GD04-045
+4 GD04-046
+4 GD04-047
+4 GD04-089
+4 GD04-090
+4 GD04-092
+4 GD04-111
+2 GD04-125
+0 GD05-038
+0 GD05-048`,
+			`# Cees's AI CB deck (P)
+1 ST07-015 PL2C1 Ptolemaios
+1 ST07-013 PL4C1 Armed Intervention
+2 ST07-009 PL4C1 Setsuna F. Seiei
+4 ST07-010 PL4C1 Tieria Erde
+4 GD03-063 PL2C1 0 Gundam
+4 GD05-050 PL2C1 Gundam Exia Repair
+4 GD04-064 PL2C2 Gundam Exia
+4 ST07-004 PL3C2 Gundam Virtue
+4 GD04-063 PL4C2 GN Armor Type-E
+4 ST07-002 PL4C2 Gundam Exia
+4 GD04-057 PL4C3 Gundam Nadleeh
+4 ST07-003 PL5C3 Gundam Virtue
+2 ST07-001 PL5C4 Gundam Exia
+1 GD03-052 PL5C4 Gundam Virtue
+3 GD03-057 PL6C4 GN Armor (Type-E)
+2 GD04-054 PL7C5 Gundam Virtue (Trans-Am)
+2 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
 			`# Cees's CB deck (RG)
 4 GD03-125 Peacemillion
 2 ST07-012 Allelujah Haptism*
@@ -4069,7 +4119,7 @@ https://exburst.dev/gundam/deck/152946
 					return true
 				}
 			}
-			
+
 			if (mo = t.match(/^Place (\d) EX Resources?\.$/)) {
 				for (let i = 0; i < mo[1]; ++i) await p.placeEXResource()
 				return true
