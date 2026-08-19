@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 2026-08-15</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 08-19</title>
 	<link rel="icon"
 		href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%228 14 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>" />
 	<style>
@@ -292,7 +292,7 @@
 			</select>
 		</div><br>
 		<div>
-			<button id="bhone" onclick="stop = false; honeDeck(parseInt(nhone.value))">⚔️Hone P1 deck</button>x<input
+			<button id="bhone" onclick="stop = false; honeDeck(parseInt(nhone.value))">⚔️Hone P1 deck</button>/<input
 				id="nhone" type="number" value="1" min="0" max="99" style="width: 32px;" oninput="clamp(this)" />
 			<button onclick="compareDecks()">⇄Compare decks</button>
 		</div>
@@ -626,6 +626,9 @@
 				let changes = 0
 				let lastline = -1
 				let changelog = []
+				;[fulldeck, alerts, deckname] = parseDecklist(dl)
+				let oldalerts = new Set(alerts)
+				let maxchanges = rndPick([2, 4])
 				do {
 					tries += 1
 					let i = rnd(0, lines.length - 1)
@@ -648,27 +651,35 @@
 						;[fulldeck, alerts, deckname] = parseDecklist(dl)
 					changes += 1
 					delta = d
-				} while (changes < 4 && tries < 100)
+				} while (changes < maxchanges && tries < 999_999)
+				let newalerts = (new Set(alerts)).difference(oldalerts)
+				if (newalerts.size > 0) {
+					// log(`🧪Mutate fail: Only ${changes} changes in ${tries} tries; ${[...newalerts]}.\n${lines.join("\n")}`, true, true)
+					continue
+				}
 				localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 				addCustomDeck()
 				log(`🧪Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
 				// Test
 				p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
-				games = 200  // 150 isn't stable enough for Red CB.
+				games = 300  // 150 isn't stable enough for Red CB.
 				ngames.value = games
 				ndelay.value = 100
+				delay = 0
 				volume.value = 0
-				await sleep(5000)
 				await playGames()
 				delay = 1
 				let win_perc = (player_wins[1]) / (player_wins[0] + 0.000001) * 100
 				log(changelog.join("\n"), true, true)
 				log(`🧪Mutant ${version} vs original: ${win_perc.toFixed(0)}%`, true, true)
-				// Over 200 games:
-				// >=127 = +50%/1200 games?
-				// >=126 = -1%/9999 games
-				// >=125 = +5%/9999 games.
-				if (win_perc >= 127) {
+				// 300 game upgrade /9999:
+				// >=140 = +29%
+				// >=133 = +12%
+				// >=129 = -0%
+				// >=127 = +20%
+				// >=126 = -1%
+				// >=125 = +5%
+				if (win_perc >= 126) {
 					log("✅Saving mutant as custom deck 3")
 					localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 					addCustomDeck()
@@ -690,21 +701,21 @@
 			const deckname = p1deck.options[p1deck.selectedIndex].text
 			const hone_start = new Date()
 			let better = false
-			log(`⚔️Honing ${deckname} ${hone_start}, ETA ${upgrades * 30}m`, true, true)
+			log(`⚔️Honing ${deckname} x${upgrades} ${hone_start}, ETA ${upgrades * 8}m`, true, true)
 			for (var i = 1; !stop && i <= upgrades; ++i) {
-				bhone.innerHTML = `⚔️Honing P1 deck ${i}/${upgrades}`
-				if (!await mutateDeck()) {
-					log(`${deckname} seems optimal. Try adding 0-count cards to consider.`, true, true)
+				bhone.innerHTML = `⚔️Honing P1 deck ${i}`
+				better = await mutateDeck()
+				const mspent = (new Date() - hone_start) / 60000
+				if (!better) {
+					log(`✅${deckname} seems optimal after ${i - 1} upgrades in ${mspent.toFixed(2)}m. Try adding 0-count cards to consider.`, true, true)
 					break
 				}
-				better = true
-				const mspent = (new Date() - hone_start) / 60000
-				log(`⚔️${i}/${upgrades} upgrades in ${(mspent).toFixed(2)}m  ETA ${(mspent / i * (upgrades - i)).toFixed(2)}m`, true, true)
+				log(`⚔️${i}/${upgrades} upgrades in ${mspent.toFixed(2)}m  ETA ${(mspent / i * (upgrades - i)).toFixed(2)}m`, true, true)
 				p1deck.value = [...p1deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 			}
 			p1deck.value = [...p1deck.options].filter(o => o.innerText === deckname)[0].value
+			p2deck.value = [...p2deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 			if (better) {
-				p2deck.value = [...p2deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 				log(`⚔️Honed ${deckname} as Custom deck 3 on ${new Date()}`, true, true)
 				compareDecks()
 			}
@@ -802,7 +813,7 @@
 				const keys = ["Type " + c.type, "Color " + c.color, "Level " + c.level, "Cost " + c.cost, "AP " + c.ap, "HP " + c.hp]
 				for (const zone of c.zones) keys.push("Zone " + zone)
 				for (const trait of c.traits) keys.push("Trait " + trait)
-				for (const link of c.link.split(" / ")) link && keys.push("Link " + link)
+				for (const link of c.link.split("/")) link && keys.push("Link " + link)
 				let pn = getPilotName(c)
 				if (pn) keys.push("Pilot " + pn)
 				for (let k of keys) counts[k] = 1 + (counts[k] || 0)
@@ -914,7 +925,7 @@
 		function linksWith(unit, pilot) {
 			if (!pilot) return false
 			let pilot_name = getPilotName(pilot)
-			for (let part of unit.link.split(" / ")) {
+			for (let part of unit.link.split("/")) {
 				if (part === `[${pilot_name}]`) return true // (Neil)
 				if (part === `[${pilot.name}]`) return true // (Machu)
 				if (pilot_name === "Quattro Bajeena" && part === "Char Aznable") return true
@@ -1517,87 +1528,42 @@ https://exburst.dev/gundam/deck/152946
 3 GD04-018 Gundam Pharact
 4 GD04-024 Gundam Aerial Rebuild
 0 GD05-018 Gundam Calibarn`,
-			`# Cees's AI CB deck
-0 GD03-022
-2 GD03-026
-0 GD03-030
-0 GD03-049
-1 GD03-052
-2 GD03-057
-4 GD03-063
-1 GD04-019
-0 GD04-023
-3 GD04-029
-0 GD04-034
-1 GD04-036
-0 GD04-037
-0 GD04-038
-0 GD04-041
-1 GD04-045
-1 GD04-046
-4 GD04-047
-0 GD04-054
-0 GD04-057
-1 GD04-063
-1 GD04-064
-0 GD04-071
-0 GD04-089
-0 GD04-090
-0 GD04-092
-0 GD04-111
-4 GD04-125
-0 GD05-038
-0 GD05-048
-4 GD05-050
-1 ST07-001
-4 ST07-002
-1 ST07-003
-4 ST07-004
-0 ST07-005
-4 ST07-006
-2 ST07-007
-3 ST07-008
-1 ST07-009
-0 ST07-010
-0 ST07-011
-0 ST07-012
-0 ST07-013
-0 ST07-014
-0 ST07-015`,
+			`# Cees's AI CB deck (PG)
+# 4 GD04-125 RL4C1 Trinity Warship
+3 ST07-011 GL4C1 Lockon Stratos (Neil)
+4 GD03-063 PL2C1 0 Gundam
+4 GD05-050 PL2C1 Gundam Exia Repair
+4 GD04-064 PL2C2 Gundam Exia
+# 3 GD04-047 RL3C1 Gundam Virtue
+4 ST07-006 GL3C2 Gundam Dynames
+3 GD04-029 GL3C2 Gundam Dynames (GN Full Shield)
+4 ST07-004 PL3C2 Gundam Virtue
+4 ST07-002 PL4C2 Gundam Exia
+4 GD04-057 PL4C3 Gundam Nadleeh
+4 GD03-026 GL5C3 Gundam Dynames
+3 GD03-022 GL5C3 Gundam Kyrios
+4 ST07-003 PL5C3 Gundam Virtue
+# 2 GD04-046 RL5C4 Gundam Dynames
+4 GD04-019 GL6C5 GN Armor Type-D (Trans-Am)
+1 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
 			`# Cees's AI CB deck (G)
-4 GD03-022
-4 GD03-026
-4 GD03-030
-4 GD04-019
-4 GD04-023
-4 GD04-029
-4 ST07-005
-4 ST07-006
-4 ST07-007
-4 ST07-008
-4 ST07-011
-4 ST07-012
-2 ST07-014`,
-			`# Cees's AI CB deck (R)
-4 GD04-034
-4 GD04-036
-4 GD04-037
-4 GD04-038
-4 GD04-041
-4 GD04-045
-4 GD04-046
-4 GD04-047
-4 GD04-089
-4 GD04-090
-4 GD04-092
-4 GD04-111
-2 GD04-125
-0 GD05-038
-0 GD05-048`,
+4 ST07-014 GL1C1 Tactical Visionary
+4 ST07-012 GL3C1 Allelujah Haptism
+4 ST07-011 GL4C1 Lockon Stratos (Neil)
+4 ST07-008 GL2C2 Gundam Kyrios (Flight Mode)
+4 ST07-006 GL3C2 Gundam Dynames
+4 GD04-029 GL3C2 Gundam Dynames (GN Full Shield)
+4 ST07-007 GL3C2 Gundam Kyrios
+4 GD03-030 GL3C3 Gundam Kyrios (Tail Unit Flight Mode)
+3 ST07-005 GL4C3 Gundam Dynames
+4 GD03-026 GL5C3 Gundam Dynames
+4 GD03-022 GL5C3 Gundam Kyrios
+3 GD04-023 GL5C4 Gundam Kyrios (Tail Booster)
+4 GD04-019 GL6C5 GN Armor Type-D (Trans-Am)`,
 			`# Cees's AI CB deck (P)
 1 ST07-015 PL2C1 Ptolemaios
 1 ST07-013 PL4C1 Armed Intervention
-2 ST07-009 PL4C1 Setsuna F. Seiei
+3 ST07-009 PL4C1 Setsuna F. Seiei
 4 ST07-010 PL4C1 Tieria Erde
 4 GD03-063 PL2C1 0 Gundam
 4 GD05-050 PL2C1 Gundam Exia Repair
@@ -1608,10 +1574,51 @@ https://exburst.dev/gundam/deck/152946
 4 GD04-057 PL4C3 Gundam Nadleeh
 4 ST07-003 PL5C3 Gundam Virtue
 2 ST07-001 PL5C4 Gundam Exia
-1 GD03-052 PL5C4 Gundam Virtue
+0 GD03-052 PL5C4 Gundam Virtue
 3 GD03-057 PL6C4 GN Armor (Type-E)
 2 GD04-054 PL7C5 Gundam Virtue (Trans-Am)
 2 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
+			`# Cees's AI CB deck (R)
+0 GD04-111 Trinity
+4 GD04-125 RL4C1 Trinity Warship
+4 GD04-090 RL4C1 Hallelujah Haptism
+4 GD04-092 RL4C1 Michael Trinity
+0 GD04-089 RL4C1 Nena Trinity
+4 GD04-047 RL3C1 Gundam Virtue
+3 GD04-038 RL3C2 Gundam Exia
+3 GD05-048 RL3C2 Gundam Kyrios (Flight Mode)
+4 GD04-034 RL4C3 Gundam Kyrios
+4 GD04-045 RL4C3 Gundam Throne Zwei
+4 GD04-041 RL5C2 Gundam Throne Drei
+4 GD04-046 RL5C4 Gundam Dynames
+4 GD04-036 RL6C4 Gundam Throne Eins
+4 GD04-037 RL6C5 Gundam Kyrios (Trans-Am)
+4 GD05-038 RL7C5 Gundam Throne Eins (GN High Mega Launcher)`,
+			`# Cees's AI Vulture deck (P)
+3 GD02-127 PL2C1 Freeden
+1 GD04-094 PL3C1 Pala Sys
+4 GD04-096 PL4C1 Ennil El
+4 GD02-094 PL4C1 Garrod Ran & Tiffa Adill
+4 GD03-096 PL4C1 Jamil Neate
+2 GD02-065 PL1C1 Jenice Custom
+1 GD04-059 PL2C2 Daughtress High Mobility Command Wise Wallaby
+3 GD04-061 PL2C2 G-Falcon
+4 GD02-063 PL3C2 Gundam Airmaster (Fighter Mode)
+4 GD02-059 PL4C3 Gundam Airmaster
+4 GD02-056 PL4C3 Gundam X
+4 GD02-060 PL5C4 Gundam Leopard
+2 GD02-064 PL5C4 Gundam Leopard
+2 GD04-052 PL6C4 Gundam Leopard Destroy
+3 GD03-051 PL6C4 Gundam X Divider
+3 GD02-053 PL7C5 Gundam X
+2 GD04-049 PL8C7 Gundam DX
+0 GD02-115 PL2C1 Familial Devotion
+0 GD02-116 PL3C1 Comrades Come First
+0 GD03-062 PL4C2 GX-Bit
+0 GD04-051 Gundam Airmaster Burst
+0 GD04-058 Jamil's Gundam X
+0 GD04-060 Esperansa
+0 GD04-127 Freeden Ⅱ`,
 			`# Cees's CB deck (RG)
 4 GD03-125 Peacemillion
 2 ST07-012 Allelujah Haptism*
@@ -2065,7 +2072,7 @@ https://exburst.dev/gundam/deck/152946
 				const rv = Card.fromDict(d)
 				// DeckPlanet bug workarounds. See also cards.json.
 				rv.text = rv.text.replaceAll(/<br ?\/?>/g, "\n").replaceAll("[action]", "[Action]").replaceAll("[br]", "\n").replaceAll("[burst]", "[Burst]").replaceAll("[breach 3]", "[Breach 3]").replaceAll("[deploy]", "[Deploy]").replaceAll("[main]", "[Main]").replaceAll("[pilot]", "[Pilot]").replaceAll("[when paired]", "[When Paired]").replaceAll(/\[(Blocker|Breach|First Strike|High-Maneuver|Repair|Support|Suppression)\]/g, "<$1>").replaceAll(/\[(\w+) (\d)\]/g, "<$1 $2>").replaceAll("white Base Team", "White Base Team")
-
+				rv.link = rv.link.replaceAll(" / ", "/")
 				cid += 1
 				rv.cid = cid
 				rv.owner = this
@@ -2230,7 +2237,7 @@ https://exburst.dev/gundam/deck/152946
 					card.card_text_unstyled.replaceAll("\\\\", "\\").replaceAll(/[\[<]br ?\/?[\]>]/g, "\n").replaceAll(/\[(Blocker|Breach|First Strike|High-Maneuver|Repair|Support|Suppression)\]/g, "<$1>").replaceAll(/\[(\w+) (\d)\]/g, "<$1 $2>").replace(/\n$/, "").replaceAll("white Base Team", "White Base Team"), // DeckPlanet bug workarounds.
 					card.card_zones.filter(z => z !== "-"),
 					card.card_traits,
-					["", "-"].includes(card.card_link_requirement) ? "" : card.card_link_requirement,
+					["", "-"].includes(card.card_link_requirement) ? "" : card.card_link_requirement.replaceAll(" / ", "/"),
 					id,
 					card.card_color).toDict()
 			}
@@ -2819,6 +2826,10 @@ https://exburst.dev/gundam/deck/152946
 				if (p.battle.filter(c => c.hasTrait(mo[2])).length < mo[1]) return false
 				t = t.slice(mo[0].length)
 			}
+			if (mo = t.match(/^If there are (\d+) or more cards in your trash, /)) {
+				if (p.trash.length < mo[1]) return false
+				t = t.slice(mo[0].length)
+			}
 			if (mo = t.match(/^If there are (\d+) or more \(([^)]+?)\) cards in your trash, /)) {
 				if (p.trash.filter(c => c.hasTrait(mo[2])).length < mo[1]) return false
 				t = t.slice(mo[0].length)
@@ -2837,6 +2848,14 @@ https://exburst.dev/gundam/deck/152946
 				if (spent.length > 0 && targets.length < 2) return false
 				for (target of targets) eotKw(target, "canAttack enemy.unit.ap5min")
 				return targets.length > 0
+			}
+			if (t === "choose 1 friendly (Vulture) Unit. During this turn, it may choose an active enemy Unit that is Lv.4 or lower as its attack target.") {
+				let their = eu.filter(c => !c.rested && c.LEVEL() <= 4)
+				if (their.length < 1) return false
+				target = fua.filter(c => c.hasTrait("Vulture"))[0]
+				if (!target) return false
+				eotKw(target, "canAttack enemy.unit.lv4min")
+				return true
 			}
 			// During your turn is already checked in getSectionText
 			if (t === " a (Dawn of Fold) Command card using an EX Resource, draw 1.") {
@@ -3025,6 +3044,23 @@ https://exburst.dev/gundam/deck/152946
 				exile(mine.slice(0, 7))
 				await destroy(their)
 				return true
+			}
+			if (t === "Choose 1 (Vulture) Unit card that is Lv.5 or higher from your trash. Add it to your hand.") {
+				const mine = p.trash.filter(c => c.type === "UNIT" && c.LEVEL() >= 5 && c.hasTrait("Vulture"))
+				if (mine.length < 1) return false
+				toHand(mine[0], true)
+				return true
+			}
+			if (t === "You may choose 1 Unit card that is Lv.4 or lower from your trash. Pay its cost to deploy it.") {
+				let budget = p.resource.filter(c => !c.rested).length
+				target = p.trash.filter(c => c.type === "UNIT" && c.LEVEL() <= 4 && c.COST() <= budget)[0]
+				if (!target) return false
+				let cost = target.COST()
+				if (await p.pay(cost)) {
+					await p.deployFromTrash(target)
+					return true
+				}
+				return false
 			}
 			if (t === "You may choose 1 enemy Pilot. Return it to its owner's hand.") {
 				target = eu.filter(c => c.pilot)[0]
@@ -4368,6 +4404,13 @@ https://exburst.dev/gundam/deck/152946
 			}
 
 			let look = 0
+			if (mo = t.match(/^You may discard 1. If you do, /)) {
+				if (t.match(/^You may discard 1. If you do, look at the top 3 cards of your deck./)) {
+					if (p.hand.length < 1) return false
+					await p.discard()
+					t = t.slice(mo[0].length)
+				}
+			}
 			if (mo = t.match(/^[Ll]ook at the top (\d+) cards of your deck\.? ?/)) {
 				look = mo[1]
 				t = t.slice(mo[0].length)
@@ -4943,10 +4986,10 @@ https://exburst.dev/gundam/deck/152946
 		}
 
 		function showStats() {
-			// For CLI: let m = Number((new Date() - games_start) / 60000); JSON.stringify(Object.entries(deck_stats).sort(sortStats)) + " / " + game + " / " + m.toFixed(2) + " = " + (m/game*60).toFixed(2) + "s/game; " + ((games-game) * m/game).toFixed(2) + "m left"
+			// For CLI: let m = Number((new Date() - games_start) / 60000); JSON.stringify(Object.entries(deck_stats).sort(sortStats)) + " / " + game + " / " + m.toFixed(2) + " = " + (m/game*60).toFixed(3) + "s/game; " + ((games-game) * m/game).toFixed(2) + "m left"
 			delay = 1
 			const m = Number((new Date() - games_start) / 60000)
-			let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${(m / game * 60).toFixed(2) + "s/game"}`
+			let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${(m / game * 60000).toFixed(0) + "ms/game"}`
 			if (game < games) msg += "; ETA " + ((games - game) * m / game).toFixed(2) + "m"
 
 			let win_perc = (player_wins[1]) / (player_wins[0] + 0.000001) * 100

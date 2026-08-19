@@ -6377,7 +6377,7 @@
         "hp": 4,
         "id": "GD03-001",
         "level": 5,
-        "link": "[Christina Mackenzie] / [Amuro Ray]",
+        "link": "[Christina Mackenzie]/[Amuro Ray]",
         "name": "Gundam NT-1",
         "text": "<Repair 2> (At the end of your turn, this Unit recovers the specified number of HP.)\n[When Paired]Choose 1 rested enemy Unit. Deal 1 damage to it. When this effect destroys an enemy Unit, draw 1.",
         "traits": [
@@ -6785,7 +6785,7 @@
         "hp": 3,
         "id": "GD03-022",
         "level": 5,
-        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
         "name": "Gundam Kyrios",
         "text": "[During Link]During your turn, when this Unit destroys an enemy Unit with battle damage, deal 1 damage to all enemy Units that are Lv.3 or lower.",
         "traits": [
@@ -6939,7 +6939,7 @@
         "hp": 4,
         "id": "GD03-030",
         "level": 3,
-        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
         "name": "Gundam Kyrios (Tail Unit Flight Mode)",
         "text": "While you have a (CB) Link Unit in play, this card in your hand gets cost -1.",
         "traits": [
@@ -7017,7 +7017,7 @@
         "hp": 5,
         "id": "GD03-034",
         "level": 8,
-        "link": "[Amate Yuzuriha (Machu)] / [Nyaan]",
+        "link": "[Amate Yuzuriha (Machu)]/[Nyaan]",
         "name": "GQuuuuuuX (Omega Psycommu)",
         "text": "<Suppression> (Damage to Shields by an attack is dealt to the first 2 cards simultaneously.)\n[Deploy]Choose 1 enemy Unit. Deal 3 damage to it.",
         "traits": [
@@ -7131,7 +7131,7 @@
         "hp": 5,
         "id": "GD03-040",
         "level": 5,
-        "link": "[Shagia Frost] / [Olba Frost]",
+        "link": "[Shagia Frost]/[Olba Frost]",
         "name": "Gundam Virsago & Gundam Ashtaron",
         "text": "[During Link]This Unit gains <High-Maneuver>.\n(This Unit can't be blocked.)",
         "traits": [
@@ -7342,7 +7342,7 @@
         "hp": 4,
         "id": "GD03-051",
         "level": 6,
-        "link": "[Garrod Ran] / [Jamil Neate]",
+        "link": "[Garrod Ran]/[Jamil Neate]",
         "name": "Gundam X Divider",
         "text": "[When Linked]You may choose 1 Unit card that is Lv.4 or lower from your trash. Pay its cost to deploy it.",
         "traits": [
@@ -8944,7 +8944,7 @@
         "hp": 4,
         "id": "GD04-009",
         "level": 5,
-        "link": "[Kai Shiden] / [Hayato Kobayashi]",
+        "link": "[Kai Shiden]/[Hayato Kobayashi]",
         "name": "Guncannon (108) & Guncannon (109)",
         "text": "[When Linked]Choose 1 of your other (White Base Team) Units that is Lv.4 or higher. Set it as active.",
         "traits": [
@@ -9003,7 +9003,7 @@
         "hp": 3,
         "id": "GD04-012",
         "level": 3,
-        "link": "[Sleggar Law] / [Sayla Mass]",
+        "link": "[Sleggar Law]/[Sayla Mass]",
         "name": "Core Booster (005) & Core Booster (006)",
         "text": "",
         "traits": [
@@ -9215,7 +9215,7 @@
         "hp": 3,
         "id": "GD04-023",
         "level": 5,
-        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
         "name": "Gundam Kyrios (Tail Booster)",
         "text": "[Deploy]Choose 1 of your Units paired with a (Super Soldier) Pilot. During this turn, it may choose an active enemy Unit that is Lv.4 or lower as its attack target.",
         "traits": [
@@ -9423,7 +9423,7 @@
         "hp": 4,
         "id": "GD04-034",
         "level": 4,
-        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
         "name": "Gundam Kyrios",
         "text": "<First Strike> (While this Unit is attacking, it deals damage before the enemy Unit.)\n[During Link]This Unit gets AP+2 for each of your rested (CB) Units.",
         "traits": [
@@ -9482,7 +9482,7 @@
         "hp": 4,
         "id": "GD04-037",
         "level": 6,
-        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
         "name": "Gundam Kyrios (Trans-Am)",
         "text": "While you have a red (Super Soldier) Pilot in play, this Unit gains <First Strike>.\n(While this Unit is attacking, it deals damage before the enemy Unit.)\nWhile you have a green (Super Soldier) Pilot in play, this Unit gains <Breach 3>.\n(When this Unit's attack destroys an enemy Unit, deal the specified amount of damage to the first card in that opponent's shield area.)",
         "traits": [
@@ -9852,7 +9852,7 @@
         "hp": 3,
         "id": "GD04-056",
         "level": 4,
-        "link": "[Shinn Asuka] / [Lunamaria Hawke]",
+        "link": "[Shinn Asuka]/[Lunamaria Hawke]",
         "name": "Sword Impulse Gundam",
         "text": "[Deploy]Deal 1 damage to this Unit. If you do, choose 1 enemy Unit with 3 or less AP. Rest it.",
         "traits": [
@@ -15532,7 +15532,7 @@
         "hp": 3,
         "id": "ST07-007",
         "level": 3,
-        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
         "name": "Gundam Kyrios",
         "text": "During your turn, while you have a (CB) Pilot in play, this Unit gets AP+2.",
         "traits": [
@@ -15552,7 +15552,7 @@
         "hp": 1,
         "id": "ST07-008",
         "level": 2,
-        "link": "[Allelujah Haptism] / [Hallelujah Haptism]",
+        "link": "[Allelujah Haptism]/[Hallelujah Haptism]",
         "name": "Gundam Kyrios (Flight Mode)",
         "text": "",
         "traits": [
