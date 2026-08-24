@@ -5,7 +5,7 @@
 	"display": "standalone",
 	"background_color": "brown",
 	"theme_color": "yellow",
-	"orientation": "portrait-primary",
+	"orientation": "landscape",
 	"icons": [
 		{
 			"src": "rook.png",

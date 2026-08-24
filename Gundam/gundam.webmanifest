@@ -1,0 +1,16 @@
+{
+	"name": "Gundam Sim by CT",
+	"short_name": "Gundam Sim",
+	"start_url": "index.html",
+	"display": "standalone",
+	"background_color": "black",
+	"theme_color": "white",
+	"orientation": "landscape",
+	"icons": [
+		{
+			"sizes": "512x512",
+			"src": "icon.jpg",
+			"type": "image/jpeg"
+		}
+	]
+}
