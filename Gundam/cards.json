@@ -3420,7 +3420,7 @@
         "level": 3,
         "link": "",
         "name": "Yzak Jule",
-        "text": "[Burst]Add this card to your hand.\n[Once per Turn] When an enemy Link Unit is destroyed with damage while this Unit is attacking, draw 1.",
+        "text": "[Burst]Add this card to your hand.\n[Once per Turn]When an enemy Link Unit is destroyed with damage while this Unit is attacking, draw 1.",
         "traits": [
             "ZAFT",
             "Coordinator"
@@ -4376,7 +4376,7 @@
         "level": 6,
         "link": "[Lalah Sune]",
         "name": "Elmeth",
-        "text": "[Deploy]Look at the top 5 cards of your deck. You may reveal 1 green (Zeon) Pilot card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.\n[During Link] This Unit gets AP+2.",
+        "text": "[Deploy]Look at the top 5 cards of your deck. You may reveal 1 green (Zeon) Pilot card among them and add it to your hand. Return the remaining cards randomly to the bottom of your deck.\n[During Link]This Unit gets AP+2.",
         "traits": [
             "Zeon"
         ],
@@ -6545,7 +6545,7 @@
             "Earth"
         ]
     },
-    "GD03-010_PR2": {
+    "GD03-010": {
         "ap": 6,
         "color": "BLUE",
         "cost": 6,
@@ -11180,7 +11180,7 @@
         "level": 8,
         "link": "[Kira Yamato]",
         "name": "Strike Freedom Gundam",
-        "text": "[Deploy] Choose 1 to 2 of your Units. During this turn, when they destroy an enemy card with battle damage, draw 1.\n[During Pair][Attack]You may discard 2. If you do, choose 1 enemy Unit with the lowest Lv. Return it to the bottom of its owner's deck.",
+        "text": "[Deploy]Choose 1 to 2 of your Units. During this turn, when they destroy an enemy card with battle damage, draw 1.\n[During Pair][Attack]You may discard 2. If you do, choose 1 enemy Unit with the lowest Lv. Return it to the bottom of its owner's deck.",
         "traits": [
             "Orb"
         ],
