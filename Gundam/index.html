@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-06</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-07</title>
 	<link rel="icon" href="icon32.png" />
 	<link rel="manifest" href="gundam.webmanifest" />
 	<style>
@@ -2168,6 +2168,144 @@ https://exburst.dev/gundam/deck/152946
 0 ST07-011
 0 ST07-012
 0 ST07-014`,
+			`# Cees's AI Purple deck
+0 GD02-053
+1 GD02-054
+2 GD02-055
+0 GD02-056
+0 GD02-057
+0 GD02-058
+0 GD02-059
+0 GD02-060
+1 GD02-061
+1 GD02-062
+0 GD02-063
+0 GD02-064
+0 GD02-065
+0 GD02-066
+0 GD02-067
+4 GD02-068
+0 GD02-094
+0 GD02-095
+0 GD02-096
+0 GD02-110
+0 GD02-111
+0 GD02-112
+0 GD02-113
+0 GD02-114
+0 GD02-115
+0 GD02-116
+0 GD02-127
+0 GD02-128
+0 GD03-049
+2 GD03-050
+0 GD03-051
+0 GD03-052
+0 GD03-053
+0 GD03-054
+1 GD03-055
+3 GD03-056
+2 GD03-057
+0 GD03-058
+0 GD03-059
+0 GD03-060
+0 GD03-061
+0 GD03-062
+0 GD03-063
+0 GD03-064
+1 GD03-065
+0 GD03-066
+0 GD03-067
+1 GD03-068
+1 GD03-094
+0 GD03-095
+0 GD03-096
+0 GD03-097
+0 GD03-114
+0 GD03-115
+0 GD03-116
+0 GD03-117
+0 GD03-129
+0 GD03-130
+0 GD04-049
+0 GD04-050
+0 GD04-051
+0 GD04-052
+0 GD04-053
+0 GD04-054
+0 GD04-055
+0 GD04-056
+0 GD04-057
+0 GD04-058
+0 GD04-059
+0 GD04-060
+0 GD04-061
+0 GD04-062
+1 GD04-063
+0 GD04-064
+0 GD04-093
+0 GD04-094
+0 GD04-095
+0 GD04-096
+0 GD04-113
+0 GD04-114
+0 GD04-115
+0 GD04-116
+1 GD04-127
+1 GD04-128
+0 GD05-049
+4 GD05-050
+0 GD05-051
+0 GD05-052
+2 GD05-053
+0 GD05-054
+0 GD05-055
+0 GD05-056
+0 GD05-057
+0 GD05-058
+0 GD05-059
+2 GD05-060
+0 GD05-061
+0 GD05-062
+0 GD05-063
+0 GD05-064
+0 GD05-065
+0 GD05-093
+0 GD05-094
+0 GD05-095
+0 GD05-096
+0 GD05-114
+0 GD05-115
+0 GD05-116
+0 GD05-117
+1 GD05-129
+0 ST05-001
+0 ST05-002
+0 ST05-003
+4 ST05-004
+2 ST05-005
+4 ST05-006
+4 ST05-010
+0 ST05-011
+0 ST05-013
+1 ST05-014
+0 ST05-015
+0 ST07-001
+0 ST07-002
+0 ST07-003
+0 ST07-004
+0 ST07-009
+0 ST07-010
+0 ST07-013
+0 ST07-015
+1 ST09-001
+0 ST09-002
+0 ST09-005
+0 ST09-006
+2 ST09-007
+0 ST09-008
+0 ST09-009
+0 ST09-010`,
 			`# Cees's AI Red deck
 0 GD01-044
 0 GD01-045
@@ -4005,10 +4143,23 @@ https://exburst.dev/gundam/deck/152946
 				t = t.slice(mo[0].length)
 				if (t === "") return true
 				if (t.indexOf("Then, ") === 0) t = t.slice(6)
+				if (mo = t.match(/^if it is your turn and a friendly \(Teiwaz\) Link Unit is in play, /)) {
+					if (!myturn || !fu.some(c => c.hasTrait("Teiwaz") && c.linked())) return true
+					t = t.slice(mo[0].length)
+				}
 			}
 
 			if (mo = t.match(/^[Dd]uring your turn, /)) {
 				if (!myturn) return false  // already checked in getSectionText
+				t = t.slice(mo[0].length)
+			}
+			if (mo = t.match(/^Place the top 2 cards of your deck into your trash. If you placed a \(Vagan\) card with this effect, /)) {
+				let ok = false
+				;[1, 2].forEach(i => {
+					let c = p.deck.pop()
+					if (c) { trash(c); if (c.hasTrait("Vagan")) ok = true }
+				})
+				if (!ok) return false
 				t = t.slice(mo[0].length)
 			}
 			if (t === "this Unit recovers the specified number of HP.)") {
@@ -4324,6 +4475,12 @@ https://exburst.dev/gundam/deck/152946
 				let optional = !!mo[1]
 				t = t.slice(mo[0].length)
 				// Base
+				if (mo = t.match(/^1 \(([^)]+?)\) Base card from your trash. Deploy it.$/)) {
+					target = p.trash.filter(c => c.type === "BASE" && c.hasTrait(mo[1]))[0]
+					if (!target) return false
+					await p.deployFromTrash(target)
+					return true
+				}
 				if (mo = t.match(/^1 enemy Base. /)) {
 					if (!en.base) return false
 					targets = [en.base]
@@ -4376,7 +4533,7 @@ https://exburst.dev/gundam/deck/152946
 						}
 					}
 				}
-				if (mo = t.match(/^1 of your rested Resources. /)) {
+				if (mo = t.match(/^1 of your (rested )?Resources. /)) {
 					target = p.resource.filter(r => r.rested)[0]
 					if (!target) return false
 					t = t.slice(mo[0].length)
@@ -4389,24 +4546,6 @@ https://exburst.dev/gundam/deck/152946
 				if (t === "1 enemy Unit. Deal 1 damage to it. If a friendly (Mafty) Link Unit is in play, deal 2 damage instead.") {
 					const dmg = fu.some(c => c.hasTrait("Mafty") && c.linked()) ? 2 : 1
 					return await dealDamage(u, chooseDmgTarget(u, eu, dmg), dmg)
-				}
-				if (t === "2 (Titans) cards from your trash. Exile them from the game. If you do, choose 1 enemy Unit that is Lv.4 or lower. Rest it.") {
-					target = eu.filter(c => c.LEVEL() <= 4 && !c.rested)[0]
-					if (!target) return false
-					targets = p.trash.filter(c => c.hasTrait("Titans")).slice(0, 2)
-					if (targets.length < 2) return false
-					exile(targets)
-					rest(target)
-					return true
-				}
-				if (t === "3 (Londo Bell) cards from your trash. Exile them from the game. If you do, choose 1 enemy Unit. Begin a battle between this Unit and it and only perform the damage step.") {
-					targets = p.trash.filter(c => c.hasTrait("Londo Bell"))
-					if (targets.length < 3) return false
-					target = eu.filter(c => c.AP() < u.HP() && u.canDamage(c))[0]
-					if (!target) return false
-					exile(targets)
-					await doBattle(u, target)
-					return true
 				}
 				if (mo = t.match(/^1 of their active Units. /)) {
 					targets = eu.filter(c => !c.rested)
@@ -4429,13 +4568,22 @@ https://exburst.dev/gundam/deck/152946
 					await p.draw()
 					return true
 				}
+				if (t === "1 (X-Rounder) card from your trash and add it to your hand. If you do, discard 1.") {
+					if (p.hand.length < 1) return false
+					targets = p.trash.filter(c => c.hasTrait("X-Rounder"))
+					target = targets[0]
+					if (!target) return false
+					toHand(target, true)
+					await p.discard()
+					return true
+				}
 				// Choose regex
-				if (mo = t.match(/^1(?<num> to 2)? (?<mine>of your)? ?(?<other>other)? ?(?<state>active|rested)? ?(?<damaged>damaged|undamaged)? ?(?<flag>enemy|friendly)? ?(?<color>blue|green|purple|red|white)? ?(?<traits>\(.+?\))? ?(?<linked>Linke?d? )?(?<type>Unit|Command|Pilot)( card)?(?<token> token)?s?\.? /)) {
+				if (mo = t.match(/^(?<num>1 to 2|\d)? (?<mine>of your)? ?(?<other>other)? ?(?<state>active|rested)? ?(?<damaged>damaged|undamaged)? ?(?<flag>enemy|friendly)? ?(?<color>blue|green|purple|red|white)? ?(?<traits>\(.+?\))? ?(?<linked>Linke?d? )?(?<type>Unit|Command|Pilot)?( card)?(?<token> token)?s?\.? /)) {
 					if (t.match(/^[^.]*from your trash/)) targets = p.trash
 					else if (mo.groups.flag === "enemy") targets = mySort(eu, c => -c.AP())
 					else if (!mo.groups.mine && !mo.groups.flag) targets = eu.concat(fu)
 					else targets = mySort(fu, c => c.AP())
-					targets = targets.filter(c => c.type === mo.groups.type.toUpperCase())
+					if (mo.groups.type) targets = targets.filter(c => c.type === mo.groups.type.toUpperCase())
 					if (mo.groups.other) targets = targets.filter(c => c !== u)
 					if (mo.groups.state) {
 						if (mo.groups.state === "active") targets = targets.filter(c => !c.rested)
@@ -4453,7 +4601,12 @@ https://exburst.dev/gundam/deck/152946
 					}
 					if (mo.groups.linked) targets = targets.filter(c => c.linked())
 					targets = mySort(targets, c => myturn ? c.rested + c.sick : !c.rested)
-					if (mo.groups.num === " to 2") targets = targets.slice(0, 2)
+					if (mo.groups.num === "1 to 2") targets = targets.slice(0, 2)
+					else if (mo.groups.num > 1) {
+						// TODO, maybe let user select
+						targets = targets.slice(0, mo.groups.num)
+						if (targets.length < mo.groups.num) return false
+					}
 					target = targets[0]
 					if (!target) return false
 					t = t.slice(mo[0].length)
@@ -4498,7 +4651,7 @@ https://exburst.dev/gundam/deck/152946
 					if (!target) return false
 					t = t.slice(mo[0].length)
 				}
-				else if (mo = t.match(/^paired with a \((.+?)\) Pilot. /)) {
+				else if (mo = t.match(/^paired with an? \((.+?)\) Pilot. /)) {
 					targets = targets.filter(c => c.pilot && c.pilot.hasTrait(mo[1]))
 					target = targets[0]
 					if (!target) return false
@@ -4577,21 +4730,49 @@ https://exburst.dev/gundam/deck/152946
 					} else target = new_target
 				}
 
-				if (t === "7 (Vulture) cards from your trash. Exile them from the game. If you do, choose 1 enemy Unit/Base that is Lv.8 or lower. Destroy it.") {
-					const mine = p.trash.filter(c => c.hasTrait("Vulture"))
-					if (mine.length < 7) return false
+				// process choice
+				if (t === "Exile it from the game. If you do, choose 1 of your (Vagan) Units. It gets AP+2 during this turn.") {
+					let mine = fu.filter(c => !c.rested && !c.sick)[0]
+					if (!mine) return false
+					exile([target])
+					eotAP(mine, 2)
+					return true
+				}
+				if (t === "Exile them from the game. If you do, choose 1 enemy Unit that is Lv.4 or lower. Rest it.") {
+					target = eu.filter(c => c.LEVEL() <= 4 && !c.rested)[0]
+					if (!target) return false
+					exile(targets)
+					rest(target)
+					return true
+				}
+				if (t === "Exile them from the game. If you do, choose 1 enemy Unit. Deal 2 damage to it.") {
+					if (eu.length < 1) return false
+					target = chooseDmgTarget(card, eu, 2)
+					if (!target) return false
+					await dealDamage(card, target, 2)
+					return true
+				}
+				if (t === "Exile them from the game. If you do, choose 1 enemy Unit. Begin a battle between this Unit and it and only perform the damage step.") {
+					target = eu.filter(c => c.AP() < u.HP() && u.canDamage(c))[0]
+					if (!target) return false
+					exile(targets)
+					await doBattle(u, target)
+					return true
+				}
+				if (t === "Exile them from the game. If you do, choose 1 enemy Unit. Destroy it.") {
+					target = (!en.kw_eot.includes("friendly Units can't be destroyed by enemy effects") && mySort(eu, c => -c.AP())[0])
+					if (!target) return false
+					exile(targets)
+					await destroy(target)
+					return true
+				}
+				if (t === "Exile them from the game. If you do, choose 1 enemy Unit/Base that is Lv.8 or lower. Destroy it.") {
 					const their = (!en.kw_eot.includes("friendly Units can't be destroyed by enemy effects") && mySort(eu, c => -c.AP())[0]) || en.base
 					if (!their) return false
-					exile(mine.slice(0, 7))
+					exile(targets)
 					await destroy(their)
 					return true
 				}
-				// if (t === "Choose 1 (Vulture) Unit card that is Lv.5 or higher from your trash. Add it to your hand.") {
-				// 	const mine = p.trash.filter(c => c.type === "UNIT" && c.LEVEL() >= 5 && c.hasTrait("Vulture"))
-				// 	if (mine.length < 1) return false
-				// 	toHand(mine[0], true)
-				// 	return true
-				// }
 				if (t === "During this battle, battle damage this Unit would receive is dealt to that Unit instead.") {
 					if (!defender || defender.AP() < u.HP()) return false
 					target = targets.filter(c => c.HP() > defender.AP())[0]
@@ -4600,9 +4781,8 @@ https://exburst.dev/gundam/deck/152946
 					u.kw_eob.push("redirect_battle_damage " + target.cid)
 					return true
 				}
-				if (t === "2 (Special Move) Command cards from your trash. Exile them from the game. If you do, deal 5 damage to the first card in your opponent's shield area.") {
-					targets = p.trash.filter(c => c.type === "COMMAND" && c.hasTrait("Special Move")).slice(0, 2)
-					if (targets.length < 2 || (!en.base && en.shield.length < 1)) return false
+				if (t === "Exile them from the game. If you do, deal 5 damage to the first card in your opponent's shield area.") {
+					if (!en.base && en.shield.length < 1) return false
 					exile(targets)
 					if (en.base) await dealDamage(card, en.base, 5)
 					else await en.breakShield()
@@ -4619,7 +4799,6 @@ https://exburst.dev/gundam/deck/152946
 					bounce(target)
 					return true
 				}
-
 				if (t === "It can't receive battle damage from enemy Units during this battle.") {
 					enemy = attacker === u ? defender : attacker
 					if (!enemy.canDamage(u)) return false
@@ -4630,8 +4809,6 @@ https://exburst.dev/gundam/deck/152946
 					eotKw(target, "noDmg enemy.unit.effect")
 					return true
 				}
-
-				// process choice
 				if (t === "Rest it.") {
 					rest(target)
 					return true
@@ -4723,6 +4900,11 @@ https://exburst.dev/gundam/deck/152946
 				}
 				if (t === "Destroy it.") {
 					await destroy(target)
+					return true
+				}
+				if (t === "Destroy it. If there are 10 or more cards in your trash, choose 1 active enemy Unit that is Lv.4 or lower instead.") {
+					if (p.trash.length >= 10) targets = mySort(eu.filter(c => !c.rested && c.LEVEL() <= 4), c => -c.AP())
+					await destroy(targets[0])
 					return true
 				}
 				if (mo = t.match(/^Rest it. ?/)) {
@@ -4866,12 +5048,13 @@ https://exburst.dev/gundam/deck/152946
 				target.stunned = true
 				return true
 			}
-			if (t === "and 1 enemy Unit. Deal 1 damage to them.") {
-				const mine = chooseDmgTarget(card, targets, 1, true, false)
-				const their = chooseDmgTarget(card, eu, 1, true)
+			if (mo = t.match(/^and 1 enemy Unit. Deal (\d) damage to them.$/)) {
+				let dmg = parseInt(mo[1])
+				const mine = chooseDmgTarget(card, targets, dmg, true, false)
+				const their = chooseDmgTarget(card, eu, dmg, true)
 				if (!mine || !their) return false
-				await dealDamage(card, mine)
-				await dealDamage(card, their)
+				await dealDamage(card, mine, dmg)
+				await dealDamage(card, their, dmg)
 				return true
 			}
 			// if (t === "Choose 1 to 2 enemy Units. Deal 1 damage to them.") {
@@ -5065,6 +5248,7 @@ https://exburst.dev/gundam/deck/152946
 				await runCard(u.pilot, "Main")
 				return true
 			}
+
 			// battle damage trigger
 			if (t === " to an enemy Unit, destroy that enemy Unit.") {
 				target = (u === defender ? attacker : defender)
@@ -5075,11 +5259,11 @@ https://exburst.dev/gundam/deck/152946
 			mo = t.match(/^ to an enemy Unit that is Lv.(\d) or lower( [^)]+)?, /)
 			if (mo) {
 				target = (u === defender ? attacker : defender)
+				if (!target || !(target.LEVEL() <= parseInt(mo[1]))) return false
 				if (mo[2] === " that has no paired Pilot") {
 					if (target.pilot) return false
 				}
-				if (!target || !(target.LEVEL() <= parseInt(mo[1]))) return false
-				if (eu.includes(target)) return false
+				if (!eu.includes(target)) return false
 				t = t.slice(mo[0].length)
 				if (t === "destroy that enemy Unit.") {
 					await destroy(target)
@@ -5531,6 +5715,12 @@ https://exburst.dev/gundam/deck/152946
 			// 	eotAP(target, 1)
 			// 	return true
 			// }
+			if (t === "If 1 to 4 enemy Units are in play, deploy 1 [Graze Custom]((Tekkadan)･AP2･HP2) Unit token. If 5 or more are in play, deploy 1 [Gundam Barbatos 4th Form]((Tekkadan)･AP4･HP4) Unit token.") {
+				if (p.battle.length > 5) return false
+				if (eu.length >= 1 && eu.length <= 4) await p.deployToken("Graze Custom")
+				else if (eu.length >= 5) await p.deployToken("Gundam Barbatos 4th Form")
+				return true
+			}
 			if (mo = t.match(/^Deploy 1( rested)? \[(.*?)\].*? Unit token.$/)) {
 				await p.deployToken(mo[2], mo[1])
 				return true
@@ -5607,15 +5797,6 @@ https://exburst.dev/gundam/deck/152946
 				if (p.resource.filter(item => item.name === "EX Resource").length >= 5) return false
 				await p.placeEXResource()
 				return true
-			}
-			if (t === "1 of your Resources. Set it as active.") {
-				for (const c of p.resource) {
-					if (c.rested) {
-						await activate(c, true)
-						return true
-					}
-				}
-				return false
 			}
 			if (mo = t.match(/[Tt]his Unit gets AP\+(\d+) during this turn./)) {
 				eotAP(u, mo[1])
@@ -5720,10 +5901,8 @@ https://exburst.dev/gundam/deck/152946
 				targets.forEach(c => eotAP(c, 2))
 				return true
 			}
-			if (t === "1 (Superpower Bloc) card and 1 (UN) card from your trash. Exile them from the game. If you do, set this Unit as active. It can't attack during this turn.") {
+			if (t === "and 1 (UN) card from your trash. Exile them from the game. If you do, set this Unit as active. It can't attack during this turn.") {
 				if (!u.rested) return false
-				target = p.trash.filter(c => c.hasTrait("Superpower Bloc"))[0]
-				if (!target) return false
 				const target2 = p.trash.filter(c => c.hasTrait("UN"))[0]
 				if (!target2) return false
 				exile([target, target2])
@@ -5739,12 +5918,6 @@ https://exburst.dev/gundam/deck/152946
 				if (!ai) target = await chooseCard(targets)
 				if (!target) return false
 				await p.pay(target.COST(), u)
-				await p.deployFromTrash(target)
-				return true
-			}
-			if (mo = t.match(/^1 \(([^)]+?)\) Base card from your trash. Deploy it.$/)) {
-				target = p.trash.filter(c => c.type === "BASE" && c.hasTrait(mo[1]))[0]
-				if (!target) return false
 				await p.deployFromTrash(target)
 				return true
 			}
@@ -5836,21 +6009,19 @@ https://exburst.dev/gundam/deck/152946
 				eotAP(target, 1)
 				return true
 			}
-			// if (mo = t.match(/^Choose 1 friendly Unit. /)) {
-			// 	targets = fu
-			// 	target = targets[0]
-			// 	if (!target) return false
-			// 	t = t.slice(mo[0].length)
-			// }
-			if (mo = (t.match(/^[Ii]t can't receive battle damage from enemy Units with 2 or less (AP|HP) during this (battle|turn).$/))) {
-				if (mo[2] === "battle") {
+			if (t === "It can't receive battle damage from enemy Units with 2 or less AP during this battle. If you are Lv.7 or higher, it can't receive battle damage from enemy Units with 5 or less AP instead.") {
+				if (p.resource.length >= 7) t = "It can't receive battle damage from enemy Units with 5 or less AP during this battle."
+				else t = "It can't receive battle damage from enemy Units with 2 or less AP during this battle."
+			}
+			if (mo = (t.match(/^[Ii]t can't receive battle damage from enemy Units with (\d+) or less (AP|HP) during this (battle|turn).$/))) {
+				if (mo[3] === "battle") {
 					if (attacker && attacker.owner === p) target = attacker
 					else if (defender && defender.owner === p) target = defender
 					else return false
 				}
-				const enemies = mo[1] === "AP" ? eu.filter(c => c.AP() <= 2) : eu.filter(c => c.HP() <= 2)
+				const enemies = mo[2] === "AP" ? eu.filter(c => c.AP() <= mo[1]) : eu.filter(c => c.HP() <= mo[1])
 				if (!target || enemies.length < 1) return false
-				eobKw(target, `noDmg enemy.unit.${mo[1].toLowerCase()}2min`)
+				eobKw(target, `noDmg enemy.unit.${mo[2].toLowerCase()}${mo[1]}min`)
 				return true
 			}
 			if (mo = t.match(/^They get AP\+(\d+) during this turn.$/)) {
@@ -6082,12 +6253,11 @@ https://exburst.dev/gundam/deck/152946
 				await dealDamage(card, target)
 				return true
 			}
-			// if (t === "1 undamaged enemy Unit. Deal 1 damage to it.") {
-			// 	target = chooseDmgTarget(card, eu.filter(c => c.damage === 0))
-			// 	if (!target) return false
-			// 	await dealDamage(card, target)
-			// 	return true
-			// }
+			if (t === "If this Unit is damaged and Lv.5 or lower, it gains <High-Maneuver> during this battle.") {
+				if (u.damage < 1 || u.LEVEL() > 5) return false
+				eobKw(u, "High-Maneuver")
+				return true
+			}
 			if (mo = t.match(/^[Dd]eal 1 damage to all (enemy )?Units that are Lv.(\d) or lower.$/)) {
 				targets = mo[1] ? eu.filter(c => c.LEVEL() <= mo[2]) : eu.concat(fu).filter(c => c.LEVEL() <= mo[2])
 				if (targets.length < 1) return false
@@ -6188,6 +6358,15 @@ https://exburst.dev/gundam/deck/152946
 				if (!target) return false
 				await destroy(target)
 
+				return true
+			}
+			if (t === "Destroy it. If you do, choose 1 enemy Unit that is Lv.4 or lower. Deal 2 damage to it.") {
+				let mine = mySort(targets.filter(c => c.rested), c => c.AP())[0]
+				if (!mine) return false
+				target = chooseDmgTarget(u, eu.filter(c => c.LEVEL() <= 4), 2)
+				if (!target || mine.AP() > target.AP()) return false
+				await destroy(mine)
+				await dealDamage(card, target, 2)
 				return true
 			}
 			if (t === "Deal 1 damage to this Unit. If you do, choose 1 enemy Unit with 3 or less AP. Rest it.") {
@@ -6344,10 +6523,9 @@ https://exburst.dev/gundam/deck/152946
 				// else if (t === "1 purple Unit card with <Suppression> from your trash. Add it to your hand.") {
 				// 	targets = p.trash.filter(c => c.type === "UNIT" && c.color === "PURPLE" && c.hasKw("Suppression"))
 				// }
-				else if (t === "2 (MF) Unit cards from your trash. Exile them from the game. If you do, choose 1 (Special Move) Command card from your trash. Add it to your hand.") {
-					targets = p.trash.filter(c => c.type === "UNIT" && c.hasTrait("MF")).slice(0, 2)
+				else if (t === "Exile them from the game. If you do, choose 1 (Special Move) Command card from your trash. Add it to your hand.") {
 					target = p.trash.filter(c => c.type === "COMMAND" && c.hasTrait("Special Move"))[0]
-					if (!target || targets.length < 2) return false
+					if (!target) return false
 					exile(targets)
 					toHand(target, true)
 					return true
