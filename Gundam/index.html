@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-12</title>
+	<title>Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-13</title>
 	<link rel="icon" href="icon32.png" />
 	<link rel="manifest" href="gundam.webmanifest" />
 	<style>
@@ -154,7 +154,7 @@
 			height: 4vmin;
 			text-align: center;
 			overflow: hidden !important;
-			padding-top: 2px;
+			padding-top: 0.3em;
 			transition: 0.2s;
 		}
 
@@ -274,7 +274,7 @@
 	<div id="overlay"></div>
 	<div id="search" class="searchsmall">
 		<div onclick="toggleSearch()" class="icon" title="Search">🔎<label for="searchtext">Search</label></div>
-		<input id="searchtext" onchange="findCards(this.value)" placeholder="Supports AND, OR, and NOT.">
+		<input id="searchtext" onchange="findCards(this.value)" placeholder="Zeon OR Clan AND NOT type:unit">
 		<div id="searchresults"></div>
 	</div>
 	<div id="battlefield"></div>

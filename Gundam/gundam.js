@@ -381,7 +381,8 @@ async function mutateDeck() {
 		let ratio = 0.0
 		// sample and verify
 		ngames.value = 50
-		for (let i = 16; i > 0; --i) {
+		let batches = 20
+		for (let i = batches; i > 0; --i) {
 			await playGames()
 			p1w += player_wins[0]
 			p2w += player_wins[1]
@@ -401,7 +402,7 @@ async function mutateDeck() {
 		// 1.24/700 => 97%/99999
 		// 2.23/700 => 109%/99999
 		// 194%/100 + 133%/800 => 106%/99999
-		if (ratio >= 1.28) {
+		if (ratio >= 1.28 && p1w + p2w >= batches * ngames.value) {
 			log(`✅Saving mutant as custom deck 3 after ${p1w + p2w} games`, false, true)
 			localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 			addCustomDeck()
@@ -424,17 +425,20 @@ async function honeDeck() {
 	const deckname = p1deck.options[p1deck.selectedIndex].text
 	const hone_start = new Date()
 	let better = false
-	log(`⚔️Honing ${deckname} x${upgrades} ${hone_start}, ETA ${upgrades * 8}m`, true, true)
+	log(`⚔️Honing ${deckname} x${upgrades} ${hone_start}, ETA ${upgrades * 8}m`, true, true, true)
 	for (var i = 1; !stop && i <= upgrades; ++i) {
 		bhone.innerHTML = `<span class="rotY">⚔️</span>Honing P1 deck ${i}`
 		better = await mutateDeck()
 		const mspent = (new Date() - hone_start) / 60000
 		if (!better) {
-			log(`✅${deckname} seems optimal after ${i - 1} upgrades in ${mspent.toFixed(2)}m. Try adding 0-count cards to consider.`, true, true)
+			log(`✅${deckname} seems optimal after ${i - 1} upgrades in ${mspent.toFixed(2)}m. Try adding 0-count cards to consider.`, true, true, true)
 			break
 		}
 		upgrades = parseInt(nhone.value)
-		log(`⚔️${i}/${upgrades} upgrades in ${mspent.toFixed(2)}m. ETA ${(mspent / i * (upgrades - i)).toFixed(2)}m`, true, true)
+		let mleft = mspent / i * (upgrades - i)
+		let hleft = mleft / 60
+		mleft = mleft % 60
+		log(`⚔️${i}/${upgrades} upgrades in ${mspent.toFixed(2)}m. ETA ${hleft.toFixed(0)}h ${mleft.toFixed(2)}m`, true, true, true)
 		p1deck.value = [...p1deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 	}
 	p1deck.value = [...p1deck.options].filter(o => o.innerText === deckname)[0].value
@@ -593,7 +597,7 @@ function log(s = "", escape = true, con = false, status = false) {
 		dlog.innerHTML += (escape ? escapeHTML(s) : s) + "<br>"
 		dlog.scrollTop = dlog.scrollHeight
 	}
-	if (con || status || inStr(s, "FIXME") || inStr(s, "o link")) {
+	if (con || status) {
 		dstatus.innerText = s
 		if (con) console.log(s)
 	}
@@ -1679,7 +1683,7 @@ https://exburst.dev/gundam/deck/152946
 0 EB01-025
 1 EB01-026
 0 EB01-027
-1 EB01-028
+0 EB01-028
 0 EB01-029
 0 EB01-030
 0 EB01-031
@@ -1698,7 +1702,7 @@ https://exburst.dev/gundam/deck/152946
 0 EB01-068
 0 EB01-077
 0 EB01-078
-1 EB01-079
+0 EB01-079
 0 EB01-080
 0 EB01-087
 0 EB01-088
@@ -1709,7 +1713,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD01-027
 0 GD01-028
 0 GD01-029
-1 GD01-030
+3 GD01-030
 1 GD01-031
 0 GD01-032
 0 GD01-033
@@ -1767,8 +1771,8 @@ https://exburst.dev/gundam/deck/152946
 0 GD03-022
 0 GD03-023
 0 GD03-024
-4 GD03-025
-0 GD03-026
+1 GD03-025
+2 GD03-026
 0 GD03-027
 0 GD03-028
 0 GD03-029
@@ -1779,7 +1783,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD03-089
 0 GD03-090
 0 GD03-105
-2 GD03-106
+0 GD03-106
 0 GD03-107
 0 GD03-108
 0 GD03-125
@@ -1788,21 +1792,21 @@ https://exburst.dev/gundam/deck/152946
 0 GD04-018
 0 GD04-019
 0 GD04-020
-0 GD04-021
+1 GD04-021
 0 GD04-022
 0 GD04-023
 0 GD04-024
 0 GD04-025
 0 GD04-026
 0 GD04-027
-3 GD04-028
+4 GD04-028
 0 GD04-029
 0 GD04-030
 3 GD04-031
 0 GD04-032
 1 GD04-085
 0 GD04-086
-1 GD04-087
+0 GD04-087
 0 GD04-088
 0 GD04-105
 0 GD04-106
@@ -1818,13 +1822,13 @@ https://exburst.dev/gundam/deck/152946
 0 GD05-022
 0 GD05-023
 0 GD05-024
-0 GD05-025
+1 GD05-025
 0 GD05-026
-4 GD05-027
+1 GD05-027
 1 GD05-028
 1 GD05-029
 0 GD05-030
-0 GD05-031
+1 GD05-031
 0 GD05-032
 4 GD05-085
 0 GD05-086
@@ -1836,16 +1840,16 @@ https://exburst.dev/gundam/deck/152946
 0 GD05-109
 0 GD05-125
 0 GD05-126
-0 ST02-001
+3 ST02-001
 0 ST02-002
 0 ST02-003
 1 ST02-004
 0 ST02-005
-1 ST02-010
+0 ST02-010
 0 ST02-012
 0 ST02-013
 0 ST02-015
-0 ST03-006
+1 ST03-006
 0 ST03-007
 2 ST03-008
 0 ST03-009
@@ -2182,13 +2186,13 @@ https://exburst.dev/gundam/deck/152946
 1 EB01-045
 3 EB01-046
 0 EB01-047
-2 EB01-048
+0 EB01-048
 0 EB01-049
 0 EB01-050
 0 EB01-051
 0 EB01-052
-0 EB01-053
-2 EB01-054
+1 EB01-053
+1 EB01-054
 0 EB01-055
 3 EB01-056
 0 EB01-057
@@ -2198,7 +2202,7 @@ https://exburst.dev/gundam/deck/152946
 0 EB01-069
 0 EB01-070
 1 EB01-071
-0 EB01-072
+1 EB01-072
 0 EB01-081
 0 EB01-082
 0 EB01-083
@@ -2217,7 +2221,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD01-074
 0 GD01-075
 1 GD01-076
-1 GD01-077
+2 GD01-077
 0 GD01-078
 0 GD01-079
 0 GD01-080
@@ -2230,7 +2234,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD01-096
 0 GD01-097
 0 GD01-098
-2 GD01-117
+3 GD01-117
 0 GD01-118
 0 GD01-119
 0 GD01-120
@@ -2264,7 +2268,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD02-129
 0 GD02-130
 0 GD03-069
-1 GD03-070
+0 GD03-070
 0 GD03-071
 0 GD03-072
 0 GD03-073
@@ -2329,17 +2333,17 @@ https://exburst.dev/gundam/deck/152946
 0 GD05-078
 0 GD05-079
 0 GD05-080
-1 GD05-097
+0 GD05-097
 0 GD05-098
-1 GD05-099
-1 GD05-100
+0 GD05-099
+0 GD05-100
 0 GD05-101
 0 GD05-118
 0 GD05-119
 0 GD05-120
 0 GD05-121
 0 GD05-122
-0 GD05-130
+4 GD05-130
 0 ST01-006
 2 ST01-007
 0 ST01-008
@@ -2353,7 +2357,7 @@ https://exburst.dev/gundam/deck/152946
 0 ST04-004
 0 ST04-005
 0 ST04-010
-4 ST04-012
+3 ST04-012
 0 ST04-013
 0 ST04-015
 0 ST05-007
@@ -3223,7 +3227,8 @@ class Player {
 }
 
 async function loadCards() {
-	log("⏳Loading " + document.title)
+	log("⏳Loading " + document.title, false, true)
+	dstatus.innerText = document.title
 	const response = await fetch("cards.json")
 	CARDS = await response.json()
 	if (Object.keys(CARDS).length > 1) {
@@ -3231,7 +3236,7 @@ async function loadCards() {
 		for (const k in CARDS) {
 			const card = CARDS[k]
 			if (card.cost < 1 && !card.id.match(/^[TRE]/)) {
-				log("🚩🚩FIXME: Card cost < 1: " + card.id)
+				log("🚩🚩FIXME: Card cost < 1: " + card.id, false, true, true)
 				// ORB let card_data = await fetch(`https://gundamcard.gg/cards/${card.id}/`)
 			}
 		}
@@ -3528,7 +3533,7 @@ async function actionStep() {
 			}
 			if (refund) {
 				if (c.id === "ST10-014" && p.resource.length < cost) {
-					log(`FIXME: Refunding ${c.id} cost ${cost} spent ${spent} r/res ${p.resource.filter(c => c.rested).length}/${p.resource.length}`)
+					log(`FIXME: Refunding ${c.id} cost ${cost} spent ${spent} r/res ${p.resource.filter(c => c.rested).length}/${p.resource.length}`, false, true, true)
 					// debugger;
 				}
 				// No useful target, so don't play this and roll back payment.
@@ -3762,7 +3767,7 @@ function getSectionText(card, act = "Main", clause = "", limit = true) {
 	}
 
 	if (act != "Pilot") {
-		if ((mo.length > 3 && limits2 && limits2 !== "Activate･") || !l3ok) log(`🚩🚩FIXME: ${card} ACT${act}/CLAUSE${clause} LIMITS2` + limits2 + "LIMITS3" + limits3 + " MO" + mo + " TEXT" + text + " MO2" + mo2)
+		if ((mo.length > 3 && limits2 && limits2 !== "Activate･") || !l3ok) log(`🚩🚩FIXME: ${card} ACT${act}/CLAUSE${clause} LIMITS2` + limits2 + "LIMITS3" + limits3 + " MO" + mo + " TEXT" + text + " MO2" + mo2, true, true, true)
 	}
 	// TODO: Full text line?
 	if (inStr(limits, "[Once per Turn]")) text = "[Once per Turn]" + text
@@ -3887,13 +3892,13 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!myturn) return false  // already checked in getSectionText
 		t = t.slice(mo[0].length)
 	}
-	if (mo = t.match(/^Place the top 2 cards of your deck into your trash. If you placed a \(Vagan\) card with this effect, /)) {
+	if (mo = t.match(/^Place the top 2 cards of your deck into your trash\. If you placed a \(Vagan\) card with this effect, /)) {
 		let ok = false
 			;[1, 2].forEach(i => {
 				let c = p.deck.pop()
 				if (c) { trash(c); if (c.hasTrait("Vagan")) ok = true }
 			})
-		if (!ok) return false
+		if (!ok) return true
 		t = t.slice(mo[0].length)
 	}
 	if (t === "this Unit recovers the specified number of HP.)") {
@@ -4385,6 +4390,19 @@ async function runCard2(card, act, clause = "", t = "") {
 		}
 
 		// with must be before that is
+		if (mo = t.match(/^that (is|are) Lv\.(\d+)\. ?/)) {
+			targets = targets.filter(c => c.LEVEL() == mo[2])
+			target = targets[0]
+			if (!target) return false
+			t = t.slice(mo[0].length)
+			if (t === "Rest it. If you do, choose 1 enemy Unit that is Lv.2 or lower. Return it to its owner's hand.") {
+				let their = mySort(eu.filter(c => c.LEVEL() <= 2), c => -c.AP())[0]
+				if (!their) return false
+				rest(target)
+				bounce(their)
+				return true
+			}
+		}
 		if (mo = t.match(/^that is Lv.1 or lower or has 1 or less AP. /)) {
 			targets = targets.filter(c => c.LEVEL() <= 1 || c.AP() <= 1)
 			target = targets[0]
@@ -4615,6 +4633,25 @@ async function runCard2(card, act, clause = "", t = "") {
 			if (p.trash.length >= 10) targets = mySort(eu.filter(c => !c.rested && c.LEVEL() <= 4), c => -c.AP())
 			await destroy(targets[0])
 			return true
+		}
+		if (mo = t.match(/^Base/)) {
+			if (!p.base || p.base.rested) return false
+			if (t === "Base. Rest it. If you do, choose 1 enemy Unit that is Lv.4 or lower. It gets AP-2 during this battle.") {
+				target = null
+				if (attacker && attacker.owner !== p) target = attacker
+				if (defender && defender.owner !== p) target = defender
+				if (!target) return false
+				rest(p.base)
+				eobAP(target, 2)
+				return true
+			}
+			if (t === "Base and 1 enemy Unit with 3 or less HP. Rest them.") {
+				target = eu.filter(c => !c.rested && c.HP() <= 3)[0]
+				if (!target || (!myturn && target.sick) || (myturn && fua.length < 1)) return false
+				rest(p.base)
+				rest(target)
+				return true
+			}
 		}
 		if (mo = t.match(/^Rest it. ?/)) {
 			if (t === "Rest it. If a friendly (Jupitris) Link Unit is in play, choose 1 to 2 enemy Units with 3 or less HP instead.") {
@@ -4952,6 +4989,26 @@ async function runCard2(card, act, clause = "", t = "") {
 			return true
 		}
 		return false
+	}
+	if (t === " effect, choose 1 enemy Unit. It gets AP-2 during this turn.") {
+		debugger;
+	}
+	if (t === ", this Unit gains <Suppression> during this turn.") {
+		// handled without ", " elsewhere
+		return false
+	}
+	if (t === "Units/Bases. It recovers 2 HP.") {
+		target = mySort(fu, c => -c.damage + c.getRepair())[0] || p.base
+		if (!target || target.damage < 1) return false
+		await target.recover(2)
+		return true
+	}
+	if (t === "Base. Rest it. If you do, set this Unit as active. It can't choose the enemy player as its attack target during this turn.") {
+		if (!p.base || p.base.rested || !u.rested) return false
+		rest(p.base)
+		await activate(u)
+		eotKw(u, "must_attack_unit")
+		return true
 	}
 	if (t === "When it deals battle damage to an enemy Unit that is Lv.5 or lower during this turn, destroy that enemy Unit.") {
 		let kw = "When this Unit deals battle damage to an enemy Unit that is Lv.5 or lower, destroy that enemy Unit."
@@ -5296,7 +5353,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		return true
 	}
 	// battle Action command
-	if (t === "1 friendly rested (Academy) Unit. Change a battling enemy Unit's attack target to it.") {
+	if (t === "rested (Academy) Unit. Change a battling enemy Unit's attack target to it.") {
 		targets = fu.filter(c => c.rested && c.hasTrait("Academy"))
 		t = "Change a battling enemy Unit's attack target to it."
 	}
@@ -5894,7 +5951,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (clause === "receives damage") {
 		if (active_damage < 1) {
-			log("FIXME: no damage to receive")
+			log("FIXME: no damage to receive", false, true, true)
 			return false
 		}
 		if (inStr(t, " from an enemy, ") && active_card.owner === p) return false
@@ -6263,7 +6320,7 @@ async function runCard2(card, act, clause = "", t = "") {
 			return true
 		}
 		if (targets.length < 1) {
-			console.log(`FIXME: No targets for ${card.id}: ${t}`)
+			log(`FIXME: No targets for ${card.id}: ${t}`, true, true, true)
 		}
 		target = targets[0]
 		if (!target) return false
@@ -6450,7 +6507,7 @@ async function runCard2(card, act, clause = "", t = "") {
 			// TODO: Choose top or trash
 			trash(target)
 		} else if (target === null) {
-			log(`🚩🚩FIXME No target for ${card.type} ${card.id} ${act}${clause} "${t}". p battle length: ${p.battle.length}`)
+			log(`🚩🚩FIXME: No target for ${card.type} ${card.id} ${act}${clause} "${t}". p battle length: ${p.battle.length}`, true, true, true)
 			return false
 		}
 
@@ -6539,7 +6596,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		}
 	}
 
-	log(`🚩🚩FIXME: Not implemented ${card.type} ${card.id} "${act}${clause}": "${t}". p battle length: ${p.battle.length}`)
+	log(`🚩🚩FIXME: Not implemented ${card.type} ${card.id} "${act}${clause}": "${t}". p battle length: ${p.battle.length}`, true, true, true)
 	return false
 }
 
@@ -7003,7 +7060,7 @@ async function playGames() {
 		try {
 			await playGame()
 		} catch (ex) {
-			if (!inStr("" + ex, "💀")) log("🚩🚩FIXME PG: " + ex + " " + ex.stack)
+			if (!inStr("" + ex, "💀")) log("🚩🚩FIXME: PG: " + ex + " " + ex.stack, true, true, true)
 		}
 		if (game > 1 && delay > 0 || game >= games) showStats()
 		if (delay > 0) {
@@ -7019,7 +7076,7 @@ async function playGames() {
 			let covered = Object.keys(card.covered_lines).length
 			let expected = card.text.split("\n")
 			if (covered !== expected) {
-				log(`🚩🚩FIXME cov: ${card.id} only covered ${covered}/${expected}: ${Object.keys(card.covered_lines)}`)
+				log(`🚩🚩FIXME cov: ${card.id} only covered ${covered}/${expected}: ${Object.keys(card.covered_lines)}`, true, true, true)
 			}
 		}
 	}
