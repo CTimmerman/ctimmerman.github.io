@@ -436,9 +436,13 @@ async function honeDeck() {
 		}
 		upgrades = parseInt(nhone.value)
 		let mleft = mspent / i * (upgrades - i)
-		let hleft = mleft / 60
-		mleft = mleft % 60
-		log(`⚔️${i}/${upgrades} upgrades in ${mspent.toFixed(2)}m. ETA ${hleft.toFixed(0)}h ${mleft.toFixed(2)}m`, true, true, true)
+		let eta = `${mleft.toFixed(2)}m`
+		if (mleft > 60) {
+			let hleft = Math.floor(mleft / 60)
+			mleft = mleft % 60
+			eta = `${hleft.toFixed(0)}h ${mleft.toFixed(2)}m`
+		}
+		log(`⚔️${i}/${upgrades} upgrades in ${mspent.toFixed(2)}m. ETA ${eta}`, true, true, true)
 		p1deck.value = [...p1deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 	}
 	p1deck.value = [...p1deck.options].filter(o => o.innerText === deckname)[0].value
