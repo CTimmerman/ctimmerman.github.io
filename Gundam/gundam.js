@@ -4,6 +4,8 @@ const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
 let zoomed = ""
+let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-18"
+document.title = title
 
 function dict2str(d) {
 	const keys = []
@@ -26,23 +28,15 @@ function setVolume() {
 }
 setVolume()
 
-let DEBUG_ID = "FOO"
-let DEBUG_ACT = "Main"
 let active_player = null
-let active_unit = null
-let active_text = ""
-let active_cost = 0
-let active_card = null
-let running_card = null
-let active_target = null
-let active_damage = 0
 let spent = []
 let attacker = null
 let defender = null
-let destroyer = null
 let once_per_turn = []
 
 let CARDS = {}
+let DEBUG_ID = "FOO"
+let DEBUG_ACT = "Main"
 // Why doesn't upstream list EXR promos like other promos?
 // "EXR-001_PR", "EXR-001_PR2", "EXR-001_PR3", "EXR-001_PR4", "EXR-001_PR5"
 const EX_RESOURCES = ["EXR-001", "EXRP-001", "EXRP-002"]
@@ -168,9 +162,9 @@ function trash(card) {
 	card.owner.trash.push(card)
 }
 
-async function destroy(card, destroy_effect = true) {
+async function destroy(card, ctx, destroy_effect = true) {
 	if (!card || card.owner.trash.includes(card) ||
-		(destroy_effect && card.isUnit() && card.hasKw("can't be destroyed by enemy effects") && running_card.owner !== card.owner)) return false
+		(destroy_effect && card.isUnit() && card.hasKw("can't be destroyed by enemy effects") && ctx.running_card.owner !== card.owner)) return false
 	log("💥Destroy " + card)
 	if (inStr(card.type, "BASE")) {
 		card.owner.base = null
@@ -180,7 +174,7 @@ async function destroy(card, destroy_effect = true) {
 	if (card.pilot) trash(card.pilot)
 	// tokens don't go to trash
 	if (card.type.indexOf("TOKEN") < 0 && card.type.indexOf("EX") !== 0) trash(card)
-	await run(card, "Destroyed")
+	await run(card, "Destroyed", "", ctx)
 	if (delay === 0) return true
 	await render()
 	await boom.play().catch(ex => { })
@@ -200,7 +194,7 @@ async function sleep(ms = 1000) {
 	if (delay === 0) return
 	do {
 		await new Promise(r => setTimeout(r, delay * ms))
-	} while (delay === maxDelay && !stop)
+	} while (delay === maxDelay && !window.stop)
 }
 
 function getel(card) {
@@ -228,11 +222,12 @@ async function activate(card, effect = false) {
 	}
 }
 
-function rest(card, effect = true) {
-	if (effect) {
+function rest(card, ctx = {}) {
+	if (ctx.rester) {
 		let base = card.owner.base
-		if (card.type === "UNIT" && active_player === card.owner && base && !base.rested && inStr(base.text, "During your turn, when you would rest a Unit with a friendly (League Militaire) Unit's effect, you may rest this Base instead.") && running_card && running_card.type === "UNIT" && running_card.hasTrait("League Militaire")) {
-			card = base
+		if (card.type === "UNIT" && active_player === card.owner && base && !base.rested && inStr(base.text, "During your turn, when you would rest a Unit with a friendly (League Militaire) Unit's effect, you may rest this Base instead.")) {
+			let rester = (ctx.rester.isUnit() ? ctx.rester : ctx.rester.unit)
+			if (rester && rester.hasTrait("League Militaire")) card = base
 		}
 		log("💤Rest " + card)
 	}
@@ -313,7 +308,7 @@ function compareDecks() {
  * ⚔️9/999 upgrades in 230.97m. ETA 25406.60m
  */
 async function mutateDeck() {
-	if (!game_over) {
+	if (!window.game_over) {
 		alert("Please end the current games before testing.")
 		return
 	}
@@ -322,7 +317,7 @@ async function mutateDeck() {
 	// let old_win_perc = 0
 	// let wp_history = []
 	// 6000+ is a common place to find improvements to a good AI deck.
-	while (version < 99999 && !stop) {
+	while (version < 99999 && !window.stop) {
 		++version
 		delay = 1
 		let decklist = p1deck.value < 0 ? decks[rnd(0, decks.length - 1)] : decks[p1deck.value]
@@ -371,7 +366,7 @@ async function mutateDeck() {
 		localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 		addCustomDeck()
 		log(`🧪Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
-		// Test
+		// Test mutant
 		p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
 		nspeed.value = 100
 		volume.value = 0
@@ -381,7 +376,7 @@ async function mutateDeck() {
 		let ratio = 0.0
 		// sample and verify
 		ngames.value = 50
-		let batches = 20
+		let batches = 30
 		for (let i = batches; i > 0; --i) {
 			await playGames()
 			p1w += player_wins[0]
@@ -391,7 +386,7 @@ async function mutateDeck() {
 			if (ratio < 1.11) break
 		}
 		delay = 1
-		log(`🧪Mutant ${version} / original: ${(100 * ratio).toFixed(0)}%\n${changelog.join("\n")}`, true, ratio >= 1.28, true)
+		log(`🧪Mutant ${version} / ${p1w + p2w} games: ${(100 * ratio).toFixed(0)}%\n${changelog.join("\n")}`, true, false, true)
 		// 126%/420 => 102%/99999, but 127% (+2 others >= 126%)/450 => 98%/99999
 		// 1.27/500 => 113%/99999, or 78%/99999 :(
 		// 1.28/600 => 106%/99999 x2.
@@ -402,8 +397,12 @@ async function mutateDeck() {
 		// 1.24/700 => 97%/99999
 		// 2.23/700 => 109%/99999
 		// 194%/100 + 133%/800 => 106%/99999
-		if (ratio >= 1.28 && p1w + p2w >= batches * ngames.value) {
-			log(`✅Saving mutant as custom deck 3 after ${p1w + p2w} games`, false, true)
+		// 1.17/(50*20) => 105%/99999
+		// 1.17/(50*30) => 106%/99999
+		// 1.16/(50*30) => 105%/99999
+		// 1.15/(50*30) => 107%/99999
+		if (ratio >= 1.13 && p1w + p2w >= batches * ngames.value) {
+			log(`✅Saving ${(100 * ratio).toFixed(0)}% mutant ${version} as custom deck 3 after ${p1w + p2w} games\n${changelog.join("\n")}`, true, true, true)
 			localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 			addCustomDeck()
 			better = true
@@ -426,7 +425,7 @@ async function honeDeck() {
 	const hone_start = new Date()
 	let better = false
 	log(`⚔️Honing ${deckname} x${upgrades} ${hone_start}, ETA ${upgrades * 8}m`, true, true, true)
-	for (var i = 1; !stop && i <= upgrades; ++i) {
+	for (var i = 1; !window.stop && i <= upgrades; ++i) {
 		bhone.innerHTML = `<span class="rotY">⚔️</span>Honing P1 deck ${i}`
 		better = await mutateDeck()
 		const mspent = (new Date() - hone_start) / 60000
@@ -637,22 +636,20 @@ function getPilotName(card) {
 	return ""
 }
 
-async function pair(unit, pilot) {
+async function pair(unit, pilot, ctx = {}) {
 	log(`🧑‍✈️Pair ${pilot.AP()}/${pilot.HP()} #${pilot.cid} ${getPilotName(pilot)} & ${unit}`)
 	unit.pilot = pilot
 	pilot.unit = unit
 	await render()
-	await run(unit, "When Paired")
-	window.paired_unit = unit
-	await publish("When you pair ", active_player.battle)
+	await run(unit, "When Paired", "", ctx)
+	await publish("When you pair ", active_player.battle, {paired_unit: unit})
 	// await run(unit, "During Pair")
 	if (unit.link && linksWith(unit, pilot)) {
 		log("🔗Link")
 		unit.sick = false
-		await run(unit, "When Linked")
-		active_unit = unit
-		await run(unit.owner.base, "", " Unit links, ")
-		// await run(unit, "During Link")
+		await run(unit, "When Linked", "", ctx)
+		await run(unit.owner.base, "", " Unit links, ", {...ctx, active_unit: unit})
+		// await run(unit, "During Link", "", ctx)
 	}
 }
 
@@ -1023,1861 +1020,9 @@ class Card {
 	}
 }
 
-const DECKS = [
-	`# ST01 Heroic Beginnings (UW)
-2 ST01-001 Gundam
-4 ST01-002 Gundam (MA Form)
-4 ST01-003 Guncannon
-3 ST01-004 Guntank
-3 ST01-005 GM
-2 ST01-006 Gundam Aerial (Permet Score Six)
-4 ST01-007 Gundam Aerial (Bit on Form)
-3 ST01-008 Demi Trainer
-3 ST01-009 Zowort
-4 ST01-010 Amuro Ray
-4 ST01-011 Suletta Mercury
-3 ST01-012 Thoroughly Damaged
-3 ST01-013 Kai's Resolve
-2 ST01-014 Unforeseen Incident
-3 ST01-015 White Base
-3 ST01-016 Asticassia School of Technology, Earth House`,
-	`# ST02 Wings of Advance (GU)
-2 ST02-001 Wing Gundam
-4 ST02-002 Wing Gundam (Bird Mode)
-4 ST02-003 Gundam Heavyarms
-3 ST02-004 Gundam Sandrock
-3 ST02-005 Maganac
-2 ST02-006 Tallgeese
-4 ST02-007 Leo
-3 ST02-008 Aries
-3 ST02-009 Tragos
-4 ST02-010 Heero Yuy
-4 ST02-011 Zechs Merquise
-3 ST02-012 Simultaneous Fire
-3 ST02-013 Peaceful Timbre
-2 ST02-014 Siege Ploy
-3 ST02-015 Saint Gabriel Institute
-3 ST02-016 Corsica Base`,
-	`# Fixed Wings of Advance (GU)
-4 ST02-001 Wing Gundam
-4 ST02-002 Wing Gundam (Bird Mode)
-4 ST02-003 Gundam Heavyarms
-4 ST02-004 Gundam Sandrock
-4 ST02-005 Maganac
-4 ST02-006 Tallgeese
-4 ST02-007 Leo
-3 ST02-008 Aries
-3 ST02-009 Tragos
-4 ST02-010 Heero Yuy
-3 ST02-011 Zechs Merquise
-0 ST02-012 Simultaneous Fire
-3 ST02-013 Peaceful Timbre
-0 ST02-014 Siege Ploy
-4 ST02-015 Saint Gabriel Institute
-2 ST02-016 Corsica Base`,
-	`# ST03 Zeon's Rush (GR)
-2 ST03-001 Sinanju
-4 ST03-002 Angelo's Geara Zulu
-4 ST03-003 Geara Zulu
-3 ST03-004 Gaza D (Sleeves)
-3 ST03-005 Dra-C (Sleeves)
-2 ST03-006 Char's Zaku Ⅱ
-3 ST03-007 Zaku Ⅰ
-4 ST03-008 Zaku Ⅱ
-3 ST03-009 Gouf
-4 ST03-010 Full Frontal
-4 ST03-011 Char Aznable
-3 ST03-012 Indignation
-3 ST03-013 Close Combat
-2 ST03-014 The Blue Giant
-3 ST03-015 Rewloola
-3 ST03-016 Falmel`,
-	`# ST04 SEED Strike (RW)
-2 ST04-001 Aile Strike Gundam
-4 ST04-002 Strike Gundam
-4 ST04-003 Moebius Zero
-3 ST04-004 Moebius
-3 ST04-005 Strike Dagger
-2 ST04-006 Aegis Gundam
-4 ST04-007 Aegis Gundam (MA Mode)
-3 ST04-008 Ginn
-3 ST04-009 Miguel's Ginn
-4 ST04-010 Kira Yamato
-4 ST04-011 Athrun Zala
-3 ST04-012 Striker Pack
-3 ST04-013 Hawk of Endymion
-2 ST04-014 The Magic Bullet of Dusk
-3 ST04-015 Archangel
-3 ST04-016 Vesalius`,
-	`# ST05 Iron Bloom (PW)
-2 ST01-014 Unforeseen Incident
-2 ST05-001 Gundam Barbatos 4th Form
-4 ST05-002 Gundam Barbatos 2nd Form
-4 ST05-003 CGS Mobile Worker
-4 ST05-004 Graze Custom
-4 ST05-005 Gundam Gusion Rebake
-3 ST05-006 Hyakuren
-2 ST05-007 McGillis' Schwalbe Graze
-4 ST05-008 Graze Commander Type
-3 ST05-009 Graze
-4 ST05-010 Mikazuki Augus
-3 ST05-011 Akihiro Altland
-3 ST05-012 McGillis Fareed
-2 ST05-013 With Iron and Blood
-2 ST05-014 Fatal Strike
-4 ST05-015 Isaribi`,
-	`# Fixed Iron Bloom (PW)
-0 ST01-014 Unforeseen Incident
-4 ST05-001 Gundam Barbatos 4th Form
-4 ST05-002 Gundam Barbatos 2nd Form
-2 ST05-003 CGS Mobile Worker
-4 ST05-004 Graze Custom
-4 ST05-005 Gundam Gusion Rebake
-4 ST05-006 Hyakuren
-4 ST05-007 McGillis' Schwalbe Graze
-4 ST05-008 Graze Commander Type
-0 ST05-009 Graze
-4 ST05-010 Mikazuki Augus
-3 ST05-011 Akihiro Altland
-1 ST05-012 McGillis Fareed
-4 ST05-013 With Iron and Blood
-4 ST05-014 Fatal Strike
-4 ST05-015 Isaribi`,
-	`# ST06 Clan Unity (GR)
-2 ST03-013 Close Combat  # Listed last on https://x.com/GUNDAM_GCG_ENG/status/1976623748871811321/photo/1
-2 ST06-001 GQuuuuuuX (Omega Psycommu)
-4 ST06-002 GQuuuuuuX (Omega Psycommu)
-4 ST06-003 Gaia's Rick Dom (GQ)
-4 ST06-004 Gelgoog (GQ)
-2 ST06-005 Red Gundam
-4 ST06-006 Red Gundam
-4 ST06-007 Ortega's Rick Dom (GQ)
-4 ST06-008 Sugai's Gelgoog (GQ)
-4 ST06-009 Amate Yuzuriha (Machu)
-4 ST06-010 Shuji Itō
-2 ST06-011 Ruthless Tactics
-4 ST06-012 Schoolgirl and Smuggler
-2 ST06-013 Fierce Unity
-2 ST06-014 Clan Battle
-2 ST06-015 Kaneban Co., Ltd.`,
-	`# ST07 Celestial Drive (GP)
-2 ST07-001 Gundam Exia
-4 ST07-002 Gundam Exia
-4 ST07-003 Gundam Virtue
-3 ST07-004 Gundam Virtue
-2 ST07-005 Gundam Dynames
-4 ST07-006 Gundam Dynames
-3 ST07-007 Gundam Kyrios
-4 ST07-008 Gundam Kyrios (Flight Mode)
-3 ST07-009 Setsuna F. Seiei
-3 ST07-010 Tieria Erde
-3 ST07-011 Lockon Stratos (Neil)
-3 ST07-012 Allelujah Haptism
-2 ST07-013 Armed Intervention
-4 ST07-014 Tactical Visionary
-4 ST07-015 Ptolemaios
-2 ST05-014 Fatal Strike`,
-	`# ST08 Flash of Radiance (RU)
-January 16, 2026. ＄15.99
-2 ST08-001 Ξ Gundam
-4 ST08-002 Ξ Gundam
-3 ST08-003 Messer (Type-F Naked) (Commander Type)
-4 ST08-004 Messer Type-F01
-3 ST08-005 Messer Type-F02 Minelayer
-2 ST08-006 Penelope
-4 ST08-007 Penelope
-4 ST08-008 Gustav Karl Type-00
-3 ST08-009 Jegan Ground Type-A (Man Hunter)
-4 ST08-010 Hathaway Noa
-4 ST08-011 Lane Aim
-3 ST08-012 Words for Hathaway
-3 ST08-013 Lady Luck
-3 ST08-014 Valiant
-2 ST08-015 Davao
-2 ST02-014 Siege Ploy`,
-	`# ST09 Destiny Ignition (PR)
-2 ST09-001 Impulse Gundam
-2 ST09-002 Force Impulse Gundam
-4 ST09-005 Zaku Warrior
-4 ST09-006 Sword Impulse Gundam
-4 ST09-007 Blast Impulse Gundam
-4 ST09-008 Shinn Asuka
-2 ST09-009 Giant Killing
-4 ST09-010 Minerva
-2 GD02-110 Awakened Power
-
-4 ST04-007 Aegis Gundam (MA Mode)
-4 ST04-011 Athrun Zala
-2 ST04-016 Vesalius
-2 ST09-003 Saviour Gundam
-3 GD01-049 Blitz Gundam
-4 GD01-054 Duel Gundam
-3 GD01-111 Battle of Aces`,
-	`# ST09 Destiny Ignition (PW)
-March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
-3 ST01-014 Unforeseen Incident
-4 ST04-002 Strike Gundam
-4 ST04-010 Kira Yamato
-2 ST04-015 Archangel
-2 ST09-004 Freedom Gundam
-3 GD01-118 Overflowing Affection
-4 GD02-076 Buster Gundam
-
-2 ST09-001 Impulse Gundam
-2 ST09-002 Force Impulse Gundam
-4 ST09-005 Zaku Warrior
-4 ST09-006 Sword Impulse Gundam
-4 ST09-007 Blast Impulse Gundam
-4 ST09-008 Shinn Asuka
-2 ST09-009 Giant Killing
-4 ST09-010 Minerva
-2 GD02-110 Awakened Power`,
-	`# ST10 Generation Pulse (UW)
-Released 2026-06-26
-4 ST10-016 Luna Mana & Carry Base
-2 ST10-015 Diffuse Beam Cannon
-2 ST10-013 Tactical Training
-2 ST10-014 Unlocking the Development Diagram
-4 ST10-011 Kamille Bidan
-4 ST10-012 Mark Guilder
-4 ST10-005 Nemo
-4 ST10-003 Gundam Mk-II (AEUG)
-3 ST10-010 Mobile Worker (Tekkadan)
-4 ST10-009 Graze Duel Type
-4 ST10-008 Gundam Barbatos 1st Form
-3 ST10-004 Super Gundam
-2 ST10-006 Phoenix Gundam (Power Unleashed) (EX)
-3 ST10-002 Zeta Gundam
-3 ST10-007 Gundam Barbatos 4th Form
-2 ST10-001 Zeta Gundam (EX)`,
-	`# Blurple deck winner of nats (PU)
-https://exburst.dev/gundam/deck/152946
-4 ST02-016 Corsica Base
-4 ST05-014 Fatal Strike
-2 GD01-100 A Show of Resolve
-4 ST01-010 Amuro Ray
-4 ST05-010 Mikazuki Augus
-4 ST05-004 Graze Custom
-4 GD01-008 Guntank
-4 GD02-013 Hizack
-4 GD02-054 Gundam Barbatos 1st Form
-4 GD01-018 ReZEL
-4 GD03-056 Gundam Barbatos Adapt
-4 ST01-001 Gundam
-2 GD02-055 Gundam Gusion Rebake
-2 GD03-001 Gundam NT-1`,
-	`# Some top deck (UW)
-4 GD04-121 Reineforce Jr.
-3 GD01-118 Overflowing Affection
-2 GD01-100 A Show of Resolve
-4 ST01-010 Amuro Ray
-3 GD04-098 Riddhe Marcenas
-4 GD04-081 Üso Ewin
-4 GD04-016 Zoloat (League Militaire)
-2 GD04-077 Flat (Militia)
-2 GD04-015 Gun EZ
-3 GD01-086 Gundam Lfrith
-2 GD04-013 Core Fighter
-2 GD01-006 Delta Plus
-3 ST01-001 Gundam
-4 GD04-003 Victory Gundam
-4 GD04-006 V-Dash Gundam
-4 GD04-065 Unicorn Gundam 02 Banshee Norn (Destroy Mode)`,
-	`# Cees's Academy deck (G)
-3 GD04-124 9th Tactical Testing Sector
-2 GD04-123 A Baoa Qu
-3 GD04-108 Witches from Earth
-2 GD04-085 Suletta Mercury
-1 GD04-106 Indiscriminate Violence
-2 GD04-087 Elan Ceres (Enhanced Person Number 5)
-0 GD05-109 Felsi's Plea
-0 GD05-108 Overcoming Hardships
-4 ST03-007 Zaku Ⅰ
-4 GD04-031 Heindree
-4 GD04-028 Zakrello
-1 GD05-032 Desultor
-1 GD05-025 Demi Barding
-0 GD05-031 Guel's Dilanza
-4 GD04-030 Chuchu's Demi Trainer
-4 GD04-025 Gundvölva
-4 GD04-020 Gundam Lfrith Ur
-4 GD04-021 Gundam Lfrith Thorn
-3 GD04-018 Gundam Pharact
-4 GD04-024 Gundam Aerial Rebuild
-0 GD05-018 Gundam Calibarn`,
-	`# Cees's AI Academy deck (GW)
-0 EB01-088
-0 GD01-067
-0 GD01-070
-3 GD01-071
-0 GD01-074
-4 GD01-075
-4 GD01-076
-2 GD01-082
-0 GD01-083
-1 GD01-084
-4 GD01-085
-2 GD01-097
-2 GD01-098
-0 GD01-119
-0 GD01-122
-4 GD01-130
-0 GD02-074
-3 GD02-078
-0 GD02-084
-2 GD04-018
-0 GD04-020
-3 GD04-021
-2 GD04-024
-0 GD04-025
-0 GD04-030
-3 GD04-031
-2 GD04-085
-1 GD04-087
-0 GD04-106
-0 GD04-108
-0 GD04-124
-0 GD05-018
-0 GD05-022
-0 GD05-025
-0 GD05-030
-1 GD05-031
-0 GD05-087
-0 GD05-108
-0 GD05-109
-0 ST01-006
-3 ST01-007
-1 ST01-008
-0 ST01-009
-3 ST01-011
-0 ST01-016
-0 ST02-015`,
-	`# Cees's AI CB deck (G)
-4 ST07-014 GL1C1 Tactical Visionary
-4 ST07-012 GL3C1 Allelujah Haptism
-4 ST07-011 GL4C1 Lockon Stratos (Neil)
-4 ST07-008 GL2C2 Gundam Kyrios (Flight Mode)
-4 ST07-006 GL3C2 Gundam Dynames
-4 GD04-029 GL3C2 Gundam Dynames (GN Full Shield)
-4 ST07-007 GL3C2 Gundam Kyrios
-4 GD03-030 GL3C3 Gundam Kyrios (Tail Unit Flight Mode)
-3 ST07-005 GL4C3 Gundam Dynames
-4 GD03-026 GL5C3 Gundam Dynames
-4 GD03-022 GL5C3 Gundam Kyrios
-3 GD04-023 GL5C4 Gundam Kyrios (Tail Booster)
-4 GD04-019 GL6C5 GN Armor Type-D (Trans-Am)`,
-	`# Cees's AI CB deck (GP)
-4 ST07-011 GL4C1 Lockon Stratos (Neil)
-4 GD03-063 PL2C1 0 Gundam
-4 GD05-050 PL2C1 Gundam Exia Repair
-4 GD04-064 PL2C2 Gundam Exia
-4 ST07-006 GL3C2 Gundam Dynames
-4 GD04-029 GL3C2 Gundam Dynames (GN Full Shield)
-4 ST07-004 PL3C2 Gundam Virtue
-4 ST07-002 PL4C2 Gundam Exia
-4 GD04-057 PL4C3 Gundam Nadleeh
-4 GD03-026 GL5C3 Gundam Dynames
-2 GD03-022 GL5C3 Gundam Kyrios
-3 ST07-003 PL5C3 Gundam Virtue
-4 GD04-019 GL6C5 GN Armor Type-D (Trans-Am)
-1 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
-	`# Cees's AI CB deck 2 (GP)
-0 ST07-014 GL1C1 Tactical Visionary
-3 ST07-012 GL3C1 Allelujah Haptism
-3 ST07-011 GL4C1 Lockon Stratos (Neil)
-0 ST07-008 GL2C2 Gundam Kyrios (Flight Mode)
-4 ST07-006 GL3C2 Gundam Dynames
-3 GD04-029 GL3C2 Gundam Dynames (GN Full Shield)
-1 ST07-007 GL3C2 Gundam Kyrios
-1 GD03-030 GL3C3 Gundam Kyrios (Tail Unit Flight Mode)
-0 ST07-005 GL4C3 Gundam Dynames
-4 GD03-026 GL5C3 Gundam Dynames
-1 GD03-022 GL5C3 Gundam Kyrios
-1 GD04-023 GL5C4 Gundam Kyrios (Tail Booster)
-2 GD04-019 GL6C5 GN Armor Type-D (Trans-Am)
-2 ST07-015 PL2C1 Ptolemaios
-0 ST07-013 PL4C1 Armed Intervention
-2 ST07-009 PL4C1 Setsuna F. Seiei
-0 ST07-010 PL4C1 Tieria Erde
-4 GD03-063 PL2C1 0 Gundam
-4 GD05-050 PL2C1 Gundam Exia Repair
-0 GD04-064 PL2C2 Gundam Exia
-4 ST07-004 PL3C2 Gundam Virtue
-1 GD04-063 PL4C2 GN Armor Type-E
-4 ST07-002 PL4C2 Gundam Exia
-3 GD04-057 PL4C3 Gundam Nadleeh
-1 ST07-003 PL5C3 Gundam Virtue
-0 ST07-001 PL5C4 Gundam Exia
-0 GD03-052 PL5C4 Gundam Virtue
-2 GD03-057 PL6C4 GN Armor (Type-E)
-0 GD04-054 PL7C5 Gundam Virtue (Trans-Am)
-0 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
-	`# Cees's AI CB deck (P)
-1 ST07-015 PL2C1 Ptolemaios
-1 ST07-013 PL4C1 Armed Intervention
-3 ST07-009 PL4C1 Setsuna F. Seiei
-4 ST07-010 PL4C1 Tieria Erde
-4 GD03-063 PL2C1 0 Gundam
-4 GD05-050 PL2C1 Gundam Exia Repair
-4 GD04-064 PL2C2 Gundam Exia
-4 ST07-004 PL3C2 Gundam Virtue
-4 GD04-063 PL4C2 GN Armor Type-E
-4 ST07-002 PL4C2 Gundam Exia
-4 GD04-057 PL4C3 Gundam Nadleeh
-4 ST07-003 PL5C3 Gundam Virtue
-2 ST07-001 PL5C4 Gundam Exia
-0 GD03-052 PL5C4 Gundam Virtue
-3 GD03-057 PL6C4 GN Armor (Type-E)
-2 GD04-054 PL7C5 Gundam Virtue (Trans-Am)
-2 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
-	`# Cees's AI CB deck (R)
-0 GD04-111 Trinity
-4 GD04-125 RL4C1 Trinity Warship
-4 GD04-090 RL4C1 Hallelujah Haptism
-3 GD04-092 RL4C1 Michael Trinity
-0 GD04-089 RL4C1 Nena Trinity
-4 GD04-047 RL3C1 Gundam Virtue
-3 GD04-038 RL3C2 Gundam Exia
-4 GD05-048 RL3C2 Gundam Kyrios (Flight Mode)
-4 GD04-034 RL4C3 Gundam Kyrios
-4 GD04-045 RL4C3 Gundam Throne Zwei
-4 GD04-041 RL5C2 Gundam Throne Drei
-4 GD04-046 RL5C4 Gundam Dynames
-4 GD04-036 RL6C4 Gundam Throne Eins
-4 GD04-037 RL6C5 Gundam Kyrios (Trans-Am)
-4 GD05-038 RL7C5 Gundam Throne Eins (GN High Mega Launcher)`,
-	`# Cees's AI CB deck (PR)
-0 ST07-015 PL2C1 Ptolemaios
-0 ST07-013 PL4C1 Armed Intervention
-0 ST07-009 PL4C1 Setsuna F. Seiei
-0 ST07-010 PL4C1 Tieria Erde
-0 GD03-063 PL2C1 0 Gundam
-0 GD05-050 PL2C1 Gundam Exia Repair
-0 GD04-064 PL2C2 Gundam Exia
-0 ST07-004 PL3C2 Gundam Virtue
-0 GD04-063 PL4C2 GN Armor Type-E
-0 ST07-002 PL4C2 Gundam Exia
-0 GD04-057 PL4C3 Gundam Nadleeh
-0 ST07-003 PL5C3 Gundam Virtue
-0 ST07-001 PL5C4 Gundam Exia
-0 GD03-052 PL5C4 Gundam Virtue
-0 GD03-057 PL6C4 GN Armor (Type-E)
-0 GD04-054 PL7C5 Gundam Virtue (Trans-Am)
-0 GD03-049 PL7C6 Gundam Exia (Trans-Am)
-0 GD04-111 Trinity
-4 GD04-125 RL4C1 Trinity Warship
-4 GD04-090 RL4C1 Hallelujah Haptism
-3 GD04-092 RL4C1 Michael Trinity
-0 GD04-089 RL4C1 Nena Trinity
-4 GD04-047 RL3C1 Gundam Virtue
-3 GD04-038 RL3C2 Gundam Exia
-4 GD05-048 RL3C2 Gundam Kyrios (Flight Mode)
-4 GD04-034 RL4C3 Gundam Kyrios
-4 GD04-045 RL4C3 Gundam Throne Zwei
-4 GD04-041 RL5C2 Gundam Throne Drei
-4 GD04-046 RL5C4 Gundam Dynames
-4 GD04-036 RL6C4 Gundam Throne Eins
-4 GD04-037 RL6C5 Gundam Kyrios (Trans-Am)
-4 GD05-038 RL7C5 Gundam Throne Eins (GN High Mega Launcher)`,
-	`# Cees's AI Blue deck
-0 EB01-001
-0 EB01-002
-0 EB01-003
-0 EB01-004
-0 EB01-005
-0 EB01-006
-0 EB01-007
-0 EB01-008
-1 EB01-009
-0 EB01-010
-0 EB01-011
-0 EB01-012
-0 EB01-013
-0 EB01-014
-0 EB01-015
-1 EB01-016
-0 EB01-017
-0 EB01-018
-0 EB01-019
-0 EB01-020
-0 EB01-061
-0 EB01-062
-0 EB01-063
-0 EB01-064
-0 EB01-073
-0 EB01-074
-0 EB01-075
-0 EB01-076
-0 EB01-085
-0 EB01-086
-0 GD01-001
-0 GD01-002
-0 GD01-003
-0 GD01-004
-0 GD01-005
-0 GD01-006
-0 GD01-007
-0 GD01-008
-0 GD01-009
-0 GD01-010
-0 GD01-011
-1 GD01-012
-1 GD01-013
-0 GD01-014
-0 GD01-015
-0 GD01-016
-0 GD01-017
-4 GD01-018
-4 GD01-019
-0 GD01-020
-1 GD01-021
-0 GD01-022
-0 GD01-087
-0 GD01-088
-0 GD01-089
-0 GD01-099
-1 GD01-100
-0 GD01-101
-0 GD01-102
-0 GD01-103
-0 GD01-104
-0 GD01-123
-0 GD01-124
-0 GD02-001
-0 GD02-002
-0 GD02-003
-0 GD02-004
-0 GD02-005
-4 GD02-006
-0 GD02-007
-0 GD02-008
-0 GD02-009
-0 GD02-010
-0 GD02-011
-0 GD02-012
-0 GD02-013
-2 GD02-014
-0 GD02-015
-0 GD02-016
-0 GD02-017
-0 GD02-018
-1 GD02-019
-0 GD02-085
-0 GD02-086
-0 GD02-087
-0 GD02-100
-0 GD02-101
-0 GD02-102
-0 GD02-121
-0 GD02-122
-0 GD03-001
-0 GD03-002
-3 GD03-003
-0 GD03-004
-2 GD03-005
-0 GD03-006
-0 GD03-007
-1 GD03-008
-0 GD03-009
-0 GD03-010
-0 GD03-011
-0 GD03-012
-0 GD03-013
-0 GD03-014
-0 GD03-015
-1 GD03-016
-2 GD03-084
-0 GD03-085
-0 GD03-086
-0 GD03-087
-0 GD03-101
-0 GD03-102
-0 GD03-103
-0 GD03-104
-0 GD03-123
-0 GD03-124
-0 GD04-001
-0 GD04-002
-0 GD04-003
-0 GD04-004
-3 GD04-005
-0 GD04-006
-0 GD04-007
-0 GD04-008
-0 GD04-009
-2 GD04-010
-0 GD04-011
-0 GD04-012
-0 GD04-013
-0 GD04-014
-0 GD04-015
-2 GD04-016
-1 GD04-081
-0 GD04-082
-0 GD04-083
-0 GD04-084
-0 GD04-101
-0 GD04-102
-0 GD04-103
-0 GD04-104
-0 GD04-121
-0 GD04-122
-0 GD05-001
-0 GD05-002
-0 GD05-003
-0 GD05-004
-0 GD05-005
-1 GD05-006
-0 GD05-007
-0 GD05-008
-1 GD05-009
-1 GD05-010
-0 GD05-011
-0 GD05-012
-0 GD05-013
-0 GD05-014
-0 GD05-015
-0 GD05-016
-0 GD05-081
-0 GD05-082
-1 GD05-083
-0 GD05-084
-0 GD05-102
-0 GD05-103
-0 GD05-104
-1 GD05-105
-0 GD05-123
-0 GD05-124
-0 ST01-001
-0 ST01-002
-0 ST01-003
-0 ST01-004
-4 ST01-005
-0 ST01-010
-0 ST01-012
-0 ST01-013
-0 ST01-015
-0 ST02-006
-0 ST02-007
-0 ST02-008
-1 ST02-009
-0 ST02-011
-0 ST02-014
-2 ST02-016
-0 ST08-006
-0 ST08-007
-0 ST08-008
-0 ST08-009
-0 ST08-011
-0 ST08-015
-0 ST10-001
-0 ST10-002
-0 ST10-003
-0 ST10-004
-0 ST10-005
-0 ST10-011
-0 ST10-013
-0 ST10-014
-0 ST10-016`,
-	`# Cees's AI Green deck
-0 EB01-021
-0 EB01-022
-0 EB01-023
-0 EB01-024
-0 EB01-025
-1 EB01-026
-0 EB01-027
-0 EB01-028
-0 EB01-029
-0 EB01-030
-0 EB01-031
-1 EB01-032
-0 EB01-033
-0 EB01-034
-2 EB01-035
-0 EB01-036
-0 EB01-037
-0 EB01-038
-0 EB01-039
-0 EB01-040
-0 EB01-065
-1 EB01-066
-0 EB01-067
-0 EB01-068
-0 EB01-077
-0 EB01-078
-0 EB01-079
-0 EB01-080
-0 EB01-087
-0 EB01-088
-0 GD01-023
-0 GD01-024
-0 GD01-025
-1 GD01-026
-0 GD01-027
-0 GD01-028
-0 GD01-029
-3 GD01-030
-1 GD01-031
-0 GD01-032
-0 GD01-033
-2 GD01-034
-0 GD01-035
-0 GD01-036
-0 GD01-037
-0 GD01-038
-0 GD01-039
-1 GD01-040
-0 GD01-041
-0 GD01-042
-0 GD01-043
-0 GD01-090
-0 GD01-091
-0 GD01-092
-0 GD01-105
-0 GD01-106
-0 GD01-107
-0 GD01-108
-0 GD01-109
-0 GD01-110
-0 GD01-125
-0 GD01-126
-0 GD02-020
-0 GD02-021
-0 GD02-022
-0 GD02-023
-0 GD02-024
-0 GD02-025
-0 GD02-026
-0 GD02-027
-0 GD02-028
-0 GD02-029
-0 GD02-030
-0 GD02-031
-0 GD02-032
-0 GD02-033
-0 GD02-034
-2 GD02-035
-0 GD02-088
-0 GD02-089
-0 GD02-090
-0 GD02-103
-0 GD02-104
-0 GD02-105
-0 GD02-106
-0 GD02-123
-0 GD02-124
-0 GD03-017
-0 GD03-018
-0 GD03-019
-0 GD03-020
-0 GD03-021
-0 GD03-022
-0 GD03-023
-0 GD03-024
-1 GD03-025
-2 GD03-026
-0 GD03-027
-0 GD03-028
-0 GD03-029
-0 GD03-030
-0 GD03-031
-0 GD03-032
-0 GD03-088
-0 GD03-089
-0 GD03-090
-0 GD03-105
-0 GD03-106
-0 GD03-107
-0 GD03-108
-0 GD03-125
-0 GD03-126
-0 GD04-017
-0 GD04-018
-0 GD04-019
-0 GD04-020
-1 GD04-021
-0 GD04-022
-0 GD04-023
-0 GD04-024
-0 GD04-025
-0 GD04-026
-0 GD04-027
-4 GD04-028
-0 GD04-029
-0 GD04-030
-3 GD04-031
-0 GD04-032
-1 GD04-085
-0 GD04-086
-0 GD04-087
-0 GD04-088
-0 GD04-105
-0 GD04-106
-0 GD04-107
-0 GD04-108
-0 GD04-123
-0 GD04-124
-0 GD05-017
-0 GD05-018
-0 GD05-019
-0 GD05-020
-0 GD05-021
-0 GD05-022
-0 GD05-023
-0 GD05-024
-1 GD05-025
-0 GD05-026
-1 GD05-027
-1 GD05-028
-1 GD05-029
-0 GD05-030
-1 GD05-031
-0 GD05-032
-4 GD05-085
-0 GD05-086
-0 GD05-087
-0 GD05-088
-0 GD05-106
-0 GD05-107
-0 GD05-108
-0 GD05-109
-0 GD05-125
-0 GD05-126
-3 ST02-001
-0 ST02-002
-0 ST02-003
-1 ST02-004
-0 ST02-005
-0 ST02-010
-0 ST02-012
-0 ST02-013
-0 ST02-015
-1 ST03-006
-0 ST03-007
-2 ST03-008
-0 ST03-009
-0 ST03-011
-0 ST03-014
-4 ST03-016
-0 ST06-005
-1 ST06-006
-0 ST06-007
-1 ST06-008
-0 ST06-010
-0 ST06-012
-0 ST06-013
-0 ST06-015
-0 ST07-005
-0 ST07-006
-0 ST07-007
-1 ST07-008
-0 ST07-011
-0 ST07-012
-0 ST07-014`,
-	`# Cees's AI Purple deck
-0 GD02-053
-1 GD02-054
-2 GD02-055
-0 GD02-056
-0 GD02-057
-0 GD02-058
-0 GD02-059
-0 GD02-060
-1 GD02-061
-1 GD02-062
-0 GD02-063
-0 GD02-064
-0 GD02-065
-0 GD02-066
-0 GD02-067
-4 GD02-068
-0 GD02-094
-0 GD02-095
-0 GD02-096
-0 GD02-110
-0 GD02-111
-0 GD02-112
-0 GD02-113
-0 GD02-114
-0 GD02-115
-0 GD02-116
-0 GD02-127
-0 GD02-128
-0 GD03-049
-2 GD03-050
-0 GD03-051
-0 GD03-052
-0 GD03-053
-0 GD03-054
-1 GD03-055
-3 GD03-056
-2 GD03-057
-0 GD03-058
-0 GD03-059
-0 GD03-060
-0 GD03-061
-0 GD03-062
-0 GD03-063
-0 GD03-064
-1 GD03-065
-0 GD03-066
-0 GD03-067
-1 GD03-068
-1 GD03-094
-0 GD03-095
-0 GD03-096
-0 GD03-097
-0 GD03-114
-0 GD03-115
-0 GD03-116
-0 GD03-117
-0 GD03-129
-0 GD03-130
-0 GD04-049
-0 GD04-050
-0 GD04-051
-0 GD04-052
-0 GD04-053
-0 GD04-054
-0 GD04-055
-0 GD04-056
-0 GD04-057
-0 GD04-058
-0 GD04-059
-0 GD04-060
-0 GD04-061
-0 GD04-062
-1 GD04-063
-0 GD04-064
-0 GD04-093
-0 GD04-094
-0 GD04-095
-0 GD04-096
-0 GD04-113
-0 GD04-114
-0 GD04-115
-0 GD04-116
-1 GD04-127
-1 GD04-128
-0 GD05-049
-4 GD05-050
-0 GD05-051
-0 GD05-052
-2 GD05-053
-0 GD05-054
-0 GD05-055
-0 GD05-056
-0 GD05-057
-0 GD05-058
-0 GD05-059
-2 GD05-060
-0 GD05-061
-0 GD05-062
-0 GD05-063
-0 GD05-064
-0 GD05-065
-0 GD05-093
-0 GD05-094
-0 GD05-095
-0 GD05-096
-0 GD05-114
-0 GD05-115
-0 GD05-116
-0 GD05-117
-1 GD05-129
-0 ST05-001
-0 ST05-002
-0 ST05-003
-4 ST05-004
-2 ST05-005
-4 ST05-006
-4 ST05-010
-0 ST05-011
-0 ST05-013
-1 ST05-014
-0 ST05-015
-0 ST07-001
-0 ST07-002
-0 ST07-003
-0 ST07-004
-0 ST07-009
-0 ST07-010
-0 ST07-013
-0 ST07-015
-1 ST09-001
-0 ST09-002
-0 ST09-005
-0 ST09-006
-2 ST09-007
-0 ST09-008
-0 ST09-009
-0 ST09-010`,
-	`# Cees's AI Red deck
-0 GD01-044
-0 GD01-045
-0 GD01-046
-0 GD01-047
-0 GD01-048
-0 GD01-049
-0 GD01-050
-4 GD01-051
-2 GD01-052
-0 GD01-053
-0 GD01-054
-0 GD01-055
-4 GD01-056
-0 GD01-057
-0 GD01-058
-0 GD01-059
-1 GD01-060
-0 GD01-061
-0 GD01-062
-0 GD01-063
-2 GD01-064
-0 GD01-093
-0 GD01-094
-0 GD01-095
-0 GD01-111
-0 GD01-112
-0 GD01-113
-0 GD01-114
-0 GD01-115
-0 GD01-116
-0 GD01-127
-0 GD01-128
-0 GD02-036
-1 GD02-037
-0 GD02-038
-0 GD02-039
-0 GD02-040
-0 GD02-041
-0 GD02-042
-0 GD02-043
-0 GD02-044
-0 GD02-045
-3 GD02-046
-0 GD02-047
-0 GD02-048
-0 GD02-049
-0 GD02-050
-0 GD02-051
-1 GD02-052
-3 GD02-091
-0 GD02-092
-0 GD02-093
-0 GD02-107
-0 GD02-108
-0 GD02-109
-0 GD02-125
-3 GD02-126
-0 GD03-033
-2 GD03-034
-4 GD03-035
-0 GD03-036
-0 GD03-037
-0 GD03-038
-0 GD03-039
-0 GD03-040
-0 GD03-041
-0 GD03-042
-0 GD03-043
-0 GD03-044
-0 GD03-045
-0 GD03-046
-0 GD03-047
-1 GD03-048
-0 GD03-091
-0 GD03-092
-0 GD03-093
-0 GD03-109
-0 GD03-110
-0 GD03-111
-0 GD03-112
-0 GD03-113
-0 GD03-127
-0 GD03-128
-0 GD04-033
-0 GD04-034
-0 GD04-035
-0 GD04-036
-0 GD04-037
-0 GD04-038
-0 GD04-039
-2 GD04-040
-1 GD04-041
-0 GD04-042
-0 GD04-043
-0 GD04-044
-0 GD04-045
-0 GD04-046
-0 GD04-047
-0 GD04-048
-0 GD04-089
-0 GD04-090
-0 GD04-091
-0 GD04-092
-1 GD04-109
-0 GD04-110
-0 GD04-111
-0 GD04-112
-0 GD04-125
-0 GD04-126
-0 GD05-033
-1 GD05-034
-1 GD05-035
-0 GD05-036
-0 GD05-037
-0 GD05-038
-0 GD05-039
-0 GD05-040
-0 GD05-041
-0 GD05-042
-2 GD05-043
-0 GD05-044
-0 GD05-045
-1 GD05-046
-0 GD05-047
-0 GD05-048
-0 GD05-089
-0 GD05-090
-0 GD05-091
-0 GD05-092
-0 GD05-110
-0 GD05-111
-0 GD05-112
-0 GD05-113
-0 GD05-127
-0 GD05-128
-0 ST03-001
-0 ST03-002
-0 ST03-003
-0 ST03-004
-0 ST03-005
-0 ST03-010
-0 ST03-012
-1 ST03-013
-4 ST03-015
-0 ST04-006
-0 ST04-007
-0 ST04-008
-0 ST04-009
-0 ST04-011
-0 ST04-014
-0 ST04-016
-0 ST06-001
-0 ST06-002
-0 ST06-003
-0 ST06-004
-1 ST06-009
-0 ST06-011
-0 ST06-014
-0 ST08-001
-1 ST08-002
-0 ST08-003
-0 ST08-004
-3 ST08-005
-0 ST08-010
-0 ST08-012
-0 ST08-013
-0 ST08-014
-0 ST09-003`,
-	`# Cees's AI White deck
-4 EB01-041
-1 EB01-042
-0 EB01-043
-0 EB01-044
-1 EB01-045
-3 EB01-046
-0 EB01-047
-0 EB01-048
-0 EB01-049
-0 EB01-050
-0 EB01-051
-0 EB01-052
-1 EB01-053
-1 EB01-054
-0 EB01-055
-3 EB01-056
-0 EB01-057
-0 EB01-058
-0 EB01-059
-0 EB01-060
-0 EB01-069
-0 EB01-070
-1 EB01-071
-1 EB01-072
-0 EB01-081
-0 EB01-082
-0 EB01-083
-0 EB01-084
-0 EB01-089
-0 EB01-090
-0 GD01-065
-1 GD01-066
-0 GD01-067
-1 GD01-068
-0 GD01-069
-0 GD01-070
-0 GD01-071
-0 GD01-072
-0 GD01-073
-0 GD01-074
-0 GD01-075
-1 GD01-076
-2 GD01-077
-0 GD01-078
-0 GD01-079
-0 GD01-080
-0 GD01-081
-0 GD01-082
-0 GD01-083
-0 GD01-084
-0 GD01-085
-0 GD01-086
-0 GD01-096
-0 GD01-097
-0 GD01-098
-3 GD01-117
-0 GD01-118
-0 GD01-119
-0 GD01-120
-0 GD01-121
-0 GD01-122
-0 GD01-129
-0 GD01-130
-0 GD02-069
-0 GD02-070
-1 GD02-071
-2 GD02-072
-0 GD02-073
-0 GD02-074
-0 GD02-075
-0 GD02-076
-0 GD02-077
-0 GD02-078
-0 GD02-079
-3 GD02-080
-0 GD02-081
-2 GD02-082
-0 GD02-083
-0 GD02-084
-1 GD02-097
-1 GD02-098
-0 GD02-099
-0 GD02-117
-0 GD02-118
-0 GD02-119
-0 GD02-120
-0 GD02-129
-0 GD02-130
-0 GD03-069
-0 GD03-070
-0 GD03-071
-0 GD03-072
-0 GD03-073
-0 GD03-074
-0 GD03-075
-1 GD03-076
-0 GD03-077
-0 GD03-078
-0 GD03-079
-0 GD03-080
-0 GD03-081
-1 GD03-082
-0 GD03-083
-0 GD03-098
-0 GD03-099
-0 GD03-100
-0 GD03-118
-0 GD03-119
-0 GD03-120
-0 GD03-121
-0 GD03-122
-0 GD03-131
-0 GD03-132
-0 GD04-065
-0 GD04-066
-0 GD04-067
-0 GD04-068
-0 GD04-069
-0 GD04-070
-0 GD04-071
-0 GD04-072
-0 GD04-073
-0 GD04-074
-0 GD04-075
-0 GD04-076
-1 GD04-077
-0 GD04-078
-0 GD04-079
-0 GD04-080
-0 GD04-097
-0 GD04-098
-0 GD04-099
-0 GD04-100
-0 GD04-117
-0 GD04-118
-0 GD04-119
-0 GD04-120
-0 GD04-129
-0 GD04-130
-0 GD05-066
-0 GD05-067
-0 GD05-068
-0 GD05-069
-0 GD05-070
-0 GD05-071
-0 GD05-072
-0 GD05-073
-0 GD05-074
-1 GD05-075
-1 GD05-076
-0 GD05-077
-0 GD05-078
-0 GD05-079
-0 GD05-080
-0 GD05-097
-0 GD05-098
-0 GD05-099
-0 GD05-100
-0 GD05-101
-0 GD05-118
-0 GD05-119
-0 GD05-120
-0 GD05-121
-0 GD05-122
-4 GD05-130
-0 ST01-006
-2 ST01-007
-0 ST01-008
-0 ST01-009
-0 ST01-011
-0 ST01-014
-0 ST01-016
-0 ST04-001
-0 ST04-002
-0 ST04-003
-0 ST04-004
-0 ST04-005
-0 ST04-010
-3 ST04-012
-0 ST04-013
-0 ST04-015
-0 ST05-007
-0 ST05-008
-0 ST05-009
-0 ST05-012
-0 ST09-004
-0 ST10-006
-0 ST10-007
-0 ST10-008
-0 ST10-009
-0 ST10-010
-2 ST10-012
-0 ST10-015`,
-	`# Cees's AI Vulture deck (P)
-3 GD02-127 PL2C1 Freeden
-1 GD04-094 PL3C1 Pala Sys
-4 GD04-096 PL4C1 Ennil El
-4 GD02-094 PL4C1 Garrod Ran & Tiffa Adill
-4 GD03-096 PL4C1 Jamil Neate
-2 GD02-065 PL1C1 Jenice Custom
-1 GD04-059 PL2C2 Daughtress High Mobility Command Wise Wallaby
-3 GD04-061 PL2C2 G-Falcon
-4 GD02-063 PL3C2 Gundam Airmaster (Fighter Mode)
-4 GD02-059 PL4C3 Gundam Airmaster
-4 GD02-056 PL4C3 Gundam X
-4 GD02-060 PL5C4 Gundam Leopard
-2 GD02-064 PL5C4 Gundam Leopard
-2 GD04-052 PL6C4 Gundam Leopard Destroy
-3 GD03-051 PL6C4 Gundam X Divider
-3 GD02-053 PL7C5 Gundam X
-2 GD04-049 PL8C7 Gundam DX
-0 GD02-115 PL2C1 Familial Devotion
-0 GD02-116 PL3C1 Comrades Come First
-0 GD03-062 PL4C2 GX-Bit
-0 GD04-051 Gundam Airmaster Burst
-0 GD04-058 Jamil's Gundam X
-0 GD04-060 Esperansa
-0 GD04-127 Freeden Ⅱ`,
-	`# Cees's AI Zeon deck (GP)
-0 GD01-023
-0 GD01-026
-1 GD01-027
-4 GD01-030
-3 GD01-031
-0 GD01-032
-4 GD01-035
-3 GD01-036
-1 GD01-037
-0 GD01-038
-0 GD01-039
-0 GD01-092
-0 GD01-106
-0 GD01-125
-0 GD02-020
-0 GD02-032
-0 GD02-033
-0 GD02-034
-0 GD02-089
-0 GD02-090
-0 GD02-105
-0 GD02-123
-0 GD03-017
-0 GD03-020
-1 GD03-024
-1 GD03-027
-0 GD03-089
-0 GD03-090
-0 GD03-107
-0 GD03-108
-0 GD03-126
-1 GD04-017
-0 GD04-022
-0 GD04-026
-1 GD04-027
-4 GD04-028
-1 GD04-032
-0 GD04-086
-0 GD04-088
-2 GD04-123
-4 ST03-006
-0 ST03-007
-0 ST03-008
-3 ST03-009
-0 ST03-011
-0 ST03-014
-4 ST03-016
-0 GD05-049
-0 GD05-052
-1 GD05-053
-1 GD05-054
-4 GD05-056
-0 GD05-057
-3 GD05-061
-0 GD05-062
-0 GD05-063
-3 GD05-093
-0 GD05-094
-0 GD05-095
-0 GD05-115
-0 GD05-116
-0 GD05-129`,
-	`# Cees's AI Zeon deck (PR)
-0 GD05-049
-0 GD05-052
-4 GD05-053
-0 GD05-054
-2 GD05-056
-0 GD05-057
-1 GD05-061
-4 GD05-062
-0 GD05-063
-1 GD05-093
-0 GD05-094
-0 GD05-095
-0 GD05-115
-0 GD05-116
-2 GD05-129
-0 GD01-044
-0 GD01-047
-0 GD01-048
-4 GD01-051
-1 GD01-052
-1 GD01-053
-4 GD01-056
-2 GD01-057
-0 GD01-058
-0 GD01-059
-0 GD01-060
-2 GD01-093
-0 GD01-112
-0 GD01-114
-0 GD01-115
-3 GD01-128
-0 GD02-036
-0 GD02-039
-0 GD02-047
-0 GD02-048
-3 GD02-050
-0 GD02-091
-0 GD02-125
-4 GD03-035
-3 GD03-048
-3 GD03-092
-0 GD04-033
-0 GD04-039
-3 GD04-040
-0 GD04-043
-0 ST03-001
-0 ST03-002
-0 ST03-003
-0 ST03-004
-2 ST03-005
-1 ST03-010
-0 ST03-012
-0 ST03-015
-0 ST06-004`,
-	`# Cees's AI Zeon deck (GR)
-0 GD01-023
-0 GD01-026
-0 GD01-027
-3 GD01-030
-1 GD01-031
-0 GD01-032
-1 GD01-035
-3 GD01-036
-3 GD01-037
-0 GD01-038
-0 GD01-039
-0 GD01-092
-0 GD01-106
-0 GD01-125
-0 GD02-020
-0 GD02-032
-0 GD02-033
-0 GD02-034
-1 GD02-089
-1 GD02-090
-0 GD02-105
-0 GD02-123
-0 GD03-017
-0 GD03-020
-0 GD03-024
-1 GD03-027
-0 GD03-089
-0 GD03-090
-0 GD03-107
-0 GD03-108
-0 GD03-126
-0 GD04-017
-0 GD04-022
-0 GD04-026
-2 GD04-027
-4 GD04-028
-3 GD04-032
-0 GD04-086
-0 GD04-088
-2 GD04-123
-4 ST03-006
-0 ST03-007
-1 ST03-008
-0 ST03-009
-0 ST03-011
-0 ST03-014
-3 ST03-016
-0 GD01-044
-0 GD01-047
-0 GD01-048
-1 GD01-051
-2 GD01-052
-0 GD01-053
-3 GD01-056
-1 GD01-057
-0 GD01-058
-0 GD01-059
-0 GD01-060
-0 GD01-093
-0 GD01-112
-0 GD01-114
-0 GD01-115
-0 GD01-128
-0 GD02-036
-0 GD02-039
-0 GD02-047
-0 GD02-048
-1 GD02-050
-0 GD02-091
-0 GD02-125
-3 GD03-035
-0 GD03-048
-3 GD03-092
-0 GD04-033
-0 GD04-039
-1 GD04-040
-0 GD04-043
-1 ST03-001
-0 ST03-002
-0 ST03-003
-0 ST03-004
-0 ST03-005
-0 ST03-010
-0 ST03-012
-1 ST03-015
-0 ST06-004`,
-	`# Cees's CB deck (GR)
-4 GD03-125 Peacemillion
-2 ST07-012 Allelujah Haptism*
-1 GD04-090 Hallelujah Haptism*
-3 ST07-011 Lockon Stratos (Neil)
-4 ST07-008 Gundam Kyrios (Flight Mode)
-4 GD03-028 Auda's Maganac
-4 ST07-006 Gundam Dynames
-3 GD04-029 Gundam Dynames (GN Full Shield)
-2 ST07-007 Gundam Kyrios
-4 GD03-030 Gundam Kyrios (Tail Unit Flight Mode)
-2 ST02-004 Gundam Sandrock
-2 ST07-005 Gundam Dynames
-4 GD03-026 Gundam Dynames
-4 ST02-003 Gundam Heavyarms
-0 GD04-023 Gundam Kyrios (Tail Booster)
-2 GD04-046 Gundam Dynames
-4 GD04-019 GN Armor Type-D (Trans-Am)
-0 GD03-029 Gundam Heavyarms Custom
-1 GD04-037 Gundam Kyrios (Trans-Am)`,
-	`# Cees's GD05 prerelease deck (UGPRW)
-1 GD05-130 Presidential Office
-1 GD05-124 White Ark
-1 GD05-125 Ra Cailum
-1 GD05-126 Quiet Zero
-1 GD05-117 Become a Shield
-1 GD05-113 Rose Screamer
-1 GD05-112 Hoka Kyoten Juzetsujin
-1 GD05-114 Widespread Annihilation
-1 GD05-096 Chad Chadan
-1 GD05-086 Kayra Su
-1 GD05-094 Quess Paraya
-1 GD05-090 Stellar Loussier
-1 GD05-091 Sting Oakley
-1 GD05-082 Andrew Waldfeld
-1 GD05-095 Gyunei Guss
-1 GD05-014 Javelin
-1 GD05-027 Jegan
-1 GD05-065 Landman Rodi
-1 GD05-075 Royal Gundam
-1 GD05-080 Gavane's Borjarnon
-1 GD05-039 Chaos Gundam
-1 GD05-047 Exass
-1 GD05-044 Gundam Rose
-1 GD05-063 Gyunei's Jagd Doga
-1 GD05-028 Kayra's Jegan
-1 GD05-029 Kayra's Re-GZ
-1 GD05-003 Waldfeld's Murasame
-1 GD05-064 Force Impulse Gundam
-1 GD05-041 Gaia Gundam (MA Mode)
-2 GD05-057 Gyunei's Jagd Doga
-1 GD05-058 Shiden Custom (Ryusei-Go)
-2 GD05-005 Strike Rouge (Ootori)
-2 GD05-011 Calamity Gundam & Raider Gundam
-1 GD05-060 Gundam Flauros (Ryusei-Go)
-1 GD05-052 Sazabi
-1 GD05-059 Gundam Barbatos Lupus
-1 GD05-037 Destroy Gundam`,
-	`# Cees's Minerva deck (PR)
-3 ST09-010 Minerva
-0 ST04-016 Vesalius
-1 GD04-128 Armory One
-0 GD04-113 Damage Control
-0 ST09-009 Giant Killing
-0 GD02-110 Awakened Power
-1 GD04-115 Backup
-1 GD04-116 Reliable Big Brother
-3 GD04-095 Lunamaria Hawke
-2 GD04-093 Rey Za Burrel # 3 > GD04-050
-4 ST09-008 Shinn Asuka
-4 ST09-005 Zaku Warrior
-2 ST09-001 Impulse Gundam # 3 > 4 ST09-006
-4 GD04-062 Lunamaria's Gunner Zaku Warrior
-2 ST05-006 Hyakuren
-0 ST04-007 Aegis Gundam (Ma Mode)
-1 GD01-054 Duel Gundam
-1 GD04-109 Overwhelming Pressure # 2 > 4 GD04-062
-4 ST09-006 Sword Impulse Gundam
-1 GD04-056 Sword Impulse Gundam
-2 GD04-053 Rey's Blaze Zaku Phantom
-4 ST09-007 Blast Impulse Gundam
-3 GD04-055 Heine's Gouf Ignited
-2 ST09-002 Force Impulse Gundam
-1 GD05-064 Force Impulse Gundam
-2 GD04-050 Destiny Gundam
-2 ST09-003 Saviour Gundam`,
-	`# Cees's Red CB deck (PR)
-0 GD04-090 Hallelujah Haptism
-0 GD04-043 Zssa (sleeves)
-0 GD04-037 Gundam Kyrios (Trans-Am)
-0 GD04-038 Gundam Exia
-0 GD04-126 Izuma Colony
-4 ST07-015 Ptolemaios
-4 GD04-125 Trinity Warship
-0 GD01-111 Battle of Aces
-0 GD04-089 Nena Trinity
-1 GD04-092 Michael Trinity
-0 GD04-111 Trinity
-3 ST07-009 Setsuna F. Seiei
-3 ST07-010 Tieria Erde
-4 GD03-063 0 Gundam
-0 GD04-064 Gundam Exia
-4 GD04-047 Gundam Virtue
-3 GD04-038 Gundam Exia
-3 ST07-004 Gundam Virtue
-0 GD04-063 GN Armor Type-E
-4 ST07-002 Gundam Exia
-2 GD04-057 Gundam Nadleeh
-4 GD04-045 Gundam Throne Zwei
-3 GD04-041 Gundam Throne Drei
-4 ST07-003 Gundam Virtue
-2 ST07-001 Gundam Exia
-2 GD04-036 Gundam Throne Eins
-0 GD04-054 Gundam Virtue (Trans-Am)`,
-	`# Cees's Red ZAFT deck (R)
-4 GD03-127 Jachin Due
-4 ST04-011 Athrun Zala
-4 GD04-044 Gadeel
-4 GD03-046 CGUE
-4 ST03-004 Gaza D (Sleeves)
-4 GD01-054 Duel Gundam
-4 GD03-047 DINN (Commander Type)
-4 ST04-007 Aegis Gundam (MA Mode)
-3 GD01-049 Blitz Gundam
-2 GD03-038 GuAIZ (Commander Type)
-1 GD04-053 Rey's Blaze Zaku Phantom
-4 GD03-042 Duel Gundam (Assault Shroud)
-4 GD04-048 Hambrabi (GQ)
-2 ST09-003 Saviour Gundam
-2 GD04-042 Psycho Gundam (GQ)`,
-	`# Cees's Titans deck (U)
-3 GD03-123 Jupitris
-1 GD04-122 Jaburo
-4 GD03-104 Reccoa's Shadow
-4 GD03-102 Privileged Position
-4 GD03-084 Paptimus Scirocco
-4 GD03-013 Hizack
-1 GD03-086 Yazan Gable
-3 GD03-014 Hizack Custom
-4 GD03-012 Messala (MA Mode)
-4 GD03-008 Bolinoak Sammahn
-4 GD04-010 Gaplant
-4 GD03-009 Palace Athene
-3 GD03-004 Hambrabi
-3 GD03-003 Messala
-4 GD03-015 Baund Doc`,
-	`# Cees's Vulture deck (P)
-4 GD04-127 Freeden Ⅱ
-0 ST05-013 With Iron and Blood
-0 GD04-115 Backup
-1 ST09-009 Giant Killing
-0 GD04-113 Damage Control
-3 ST05-014 Fatal Strike
-0 GD04-094 Pala Sys
-4 GD04-096 Ennil El
-1 GD03-096 Jamil Neate
-1 GD03-097 Wistario Afam
-4 GD04-059 Daughtress High Mobility Command Wise Wallaby
-4 GD04-061 G-Falcon
-4 GD04-060 Esperansa
-4 GD03-068 Gundam Hajiroboshi
-4 GD04-058 Jamil's Gundam X
-1 GD04-062 Lunamaria's Gunner Zaku Warrior
-4 GD03-062 GX-Bit
-2 GD03-055 Gundam Hajiroboshi (2nd Form)
-1 GD04-056 Sword Impulse Gundam
-1 GD03-066 Gundam Barbatos 5th Form (Ground Type)
-0 GD04-055 Heine's Gouf Ignited
-2 GD04-051 Gundam Airmaster Burst
-3 GD04-052 Gundam Leopard Destroy
-2 GD04-049 Gundam DX`,
-	`# Cees's UN deck (W)
-0 GD04-130 Industrial 7
-4 GD03-132 Radish
-0 GD03-071 Z
-0 GD04-098 RM
-0 GD04-118 World Distortion
-0 GD05-110 Incendiary Spark
-0 GD04-117 Graceful Deameanor
-3 GD03-100 Soma Peries
-0 GD03-119 Awkward Approach
-2 GD03-098 Graham Aker
-0 GD04-070 Al ET
-0 GD03-121 Unheralded Attack
-3 GD03-120 Immortal Colasour
-0 GD03-122 Veteran Tactics
-4 GD04-099 Ali al-Saachez
-1 GD03-118 Awakened Potential
-0 GD03-099 Emma Sheen
-0 GD03-079 G-Defenser
-4 GD03-083 AEU Hellion
-4 GD03-081 AEU Enact Demonstration Color
-4 GD03-078 Tieren High Mobility Type
-3 GD03-074 Tieren Taozi  # 4 > GD04-099/GD03-132/GD03-078
-4 GD03-082 Union Flag
-4 GD04-080 Alvatore
-3 GD04-075 GN-X
-4 GD04-079 Agrissa
-2 GD04-071 Graham's Union Flag Custom Ⅱ (GN Flag)
-1 GD03-075 Super Gundam`,
-	`# Cees's Zeon deck (G)
-4 ST03-016 Falmel
-1 GD04-123 A Baoa Qu
-4 GD03-108 How Many Miles to the Battlefield?
-4 ST03-014 The Blue Giant
-3 GD03-090 Mikhail Kaminsky
-0 GD02-090 Challia Bull (GQ)
-1 GD04-088 Tokwan
-2 GD03-089 Bernard W
-1 GD03-032 Zaku (Four Snake Eyes') [YETI] (GQ)
-4 ST03-008 Zaku Ⅱ
-0 GD03-020 Zaku II FZ
-4 GD04-028 Zakrello
-4 GD03-024 Hy-Gogg
-4 GD03-027 Z’Gok E
-4 ST03-009 Gouf
-3 GD04-027 Bigro
-4 GD04-032 Xavier's Gyan Hakuji-Packs (GQ)
-1 GD04-017 Zeong
-1 GD04-022 Kikeroga (MS Mode) (GQ)
-1 GD01-027 Big Zam`,
-	`# Geicokiller's GundamFighter (RW)
-# tcgtopdecks-hq.com
-4 GD05-128 Gundam Fight
-4 GD05-111 Airframe​ Seizure
-4 GD01-118 Overflowing Affection
-4 GD05-121 Cyclone Punch
-4 GD05-110 Darkness Finger
-2 GD05-120 Shining Finger
-4 GD05-097 Domon Kasshu
-4 GD05-089 Master Asia
-4 GD05-042 Shining Gundam
-4 GD05-069 Gundam Maxter
-4 GD05-072 Rising Gundam
-4 GD05-066 Shining Gundam
-4 GD05-033 Master Gundam`,
-	`# Roemer's Zeon deck (GR)
-2 ST03-016 Falmel
-2 GD01-125 Zanzibar
-4 ST03-011 Char Aznable
-3 GD01-092 M'Quve
-4 GD03-092 Nyaan
-2 GD01-039 Dopp
-4 ST03-008 Zaku Ⅱ
-4 GD01-035 Zaku Ⅱ
-3 ST03-006 Char's Zaku Ⅱ
-4 GD01-026 Char's Zaku Ⅱ
-4 GD01-030 Rick Dom
-3 GD03-048 GFreD
-4 GD01-031 Gelgoog
-3 GD01-023 Char's Gelgoog
-2 GD03-035 GFreD
-2 GD04-017 Zeong`,
-	`# Roemer's Zeon deck (GR, AI)
-4 ST03-016 Falmel
-1 GD01-125 Zanzibar
-4 ST03-011 Char Aznable
-4 GD01-092 M'Quve
-4 GD03-092 Nyaan
-0 GD01-039 Dopp
-4 ST03-008 Zaku Ⅱ
-4 GD01-035 Zaku Ⅱ
-4 ST03-006 Char's Zaku Ⅱ
-4 GD01-026 Char's Zaku Ⅱ
-4 GD01-030 Rick Dom
-4 GD03-048 GFreD
-4 GD01-031 Gelgoog
-0 GD01-023 Char's Gelgoog
-4 GD03-035 GFreD
-1 GD04-017 Zeong`,
-]
-
+// let response = await fetch("cards.json")
+// const DECKS = await response.json() // No multiline strings
+import { DECKS } from "./decks.js"
 let decks = DECKS.slice()
 
 function addCustomDeck() {
@@ -3011,7 +1156,7 @@ class Player {
 			)
 	}
 
-	async deploy(card) {
+	async deploy(ctx, card) {
 		if (card.type === "BASE") {
 			if (this.base) {
 				log("🗑️Replace " + this.base)
@@ -3027,7 +1172,7 @@ class Player {
 				/* 5-10-4. A card placed into the trash by rules management when the limit on the
 				number of cards in the battle area or base section is exceeded is not treated
 				as destroyed. (See 11. Rules Management) */
-				// await destroy(weakest, false)
+				// await destroy(weakest, ctx, false)
 				log("🗑️Replace " + weakest)
 				this.battle = this.battle.filter(c => c !== weakest)
 				if (weakest.pilot) trash(weakest.pilot)
@@ -3046,26 +1191,26 @@ class Player {
 			this.kw_eot.push("Deployed " + card.traits)
 		}
 		await render()
-		await run(card, "Deploy")
+		await run(card, "Deploy", "", ctx)
 	}
 
-	async deployFromHand(card) {
+	async deployFromHand(ctx, card) {
 		this.hand = this.hand.filter(c => c !== card)
 		card.from_trash = false
-		await this.deploy(card)
+		await this.deploy(ctx, card)
 	}
 
-	async deployFromTrash(card) {
+	async deployFromTrash(ctx, card) {
 		this.trash = this.trash.filter(c => c !== card)
 		card.from_trash = true
-		await this.deploy(card)
+		await this.deploy(ctx, card)
 		card.from_trash = false
 	}
 
-	async deployToken(name, rested = false) {
+	async deployToken(ctx, name, rested = false) {
 		let token = this.getToken(name)
 		token.rested = !!rested
-		await this.deploy(token)
+		await this.deploy(ctx, token)
 	}
 
 	async draw(number = 1, effect = true) {
@@ -3074,7 +1219,7 @@ class Player {
 		log("🎴" + this.name + " draw " + number)
 		for (let i = 0; i < number; ++i) {
 			if (this.deck.length < 1) {
-				let msg = `💀${this.name} lost by card ${running_card} of empty deck ${this.deckname} (vs ${(this === p1 ? p2 : p1).deckname})`
+				let msg = `💀${this.name} lost by empty deck ${this.deckname} (vs ${(this === p1 ? p2 : p1).deckname})`
 				log(msg)
 				endGame(this === p1 ? p2 : p1)
 				throw Error(msg)
@@ -3083,7 +1228,7 @@ class Player {
 		}
 	}
 
-	async discard(number = 1, targets = null, optional = false) {
+	async discard(ctx, number = 1, targets = null, optional = false) {
 		number = parseInt(number)
 		// if (targets) number = targets.length
 		if (!targets) targets = [...this.hand]
@@ -3097,7 +1242,7 @@ class Player {
 			this.hand = this.hand.filter(item => item !== c)
 			trash(c)
 		}
-		if (discarded.length > 0 && running_card) discarded[0].owner.kw_eot.push("discard_by_effect_of_p" + running_card.owner.pid)
+		if (discarded.length > 0 && ctx.running_card) discarded[0].owner.kw_eot.push("discard_by_effect_of_p" + ctx.running_card.owner.pid)
 		return discarded
 	}
 
@@ -3178,13 +1323,11 @@ class Player {
 	async paid(cost, card, text = "") {
 		if (spent.length > 0) log(`💲Expend ${spent.length} EX resource`)
 		log(`💲${this.name} pay ${cost} for ${text ? text + " of " : ""}${card}`)
-		active_unit = card
-		active_text = text
-		active_cost = cost
-		await publish("hen you pay ", this.battle.concat(this.base))
-		active_unit = null
-		active_text = ""
-		active_cost = 0
+		await publish("hen you pay ", this.battle.concat(this.base), {
+			active_unit: card,
+			active_text: text,
+			active_cost: cost
+		})
 	}
 
 	/** Only log if payment won't be refunded! */
@@ -3195,7 +1338,7 @@ class Player {
 		let paid = 0
 		// EX last
 		for (const r of mySort(this.resource.filter(c => !c.rested), c => c.type.indexOf("EX"))) {
-			rest(r, false)
+			rest(r)
 			paid += 1
 			if (inStr(r.type, "EX")) {
 				spent.push(r)
@@ -3407,7 +1550,7 @@ async function attackStep(att, def = null) {
 	defender = def
 	const enemy = att.owner === p1 ? p2 : p1
 	log("🔫" + att + " attack " + (def ? "" + def : enemy.name))
-	rest(att, false)
+	rest(att)
 	await sleep(500)
 	await run(att, "Attack")
 	await publish(" attacks", att.owner.battle, {source: att, target: def})
@@ -3421,7 +1564,7 @@ async function attackStep(att, def = null) {
 				if (defender.HP() > attacker.AP() || defender.AP() >= attacker.HP()) continue
 			}
 			log(`🛡️${bc} blocks ${att}`)
-			rest(bc, false)
+			rest(bc)
 			defender = bc
 			await sleep(500)
 			await run(att, "", "blocked")
@@ -3519,9 +1662,7 @@ async function actionStep() {
 						trash(c)
 						await render()
 						await p.paid(cost, c)  // log payment
-						active_card = c
-						await publish("play and activate", p.battle)
-						active_card = null
+						await publish("play and activate", p.battle, {active_card: c})
 					} else {
 						refund = true
 					}
@@ -3577,7 +1718,7 @@ function chooseDmgTarget(source, targets, amount = 1, mandatory = false, kill = 
 	return (kill && mySort(targets.filter(c => c.HP() === amount), c => c.rested))[0] || targets[0]
 }
 
-async function doBattle(att, def) {
+async function doBattle(att, def, ctx) {
 	if (def.isUnit() && !def.owner.battle.includes(def)) {
 		return
 	}
@@ -3638,11 +1779,11 @@ async function doBattle(att, def) {
 					}
 				}
 			}
-			destroyer = att
-			await destroy(def, false)
-			await publish(" destroys an enemy card with battle damage, ", [att])
+			let context = {destroyer: att}
+			await destroy(def, context, false)
+			await publish(" destroys an enemy card with battle damage, ", [att], context)
 			if (def.isUnit()) {
-				await publish(" destroys an enemy Unit with battle damage, ", att.owner.base ? [att, att.owner.base] : [att])
+				await publish(" destroys an enemy Unit with battle damage, ", att.owner.base ? [att, att.owner.base] : [att], context)
 			}
 		}
 	}
@@ -3651,10 +1792,11 @@ async function doBattle(att, def) {
 		await dealBattleDamage(def, att, dmg_to_att)
 	}
 	if (att.HP() < 1 && !att.owner.trash.includes(att)) {
-		await destroy(att, false)
-		await publish(" destroys an enemy card with battle damage, ", [def])
+		let context = {destroyer: def}
+		await destroy(att, context, false)
+		await publish(" destroys an enemy card with battle damage, ", [def], context)
 		if (def.isUnit()) {
-			await publish(" destroys an enemy Unit with battle damage, ", def.owner.base ? [def, def.owner.base] : [def])
+			await publish(" destroys an enemy Unit with battle damage, ", def.owner.base ? [def, def.owner.base] : [def], context)
 		}
 	}
 
@@ -3678,16 +1820,15 @@ async function doBattle(att, def) {
 }
 
 async function dealBattleDamage(att, def, amount) {
-	active_card = att
-	active_target = def
-	active_damage = amount
-	await run(att, "", "When this Unit deals battle damage")
-	await run(def, "", "receives damage")
-	await run(def, "", "receives battle damage")
-	if (active_damage > 0) def.damage += active_damage
-	active_card = null
-	active_target = null
-	active_damage = 0
+	let ctx = {
+		active_card: att,
+		active_target: def,
+		active_damage: amount
+	}
+	await run(att, "", "When this Unit deals battle damage", ctx)
+	await run(def, "", "receives damage", ctx)
+	await run(def, "", "receives battle damage", ctx)
+	if (ctx.active_damage > 0) def.damage += ctx.active_damage
 }
 
 async function dealDamage(source, target, amount = 1) {
@@ -3702,13 +1843,15 @@ async function dealDamage(source, target, amount = 1) {
 	log(`🎯${source} deals ${amount} effect damage to ${target}`)
 	if (amount > 0) {
 		target.effect_damage = amount
-		//await run(target, "When this Unit receives effect damage from an enemy, ")
+		//await run(target, "When this Unit receives effect damage from an enemy, ", ctx)
 		await publish(" receives effect damage, ", target.owner.battle, {
 			source: source,
 			target: target
 		})
 		target.damage += Math.max(0, target.effect_damage)
-		if (target.HP() < 1) await destroy(target, false)
+		if (target.HP() < 1) {
+			await destroy(target, {destroyer: source}, false)
+		}
 	}
 	return true
 }
@@ -3779,34 +1922,30 @@ function getSectionText(card, act = "Main", clause = "", limit = true) {
 	return text
 }
 /** runs card and pilot text */
-async function run(card, act = "Main", clause = "") {
+async function run(card, act = "Main", clause = "", ctx = {}) {
 	if (!card) return false
 	if (card.type === "COMMAND") {
 		// log("DEBUG Running " + card + " " + act + " " + clause)
 	}
-	let rv = await runCard(card, act, clause)
+	let rv = await runCard(card, act, clause, ctx)
 	if (card.pilot && card.pilot.type === "PILOT") {
-		rv = rv | await runCard(card.pilot, act, clause)
+		rv = rv | await runCard(card.pilot, act, clause, ctx)
 		// if (!rv && inStr(clause, " deals damage to an ")) {
 		// 	log("FIXME: SHOULD HAVE RAN " + card.pilot.name + " TEXT? act: " + act + " clause: " + clause + " text: " + getSectionText(card.pilot, act, clause) + " defender: " + defender)
-		// 	await runCard(card.pilot, act, clause)
+		// 	await runCard(card.pilot, act, clause, ctx)
 		// }
 	}
 	return rv
 }
 /** runs events */
-async function publish(clause, cards, context) {
-	window.event_context = context
-	for (const c of cards) await run(c, "", clause)
-	window.event_context = {}
+async function publish(clause, cards, ctx) {
+	for (const c of cards) await run(c, "", clause, ctx)
 }
 /** logs ran */
-async function runCard(card, act, clause = "") {
+async function runCard(card, act, clause = "", context = {}) {
 	let t = getSectionText(card, act, clause)
 	if (!t) return false
-	running_card = card
-	let rv = await runCard2(card, act, clause, t)
-	running_card = null
+	let rv = await runCard2(card, act, clause, t, {...context, running_card: card})
 	if (rv) {
 		if (inStr(t, "[Once per Turn]")) once_per_turn.push(t + card.cid)
 		log(`⚡${card.owner.name} ran ${card} ${(act || clause)}: ${t}`)
@@ -3820,7 +1959,7 @@ async function runCard(card, act, clause = "") {
 	}
 	return rv
 }
-async function runCard2(card, act, clause = "", t = "") {
+async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	if (!t) t = getSectionText(card, act, clause)
 	if (!t) {
 		if (clause || inStr(card.text, act)) log(`🚩No act ${act} or clause "${clause}" found in ${card.id} ${card.text}`)
@@ -3849,7 +1988,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		// log("FIXME: DEBUG " + act + " " + clause + " " + card)
 	}
 
-	if (destroyer && destroyer.hasTrait("Neo Zeon") && u.type === "UNIT") p.kw_eot.push("Neo Zeon friendly fire")
+	if (ctx.destroyer && ctx.destroyer.hasTrait("Neo Zeon") && u.type === "UNIT") p.kw_eot.push("Neo Zeon friendly fire")
 
 	// trim if and other cruft
 	if (mo = t.match(/^\[Once per Turn\]/)) t = t.slice(mo[0].length)
@@ -3880,16 +2019,24 @@ async function runCard2(card, act, clause = "", t = "") {
 			if (attacker === u || !attacker.hasKw("Repair")) return false
 			target = mySort(eu.filter(c => c.LEVEL() <= attacker.LEVEL()), c => -c.AP())[0]
 			if (!target) return false
-			rest(target)
+			rest(target, {rester: card})
 			return true
 		}
 	}
+	if (mo = t.match(/^area card, /)) {
+		t = t.slice(mo[0].length)
+	}
 	if (mo = t.match(/^area card with battle damage, /)) {
-		if (!window.event_context.with_battle_damage) return false
+		if (!ctx.with_battle_damage) return false
 		t = t.slice(mo[0].length)
 	}
 	else if (mo = t.match(/^area card with damage, /)) {
-		if (!window.event_context.with_damage) return false
+		try {
+			if (!ctx.with_damage) return false
+		} catch(ex) {
+			log(`🚩🚩FIXME: ${card} ${act}${clause} has no context?! ${ex}`, true, true, true)
+			debugger;
+		}
 		t = t.slice(mo[0].length)
 	}	
 	if (mo = t.match(/^[Dd]uring your turn, /)) {
@@ -3919,7 +2066,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	// on pair
 	if (mo = t.match(/a \((.+?)\) Pilot with one of your blue Units, /)) {
-		if (window.paired_unit.color !== "BLUE" || !window.paired_unit.pilot.hasTrait(mo[1])) return false
+		if (ctx.paired_unit.color !== "BLUE" || !ctx.paired_unit.pilot.hasTrait(mo[1])) return false
 		t = t.slice(mo[0].length)
 	}
 
@@ -4010,15 +2157,15 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	// During your turn is already checked in getSectionText
 	if (t === " a (Dawn of Fold) Command card using an EX Resource, draw 1.") {
-		if (!active_card.traits.includes("Dawn of Fold") || spent.length < 1) return false
+		if (!ctx.active_card.traits.includes("Dawn of Fold") || spent.length < 1) return false
 		await p.draw()
 		return true
 	}
 	if (t === " a (Dawn of Fold) Command card using an EX Resource, you may pair that card from your trash with one of your Units with \"Gundam Lfrith\" in its card name.") {
-		if (spent.length < 1 || !inStr(active_card.text, "[Pilot]")) return false
+		if (spent.length < 1 || !inStr(ctx.active_card.text, "[Pilot]")) return false
 		target = p.getPairableUnits().filter(c => inStr(c.name, "Gundam Lfrith"))[0]
 		if (!target) return false
-		await pair(target, active_card)
+		await pair(target, ctx.active_card)
 		return true
 	}
 
@@ -4039,12 +2186,12 @@ async function runCard2(card, act, clause = "", t = "") {
 		t = t.slice(mo[0].length)
 	}
 	if (t === "If this Unit is destroyed by one of your (Neo Zeon) card's effects, add it from your trash to your hand.") {
-		if (!destroyer.hasTrait("Neo Zeon")) return false
+		if (!ctx.destroyer.hasTrait("Neo Zeon")) return false
 		toHand(u, true)
 		return true
 	}
 	if (t === "If this Unit is destroyed with battle damage, you and the player who destroyed this Unit draw 1.") {
-		if (!destroyer) return false
+		if (!ctx.destroyer) return false
 		await p.draw()
 		await en.draw()
 		return true
@@ -4135,7 +2282,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		await p.draw()
 		if (p.trash.filter(c => inStr(c.name, "A Healthy Curiosity")).length >= 2) {
 			target = eu.filter(c => c.HP() <= 4 && !c.rested)[0]
-			if (target) rest(target)
+			if (target) rest(target, {rester: card})
 		}
 		return true
 	}
@@ -4177,20 +2324,20 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (mo = t.match(/^[Dd]eploy (\d) (rested )?\[([^\]]+)\].*? Unit tokens?\.$/)) {
 		for (let i = 0; i < mo[1]; ++i) {
-			await p.deployToken(mo[3], mo[2])
+			await p.deployToken(ctx, mo[3], mo[2])
 		}
 		return true
 	}
 	if (inStr(t, "deploy 1 [Parts]((League Militaire)･AP1･HP1･This Unit can't choose the enemy player as its attack target) Unit token.")) {
-		await p.deployToken("Parts")
+		await p.deployToken(ctx, "Parts")
 		return true
 	}
 	if (inStr(t, "deploy 1 [Tallgeese]((OZ)･AP4･HP2) Unit token. If it is your turn and a card with \"Corsica Base\" in its card name is in your trash, deploy 2 [Leo]((OZ)･AP1･HP1) Unit tokens instead.")) {
 		if (myturn && p.trash.filter(c => c.name.indexOf("Corsica Base")).length > 0) {
-			await p.deployToken("Leo")
-			await p.deployToken("Leo")
+			await p.deployToken(ctx, "Leo")
+			await p.deployToken(ctx, "Leo")
 		} else {
-			await p.deployToken("Tallgeese")
+			await p.deployToken(ctx, "Tallgeese")
 		}
 		return true
 	}
@@ -4213,7 +2360,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (mo = t.match(/^1 \(([^)]+?)\) Base card from your trash. Deploy it.$/)) {
 			target = p.trash.filter(c => c.type === "BASE" && c.hasTrait(mo[1]))[0]
 			if (!target) return false
-			await p.deployFromTrash(target)
+			await p.deployFromTrash(ctx, target)
 			return true
 		}
 		if (mo = t.match(/^1 enemy Base. /)) {
@@ -4247,7 +2394,7 @@ async function runCard2(card, act, clause = "", t = "") {
 			if (t === "Destroy the first 2 cards in that player's shield area.") {
 				let i = 0
 				if (en.base) {
-					await destroy(en.base)
+					await destroy(en.base, ctx)
 					++i
 				}
 				for (; i < 2; ++i) await en.breakShield(card, false)
@@ -4263,7 +2410,7 @@ async function runCard2(card, act, clause = "", t = "") {
 				if (en.hand.length < mo[1]) return false
 				t = t.slice(mo[0].length)
 				if (t === "They discard 1.") {
-					await en.discard()
+					await en.discard(ctx)
 					return true
 				}
 			}
@@ -4296,6 +2443,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		}
 		// GD02-100
 		if (t === "1 friendly damaged Unit. It recovers 2 HP. Then, draw 1.") {
+			if (p.deck.length < 1) return false
 			targets = mySort(fu.filter(c => c.damage > 0), c => -c.damage + c.getRepair())
 			target = targets[0]
 			if (!target) return false
@@ -4309,7 +2457,7 @@ async function runCard2(card, act, clause = "", t = "") {
 			target = targets[0]
 			if (!target) return false
 			toHand(target, true)
-			await p.discard()
+			await p.discard(ctx)
 			return true
 		}
 		// Choose regex
@@ -4342,12 +2490,6 @@ async function runCard2(card, act, clause = "", t = "") {
 				targets = targets.slice(0, mo.groups.num)
 				if (targets.length < mo.groups.num) return false
 			}
-			target = targets[0]
-			if (!target) return false
-			t = t.slice(mo[0].length)
-		}
-		if (mo = t.match(/^whose Lv. is equal to or lower than this Unit. /)) {
-			targets = targets.filter(c => c.LEVEL() <= u.LEVEL())
 			target = targets[0]
 			if (!target) return false
 			t = t.slice(mo[0].length)
@@ -4402,7 +2544,7 @@ async function runCard2(card, act, clause = "", t = "") {
 			if (t === "Rest it. If you do, choose 1 enemy Unit that is Lv.2 or lower. Return it to its owner's hand.") {
 				let their = mySort(eu.filter(c => c.LEVEL() <= 2), c => -c.AP())[0]
 				if (!their) return false
-				rest(target)
+				rest(target, {rester: card})
 				bounce(their)
 				return true
 			}
@@ -4486,11 +2628,18 @@ async function runCard2(card, act, clause = "", t = "") {
 			eotAP(mine, 2)
 			return true
 		}
+		if (t === "Exile them from the game. If you do, choose 1 enemy Unit that is Lv.4 or lower. Destroy it.") {
+			target = eu.filter(c => c.LEVEL() <= 4 && !c.rested)[0]
+			if (!target) return false
+			exile(targets)
+			await destroy(target, ctx)
+			return true
+		}
 		if (t === "Exile them from the game. If you do, choose 1 enemy Unit that is Lv.4 or lower. Rest it.") {
 			target = eu.filter(c => c.LEVEL() <= 4 && !c.rested)[0]
 			if (!target) return false
 			exile(targets)
-			rest(target)
+			rest(target, {rester: card})
 			return true
 		}
 		if (t === "Exile them from the game. If you do, choose 1 enemy Unit. Deal 2 damage to it.") {
@@ -4511,14 +2660,14 @@ async function runCard2(card, act, clause = "", t = "") {
 			target = (!en.kw_eot.includes("friendly Units can't be destroyed by enemy effects") && mySort(eu, c => -c.AP())[0])
 			if (!target) return false
 			exile(targets)
-			await destroy(target)
+			await destroy(target, ctx)
 			return true
 		}
 		if (t === "Exile them from the game. If you do, choose 1 enemy Unit/Base that is Lv.8 or lower. Destroy it.") {
 			const their = (!en.kw_eot.includes("friendly Units can't be destroyed by enemy effects") && mySort(eu, c => -c.AP())[0]) || en.base
 			if (!their) return false
 			exile(targets)
-			await destroy(their)
+			await destroy(their, ctx)
 			return true
 		}
 		if (t === "During this battle, battle damage this Unit would receive is dealt to that Unit instead.") {
@@ -4547,19 +2696,19 @@ async function runCard2(card, act, clause = "", t = "") {
 			return true
 		}
 		if (t === "Rest it.") {
-			rest(target)
+			rest(target, {rester: card})
 			return true
 		}
 		if (t === "Rest them.") {
-			targets.forEach(target => rest(target))
+			targets.forEach(target => rest(target, {rester: card}))
 			return true
 		}
 		if (mo = t.match(/^and 1 (active )?enemy Unit. Rest them.$/)) {
 			let mine = mySort(targets, c => c.AP())[0]
 			let their = mySort(eu.filter(c => mo[1] ? !c.rested : true), c => -c.AP())[0]
 			if (!their) return false
-			rest(mine)
-			rest(their)
+			rest(mine, {rester: card})
+			rest(their, {rester: card})
 			return true
 		}
 		if (mo = t.match(/^Deal (\d+) damage to it and this Unit.$/)) {
@@ -4630,12 +2779,14 @@ async function runCard2(card, act, clause = "", t = "") {
 			return await dealDamage(card, chooseDmgTarget(u, targets, token_count), token_count)
 		}
 		if (t === "Destroy it.") {
-			await destroy(target)
+			ctx = {...ctx, destroyer: card}
+			await destroy(target, ctx)
 			return true
 		}
 		if (t === "Destroy it. If there are 10 or more cards in your trash, choose 1 active enemy Unit that is Lv.4 or lower instead.") {
 			if (p.trash.length >= 10) targets = mySort(eu.filter(c => !c.rested && c.LEVEL() <= 4), c => -c.AP())
-			await destroy(targets[0])
+			ctx = {...ctx, destroyer: card}
+			await destroy(targets[0], ctx)
 			return true
 		}
 		if (mo = t.match(/^Base/)) {
@@ -4645,15 +2796,15 @@ async function runCard2(card, act, clause = "", t = "") {
 				if (attacker && attacker.owner !== p) target = attacker
 				if (defender && defender.owner !== p) target = defender
 				if (!target) return false
-				rest(p.base)
+				rest(p.base, {rester: card})
 				eobAP(target, 2)
 				return true
 			}
 			if (t === "Base and 1 enemy Unit with 3 or less HP. Rest them.") {
 				target = eu.filter(c => !c.rested && c.HP() <= 3)[0]
 				if (!target || (!myturn && target.sick) || (myturn && fua.length < 1)) return false
-				rest(p.base)
-				rest(target)
+				rest(p.base, {rester: card})
+				rest(target, {rester: card})
 				return true
 			}
 		}
@@ -4661,14 +2812,15 @@ async function runCard2(card, act, clause = "", t = "") {
 			if (t === "Rest it. If a friendly (Jupitris) Link Unit is in play, choose 1 to 2 enemy Units with 3 or less HP instead.") {
 				targets = eu.filter(c => !c.rested && c.HP() <= 3).slice(0, fu.some(c => c.hasTrait("Jupitris")) ? 2 : 1)
 				if (targets.length < 1) return false
-				for (const c of targets) rest(c)
+				for (const c of targets) rest(c, {rester: card})
 				return true
 			}
 			if (t === "Rest it. If you do, all enemy players each choose 1 of their active Units. Rest them.") {
 				target = mySort(targets, c => c.AP())[0]
 				let their = mySort(eu.filter(c => !c.rested), c => c.AP())[0]
 				if (!their) return false
-				rest(their)
+				rest(target, {rester: card})
+				rest(their, {rester: card})
 				return true
 			}
 			if (t === "Rest it. If you do, choose 1 enemy Unit that is Lv.2 or lower. Return it to its owner's hand.") {
@@ -4678,7 +2830,7 @@ async function runCard2(card, act, clause = "", t = "") {
 				if (!target2) return false
 				if (!ai) target = await chooseCard(targets)
 				if (!target) return false
-				rest(target)
+				rest(target, {rester: card})
 				bounce(target)
 				return true
 			}
@@ -4687,7 +2839,7 @@ async function runCard2(card, act, clause = "", t = "") {
 				if (!afu) return false
 				target = chooseDmgTarget(u, eu.filter(c => c.level <= afu.level), 3)
 				if (!target) return false
-				rest(afu)
+				rest(afu, {rester: card})
 				await dealDamage(card, target, 3)
 				return true
 			}
@@ -4695,7 +2847,16 @@ async function runCard2(card, act, clause = "", t = "") {
 				const mine = mySort(targets, c => c.LEVEL())[0]
 				target = chooseDmgTarget(card, eu.filter(c => c.AP() <= 2), 2)
 				if (!target) return false
-				rest(mine)
+				rest(mine, {rester: card})
+				await dealDamage(card, target, 2)
+				return true
+			}
+			if (t === "Rest it. If you do, choose 1 rested enemy Unit. Deal 2 damage to it.") {
+				let mine = target
+				if (!mine) return false
+				target = chooseDmgTarget(card, eu.filter(c => c.rested), 2)
+				if (!target) return false
+				await rest(mine, true, {rester: card})
 				await dealDamage(card, target, 2)
 				return true
 			}
@@ -4710,17 +2871,18 @@ async function runCard2(card, act, clause = "", t = "") {
 				}
 				targets = targets.filter(c => c.LEVEL() <= mine[i])
 				if (targets.length < 1) return false
-				rest(mine[i])
+				rest(mine[i], {rester: card})
 				targets.forEach(async c => await dealDamage(u, c, 2))
 				return true
 			}
 			if (t === "Rest it. If you do, draw 1. This Unit gains <High-Maneuver> during this turn.") {
-				await rest(target)
+				if (p.deck.length < 1) return false
+				await rest(target, {rester: card})
 				await p.draw()
 				eotKw(u, "High-Maneuver")
 				return true
 			}
-			rest(target)
+			rest(target, {rester: card})
 			t = t.slice(mo[0].length)
 			if (t === "") return true
 		}
@@ -4785,10 +2947,12 @@ async function runCard2(card, act, clause = "", t = "") {
 			return true
 		}
 		if (t === "Deal 2 damage to it. Then, if you have a Unit with \"Master Gundam\" in its card name in play, draw 1.") {
+			let would_draw = fu.some(c => inStr(c.name, "Master Gundam"))
+			if (would_draw && p.deck.length < 1) return false
 			target = chooseDmgTarget(card, targets, 2)
 			if (!target) return false
 			await dealDamage(card, target, 2)
-			if (fu.some(c => inStr(c.name, "Master Gundam"))) await p.draw()
+			if (would_draw) await p.draw()
 			return true
 		}
 
@@ -4799,7 +2963,7 @@ async function runCard2(card, act, clause = "", t = "") {
 			t = t.slice(mo[0].length)
 			if (t === "") return true
 			if (t === "If you use an EX Resource to play this card, rest the enemy Unit.") {
-				if (spent.length > 0) rest(target)
+				if (spent.length > 0) rest(target, {rester: card})
 				return true
 			}
 		}
@@ -4810,17 +2974,26 @@ async function runCard2(card, act, clause = "", t = "") {
 			t = t.slice(mo[0].length)
 			if (t === "") return true
 		}
+		// choose, rare
+		if (card.text === "[Action]Choose 1 friendly (Shrike Team) Unit. It gains the following effect during this turn:\n■[During Link][Destroyed]Choose 1 friendly (League Militaire) Unit. Set it as active.\n[Pilot][Helen Jackson]") {
+			target = targets.filter(c => c.linked())[0]
+			if (!target) return false
+			eotKw(target, "[During Link][Destroyed]Choose 1 friendly (League Militaire) Unit. Set it as active.")
+			return true
+		}
 	}
 	// Potentially unchosen effects, eg "When a friendly (Clan) Unit links, it gains <Breach 3> during this turn."
 	if (t === "It can't attack during this turn.") {
 		target.sick = true
 		return true
 	}
-	if (mo = t.match(/^It gains <Breach 3> during this turn. ?/)) {
-		if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
+	if (mo = t.match(/^It gains <Breach (\d+)> during this turn. ?/)) {
+		if (!myturn || !eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
+		//let their = mySort(eu.filter(c => c.rested), c => -c.HP())
 		target = mySort(fu.filter(c => c.getBreach() < 1), c => -c.AP())[0]
 		if (!target) return false
-		eotKw(target, "Breach 3")
+		//if (en.base)
+		eotKw(target, `Breach ${mo[1]}`)
 		t = t.slice(mo[0].length)
 		if (t === "") return true
 	}
@@ -4872,7 +3045,8 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (t == "Destroy this Unit：Choose 1 enemy Base/enemy Shield this Unit is battling. Deal 6 damage to it.") {
 		// The action step is before the damage step, so
 		if (!(defender && defender.hasKw("First Strike") && defender.AP() >= u.HP()) && u.AP() >= 6) return false
-		await destroy(u)
+		ctx = {...ctx, destroyer: card}
+		await destroy(u, ctx)
 		if (!defender) {
 			if (en.shield.length < 1) return false
 			await en.breakShield(card)
@@ -4884,7 +3058,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		targets = mySort(fu.filter(c => !c.rested), c => -c.sick).slice(0, 2)
 		if (targets.length < 2) return false
 		if (targets[0].AP() + targets[1].AP() >= u.AP()) return false
-		targets.forEach(c => rest(c))
+		targets.forEach(c => rest(c))  // Activation is not an effect but causes one.
 		await activate(u)
 		return true
 	}
@@ -4910,31 +3084,17 @@ async function runCard2(card, act, clause = "", t = "") {
 		eotAP(target, -p.trash.filter(c => inStr(c.name, "Gundam Virtue")).length)
 		return true
 	}
-	// if (t === "1 of your Units paired with a (Super Soldier) Pilot. During this turn, it may choose an active enemy Unit that is Lv.4 or lower as its attack target.") {
-	// 	target = fu.filter(c => c.pilot && c.pilot.hasTrait("Super Soldier"))[0]
-	// 	if (!target) return false
-	// 	eotKw(target, "canAttack active.unit.lv4min")
-	// 	return true
-	// }
 	if (mo = t.match(/^Choose 1 Command card that is Lv.(\d+) or lower from your trash. Add it to your hand.$/)) {
 		target = p.trash.filter(c => c.type === "COMMAND" && c.LEVEL() <= mo[1])[0]
 		if (!target) return false
 		toHand(target, true)
 		return true
 	}
-	if (t === "If you do, choose 1 rested enemy Unit. Deal 2 damage to it.") {
-		let mine = target
-		if (!mine) return false
-		target = chooseDmgTarget(card, eu.filter(c => c.rested), 2)
-		if (!target) return false
-		await rest(mine)
-		await dealDamage(card, target, 2)
-		return true
-	}
 	if (t === "Destroy it. If you do, place the top 3 cards of your deck into your trash. Add 1 (Neo Zeon) Unit card you placed from your deck with this effect to your hand.") {
 		target = targets.filter(c => c.rested)[0]
 		if (!target) return false
-		await destroy(target)
+		ctx = {...ctx, destroyer: card}
+		await destroy(target, ctx)
 		let milled = p.mill(3)
 		target = milled.filter(c => c.type === "UNIT" && c.hasTrait("Neo Zeon"))[0]
 		if (!target) return false
@@ -4967,8 +3127,8 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!p.base || p.base.rested) return false
 		target = eu.filter(c => c.HP() <= 3 && !c.rested)[0]
 		if (!target) return false
-		rest(p.base)
-		rest(target)
+		rest(p.base, {rester: card})
+		rest(target, {rester: card})
 		return true
 	}
 	if (inStr(t, `Deal 3 damage to it. If there are 2 or more cards with "Improved Technique" in their card name in your trash, choose 1 enemy Unit instead.`)) {
@@ -4987,7 +3147,8 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!u.rested) return false
 		target = targets.filter(c => c.rested && c.HP() < u.HP() && c.AP() < u.AP() && eu.some(c2 => c2.AP() >= u.HP()))[0]
 		if (!target) return false
-		if (await destroy(target)) {
+		ctx = {...ctx, destroyer: card}
+		if (await destroy(target, ctx)) {
 			await activate(u)
 			eotKw(u, "must_attack_unit")
 			return true
@@ -5009,7 +3170,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (t === "Base. Rest it. If you do, set this Unit as active. It can't choose the enemy player as its attack target during this turn.") {
 		if (!p.base || p.base.rested || !u.rested) return false
-		rest(p.base)
+		rest(p.base, {rester: card})
 		await activate(u)
 		eotKw(u, "must_attack_unit")
 		return true
@@ -5072,7 +3233,8 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (t === " to an enemy Unit, destroy that enemy Unit.") {
 		target = (u === defender ? attacker : defender)
 		if (eu.includes(target)) return false
-		await destroy(target)
+		ctx = {...ctx, destroyer: card}
+		await destroy(target, ctx)
 		return true
 	}
 	mo = t.match(/^ to an enemy Unit that is Lv.(\d) or lower( [^)]+)?, /)
@@ -5085,12 +3247,14 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!eu.includes(target)) return false
 		t = t.slice(mo[0].length)
 		if (t === "destroy that enemy Unit.") {
-			await destroy(target)
+			ctx = {...ctx, destroyer: card}
+			await destroy(target, ctx)
 			return true
 		}
 		if (t === "if you have a (CB) Pilot in play, destroy that enemy Unit.") {
 			if (!fu.some(c => c.pilot && c.pilot.hasTrait("CB"))) return false
-			await destroy(target)
+			ctx = {...ctx, destroyer: card}
+			await destroy(target, ctx)
 			return true
 		}
 	}
@@ -5134,7 +3298,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (u.rested || !u.sick && u.AP() > support) return false
 		target = mySort(fu.filter(c => c !== u && !c.rested && !c.sick), c => c.AP())[0]
 		if (!target) return false
-		rest(u)
+		rest(u)  // pay != effect
 		eotAP(target, support)
 		if (target.hasTrait("ZAFT")) await publish("When you use this Unit's <Support> to increase a (ZAFT) Unit's AP, ", [u])
 		return true
@@ -5186,7 +3350,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (t === "②：If you have a Unit with \"Gundam Aerial\" in its card name that is Lv.5 or higher in play, deploy 1 [Gundnode]((Quiet Zero)･AP2･HP2･<Breach 1>) Unit token.") {
 		if (!fu.some(c => inStr(c.name, "Gundam Aerial") && c.LEVEL() >= 5) || !await p.pay(2, card)) return false
-		await p.deployToken("Gundnode")
+		await p.deployToken(ctx, "Gundnode")
 		return true
 	}
 	if (t === "Discard 1 (Zeon)/(Neo Zeon) Unit card：If a Pilot is not paired with this Unit, choose 1 (Newtype) Pilot card that is Lv.3 or lower from your trash. Pair it with this Unit.") {
@@ -5195,7 +3359,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!target) return false
 		targets = p.hand.filter(c => c.type === "UNIT" && (c.traits.includes("Zeon") || c.traits.includes("Neo Zeon"))).slice(0, 1)
 		if (targets.length < 1) return false
-		await p.discard(1, targets)
+		await p.discard(ctx, 1, targets)
 		await pair(u, target)
 		return true
 	}
@@ -5231,7 +3395,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (mine.length < 2) return false
 		target = mySort(eu.filter(c => c.damage > 0 && c.LEVEL() <= 7), c => -c.AP())[0]
 		if (!target) return false
-		rest(target)
+		rest(target, {rester: card})
 		target.stunned = true
 		return true
 	}
@@ -5244,7 +3408,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		let target2 = fu.filter(c => !c.rested && c.hasTrait("Earth Federation"))[0]
 		if (!target2) return false
 		rest(target2)
-		rest(target)
+		rest(target, {rester: card})
 		return true
 	}
 	if (t === "Exile 3 blue cards from your trash：Set this Unit as active. It can't choose the enemy player as its attack target during this turn.") {
@@ -5268,7 +3432,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!target || !u.rested || !await p.pay(2, u, true, t)) return false
 		p.battle = p.battle.filter(c => c !== u)
 		p.deck = [u].concat(p.deck)
-		await p.deployFromTrash(target)
+		await p.deployFromTrash(ctx, target)
 		return true
 	}
 	if (t === "During this turn, all enemy Units must choose that Unit as their attack target when attacking.") {
@@ -5289,7 +3453,8 @@ async function runCard2(card, act, clause = "", t = "") {
 		let their = eu.filter(c => c.LEVEL() <= 4)
 		if (their.length < 1 || mine.length > their.length) return false
 		if (mine.some(c => !c.rested)) return false
-		their.concat(mine).forEach(async c => await destroy(c))
+		ctx = {...ctx, destroyer: card}
+		their.concat(mine).forEach(async c => await destroy(c, ctx))
 		return true
 	}
 	// Attach command's trigger to player
@@ -5311,15 +3476,15 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (mo = t.match(/^Choose 1 active friendly Base. Rest it. If you do, /)) {
 		if (!p.base || p.base.rested) return false
-		rest(p.base)
+		rest(p.base, {rester: card})
 		t = t.slice(mo[0].length)
 	}
 	if (mo = t.match(/^and 1 enemy Unit that is Lv.(\d+) or lower. Rest them.$/)) {
 		let mine = mySort(targets, c => -c.sick + c.AP())[0]
 		target = eu.filter(c => !c.rested && c.LEVEL() <= mo[1])[0]
 		if (!mine || !target) return false
-		rest(mine)
-		rest(target)
+		rest(mine, {rester: card})
+		rest(target, {rester: card})
 		return true
 	}
 	// Activated Attack
@@ -5400,7 +3565,7 @@ async function runCard2(card, act, clause = "", t = "") {
 			card.type = "UNIT"
 			card.ap = 3
 			card.hp = 3
-			await p.deploy(card)
+			await p.deploy(ctx, card)
 			return true
 		}
 		return toHand(card)
@@ -5426,76 +3591,80 @@ async function runCard2(card, act, clause = "", t = "") {
 		targets.forEach(async c => await c.recover(2))
 		return true
 	}
-
-	if (t === "Rest this Base：Choose 1 friendly Unit. It gets AP+1 during this turn.") {
-		if (card.rested) return false
-		target = fu.filter(c => !c.rested && !c.sick)[0]
-		if (!target) return false
-		rest(card)
-		eotAP(target, 1)
-		return true
-	}
-	if (t === "Rest this Base：Choose 1 friendly Unit. It recovers 1 HP.") {
-		if (card.rested) return false
-		target = fu.filter(c => c.damage > 0 && c.getRepair() < c.damage)[0]
-		if (!target) return false
-		await target.recover(1)
-		return true
-	}
-	if (t === "Rest this Base：Choose 1 friendly (Londo Bell) Unit. During this turn, when it receives enemy damage, reduce it by 1.") {
-		if (card.rested) return false
-		target = fu.filter(c => !c.rested && !c.sick && c.hasTrait("Londo Bell"))[0]
-		if (!target) return false
-		rest(card)
-		eotHP(target)
-		return true
-	}
-	if (t === "Rest this Base：Choose 1 friendly (ZAFT) Unit with 5 or more AP. It gains <Breach 3> during this battle.") {
-		if (card.rested) return false
-		target = fua.filter(c => c.hasTrait("ZAFT") && c.AP() >= 5)[0]
-		if (!target) return false
-		rest(card)
-		eobKw(target, "Breach 3")
-		return true
-	}
-	if (t === "Rest this Base：Choose 1 of your damaged Units. It gets AP+2 during this turn.") {
-		if (card.rested) return false
-		target = fu.filter(c => c.damage > 0 && !c.rested && !c.sick)[0]
-		if (!target) return false
-		rest(card)
-		eotAP(target, 2)
-		return true
-	}
-	if (mo = t.match(/^Rest this Base：If a friendly \(([^)]+?)\) Link Unit is in play, choose 1 friendly Unit. It gets AP\+2 during this turn.$/)) {
-		if (card.rested || !fu.some(c => c.hasTrait(mo[1]) && c.linked())) return false
-		target = fu.filter(c => !c.rested && !c.sick)[0]
-		if (!target) return false
-		rest(card)
-		eotAP(target, 2)
-		return true
-	}
-	if (mo = t.match(/^Rest this Base：If a friendly \(([^)]+?)\) Unit is in play, choose 1 enemy Unit. It gets AP-1 during this turn./)) {
-		if (card.rested || !fu.some(c => c.hasTrait(mo[1]))) return false
-		target = eu.filter(c => myturn ? c.rested : (!c.rested && !c.sick))[0]
-		if (!target) return false
-		eotAP(target, -1)
-		return true
-	}
-	if (t === "Rest this Base：If one of your Units has been destroyed by one of your (Neo Zeon) card's effects during this turn, deploy 1 (Neo Zeon) Unit card that is Lv.3 or lower from your hand.") {
-		if (card.rested || p.battle.length > 5 || !p.kw_eot.includes("Neo Zeon friendly fire")) return false
-		target = p.hand.filter(c => c.type === "UNIT" && c.hasTrait("Neo Zeon") && c.LEVEL() <= 3)[0]
-		if (!target) return false
-		await p.deploy(target)
-		return true
+	if (mo = t.match(/^Rest this Base：/)) {
+		if (t === "Rest this Base：Choose 1 friendly Unit. It gets AP+1 during this turn.") {
+			if (card.rested) return false
+			target = fu.filter(c => !c.rested && !c.sick)[0]
+			if (!target) return false
+			rest(card)
+			eotAP(target, 1)
+			return true
+		}
+		if (t === "Rest this Base：Choose 1 friendly Unit. It recovers 1 HP.") {
+			if (card.rested) return false
+			target = fu.filter(c => c.damage > 0 && c.getRepair() < c.damage)[0]
+			if (!target) return false
+			rest(card)
+			await target.recover(1)
+			return true
+		}
+		if (t === "Rest this Base：Choose 1 friendly (Londo Bell) Unit. During this turn, when it receives enemy damage, reduce it by 1.") {
+			if (card.rested) return false
+			target = fu.filter(c => !c.rested && !c.sick && c.hasTrait("Londo Bell"))[0]
+			if (!target) return false
+			rest(card)
+			eotHP(target)
+			return true
+		}
+		if (t === "Rest this Base：Choose 1 friendly (ZAFT) Unit with 5 or more AP. It gains <Breach 3> during this battle.") {
+			if (card.rested) return false
+			target = fua.filter(c => c.hasTrait("ZAFT") && c.AP() >= 5)[0]
+			if (!myturn || !target || !eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
+			rest(card)
+			eobKw(target, "Breach 3")
+			return true
+		}
+		if (t === "Rest this Base：Choose 1 of your damaged Units. It gets AP+2 during this turn.") {
+			if (card.rested) return false
+			target = fu.filter(c => c.damage > 0 && !c.rested && !c.sick)[0]
+			if (!target) return false
+			rest(card)
+			eotAP(target, 2)
+			return true
+		}
+		if (mo = t.match(/^Rest this Base：If a friendly \(([^)]+?)\) Link Unit is in play, choose 1 friendly Unit. It gets AP\+2 during this turn.$/)) {
+			if (card.rested || !fu.some(c => c.hasTrait(mo[1]) && c.linked())) return false
+			target = fu.filter(c => !c.rested && !c.sick)[0]
+			if (!target) return false
+			rest(card)
+			eotAP(target, 2)
+			return true
+		}
+		if (mo = t.match(/^Rest this Base：If a friendly \(([^)]+?)\) Unit is in play, choose 1 enemy Unit. It gets AP-1 during this turn./)) {
+			if (card.rested || !fu.some(c => c.hasTrait(mo[1]))) return false
+			target = eu.filter(c => myturn ? c.rested : (!c.rested && !c.sick))[0]
+			if (!target) return false
+			rest(card)
+			eotAP(target, -1)
+			return true
+		}
+		if (t === "Rest this Base：If one of your Units has been destroyed by one of your (Neo Zeon) card's effects during this turn, deploy 1 (Neo Zeon) Unit card that is Lv.3 or lower from your hand.") {
+			if (card.rested || p.battle.length > 5 || !p.kw_eot.includes("Neo Zeon friendly fire")) return false
+			target = p.hand.filter(c => c.type === "UNIT" && c.hasTrait("Neo Zeon") && c.LEVEL() <= 3)[0]
+			if (!target) return false
+			rest(card)
+			await p.deploy(ctx, target)
+			return true
+		}
 	}
 	if (t === "②：Deploy 1 [Gundam]((White Base Team)･AP3･HP3) Unit token if you have no Units in play, deploy 1 [Guncannon]((White Base Team)･AP2･HP2) Unit token if you have only 1 Unit in play, or deploy 1 [Guntank]((White Base Team)･AP1･HP1) Unit token if you have 2 or more Units in play.") {
 		if (!await p.pay(2, u, true, t)) return false
 		if (fu.length === 0) {
-			await p.deployToken("Gundam")
+			await p.deployToken(ctx, "Gundam")
 		} else if (fu.length === 1) {
-			await p.deployToken("Guncannon")
+			await p.deployToken(ctx, "Guncannon")
 		} else {
-			await p.deployToken("Guntank")
+			await p.deployToken(ctx, "Guntank")
 		}
 		return true
 	}
@@ -5519,20 +3688,14 @@ async function runCard2(card, act, clause = "", t = "") {
 		eotKw(target, "First Strike")
 		return true
 	}
-	// if (t === "Choose 1 of your (Titans) Units whose Lv. is equal to or lower than this Unit. It gets AP+1 during this turn.") {
-	// 	target = mySort(fu.filter(c => !c.sick && c.hasTrait("Titans") && c.LEVEL() <= u.LEVEL()), c => c.rested)[0]
-	// 	if (!target || eu.length < 1) return false
-	// 	eotAP(target, 1)
-	// 	return true
-	// }
 	if (t === "If 1 to 4 enemy Units are in play, deploy 1 [Graze Custom]((Tekkadan)･AP2･HP2) Unit token. If 5 or more are in play, deploy 1 [Gundam Barbatos 4th Form]((Tekkadan)･AP4･HP4) Unit token.") {
 		if (p.battle.length > 5) return false
-		if (eu.length >= 1 && eu.length <= 4) await p.deployToken("Graze Custom")
-		else if (eu.length >= 5) await p.deployToken("Gundam Barbatos 4th Form")
+		if (eu.length >= 1 && eu.length <= 4) await p.deployToken(ctx, "Graze Custom")
+		else if (eu.length >= 5) await p.deployToken(ctx, "Gundam Barbatos 4th Form")
 		return true
 	}
 	if (mo = t.match(/^Deploy 1( rested)? \[(.*?)\].*? Unit token.$/)) {
-		await p.deployToken(mo[2], mo[1])
+		await p.deployToken(ctx, mo[2], mo[1])
 		return true
 	}
 	if (t === "Choose 1 of your active (League Militaire) Units and 1 enemy Unit that is Lv.3 or lower. Rest them.") {
@@ -5540,18 +3703,19 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!target) return false
 		const friend = mySort(fu.filter(c => !c.rested && c.hasTrait("League Militaire")), c => c.AP())[0]
 		if (!friend) return false
-		rest(friend)
-		rest(target)
+		rest(friend, {rester: card})
+		rest(target, {rester: card})
 		return true
 	}
 	if (t === "Deploy 1 rested [GQuuuuuuX (Omega Psycommu)]((Clan)･AP3･HP2) Unit token and 1 rested [Red Gundam]((Clan)･AP2･HP3) Unit token.") {
 		if (fu.length >= 6) return false
 		for (const token of ["GQuuuuuuX (Omega Psycommu)", "Red Gundam"]) {
-			await p.deployToken(token, true)
+			await p.deployToken(ctx, token, true)
 		}
 		return true
 	}
 	if (mo = t.match(/^[Dd]raw (\d).$/)) {
+		// TODO: undo effect first? if (optional && p.deck.length < 1) return false
 		await p.draw(mo[1])
 		return true
 	}
@@ -5564,12 +3728,12 @@ async function runCard2(card, act, clause = "", t = "") {
 		// Attack/Deploy/Destroyed is not optional?! TODO: Maybe don't attack/deploy if low on cards.
 		if (act === "Main" && (mo[1] >= p.deck.length || p.hand.length + mo[1] - mo[2] <= 0) && !card.hasTrait("Special Move")) return false
 		await p.draw(mo[1])
-		await p.discard(mo[2])
+		await p.discard(ctx, mo[2])
 		return true
 	}
 	// When Paired
 	if (t === "a Pilot with this Unit or one of your white Units, choose 1 enemy Unit. It gets AP-2 during this turn.") {
-		if (!window.paired_unit || !window.paired_unit.color === "WHITE") return false
+		if (!ctx.paired_unit || !ctx.paired_unit.color === "WHITE") return false
 		targets = mySort(eu, c => -c.rested * 10 - c.AP())
 		target = targets[0]
 		if (!target) return false
@@ -5578,21 +3742,23 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (mo = t.match(/^(and )?[Aa]dd it to your hand. If you do, discard 1./)) {
 		toHand(target, true)
-		await p.discard()
+		await p.discard(ctx)
 		return true
 	}
 	// When Linked
 	if (mo = t.match(/^[Dd]raw (\d). If you do, discard (\d).$/)) {
-		if (p.deck.length < mo[1]) return false
+		// not optional! if (p.deck.length < mo[1]) return false
 		await p.draw(mo[1])
-		await p.discard(mo[2])
+		// if dead, we don't reach here.
+		await p.discard(ctx, mo[2])
 		return true
 	}
+	// When Paired
 	if (t === "Draw 1. Then, discard 1. If you discard a (Special Move) Command card with this effect, you may activate its [Main].") {
 		await p.draw()
 		targets = mySort(p.hand, c => - (c.type === "COMMAND") * 4 - c.hasTrait("Special Move") * 2 - inStr(c.text, "[Main]"))
 		target = targets[0]
-		let discarded = await p.discard(1, [target])
+		let discarded = await p.discard(ctx, 1, [target])
 		for (let c of discarded) {
 			if (targets.includes(c)) {
 				if (ai || await chooseCard([c], "Activate Main?")) await runCard(c, "Main")
@@ -5602,9 +3768,8 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (t.slice(1) === "lace 1 EX Resource.") {
 		// https://www.gundam-gcg.com/en/pdf/comprehensiverules_en.pdf?v#:~:text=You%20may%20have%20up%20to,view%20cards%20in%20this%20location.
-		// TODO: Replace existing rested EX Resource?
 		//log(`💲+1 EX Resource`)
-		if (p.resource.filter(item => item.name === "EX Resource").length >= 5) return false
+		// if (p.resource.filter(item => !item.rested && item.name === "EX Resource").length >= 5) return false
 		await p.placeEXResource()
 		return true
 	}
@@ -5629,7 +3794,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (t === "You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.") {
 		target = mySort(p.hand.filter(item => item.level <= 4 && item.type === "UNIT" && (item.hasTrait("Neo Zeon") || item.hasTrait("Zeon"))), item => -item.COST())[0]
 		if (!target || fu.length >= 6) return false
-		await p.deploy(target)
+		await p.deploy(ctx, target)
 		p.hand = p.hand.filter(item => item !== target)
 		return true
 	}
@@ -5645,12 +3810,12 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (mo = t.match(/^It recovers (\d+) HP\. ?/)) {
 		target = mySort(targets.filter(c => c.damage > 0), c => -c.damage)[0]
 		if (!target) return false
+		let would_draw = (t === "It recovers 2 HP. Then, draw 1.")
+		if (t === "It recovers 2 HP. Then, if it is paired with a Pilot that is Lv.3 or lower, draw 1.") would_draw = (target.pilot && target.pilot.LEVEL() <= 3)
+		if (would_draw && p.deck.length < 1) return false
 		await target.recover(mo[1])
-		t = t.slice(mo[0].length)
-		if (t === "") return false
-	}
-	if (t === "Then, if it is paired with a Pilot that is Lv.3 or lower, draw 1.") {
-		if (target.pilot && target.pilot.LEVEL() <= 3) await p.draw()
+		if (would_draw) await p.draw()
+		// TODO: Check for new items on card additions.
 		return true
 	}
 	if (mo = t.match(/^It gets AP\+(\d+) during this turn.$/)) {
@@ -5664,29 +3829,16 @@ async function runCard2(card, act, clause = "", t = "") {
 		return true
 	}
 	if (clause === " Unit links, " && inStr(card.text, "When a friendly (Clan) Unit links, it gains <Breach 3> during this turn.")) {
-		if (active_unit.owner !== u.owner || !active_unit.hasTrait("Clan")) return false
-		eotKw(active_unit, "Breach 3")
+		if (ctx.active_unit.owner !== u.owner || !ctx.active_unit.hasTrait("Clan")) return false
+		eotKw(ctx.active_unit, "Breach 3")
 		return true
 	}
-	// if (t === "Choose 1 friendly Link Unit. It gains <Breach 1> during this turn.") {
-	// 	if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
-	// 	target = mySort(fua.filter(c => c.linked()), c => c.AP())[0]
-	// 	if (!target || (en.shield.length < 1 && !en.base)) return false
-	// 	eotKw(target, "Breach 1")
-	// 	return true
-	// }
-	// if (inStr(t, "Choose 1 of your Units. It gains <Breach 3> during this turn.")) {
-	// 	if (!eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
-	// 	target = mySort(fua, c => c.AP())[0]
-	// 	if (!target || (en.shield.length < 1 && !en.base)) return false
-	// 	eotKw(target, "Breach 3")
-	// 	return true
-	// }
 	// Attack ability is mandatory, hence "may".
 	if (mo = t.match(/^(You may )?[Dd]iscard (\d). If you do, draw (\d).$/)) {
+		if (mo[1] && p.deck.length < 1) return false
 		let to_discard = parseInt(mo[2])
 		if (p.hand.length < to_discard) return false
-		await p.discard(to_discard)
+		await p.discard(ctx, to_discard)
 		await p.draw(mo[3])
 		return true
 	}
@@ -5694,7 +3846,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (t === "You may rest this Unit. If you do, choose 1 enemy Unit that is Lv.3 or lower. Deal 2 damage to it.") {
 		target = chooseDmgTarget(u, eu.filter(c => c.LEVEL() <= 3), 2)
 		if (!target) return false
-		rest(u)
+		rest(u, {rester: card})
 		await dealDamage(u, target, 2)
 		return true
 	}
@@ -5707,9 +3859,6 @@ async function runCard2(card, act, clause = "", t = "") {
 	// if (t === "2 friendly Units. They get AP+1 during this turn.") {
 	// 	targets = fu.filter(c => (!myturn && c.rested) || !c.rested && !c.sick).slice(0, 2)
 	// 	if (targets.length < 2 || (myturn && eu.filter(c => c.rested).length < 1 && !eu.base)) return false
-	// 	targets.forEach(c => eotAP(c))
-	// 	return true
-	// }
 	if (t === "1 to 3 of your (CB) Units. They get AP+2 during this turn.") {
 		targets = fu.filter(c => c.hasTrait("CB") && !c.rested && !c.sick).slice(0, 3)
 		// TODO: Might be worth to risk hitting a Burst-deployed BASE.
@@ -5734,14 +3883,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!ai) target = await chooseCard(targets)
 		if (!target) return false
 		await p.pay(target.COST(), u)
-		await p.deployFromTrash(target)
-		return true
-	}
-	if (mo = t.match(/^It gains <Breach (\d+)> during this turn.$/)) {
-		if (!myturn || !eu.some(c => c.rested) || !en.base && en.shield.length < 1) return false
-		target = mySort(targets, c => -c.AP())[0]
-		if (!target) return false
-		eotKw(target, `Breach ${mo[1]}`)
+		await p.deployFromTrash(ctx, target)
 		return true
 	}
 	if (inStr(t, "It gains <First Strike> during this turn.")) {
@@ -5753,14 +3895,10 @@ async function runCard2(card, act, clause = "", t = "") {
 		eotKw(target, "First Strike")
 		return true
 	}
-	// ST05-003 & ST05-013
+	// ST05-013
 	if (mo = t.match(/^Deal 1 damage to it. It gets AP\+(\d) during this turn.$/)) {
 		target = mySort(targets.filter(c => c !== u && !c.rested && !c.sick && c.HP() > 1), c => c.AP())[0]
 		if (!target) return false
-		if (inStr(t, "Rest this Unit")) { // TODO: WTF
-			if (u.rested) return false
-			rest(u)
-		}
 		await dealDamage(card, target)
 		eotAP(target, mo[1])
 		return true
@@ -5789,8 +3927,8 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!target) return false
 		const mine = mySort(targets, c => -c.sick || c.AP()).slice(0, 2)
 		if (mine.length < 2) return false
-		rest(mine[0])
-		rest(mine[1])
+		rest(mine[0], {rester: card})
+		rest(mine[1], {rester: card})
 		await dealDamage(card, target, 3)
 		return true
 	}
@@ -5847,11 +3985,6 @@ async function runCard2(card, act, clause = "", t = "") {
 		for (const target of targets) eotAP(target, mo[1])
 		return true
 	}
-	// if (t === "If you have 3 or more (League Militaire) Units in play, draw 1.") {
-	// 	if (fu.filter(c => c.hasTrait("League Militaire")).length < 3) return false
-	// 	await p.draw()
-	// 	return true
-	// }
 	// When Paired
 	// Unit
 	if (t === "Deal 1 damage to it. When this effect destroys an enemy Unit, draw 1.") {
@@ -5860,12 +3993,12 @@ async function runCard2(card, act, clause = "", t = "") {
 		return true
 	}
 	if (t === "Deploy 2 [Wire-Guided Arm]((Zeon)･AP2･HP1・This Unit can't be paired with a Pilot) Unit tokens.") {
-		await p.deployToken("Wire-Guided Arm")
-		await p.deployToken("Wire-Guided Arm")
+		await p.deployToken(ctx, "Wire-Guided Arm")
+		await p.deployToken(ctx, "Wire-Guided Arm")
 		return true
 	}
 	if (t === "deploy 2 rested [Ad Balloon]((Civilian)･AP0･HP1･This Unit can't be set as active or paired with a Pilot) Unit tokens.") {
-		[..."12"].forEach(async c => { await p.deployToken("Ad Balloon", true) })
+		[..."12"].forEach(async c => { await p.deployToken(ctx, "Ad Balloon", true) })
 		return true
 	}
 	if (t === "Return it to its owner's hand.") {
@@ -5894,7 +4027,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (inStr(t, "Deploy 1 [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.")) {
 		if (fu.length >= 6) return false
-		await p.deployToken("Hy-Gogg")
+		await p.deployToken(ctx, "Hy-Gogg")
 		return true
 	}
 	if (t === "If you have another Link Unit in play, draw 1.") {
@@ -5943,7 +4076,7 @@ async function runCard2(card, act, clause = "", t = "") {
 
 	if (clause === "play and activate") {
 		if (t === " an (Academy) Command card using an EX Resource, if you have no remaining EX Resources, place 1 rested EX Resource.") {
-			if (spent.length < 1 || !active_card.traits.includes("Academy") || p.resource.filter(c => inStr(c.name, "EX")).length > 0) return false
+			if (spent.length < 1 || !ctx.active_card.traits.includes("Academy") || p.resource.filter(c => inStr(c.name, "EX")).length > 0) return false
 			await p.placeEXResource(true)
 			return true
 		}
@@ -5954,26 +4087,26 @@ async function runCard2(card, act, clause = "", t = "") {
 		return true
 	}
 	if (clause === "receives damage") {
-		if (active_damage < 1) {
+		if (ctx.active_damage < 1) {
 			log("FIXME: no damage to receive", false, true, true)
 			return false
 		}
-		if (inStr(t, " from an enemy, ") && active_card.owner === p) return false
+		if (inStr(t, " from an enemy, ") && ctx.active_card.owner === p) return false
 		if (t === " from an enemy, reduce it by 1.") {
 			log(`⚡${card} ${card.text}`)
-			active_damage -= 1
+			ctx.active_damage -= 1
 			return true
 		}
 		if (inStr(card.text, "If you have a (CB) Pilot in play, when this Unit receives damage from an enemy, reduce it by 1.")) {
 			if (!fu.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) return false
 			log(`⚡${card} ${card.text}`)
-			active_damage -= 1
+			ctx.active_damage -= 1
 			return true
 		}
 		// TODO: Check if reduced to zero damage still counts.
 		if (t === " from an enemy, place 1 EX Resource.") {
 			let rule = " when one of your other (Academy) Units receives damage from an enemy, place 1 EX Resource."
-			if (active_target.owner !== p || !active_target.traits.includes("Academy")) return false
+			if (ctx.active_target.owner !== p || !ctx.active_target.traits.includes("Academy")) return false
 			log(`⚡${card} ${rule}`)
 			await p.placeEXResource()
 			return true
@@ -6001,12 +4134,12 @@ async function runCard2(card, act, clause = "", t = "") {
 
 	if (t === "If you have another (Cyclops Team) Unit in play, deploy 1 rested [Hy-Gogg]((Cyclops Team)･AP2･HP1) Unit token.") {
 		if (!fu.some(c => c !== u && c.hasTrait("Cyclops Team"))) return false
-		await p.deployToken("Hy-Gogg", true)
+		await p.deployToken(ctx, "Hy-Gogg", true)
 		return true
 	}
 	if (t === "If you have another (UN)/(Superpower Bloc) Unit in play, deploy 1 rested [Alvaaron]((UN)･AP4･HP1) Unit token.") {
 		if (!fu.some(c => c !== u && c.hasTrait("UN") || c.hasTrait("Superpower Bloc"))) return false
-		await p.deployToken("Alvaaron", true)
+		await p.deployToken(ctx, "Alvaaron", true)
 		return true
 	}
 
@@ -6014,11 +4147,11 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (inStr(t, "If you have no (Earth Alliance) Unit tokens in play,")) {
 		if (fu.filter(c => c.isToken() && c.hasTrait("Earth Alliance")).length > 0) return false
 		if (inStr(t, "deploy 1 [Sword Strike Gundam]((Earth Alliance)･AP4･HP2･<Blocker>) or 1 [Launcher Strike Gundam]((Earth Alliance)･AP2･HP4･<Blocker>) Unit token.")) {
-			await p.deployToken("Sword Strike Gundam")
+			await p.deployToken(ctx, "Sword Strike Gundam")
 			return true
 		}
 		if (inStr(t, "deploy 1 [Aile Strike Gundam]((Earth Alliance)･AP3･HP3･<Blocker>) Unit token.")) {
-			await p.deployToken("Aile Strike Gundam")
+			await p.deployToken(ctx, "Aile Strike Gundam")
 			return true
 		}
 	}
@@ -6113,14 +4246,15 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (fu.length > 5) return false
 		target = p.hand.filter(c => c.isUnit() && c.hasTrait(mo[1]) && (mo[2] ? c.LEVEL() <= 4 : true))[0]
 		if (!target) return false
-		await p.deploy(target)
+		await p.deploy(ctx, target)
 		return true
 	}
 	if (t === "you may destroy this Unit. If you do, deploy 3 [Gundam Exia]((G Generation)･AP2･HP2) Unit tokens.") {
 		if (p.battle.length <= 4 && u.rested && p.hand.length < 1) {
-			await destroy(u)
+			ctx = {...ctx, destroyer: card}
+			await destroy(u, ctx)
 			for (let i = 0; i < 3; ++i) {
-				await p.deployToken("Gundam Exia")
+				await p.deployToken(ctx, "Gundam Exia")
 			}
 			return true
 		}
@@ -6132,7 +4266,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		const maxDamage = their[0].HP()
 		const mine = targets.slice(0, maxDamage < 2 ? 1 : 2)
 		if (mine.length < 1) return false
-		mine.forEach(c => rest(c))
+		mine.forEach(c => rest(c, {rester: card}))
 		their.forEach(async c => await dealDamage(u, c, mine.length))
 		return true
 	}
@@ -6142,14 +4276,15 @@ async function runCard2(card, act, clause = "", t = "") {
 		target = targets[0]
 		if (!ai) target = await chooseCard(targets)
 		if (!target) return false
-		await destroy(target)
+		ctx = {...ctx, destroyer: card}
+		await destroy(target, ctx)
 
 		targets = mySort(eu.filter(c => ![attacker, defender].includes(c)), c => c.AP() - c.rested)
 		target = targets[0]
 		if (!target) return false
 		if (!ai) target = await chooseCard(targets)
 		if (!target) return false
-		await destroy(target)
+		await destroy(target, ctx)
 
 		return true
 	}
@@ -6158,7 +4293,8 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!mine) return false
 		target = chooseDmgTarget(u, eu.filter(c => c.LEVEL() <= 4), 2)
 		if (!target || mine.AP() > target.AP()) return false
-		await destroy(mine)
+		ctx = {...ctx, destroyer: card}
+		await destroy(mine, ctx)
 		await dealDamage(card, target, 2)
 		return true
 	}
@@ -6167,7 +4303,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (!await dealDamage(card, u)) return false
 		target = mySort(eu.filter(c => c.AP() <= 3), c => -c.AP())[0]
 		if (!target) return false
-		rest(target)
+		rest(target, {rester: card})
 		return true
 	}
 	if (mo = t.match(/^Choose 1 damaged enemy Unit. Deal (\d) damage to it.$/)) {  // TODO: damaged in main choose regex
@@ -6179,7 +4315,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (mo = t.match(/^Choose 1 enemy Unit with (\d) or less HP. Rest it.$/)) {
 		target = mySort(eu.filter(c => c.HP() <= mo[1] && !c.rested), c => -c.AP())[0]
 		if (!target) return false
-		rest(target)
+		rest(target, {rester: card})
 		return true
 	}
 	if (t === "Rest 1 of your other (League Militaire) Units：Choose 1 enemy Unit with 4 or less HP. Rest it.") {
@@ -6187,17 +4323,10 @@ async function runCard2(card, act, clause = "", t = "") {
 		target = mySort(eu.filter(c => c.HP() <= 4 && !c.rested), c => -c.AP())[0]
 		if (!mine || !target) return false
 		rest(mine)
-		rest(target)
+		rest(target, {rester: card})
 		return true
 	}
 
-	// if (t === "If you have 2 or more other (Gjallarhorn)/(Tekkadan) Units in play, choose 1 enemy Unit with 3 or less HP. Rest it.") {
-	// 	if (fu.filter(c => c !== card && (c.hasTrait("Gjallarhorn") || c.hasTrait("Tekkadan"))).length < 2) return false
-	// 	target = mySort(eu.filter(c => c.HP() <= 3), c => -c.AP())[0]
-	// 	if (!target) return false
-	// 	rest(target)
-	// 	return true
-	// }
 	if (t === "During this turn, it may choose an active enemy Unit as its attack target.") {
 		eotKw(u, "canAttack active.unit.lv9min")
 		return true
@@ -6259,7 +4388,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		target = mySort(eu, c => c.LEVEL() * 100 - c.AP())[0]
 		if (!target) return false
 		if (p.hand.length < 2) return false
-		if ((await p.discard(2, p.hand, true)).length !== 2) return false
+		if ((await p.discard(ctx, 2, p.hand, true)).length !== 2) return false
 		en.deck = [target].concat(en.deck.slice(0, -1))
 		return true
 	}
@@ -6270,8 +4399,8 @@ async function runCard2(card, act, clause = "", t = "") {
 		return true
 	}
 	if (t === "that friendly Unit may recover 2 HP." && card.id === "GD03-125") {
-		if (!myturn || destroyer.level < 6 || !(destroyer.hasTrait("Operation Meteor") || destroyer.hasTrait("G Team"))) return false
-		await destroyer.recover(2)
+		if (!myturn || ctx.destroyer.level < 6 || !(ctx.destroyer.hasTrait("Operation Meteor") || ctx.destroyer.hasTrait("G Team"))) return false
+		await ctx.destroyer.recover(2)
 		return true
 	}
 	if (t === "deal 2 damage to all enemy Units with <Blocker>.") {
@@ -6288,11 +4417,11 @@ async function runCard2(card, act, clause = "", t = "") {
 		return true
 	}
 	if (t === "that enemy player may discard 1. If they don't discard with this effect, you may deploy 1 (Phantom Pain) Unit card that is Lv.4 or lower from your hand.") {
-		let discarded = await en.discard(1, en.hand, true)
+		let discarded = await en.discard(ctx, 1, en.hand, true)
 		if (discarded && discarded.length > 0) return true
 		targets = p.hand.filter(c => c.hasTrait("Phantom Pain") && c.type === "UNIT" && c.LEVEL() <= 4)[0]
 		if (!target) return false
-		await p.deployFromHand(target)
+		await p.deployFromHand(ctx, target)
 		return true
 	}
 
@@ -6300,22 +4429,9 @@ async function runCard2(card, act, clause = "", t = "") {
 		if (mo = t.match(/^1 \((.+?)\) (Base|Command|Pilot|Unit) card from your trash. Add it to your hand.$/)) {
 			targets = p.trash.filter(c => c.type === mo[2].toUpperCase() && c.hasTrait(mo[1]))
 		}
-		// else if (t === `1 (Minerva Squad) Unit card without "Force Impulse Gundam" in its card name from your trash. Add it to your hand.`) {
-		// 	target = p.trash.filter(c => !inStr(c.name, "Force Impulse Gundam"))[0]
-		// 	if (!target) return false
-		// 	toHand(target, true)
-		// 	return true
-		// }
 		else if (t === "1 Pilot card with \"Shinn Asuka\" in its card name from your trash. Add it to your hand.") {
 			targets = p.trash.filter(c => c.type === "PILOT" && inStr(c.name, "Shinn Asuka"))
 		}
-		// else if (t === "1 (Tekkadan) Unit card that is Lv.2 or lower from your trash. Add it to your hand.") {
-		// 	// TODO choose best
-		// 	targets = p.trash.filter(c => c.type === "UNIT" && c.level <= 2 && c.hasTrait("Tekkadan"))
-		// }
-		// else if (t === "1 purple Unit card with <Suppression> from your trash. Add it to your hand.") {
-		// 	targets = p.trash.filter(c => c.type === "UNIT" && c.color === "PURPLE" && c.hasKw("Suppression"))
-		// }
 		else if (t === "Exile them from the game. If you do, choose 1 (Special Move) Command card from your trash. Add it to your hand.") {
 			target = p.trash.filter(c => c.type === "COMMAND" && c.hasTrait("Special Move"))[0]
 			if (!target) return false
@@ -6337,7 +4453,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		// TODO: 3+ players
 		if (p.hand.length < 1) return false
 		await p.draw()
-		await p.discard(1)
+		await p.discard(ctx, 1)
 		return true
 	}
 	if (mo = t.match(/^Place the top (\d+) cards of your deck into your trash\.$/)) {
@@ -6365,7 +4481,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		target = targets[0]
 		if (!target) return false
 		if (p.resource.length >= 7 && p.deck.length < 1) return false
-		let discarded = await p.discard(1, targets, true)
+		let discarded = await p.discard(ctx, 1, targets, true)
 		if (!discarded || discarded.length < 1) return false
 		await p.placeEXResource()
 		if (p.resource.length >= 7) await p.draw()
@@ -6373,8 +4489,8 @@ async function runCard2(card, act, clause = "", t = "") {
 	}
 	if (t === "you may discard 1 red card. If you do, draw 1.") {
 		targets = p.hand.filter(c => c.color === "RED")
-		if (targets.length < 1) return false
-		let discarded = await p.discard(1, targets)
+		if (targets.length < 1 || p.deck.length < 1) return false
+		let discarded = await p.discard(ctx, 1, targets)
 		if (discarded.length < 1) return false
 		await p.draw()
 		return true
@@ -6399,7 +4515,7 @@ async function runCard2(card, act, clause = "", t = "") {
 	if (mo = t.match(/^You may discard 1. If you do, /)) {
 		if (t.match(/^You may discard 1. If you do, look at the top 3 cards of your deck./)) {
 			if (p.hand.length < 1) return false
-			await p.discard()
+			await p.discard(ctx)
 			look = 3
 			t = t.slice(mo[0].length)
 		}
@@ -6413,6 +4529,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		t = t.slice(mo[0].length)
 	}
 	if (look > 0) {
+		if (p.deck.length < 2) return false
 		if (inStr(t, "may deploy") && fu.length >= 6) return false
 		targets = p.deck.slice(-look)
 		if (targets.length < look) return false
@@ -6521,7 +4638,7 @@ async function runCard2(card, act, clause = "", t = "") {
 				toHand(target)
 			} else if (inStr(t, "You may deploy")) {
 				// try {
-				await p.deploy(target)
+				await p.deploy(ctx, target)
 				// } catch (ex) {
 				// 	log(`🚩🚩FIXME: ${ex} with card ${card} targets ${targets} target ${target} t ${t}`)
 				// 	debugger
@@ -6548,7 +4665,7 @@ async function runCard2(card, act, clause = "", t = "") {
 		target = p.hand.filter(c => c.type === "BASE" && inStr(c.name, "Presidential Office"))[0]
 		if (!target || p.base) return false
 		exile([card])
-		await p.deploy(target)
+		await p.deploy(ctx, target)
 		return true
 	}
 	if (t === "If you have an (Orb) Pilot in play, draw 1.") {
@@ -6568,33 +4685,33 @@ async function runCard2(card, act, clause = "", t = "") {
 		u.pilot = null
 		return true
 	}
-	if (t === "If it is your opponent's turn and this is a (CB) Unit, draw 1.") {
-		if (myturn || !u.hasTrait("CB")) return false
-		await p.draw()
-		return true
-	}
-	// Destroyed
 	if (t === "All players draw 1.") {
 		if (p1.deck.length < 1 && p2.deck.length < 1) throw Error("Draw by empty decks.")
 		await p1.draw()
 		await p2.draw()
 		return true
 	}
+	if (t === "If it is your opponent's turn and this is a (CB) Unit, draw 1.") {
+		if (myturn || !u.hasTrait("CB")) return false
+		await p.draw()
+		return true
+	}
+
 	if (clause === "hen you pay ") {
 		// ⓪ ① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨ ⑩
 		// not dingbat circled sans-serif 🄋 ➀ ➁ ➂ ➃ ➄ ➅ ➆ ➇ ➈ ➉
 		if (t === "① or more for a friendly Unit's effect, this Base recovers 2 HP.") {
-			if (!active_text || active_cost < 1 || !active_unit.isUnit() || active_unit.owner !== p) return false
+			if (!ctx.active_text || ctx.active_cost < 1 || !ctx.active_unit.isUnit() || ctx.active_unit.owner !== p) return false
 			await u.recover(2)
 			return true
 		}
 		if (t === "① or more cost for one of your Units' effects, you may increase this Unit's AP during this turn by an amount equal to the cost paid.") {
-			if (!active_text || active_cost < 1 || !active_unit.isUnit() || active_unit.owner !== p) return false
-			eotAP(u, active_cost)
+			if (!ctx.active_text || ctx.active_cost < 1 || !ctx.active_unit.isUnit() || ctx.active_unit.owner !== p) return false
+			eotAP(u, ctx.active_cost)
 			return true
 		}
 		if (t === "① or more for one of your Unit's effects, if this is a (Militia) Unit, it may recover 2 HP.") {
-			if (!active_text || active_cost < 1 || !active_unit.isUnit() || active_unit.owner !== p || !u.hasTrait("Militia")) return false
+			if (!ctx.active_text || ctx.active_cost < 1 || !ctx.active_unit.isUnit() || ctx.active_unit.owner !== p || !u.hasTrait("Militia")) return false
 			await u.recover(2)
 			return true
 		}
@@ -6607,8 +4724,8 @@ async function runCard2(card, act, clause = "", t = "") {
 let games = ngames.value
 let game = 0
 let game_start = new Date()
-let game_over = false
-let stop = false
+window.game_over = false
+window.stop = false
 let turn = 0
 let p1 = null
 let p2 = null
@@ -6684,7 +4801,8 @@ async function playGame() {
 		log("📈Turn " + turn + " " + p.name + " level " + level)
 		// Main phase
 		let considered = []
-		while (!stop) {
+		while (!window.stop) {
+			let ctx = {}
 			level = p.resource.length
 			let res = p.resource.filter(c => !c.rested).length || 0
 
@@ -6703,7 +4821,8 @@ async function playGame() {
 			if (inStr(c.text, "When playing this card from your hand, you may destroy 1 of your Link Units with \"Unicorn Mode\" in its card name that is Lv.5. If you do, play this card as if it has 0 Lv. and cost.")) {
 				let target = p.battle.filter(c2 => inStr(c2.name, "Unicorn Mode") && c2.linked() && c.LEVEL() === 5)[0]
 				if (target && (ai || confirm(`Destroy ${target} to play ${c} for 0?`))) {
-					await destroy(target)
+					ctx = {...ctx, destroyer: card}
+					await destroy(target, ctx)
 					clevel = 0
 					cost = 0
 				}
@@ -6711,7 +4830,7 @@ async function playGame() {
 			if (inStr(c.text, "When playing this card from your hand, you may discard 1 (G Generation) Unit card. If you do, play this card as if it has 2 Lv. and cost.")) {
 				let target = p.hand.filter(c2 => c2 !== c && c2.type === "UNIT" && c.hasTrait("G Generation"))[0]
 				if (target && (ai || confirm(`Discard ${target} to play ${c} for 2?`))) {
-					await p.discard(1, [target])
+					await p.discard(ctx, 1, [target])
 					clevel = 2
 					cost = 2
 				}
@@ -6759,9 +4878,7 @@ async function playGame() {
 						await render()
 						await p.paid(cost, c)  // TODO: Paid before activate events?
 						await sleep(800)
-						active_card = c
-						await publish("play and activate", p.battle)
-						active_card = null
+						await publish("play and activate", p.battle, {active_card: c})
 						continue
 					} else {
 						// [Pilot]
@@ -6792,7 +4909,7 @@ async function playGame() {
 					}
 				}
 				if (c.type === "BASE" || c.type === "UNIT") {
-					await p.deploy(c)
+					await p.deploy(ctx, c)
 				} else if (c.type === "PILOT") {
 					let unit = pairwith || empty_units[0]
 					if (!ai) unit = await chooseCard(empty_units)
@@ -6930,9 +5047,9 @@ async function playGame() {
 			}
 			p.kw_eob = []
 			await render()
-			if (game_over) break
+			if (window.game_over) break
 		}
-		if (game_over) break
+		if (window.game_over) break
 
 		// End Phase
 		// Step 1 Action
@@ -6951,7 +5068,7 @@ async function playGame() {
 			}
 		}
 		// Step 3 Discard to 10
-		while (p.hand.length > 10) await p.discard()
+		while (p.hand.length > 10) await p.discard({})
 		// Step 4 Reset temporary effects
 		for (const c of p1.battle.concat(p2.battle).concat(p1.trash).concat(p2.trash).concat(p1.hand).concat(p2.hand)) {
 			c.ap_eot = 0
@@ -6972,10 +5089,10 @@ async function playGame() {
 }
 
 function setGameOver(b) {
-	game_over = b
-	bstart.disabled = !game_over
-	bstop.disabled = game_over
-	// bhone.disabled = !game_over
+	window.game_over = b
+	bstart.disabled = !window.game_over
+	bstop.disabled = window.game_over
+	// bhone.disabled = !window.game_over
 }
 
 let deck_stats = {}
@@ -7059,12 +5176,15 @@ async function playGames() {
 	player_wins = [0, 0]
 	setVolume()
 	window.games_start = new Date()
-	while (!stop && game < games) {
+	while (!window.stop && game < games) {
 		setSpeed()
 		try {
 			await playGame()
 		} catch (ex) {
-			if (!inStr("" + ex, "💀")) log("🚩🚩FIXME: PG: " + ex + " " + ex.stack, true, true, true)
+			if (!inStr("" + ex, "💀")) {
+				log(`🚩🚩FIXME: PG: ${ex} ${ex.stack}`, true, true, true)
+				throw Error(ex)
+			}
 		}
 		if (game > 1 && delay > 0 || game >= games) showStats()
 		if (delay > 0) {
@@ -7148,3 +5268,17 @@ function findCards(query) {
 }
 
 playGames()
+
+window.clamp = clamp
+window.compareDecks = compareDecks
+window.findCards = findCards
+window.honeDeck = honeDeck
+window.log = log
+window.playGames = playGames
+window.setGameOver = setGameOver
+window.setSpeed = setSpeed
+window.setVolume = setVolume
+window.showDeck = showDeck
+window.toggleSettings = toggleSettings
+window.toggleSearch = toggleSearch
+window.zoom = zoom
