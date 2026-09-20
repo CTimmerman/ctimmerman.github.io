@@ -358,19 +358,19 @@ https://exburst.dev/gundam/deck/152946
 2 GD03-057 PL6C4 GN Armor (Type-E)
 0 GD04-054 PL7C5 Gundam Virtue (Trans-Am)
 0 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
-	`# Cees's AI CB deck (PR)
+	`# Cees's AI CB (PR)
 0 ST07-015 PL2C1 Ptolemaios
 0 ST07-013 PL4C1 Armed Intervention
 0 ST07-009 PL4C1 Setsuna F. Seiei
 0 ST07-010 PL4C1 Tieria Erde
-0 GD03-063 PL2C1 0 Gundam
-0 GD05-050 PL2C1 Gundam Exia Repair
-0 GD04-064 PL2C2 Gundam Exia
-0 ST07-004 PL3C2 Gundam Virtue
-0 GD04-063 PL4C2 GN Armor Type-E
-0 ST07-002 PL4C2 Gundam Exia
-0 GD04-057 PL4C3 Gundam Nadleeh
-0 ST07-003 PL5C3 Gundam Virtue
+3 GD03-063 PL2C1 0 Gundam
+3 GD05-050 PL2C1 Gundam Exia Repair
+1 GD04-064 PL2C2 Gundam Exia
+4 ST07-004 PL3C2 Gundam Virtue
+4 GD04-063 PL4C2 GN Armor Type-E
+4 ST07-002 PL4C2 Gundam Exia
+4 GD04-057 PL4C3 Gundam Nadleeh
+4 ST07-003 PL5C3 Gundam Virtue
 0 ST07-001 PL5C4 Gundam Exia
 0 GD03-052 PL5C4 Gundam Virtue
 0 GD03-057 PL6C4 GN Armor (Type-E)
@@ -378,19 +378,19 @@ https://exburst.dev/gundam/deck/152946
 0 GD03-049 PL7C6 Gundam Exia (Trans-Am)
 0 GD04-111 Trinity
 4 GD04-125 RL4C1 Trinity Warship
-4 GD04-090 RL4C1 Hallelujah Haptism
-3 GD04-092 RL4C1 Michael Trinity
+0 GD04-090 RL4C1 Hallelujah Haptism
+0 GD04-092 RL4C1 Michael Trinity
 0 GD04-089 RL4C1 Nena Trinity
 4 GD04-047 RL3C1 Gundam Virtue
-3 GD04-038 RL3C2 Gundam Exia
-4 GD05-048 RL3C2 Gundam Kyrios (Flight Mode)
-4 GD04-034 RL4C3 Gundam Kyrios
-4 GD04-045 RL4C3 Gundam Throne Zwei
+1 GD04-038 RL3C2 Gundam Exia
+0 GD05-048 RL3C2 Gundam Kyrios (Flight Mode)
+0 GD04-034 RL4C3 Gundam Kyrios
+1 GD04-045 RL4C3 Gundam Throne Zwei
 4 GD04-041 RL5C2 Gundam Throne Drei
-4 GD04-046 RL5C4 Gundam Dynames
+3 GD04-046 RL5C4 Gundam Dynames
 4 GD04-036 RL6C4 Gundam Throne Eins
-4 GD04-037 RL6C5 Gundam Kyrios (Trans-Am)
-4 GD05-038 RL7C5 Gundam Throne Eins (GN High Mega Launcher)`,
+0 GD04-037 RL6C5 Gundam Kyrios (Trans-Am)
+2 GD05-038 RL7C5 Gundam Throne Eins (GN High Mega Launcher)`,
 	`# Cees's AI (B)
 0 EB01-001
 0 EB01-002

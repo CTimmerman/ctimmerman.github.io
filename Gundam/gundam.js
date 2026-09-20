@@ -4,7 +4,7 @@ const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
 let zoomed = ""
-let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-18"
+let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-20"
 document.title = title
 
 function dict2str(d) {
@@ -281,7 +281,7 @@ function compareDecks() {
 	delay = 1
 	const deck1 = decks[p1deck.value].split("\n")
 	const deck2 = decks[p2deck.value].split("\n")
-	log(`\nDeck 1: ${decks[p1deck.value]}\nDeck 2: ${decks[p2deck.value]}`)
+	log(`\nDeck 1: ${decks[p1deck.value]}\nDeck 2: ${decks[p2deck.value]}\nDiffs:`)
 	let i1 = 0
 	let i2 = 0
 	while (i1 < 1000) {
