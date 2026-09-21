@@ -189,7 +189,7 @@ January 16, 2026. ＄15.99
 4 GD01-054 Duel Gundam
 3 GD01-111 Battle of Aces`,
 	`# ST09 Destiny Ignition (PW)
-March 27, 2026. $39.99; 28P+22W+22R deck & 5 purple D6. EXR-002 R-030 EXB-002
+March 27, 2026. $39.99; 28P+22W+22R & 5 purple D6. EXR-002 R-030 EXB-002
 3 ST01-014 Unforeseen Incident
 4 ST04-002 Strike Gundam
 4 ST04-010 Kira Yamato
@@ -225,7 +225,7 @@ Released 2026-06-26
 3 ST10-002 Zeta Gundam
 3 ST10-007 Gundam Barbatos 4th Form
 2 ST10-001 Zeta Gundam (EX)`,
-	`# Blurple deck winner of nats (PU)
+	`# Blurple winner of nats (PU)
 https://exburst.dev/gundam/deck/152946
 4 ST02-016 Corsica Base
 4 ST05-014 Fatal Strike
@@ -241,7 +241,7 @@ https://exburst.dev/gundam/deck/152946
 4 ST01-001 Gundam
 2 GD02-055 Gundam Gusion Rebake
 2 GD03-001 Gundam NT-1`,
-	`# Some top deck (UW)
+	`# Some top (UW)
 4 GD04-121 Reineforce Jr.
 3 GD01-118 Overflowing Affection
 2 GD01-100 A Show of Resolve
@@ -258,7 +258,7 @@ https://exburst.dev/gundam/deck/152946
 4 GD04-003 Victory Gundam
 4 GD04-006 V-Dash Gundam
 4 GD04-065 Unicorn Gundam 02 Banshee Norn (Destroy Mode)`,
-	`# Cees's Academy deck (G)
+	`# Cees's Academy (G)
 3 GD04-124 9th Tactical Testing Sector
 2 GD04-123 A Baoa Qu
 3 GD04-108 Witches from Earth
@@ -280,7 +280,7 @@ https://exburst.dev/gundam/deck/152946
 3 GD04-018 Gundam Pharact
 4 GD04-024 Gundam Aerial Rebuild
 0 GD05-018 Gundam Calibarn`,
-	`# Cees's AI Academy deck (GW)
+	`# Cees's AI Academy (GW)
 0 EB01-088
 0 GD01-067
 0 GD01-070
@@ -327,35 +327,35 @@ https://exburst.dev/gundam/deck/152946
 3 ST01-011
 0 ST01-016
 0 ST02-015`,
-	`# Cees's AI CB deck (GP)
+	`# Cees's AI CB (GP)
 0 ST07-014 GL1C1 Tactical Visionary
-3 ST07-012 GL3C1 Allelujah Haptism
-3 ST07-011 GL4C1 Lockon Stratos (Neil)
-0 ST07-008 GL2C2 Gundam Kyrios (Flight Mode)
+0 ST07-012 GL3C1 Allelujah Haptism
+4 ST07-011 GL4C1 Lockon Stratos (Neil)
+3 ST07-008 GL2C2 Gundam Kyrios (Flight Mode)
 4 ST07-006 GL3C2 Gundam Dynames
-3 GD04-029 GL3C2 Gundam Dynames (GN Full Shield)
-1 ST07-007 GL3C2 Gundam Kyrios
-1 GD03-030 GL3C3 Gundam Kyrios (Tail Unit Flight Mode)
+0 GD04-029 GL3C2 Gundam Dynames (GN Full Shield)
+0 ST07-007 GL3C2 Gundam Kyrios
+0 GD03-030 GL3C3 Gundam Kyrios (Tail Unit Flight Mode)
 0 ST07-005 GL4C3 Gundam Dynames
 4 GD03-026 GL5C3 Gundam Dynames
-1 GD03-022 GL5C3 Gundam Kyrios
-1 GD04-023 GL5C4 Gundam Kyrios (Tail Booster)
+0 GD03-022 GL5C3 Gundam Kyrios
+0 GD04-023 GL5C4 Gundam Kyrios (Tail Booster)
 2 GD04-019 GL6C5 GN Armor Type-D (Trans-Am)
-2 ST07-015 PL2C1 Ptolemaios
+4 ST07-015 PL2C1 Ptolemaios
 0 ST07-013 PL4C1 Armed Intervention
-2 ST07-009 PL4C1 Setsuna F. Seiei
+0 ST07-009 PL4C1 Setsuna F. Seiei
 0 ST07-010 PL4C1 Tieria Erde
 4 GD03-063 PL2C1 0 Gundam
 4 GD05-050 PL2C1 Gundam Exia Repair
-0 GD04-064 PL2C2 Gundam Exia
+1 GD04-064 PL2C2 Gundam Exia
 4 ST07-004 PL3C2 Gundam Virtue
 1 GD04-063 PL4C2 GN Armor Type-E
 4 ST07-002 PL4C2 Gundam Exia
 3 GD04-057 PL4C3 Gundam Nadleeh
-1 ST07-003 PL5C3 Gundam Virtue
+4 ST07-003 PL5C3 Gundam Virtue
 0 ST07-001 PL5C4 Gundam Exia
 0 GD03-052 PL5C4 Gundam Virtue
-2 GD03-057 PL6C4 GN Armor (Type-E)
+4 GD03-057 PL6C4 GN Armor (Type-E)
 0 GD04-054 PL7C5 Gundam Virtue (Trans-Am)
 0 GD03-049 PL7C6 Gundam Exia (Trans-Am)`,
 	`# Cees's AI CB (PR)
@@ -4889,7 +4889,7 @@ https://exburst.dev/gundam/deck/152946
 0 ST10-010
 2 ST10-012
 0 ST10-015`,
-	`# Cees's AI Vulture deck (P)
+	`# Cees's AI Vulture (P)
 3 GD02-127 PL2C1 Freeden
 1 GD04-094 PL3C1 Pala Sys
 4 GD04-096 PL4C1 Ennil El
@@ -4914,7 +4914,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD04-058 Jamil's Gundam X
 0 GD04-060 Esperansa
 0 GD04-127 Freeden Ⅱ`,
-	`# Cees's AI Zeon deck (GP)
+	`# Cees's AI Zeon (GP)
 0 GD01-023
 0 GD01-026
 1 GD01-027
@@ -4977,7 +4977,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD05-115
 0 GD05-116
 0 GD05-129`,
-	`# Cees's AI Zeon deck (PR)
+	`# Cees's AI Zeon (PR)
 0 GD05-049
 0 GD05-052
 4 GD05-053
@@ -5032,7 +5032,7 @@ https://exburst.dev/gundam/deck/152946
 0 ST03-012
 0 ST03-015
 0 ST06-004`,
-	`# Cees's AI Zeon deck (GR)
+	`# Cees's AI Zeon (GR)
 0 GD01-023
 0 GD01-026
 0 GD01-027
@@ -5119,7 +5119,7 @@ https://exburst.dev/gundam/deck/152946
 0 ST03-012
 1 ST03-015
 0 ST06-004`,
-	`# Cees's CB deck (GR)
+	`# Cees's CB (GR)
 4 GD03-125 Peacemillion
 2 ST07-012 Allelujah Haptism*
 1 GD04-090 Hallelujah Haptism*
@@ -5139,7 +5139,7 @@ https://exburst.dev/gundam/deck/152946
 4 GD04-019 GN Armor Type-D (Trans-Am)
 0 GD03-029 Gundam Heavyarms Custom
 1 GD04-037 Gundam Kyrios (Trans-Am)`,
-	`# Cees's GD05 prerelease deck (UGPRW)
+	`# Cees's GD05 prerelease (UGPRW)
 1 GD05-130 Presidential Office
 1 GD05-124 White Ark
 1 GD05-125 Ra Cailum
@@ -5177,7 +5177,7 @@ https://exburst.dev/gundam/deck/152946
 1 GD05-052 Sazabi
 1 GD05-059 Gundam Barbatos Lupus
 1 GD05-037 Destroy Gundam`,
-	`# Cees's Minerva deck (PR)
+	`# Cees's Minerva (PR)
 3 ST09-010 Minerva
 0 ST04-016 Vesalius
 1 GD04-128 Armory One
@@ -5205,7 +5205,7 @@ https://exburst.dev/gundam/deck/152946
 1 GD05-064 Force Impulse Gundam
 2 GD04-050 Destiny Gundam
 2 ST09-003 Saviour Gundam`,
-	`# Cees's Red CB deck (PR)
+	`# Cees's Red CB (PR)
 0 GD04-090 Hallelujah Haptism
 0 GD04-043 Zssa (sleeves)
 0 GD04-037 Gundam Kyrios (Trans-Am)
@@ -5233,7 +5233,7 @@ https://exburst.dev/gundam/deck/152946
 2 ST07-001 Gundam Exia
 2 GD04-036 Gundam Throne Eins
 0 GD04-054 Gundam Virtue (Trans-Am)`,
-	`# Cees's Titans deck (U)
+	`# Cees's Titans (U)
 3 GD03-123 Jupitris
 1 GD04-122 Jaburo
 4 GD03-104 Reccoa's Shadow
@@ -5249,7 +5249,7 @@ https://exburst.dev/gundam/deck/152946
 3 GD03-004 Hambrabi
 3 GD03-003 Messala
 4 GD03-015 Baund Doc`,
-	`# Cees's Vulture deck (P)
+	`# Cees's Vulture (P)
 4 GD04-127 Freeden Ⅱ
 0 ST05-013 With Iron and Blood
 0 GD04-115 Backup
@@ -5274,7 +5274,43 @@ https://exburst.dev/gundam/deck/152946
 2 GD04-051 Gundam Airmaster Burst
 3 GD04-052 Gundam Leopard Destroy
 2 GD04-049 Gundam DX`,
-	`# Cees's UN deck (W)
+	`# Cees's AI UN (W)
+0 GD03-069
+2 GD03-074
+4 GD03-078
+4 GD03-081
+4 GD03-082
+4 GD03-083
+0 GD03-098
+0 GD03-100
+0 GD03-120
+0 GD03-122
+4 GD04-070
+0 GD04-071
+4 GD04-075
+4 GD04-079
+0 GD04-080
+0 GD04-099
+0 GD02-069
+0 GD02-071
+4 GD02-072
+0 GD02-075
+4 GD02-079
+4 GD02-080
+0 GD02-081
+0 GD02-097
+0 GD02-098
+0 GD02-117
+0 GD02-120
+1 GD02-129
+4 GD03-071
+0 GD03-075
+1 GD03-079
+0 GD03-099
+0 GD03-121
+2 GD03-132
+0 GD04-118`,
+	`# Cees's UN (W)
 0 GD04-130 Industrial 7
 4 GD03-132 Radish
 0 GD03-071 Z
@@ -5303,7 +5339,7 @@ https://exburst.dev/gundam/deck/152946
 4 GD04-079 Agrissa
 2 GD04-071 Graham's Union Flag Custom Ⅱ (GN Flag)
 1 GD03-075 Super Gundam`,
-	`# Cees's Zeon deck (G)
+	`# Cees's Zeon (G)
 4 ST03-016 Falmel
 1 GD04-123 A Baoa Qu
 4 GD03-108 How Many Miles to the Battlefield?
@@ -5339,7 +5375,7 @@ https://exburst.dev/gundam/deck/152946
 4 GD05-072 Rising Gundam
 4 GD05-066 Shining Gundam
 4 GD05-033 Master Gundam`,
-	`# Roemer's Zeon deck (GR)
+	`# Roemer's Zeon (GR)
 2 ST03-016 Falmel
 2 GD01-125 Zanzibar
 4 ST03-011 Char Aznable
@@ -5356,7 +5392,7 @@ https://exburst.dev/gundam/deck/152946
 3 GD01-023 Char's Gelgoog
 2 GD03-035 GFreD
 2 GD04-017 Zeong`,
-	`# Roemer's Zeon deck (GR, AI)
+	`# Roemer's Zeon (GR, AI)
 4 ST03-016 Falmel
 1 GD01-125 Zanzibar
 4 ST03-011 Char Aznable
