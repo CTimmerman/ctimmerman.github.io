@@ -2394,7 +2394,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			if (t === "Destroy the first 2 cards in that player's shield area.") {
 				let i = 0
 				if (en.base) {
-					await destroy(en.base, ctx)
+					await destroy(en.base, {...ctx, destroyer: card})
 					++i
 				}
 				for (; i < 2; ++i) await en.breakShield(card, false)
@@ -2632,7 +2632,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			target = eu.filter(c => c.LEVEL() <= 4 && !c.rested)[0]
 			if (!target) return false
 			exile(targets)
-			await destroy(target, ctx)
+			await destroy(target, {...ctx, destroyer: card})
 			return true
 		}
 		if (t === "Exile them from the game. If you do, choose 1 enemy Unit that is Lv.4 or lower. Rest it.") {
@@ -2660,14 +2660,14 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			target = (!en.kw_eot.includes("friendly Units can't be destroyed by enemy effects") && mySort(eu, c => -c.AP())[0])
 			if (!target) return false
 			exile(targets)
-			await destroy(target, ctx)
+			await destroy(target, {...ctx, destroyer: card})
 			return true
 		}
 		if (t === "Exile them from the game. If you do, choose 1 enemy Unit/Base that is Lv.8 or lower. Destroy it.") {
 			const their = (!en.kw_eot.includes("friendly Units can't be destroyed by enemy effects") && mySort(eu, c => -c.AP())[0]) || en.base
 			if (!their) return false
 			exile(targets)
-			await destroy(their, ctx)
+			await destroy(their, {...ctx, destroyer: card})
 			return true
 		}
 		if (t === "During this battle, battle damage this Unit would receive is dealt to that Unit instead.") {
