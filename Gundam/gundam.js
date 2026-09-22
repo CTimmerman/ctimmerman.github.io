@@ -4,7 +4,7 @@ const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
 let zoomed = ""
-let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-20"
+let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-22"
 document.title = title
 
 function dict2str(d) {
@@ -565,7 +565,7 @@ function showDeck(name) {
 		}
 	}
 	overlay.innerHTML = html + `<br>avg cost ${(sumCost / 50).toFixed(2)}; avg level ${(sumLevel / 50).toFixed(2)}
-			<textarea id="tastats" style="top: 70vmin; left: 52vmin; width: 34vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
+			<textarea id="tastats" style="top: 70vmin; left: 52vmin; width: 32vmin; height: 20vmin;" onclick="event.stopPropagation()">${dict2str(counts)}</textarea>
 <textarea id="tadecklist" style="top: 70vmin; left: 0vmin; width: 50vmin; height: 20vmin;" onclick="event.stopPropagation()">${alerts.join("\n")}
 ${text}${idcount} ${oldc.id} ${oldc.color[0]}L${oldc.level}C${oldc.cost} ${oldc.name}\n</textarea><div style="position: absolute; top: 90vmin; left: 10vmin;"><button onclick="saveCustomDeck(tadecklist.value)">Save custom 1</button> <button onclick="saveCustomDeck(tadecklist.value, 2)">Save custom 2</button></div></div>`
 }
@@ -2610,7 +2610,12 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			targets = targets.filter(c => c === attacker || c === defender)
 			target = targets[0]
 			if (!target) return false
+			let their = (target === attacker ? defender : attacker)
+			if (!their || !their.isUnit()) return false
 			t = t.slice(mo[0].length)
+			if (t === "Set it as active.") {
+				if (their.AP() >= target.HP() + target.hp_eob + target.hp_eot && their.canDamage(target)) return false
+			}
 		}
 		if (targets.length > 1 && !ai) {
 			let new_target = await chooseCard(targets)
@@ -2812,6 +2817,10 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			if (t === "Rest it. If a friendly (Jupitris) Link Unit is in play, choose 1 to 2 enemy Units with 3 or less HP instead.") {
 				targets = eu.filter(c => !c.rested && c.HP() <= 3).slice(0, fu.some(c => c.hasTrait("Jupitris")) ? 2 : 1)
 				if (targets.length < 1) return false
+				if (ai) {
+					if (myturn && fua.length < 1) return false
+					if (!myturn && targets.filter(c => !c.sick).length < 1) return false
+				}
 				for (const c of targets) rest(c, {rester: card})
 				return true
 			}
@@ -4721,9 +4730,9 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	return false
 }
 
-let games = ngames.value
 let game = 0
 let game_start = new Date()
+window.games = ngames.value
 window.game_over = false
 window.stop = false
 let turn = 0
@@ -4745,7 +4754,7 @@ async function playGame() {
 	if (game > 0) showStats()
 	game += 1
 	game_start = new Date()
-	log(`\n<br>🏁Game ${game}/${games} start: ${game_start.toISOString().replace('T', ' ')}`, false)
+	log(`\n<br>🏁Game ${game}/${window.games} start: ${game_start.toISOString().replace('T', ' ')}`, false)
 	setGameOver(false)
 	pid = 0
 	cid = 0
@@ -5169,14 +5178,14 @@ function showStats() {
 
 async function playGames() {
 	if (Object.keys(CARDS).length < 1) await loadCards()
-	games = parseInt(ngames.value)
+	window.games = parseInt(ngames.value)
 	game = 0
 	deck_stats = {}
 	deck_winturns = {}
 	player_wins = [0, 0]
 	setVolume()
 	window.games_start = new Date()
-	while (!window.stop && game < games) {
+	while (!window.stop && game < window.games) {
 		setSpeed()
 		try {
 			await playGame()
@@ -5186,11 +5195,11 @@ async function playGames() {
 				throw Error(ex)
 			}
 		}
-		if (game > 1 && delay > 0 || game >= games) showStats()
+		if (game > 1 && delay > 0 || game >= window.games) showStats()
 		if (delay > 0) {
 			delay = 1
 			await render()
-			if (games <= 10) await sleep(3000)
+			if (window.games <= 10) await sleep(3000)
 			else await sleep(100)
 			setSpeed()
 		}

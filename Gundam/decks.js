@@ -4889,6 +4889,22 @@ https://exburst.dev/gundam/deck/152946
 0 ST10-010
 2 ST10-012
 0 ST10-015`,
+	`# Cees's AI Titans (B)
+3 GD03-123 Jupitris
+3 GD04-122 Jaburo
+0 GD03-104 Reccoa's Shadow
+0 GD03-102 Privileged Position
+4 GD03-084 Paptimus Scirocco
+4 GD03-013 Hizack
+4 GD03-086 Yazan Gable
+4 GD03-014 Hizack Custom
+4 GD03-012 Messala (MA Mode)
+4 GD03-008 Bolinoak Sammahn
+4 GD04-010 Gaplant
+4 GD03-009 Palace Athene
+4 GD03-004 Hambrabi
+4 GD03-003 Messala
+4 GD03-015 Baund Doc`,
 	`# Cees's AI Vulture (P)
 3 GD02-127 PL2C1 Freeden
 1 GD04-094 PL3C1 Pala Sys
