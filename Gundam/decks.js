@@ -1000,9 +1000,9 @@ https://exburst.dev/gundam/deck/152946
 0 EB01-011
 0 EB01-012
 0 EB01-013
-3 EB01-014
+2 EB01-014
 0 EB01-015
-0 EB01-016
+1 EB01-016
 0 EB01-017
 0 EB01-018
 0 EB01-019
@@ -1055,7 +1055,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD02-003
 0 GD02-004
 0 GD02-005
-4 GD02-006
+3 GD02-006
 0 GD02-007
 0 GD02-008
 0 GD02-009
@@ -1081,7 +1081,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD03-002
 2 GD03-003
 0 GD03-004
-0 GD03-005
+1 GD03-005
 0 GD03-006
 0 GD03-007
 0 GD03-008
@@ -1138,7 +1138,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD05-007
 0 GD05-008
 0 GD05-009
-0 GD05-010
+1 GD05-010
 0 GD05-011
 0 GD05-012
 0 GD05-013
@@ -1154,7 +1154,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD05-104
 0 GD05-105
 0 GD05-123
-1 GD05-124
+0 GD05-124
 0 ST01-001
 0 ST01-002
 0 ST01-003
@@ -1189,7 +1189,7 @@ https://exburst.dev/gundam/deck/152946
 
 0 GD02-053
 0 GD02-054
-2 GD02-055
+1 GD02-055
 0 GD02-056
 0 GD02-057
 0 GD02-058
@@ -1216,13 +1216,13 @@ https://exburst.dev/gundam/deck/152946
 0 GD02-127
 0 GD02-128
 0 GD03-049
-2 GD03-050
+0 GD03-050
 0 GD03-051
 0 GD03-052
 0 GD03-053
 0 GD03-054
 2 GD03-055
-3 GD03-056
+0 GD03-056
 0 GD03-057
 0 GD03-058
 0 GD03-059
@@ -1234,7 +1234,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD03-065
 0 GD03-066
 0 GD03-067
-1 GD03-068
+3 GD03-068
 0 GD03-094
 0 GD03-095
 0 GD03-096
@@ -1272,7 +1272,7 @@ https://exburst.dev/gundam/deck/152946
 0 GD04-127
 0 GD04-128
 0 GD05-049
-2 GD05-050
+4 GD05-050
 0 GD05-051
 0 GD05-052
 0 GD05-053
@@ -1303,21 +1303,21 @@ https://exburst.dev/gundam/deck/152946
 4 ST05-004
 0 ST05-005
 4 ST05-006
-3 ST05-010
+2 ST05-010
 0 ST05-011
 0 ST05-013
-0 ST05-014
+2 ST05-014
 1 ST05-015
 0 ST07-001
 0 ST07-002
 0 ST07-003
-1 ST07-004
+0 ST07-004
 0 ST07-009
 0 ST07-010
 0 ST07-013
 0 ST07-015
 0 ST09-001
-0 ST09-002
+2 ST09-002
 0 ST09-005
 0 ST09-006
 0 ST09-007
@@ -4906,30 +4906,30 @@ https://exburst.dev/gundam/deck/152946
 4 GD03-003 Messala
 4 GD03-015 Baund Doc`,
 	`# Cees's AI Vulture (P)
-3 GD02-127 PL2C1 Freeden
-1 GD04-094 PL3C1 Pala Sys
+2 GD02-127 PL2C1 Freeden
+0 GD04-094 PL3C1 Pala Sys
 4 GD04-096 PL4C1 Ennil El
 4 GD02-094 PL4C1 Garrod Ran & Tiffa Adill
-4 GD03-096 PL4C1 Jamil Neate
-2 GD02-065 PL1C1 Jenice Custom
-1 GD04-059 PL2C2 Daughtress High Mobility Command Wise Wallaby
-3 GD04-061 PL2C2 G-Falcon
+1 GD03-096 PL4C1 Jamil Neate
+0 GD02-065 PL1C1 Jenice Custom
+2 GD04-059 PL2C2 Daughtress High Mobility Command Wise Wallaby
+4 GD04-061 PL2C2 G-Falcon
 4 GD02-063 PL3C2 Gundam Airmaster (Fighter Mode)
 4 GD02-059 PL4C3 Gundam Airmaster
-4 GD02-056 PL4C3 Gundam X
-4 GD02-060 PL5C4 Gundam Leopard
-2 GD02-064 PL5C4 Gundam Leopard
-2 GD04-052 PL6C4 Gundam Leopard Destroy
-3 GD03-051 PL6C4 Gundam X Divider
-3 GD02-053 PL7C5 Gundam X
-2 GD04-049 PL8C7 Gundam DX
+3 GD02-056 PL4C3 Gundam X
+1 GD02-060 PL5C4 Gundam Leopard
+4 GD02-064 PL5C4 Gundam Leopard
+4 GD04-052 PL6C4 Gundam Leopard Destroy
+0 GD03-051 PL6C4 Gundam X Divider
+4 GD02-053 PL7C5 Gundam X
+4 GD04-049 PL8C7 Gundam DX
 0 GD02-115 PL2C1 Familial Devotion
 0 GD02-116 PL3C1 Comrades Come First
-0 GD03-062 PL4C2 GX-Bit
+4 GD03-062 PL4C2 GX-Bit
 0 GD04-051 Gundam Airmaster Burst
 0 GD04-058 Jamil's Gundam X
 0 GD04-060 Esperansa
-0 GD04-127 Freeden Ⅱ`,
+1 GD04-127 Freeden Ⅱ`,
 	`# Cees's AI Zeon (GP)
 0 GD01-023
 0 GD01-026
