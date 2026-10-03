@@ -4,7 +4,7 @@ const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
 let zoomed = ""
-let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 09-22"
+let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-03"
 document.title = title
 
 function dict2str(d) {
@@ -333,6 +333,15 @@ async function mutateDeck() {
 		let lastline = -1
 		let changelog = []
 			;[fulldeck, alerts, deckname] = parseDecklist(decklist)
+		// // Autofix deck length -- don't do on every deck reload.
+		// let mo = null
+		// for (let fault of alerts) {
+		// 	if (mo = fault.match(/length not 50: (\d+)/)) {
+		// 		delta = (mo[1] < 50) ? -1 : 1
+		// 		alerts = alerts.filter(a => !a.match(/length not 50: (\d+)/))
+		// 		break
+		// 	}
+		// }
 		let oldalerts = new Set(alerts)
 		let maxchanges = rndPick([2, 4])
 		do {
@@ -360,8 +369,12 @@ async function mutateDeck() {
 		} while (changes < maxchanges && tries < 99_999)
 		let newalerts = (new Set(alerts)).difference(oldalerts)
 		if (newalerts.size > 0) {
+			// if (oldalerts.size > alerts.length) {
+			// 	oldalerts = new Set(alerts)
+			// } else {
 			log(`🧪Mutate fail: ${changes} changes in ${tries} tries; ${[...newalerts]}${oldalerts.length > 0 ? "; new alerts since " + [...oldalerts] : ""}`, true)
 			continue
+			// }
 		}
 		localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 		addCustomDeck()
@@ -375,8 +388,8 @@ async function mutateDeck() {
 		let p2w = 0
 		let ratio = 0.0
 		// sample and verify
-		ngames.value = 50
-		let batches = 30
+		ngames.value = 25
+		let batches = 1900 / ngames.value
 		for (let i = batches; i > 0; --i) {
 			await playGames()
 			p1w += player_wins[0]
@@ -386,7 +399,7 @@ async function mutateDeck() {
 			if (ratio < 1.11) break
 		}
 		delay = 1
-		log(`🧪Mutant ${version} / ${p1w + p2w} games: ${(100 * ratio).toFixed(0)}%\n${changelog.join("\n")}`, true, false, true)
+		log(`🧪Mutant ${version} / ${p1w + p2w} games: ${Math.floor(100 * ratio)}%\n${changelog.join("\n")}`, true, false, true)
 		// 126%/420 => 102%/99999, but 127% (+2 others >= 126%)/450 => 98%/99999
 		// 1.27/500 => 113%/99999, or 78%/99999 :(
 		// 1.28/600 => 106%/99999 x2.
@@ -401,8 +414,10 @@ async function mutateDeck() {
 		// 1.17/(50*30) => 106%/99999
 		// 1.16/(50*30) => 105%/99999
 		// 1.15/(50*30) => 107%/99999
-		if (ratio >= 1.13 && p1w + p2w >= batches * ngames.value) {
-			log(`✅Saving ${(100 * ratio).toFixed(0)}% mutant ${version} as custom deck 3 after ${p1w + p2w} games\n${changelog.join("\n")}`, true, true, true)
+		// 1.13/(25*60) => 97%/99999
+		// 1.13/(25*80) => 103.5%/99999
+		if (ratio >= 1.12 && p1w + p2w >= batches * ngames.value) {
+			log(`✅Saving ${Math.floor(100 * ratio)}% mutant ${version} as custom deck 3 after ${p1w + p2w} games\n${changelog.join("\n")}`, true, true, true)
 			localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 			addCustomDeck()
 			better = true
@@ -439,9 +454,9 @@ async function honeDeck() {
 		if (mleft > 60) {
 			let hleft = Math.floor(mleft / 60)
 			mleft = mleft % 60
-			eta = `${hleft.toFixed(0)}h ${mleft.toFixed(2)}m`
+			eta = `${hleft}h ${mleft.toFixed(2)}m`
 		}
-		log(`⚔️${i}/${upgrades} upgrades in ${mspent.toFixed(2)}m. ETA ${eta}`, true, true, true)
+		log(`⚔️${i}/${upgrades} upgrades on ${new Date()} in ${mspent.toFixed(2)}m. ETA ${eta}`, true, true, true)
 		p1deck.value = [...p1deck.options].filter(o => o.innerText === "Custom deck 3")[0].value
 	}
 	p1deck.value = [...p1deck.options].filter(o => o.innerText === deckname)[0].value
@@ -596,7 +611,7 @@ function zoom(e) {
 
 function log(s = "", escape = true, con = false, status = false) {
 	s = "" + s
-	if (delay > 0 || inStr(s, " start:")) {
+	if (delay > 0) {
 		dlog.innerHTML += (escape ? escapeHTML(s) : s) + "<br>"
 		dlog.scrollTop = dlog.scrollHeight
 	}
@@ -771,10 +786,13 @@ class Card {
 			rv += this.pilot.ap
 			if (inStr(t, "[During Pair･Red Pilot]This Unit gets AP+2.") && this.pilot.color === "RED") rv += 2
 			if (this.linked()) {
-				if (inStr(t, "[During Link] This Unit gets AP+2.")) rv += 2
-				if (inStr(t, "[During Link] This Unit gets AP+2 during your turn.") && active_player == this.owner) rv += 2
-				if (inStr(t, "[During Link] This Unit gets AP+1 and HP+1.")) rv += 1
+				if (inStr(t, "[During Link]This Unit gets AP+1.")) rv += 1
+				if (inStr(t, "[During Link]This Unit gets AP+2.") || inStr(t, "[During Link]This Unit gets AP+2 and <Repair 1>.")) rv += 2
+				if (inStr(t, "[During Link]This Unit gets AP+2 during your turn.") && active_player == this.owner) rv += 2
+				if (inStr(t, "[During Link]This Unit gets AP+1 and HP+1.")) rv += 1
+				if (inStr(t, "[During Link]This Unit gets AP+2 for each of your rested (CB) Units.") && this.linked()) rv += this.owner.battle.filter(c => c.rested && c.hasTrait("CB")).length * 2
 			}
+			if (inStr(t, "This Unit and all your Units with \"Gundam Lfrith\" or \"Gundnode\" in their card name get AP+1.")) rv += 1
 		}
 		if (inStr(t, "While an enemy player has 7 or more cards in their trash, this Unit gets AP+1 and HP+1.") && en.trash.lenth >= 7) rv += 1
 		if (inStr(t, "While this Unit has <Repair>, it gets AP+1.") && this.getRepair() > 0) rv += 1
@@ -785,11 +803,10 @@ class Card {
 		if (inStr(t, "While no enemy Base is in play, this Unit gets AP+1.") && !en.base) rv += 1
 		if (inStr(t, "While you have another (Jupitris) Unit in play, this Unit gets AP+1 and <Repair 1>.") && this.owner.battle.some(c => c !== this && c.hasTrait("Jupitris"))) rv += 1
 		if (t === "During your turn, while you have a (CB) Pilot in play, this Unit gets AP+2." && active_player === this.owner && this.owner.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) rv += 2
-		if (inStr(t, "[During Link]This Unit gets AP+2 for each of your rested (CB) Units.") && this.linked()) rv += this.owner.battle.filter(c => c.rested && c.hasTrait("CB")).length * 2
+		if ((inStr(this.name, "Gundam Lfrith") || inStr(this.name, "Gundnode")) && this.owner.battle.some(c => c !== this && c.pilot && inStr(c.pilot.text, "This Unit and all your Units with \"Gundam Lfrith\" or \"Gundnode\" in their card name get AP+1."))) rv += 1
+	
 		if (inStr(t, "While you have a Unit token in play, this Unit gets AP+1.") && this.owner.battle.some(c => c.isToken())) rv += 1
-		if (active_player === this.owner && this.isUnit()) {
-			rv += this.owner.battle.filter(c => c.pilot && inStr(c.text, "[During Pair]During your turn, all your Units get AP+1.")).length
-		}
+
 		if (active_player !== this.owner && this.isToken()) {
 			// "Friendly" instead of "your" implies team base counts too.
 			rv += this.owner.battle.filter(c => inStr(c.text, "All friendly Unit tokens get AP+1 during your opponent's turn.")).length
@@ -833,7 +850,9 @@ class Card {
 	}
 	canDamage(def) {
 		const t = def.text + (def.pilot && def.pilot.text || "")
-		
+		if (def.pilot && inStr(t, "[During Pair]While your opponent has an EX Resource, this Unit can't receive battle damage from enemy Units that are Lv.5 or lower.") && this.owner.resource.filter(r => inStr(x, "EX")) && this.LEVEL() <= 5) {
+			return false
+		}
 		if (active_player === def.owner) {
 			if (inStr(t, "During your turn, this Unit can't receive battle damage from enemy Units that are Lv.2 or lower.") && this.isUnit() && this.LEVEL() <= 2) return false
 
@@ -984,7 +1003,7 @@ class Card {
 	}
 
 	hasTrait(trait) {
-		return this.traits.includes(trait)
+		return this.traits.includes(trait) || trait === "Neo Zeon" && this.owner.battle.some(c => c.id === "GD04-033" && c.linked())
 	}
 
 	getBreach() {
@@ -1007,8 +1026,13 @@ class Card {
 	getRepair() {
 		let rv = (this.text + this.kw_eot).matchAll(/(?<!gains? <)Repair (\d)/g).map(mo => parseInt(mo[1])).reduce((tot, a) => tot + a, 0)
 		const t = this.text + (this.pilot && this.pilot.text || "")
-		if (inStr(t, "[During Link]This Unit gains <Repair 2>") && this.linked()) rv += 2
-		if (inStr(t, "[During Pair]This Unit gains <Repair 2>") && this.pilot) rv += 2
+		if (this.pilot) {
+			if (this.linked()) {
+				if (inStr(t, "[During Link]This Unit gets AP+2 and <Repair 1>.")) rv += 1
+				if (inStr(t, "[During Link]This Unit gains <Repair 2>")) rv += 2
+			}
+			if (inStr(t, "[During Pair]This Unit gains <Repair 2>")) rv += 2
+		}
 		if (inStr(t, "This Unit gains the same number of <Repair 1> as the number of (Calamity War) Unit tokens you have in play.")) {
 			rv += this.owner.battle.filter(c => c.isToken() && c.hasTrait("Calamity War")).length
 		}
@@ -1607,6 +1631,7 @@ async function attackStep(att, def = null) {
 /** Give AP+n until end of battle. */
 function eobAP(unit, amount = 1) {
 	amount = parseInt(amount)
+	if (amount < 0 && unit.linked() && inStr(unit.pilot.text, "[During Link]This Unit's AP can't be reduced by enemy effects.") && running_card && running_card.owner !== unit.owner) return
 	log(`🎯AP${amount < 0 ? amount : "+" + amount} EOB ${unit}`)
 	unit.ap_eob += amount
 }
@@ -1621,6 +1646,7 @@ function eobKw(unit, kw) {
 }
 function eotAP(unit, amount = 1) {
 	amount = parseInt(amount)
+	if (amount < 0 && unit.linked() && inStr(unit.pilot.text, "[During Link]This Unit's AP can't be reduced by enemy effects.") && running_card && running_card.owner !== unit.owner) return
 	log(`🎯AP${amount < 0 ? amount : "+" + amount} EOT ${unit}`)
 	unit.ap_eot += amount
 }
@@ -2134,7 +2160,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	if (mo = t.match(/^Place the top card of your deck into your trash. If you placed a card that is Lv.(\d+) or higher with this effect, /)) {
 		if (p.deck.length < 1) return false
 		target = p.mill()[0]
-		if (target.LEVEL() < mo[1]) return false
+		if (!target || target.LEVEL() < mo[1]) return false
 		t = t.slice(mo[0].length)
 	}
 
@@ -4047,7 +4073,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	// When Linked
 	if (t === "Place the top card of your deck into your trash. If you placed a (Zeon)/(Clan) card with this effect, choose 1 enemy Unit. Deal 1 damage to it.") {
 		target = p.mill()[0]
-		if (target.hasTrait("Zeon") || target.hasTrait("Neo Zeon")) {
+		if (target && target.hasTrait("Zeon") || target.hasTrait("Clan")) {
 			target = chooseDmgTarget(u, eu)
 			if (!target) return false
 			await dealDamage(u, target)
@@ -4750,11 +4776,11 @@ function valUnit(u) {
 async function playGame() {
 	// prevent lag and make game start easier to find
 	// FIXMEs stay in the browser console
-	dlog.innerHTML = ''
+	if (game % 25 == 0) dlog.innerHTML = ''
 	if (game > 0) showStats()
 	game += 1
 	game_start = new Date()
-	log(`\n<br>🏁Game ${game}/${window.games} start: ${game_start.toISOString().replace('T', ' ')}`, false)
+	if (game % 25 === 0) log(`\n<br>🏁Game ${game}/${window.games} start: ${game_start.toISOString().replace('T', ' ')}`, false)
 	setGameOver(false)
 	pid = 0
 	cid = 0
@@ -5160,17 +5186,18 @@ function sortStats(a, b) {
 
 function showStats() {
 	// For CLI: let m = Number((new Date() - games_start) / 60000); JSON.stringify(Object.entries(deck_stats).sort(sortStats)) + " / " + game + " / " + m.toFixed(2) + " = " + (m/game*60).toFixed(3) + "s/game; " + ((games-game) * m/game).toFixed(2) + "m left"
+	if (game % 25 && game !== games) return
 	delay = 1
 	const m = Number((new Date() - games_start) / 60000)
-	let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${(m / game * 60000).toFixed(0) + "ms/game"}`
+	let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${Math.floor(m / game * 60000) + "ms/game"}`
 	if (game < games) msg += "; ETA " + ((games - game) * m / game).toFixed(2) + "m"
 
 	let win_perc = (player_wins[1]) / (player_wins[0] + 0.000001) * 100
-	msg += `<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]} ${win_perc.toFixed(0)}%<br>\nDecks ranked by W% W/D/L avg win turn:`
+	msg += `<br>\n${p1.name}: ${player_wins[0]}; ${p2.name}: ${player_wins[1]} ${Math.floor(win_perc)}%<br>\nDecks ranked by W% W/D/L avg win turn:`
 	const stats = Object.entries(deck_stats).sort(sortStats)
 	for (let i = 0; i < stats.length; ++i) {
 		const [name, s] = stats[i]
-		msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${(s[0] / (s[0] + s[1] + s[2]) * 100).toFixed(0)}% ${s}${!deck_winturns[name] ? "" : " " + Math.ceil(deck_winturns[name].reduce((tot, a) => tot + a, 0) / (deck_winturns[name].length) / 2)}`
+		msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${Math.floor(s[0] / (s[0] + s[1] + s[2]) * 100)}% ${s}${!deck_winturns[name] ? "" : " " + Math.ceil(deck_winturns[name].reduce((tot, a) => tot + a, 0) / (deck_winturns[name].length) / 2)}`
 	}
 	log(msg, false)
 	setSpeed()
