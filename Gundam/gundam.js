@@ -4,7 +4,7 @@ const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
 let zoomed = ""
-let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-03"
+let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-04"
 document.title = title
 
 function dict2str(d) {
@@ -378,7 +378,7 @@ async function mutateDeck() {
 		}
 		localStorage.setItem("mutantDeck", `# Mutant deck\n` + dl)
 		addCustomDeck()
-		log(`🧪Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
+		// log(`🧪Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
 		// Test mutant
 		p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
 		nspeed.value = 100
@@ -389,7 +389,7 @@ async function mutateDeck() {
 		let ratio = 0.0
 		// sample and verify
 		ngames.value = 25
-		let batches = 1900 / ngames.value
+		let batches = 1950 / ngames.value
 		for (let i = batches; i > 0; --i) {
 			await playGames()
 			p1w += player_wins[0]
@@ -416,6 +416,7 @@ async function mutateDeck() {
 		// 1.15/(50*30) => 107%/99999
 		// 1.13/(25*60) => 97%/99999
 		// 1.13/(25*80) => 103.5%/99999
+		// (1.17 + 1.14)/1950/25 => 103%/99999
 		if (ratio >= 1.12 && p1w + p2w >= batches * ngames.value) {
 			log(`✅Saving ${Math.floor(100 * ratio)}% mutant ${version} as custom deck 3 after ${p1w + p2w} games\n${changelog.join("\n")}`, true, true, true)
 			localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
@@ -4776,11 +4777,11 @@ function valUnit(u) {
 async function playGame() {
 	// prevent lag and make game start easier to find
 	// FIXMEs stay in the browser console
-	if (game % 25 == 0) dlog.innerHTML = ''
-	if (game > 0) showStats()
-	game += 1
 	game_start = new Date()
-	if (game % 25 === 0) log(`\n<br>🏁Game ${game}/${window.games} start: ${game_start.toISOString().replace('T', ' ')}`, false)
+	game += 1
+	if (delay > 0 || game % 25 === 0) {
+		dlog.innerHTML = `🏁Game ${game}/${window.games} start: ${game_start.toISOString().replace('T', ' ')}<br>`
+	}
 	setGameOver(false)
 	pid = 0
 	cid = 0
@@ -5121,6 +5122,10 @@ async function playGame() {
 		p = p === p1 ? p2 : p1
 	}
 	setGameOver(true)
+	if (delay > 0 || game % 25 === 0) {
+		// dlog.innerHTML = ''
+		if (game > 1 && game < window.games) showStats()
+	}
 }
 
 function setGameOver(b) {
@@ -5186,7 +5191,7 @@ function sortStats(a, b) {
 
 function showStats() {
 	// For CLI: let m = Number((new Date() - games_start) / 60000); JSON.stringify(Object.entries(deck_stats).sort(sortStats)) + " / " + game + " / " + m.toFixed(2) + " = " + (m/game*60).toFixed(3) + "s/game; " + ((games-game) * m/game).toFixed(2) + "m left"
-	if (game % 25 && game !== games) return
+	// if (game % 25 && game < games - 1) return
 	delay = 1
 	const m = Number((new Date() - games_start) / 60000)
 	let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${Math.floor(m / game * 60000) + "ms/game"}`
@@ -5222,7 +5227,7 @@ async function playGames() {
 				throw Error(ex)
 			}
 		}
-		if (game > 1 && delay > 0 || game >= window.games) showStats()
+		if (game > 1 && (delay > 0 || game === window.games)) showStats()
 		if (delay > 0) {
 			delay = 1
 			await render()
