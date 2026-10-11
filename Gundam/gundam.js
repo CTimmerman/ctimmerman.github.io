@@ -4,7 +4,7 @@ const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
 let zoomed = ""
-let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-04"
+let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-11"
 document.title = title
 
 function dict2str(d) {
@@ -352,7 +352,7 @@ async function mutateDeck() {
 			let [count, id, ...rest] = lines[i].split(" ")
 			count = parseInt(count)
 			if (!(count >= 0)) continue
-			const d = delta ? -delta : rndPick([-1, 1, -2, 2, -3, 3, -4, 4])
+			const d = delta ? -delta : rndPick([-1, 1, -1, 1, -2, 2, -3, 3, -4, 4])
 			if (count + d < 0) continue
 			else if (count + d > 4) continue
 			let oldcount = count
@@ -389,14 +389,14 @@ async function mutateDeck() {
 		let ratio = 0.0
 		// sample and verify
 		ngames.value = 25
-		let batches = 1950 / ngames.value
+		let batches = 17500 / ngames.value
 		for (let i = batches; i > 0; --i) {
 			await playGames()
 			p1w += player_wins[0]
 			p2w += player_wins[1]
 			ratio = p2w / p1w  // inf
 			// ratio = p2w / (p1w + p2w)
-			if (ratio < 1.11) break
+			if (ratio < 1.04) break
 		}
 		delay = 1
 		log(`🧪Mutant ${version} / ${p1w + p2w} games: ${Math.floor(100 * ratio)}%\n${changelog.join("\n")}`, true, false, true)
@@ -417,7 +417,7 @@ async function mutateDeck() {
 		// 1.13/(25*60) => 97%/99999
 		// 1.13/(25*80) => 103.5%/99999
 		// (1.17 + 1.14)/1950/25 => 103%/99999
-		if (ratio >= 1.12 && p1w + p2w >= batches * ngames.value) {
+		if (p1w + p2w >= batches * ngames.value) {
 			log(`✅Saving ${Math.floor(100 * ratio)}% mutant ${version} as custom deck 3 after ${p1w + p2w} games\n${changelog.join("\n")}`, true, true, true)
 			localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
 			addCustomDeck()
@@ -851,7 +851,7 @@ class Card {
 	}
 	canDamage(def) {
 		const t = def.text + (def.pilot && def.pilot.text || "")
-		if (def.pilot && inStr(t, "[During Pair]While your opponent has an EX Resource, this Unit can't receive battle damage from enemy Units that are Lv.5 or lower.") && this.owner.resource.filter(r => inStr(x, "EX")) && this.LEVEL() <= 5) {
+		if (def.pilot && inStr(t, "[During Pair]While your opponent has an EX Resource, this Unit can't receive battle damage from enemy Units that are Lv.5 or lower.") && this.owner.resource.filter(r => inStr(r.name, "EX")) && this.LEVEL() <= 5) {
 			return false
 		}
 		if (active_player === def.owner) {
@@ -1357,7 +1357,8 @@ class Player {
 
 	/** Only log if payment won't be refunded! */
 	async pay(cost, target, doLog = true, text = "") {
-		spent = []
+		// TODO: context issue?
+		if (!doLog) spent = []
 		cost = parseInt(cost)
 		if (cost > this.resource.filter(r => !r.rested).length) return false
 		let paid = 0
@@ -1366,7 +1367,7 @@ class Player {
 			rest(r)
 			paid += 1
 			if (inStr(r.type, "EX")) {
-				spent.push(r)
+				if (!doLog) spent.push(r)
 				this.resource = this.resource.filter(item => item !== r)
 				// Wait for rest animation and show gone.
 				await sleep(300)
@@ -1680,6 +1681,7 @@ async function actionStep() {
 			let t = c.text + (c.pilot ? c.pilot.text : "")
 			let cost = c.COST()
 			let refund = false
+			let old_spent = spent
 			if (c.type === "COMMAND") {
 				if (c.LEVEL() > level || cost > level) continue
 				if (await p.pay(cost, c, false)) {
@@ -1719,13 +1721,15 @@ async function actionStep() {
 					await render()
 					for (let i = 0; i < cost; ++i) {
 						r = p.resource[i]
-						if (!r) throw Error(`spent: ${spent.length} cost: ${cost} i: ${i} does not exist?!`)
+						if (!r) {
+							throw Error(`spent: ${spent.length} cost: ${cost} i: ${i} does not exist?!`)
+						}
 						await activate(r)
 					}
 				}
 				p.hand.push(c)
 			}
-			spent = []
+			spent = old_spent
 		}
 		if (ran) pass = 0
 		else pass += 1
@@ -4902,6 +4906,7 @@ async function playGame() {
 			if (!ai) {
 				if (doPair && c.type === "COMMAND") doPair = confirm(`Pair ${c}?`)
 			}
+			let pg_spent = spent
 			if (await p.pay(cost, c, false)) {
 				// Remove card from hand
 				p.hand = p.hand.filter(item => item !== c)
@@ -4939,7 +4944,7 @@ async function playGame() {
 								await activate(p.resource[i])
 							}
 						}
-						spent = []
+						spent = pg_spent
 						p.hand.push(c)
 						continue
 					}
@@ -5191,7 +5196,7 @@ function sortStats(a, b) {
 
 function showStats() {
 	// For CLI: let m = Number((new Date() - games_start) / 60000); JSON.stringify(Object.entries(deck_stats).sort(sortStats)) + " / " + game + " / " + m.toFixed(2) + " = " + (m/game*60).toFixed(3) + "s/game; " + ((games-game) * m/game).toFixed(2) + "m left"
-	// if (game % 25 && game < games - 1) return
+	if (game % 25 && game < games - 1) return
 	delay = 1
 	const m = Number((new Date() - games_start) / 60000)
 	let msg = `Game ${game}/${games} over in ${m.toFixed(2)}m; ${Math.floor(m / game * 60000) + "ms/game"}`
