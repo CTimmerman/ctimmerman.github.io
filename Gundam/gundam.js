@@ -314,8 +314,6 @@ async function mutateDeck() {
 	}
 	let version = 0
 	let better = false
-	// let old_win_perc = 0
-	// let wp_history = []
 	// 6000+ is a common place to find improvements to a good AI deck.
 	while (version < 99999 && !window.stop) {
 		++version
@@ -400,23 +398,6 @@ async function mutateDeck() {
 		}
 		delay = 1
 		log(`🧪Mutant ${version} / ${p1w + p2w} games: ${Math.floor(100 * ratio)}%\n${changelog.join("\n")}`, true, false, true)
-		// 126%/420 => 102%/99999, but 127% (+2 others >= 126%)/450 => 98%/99999
-		// 1.27/500 => 113%/99999, or 78%/99999 :(
-		// 1.28/600 => 106%/99999 x2.
-		// 1.25/600 => 100%/99999
-		// 1.30/600 => 100%/99999
-		// (700/2+13)/(700/2-13) * 1.04 = 1.12 for an expected 4% gain, twice the fluctuation of a 700-game mirrormatch.
-		// But, 1.12/700 => 98%/99999
-		// 1.24/700 => 97%/99999
-		// 2.23/700 => 109%/99999
-		// 194%/100 + 133%/800 => 106%/99999
-		// 1.17/(50*20) => 105%/99999
-		// 1.17/(50*30) => 106%/99999
-		// 1.16/(50*30) => 105%/99999
-		// 1.15/(50*30) => 107%/99999
-		// 1.13/(25*60) => 97%/99999
-		// 1.13/(25*80) => 103.5%/99999
-		// (1.17 + 1.14)/1950/25 => 103%/99999
 		if (p1w + p2w >= batches * ngames.value) {
 			log(`✅Saving ${Math.floor(100 * ratio)}% mutant ${version} as custom deck 3 after ${p1w + p2w} games\n${changelog.join("\n")}`, true, true, true)
 			localStorage.setItem("customDeck3", `# Custom deck 3\n` + lines.slice(1).join("\n"))
