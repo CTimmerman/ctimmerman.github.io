@@ -1361,6 +1361,7 @@ class Player {
 	}
 
 	async placeEXResource(rested = false) {
+		log("Placing EX resource")
 		// 5 max; replace EX resource
 		while (true) {
 			let ex = mySort(this.resource.filter(c => inStr(c.name, "EX")), c => c.rested)
@@ -1369,9 +1370,10 @@ class Player {
 		}
 		let r = this.getCard(rndPick(EX_RESOURCES))
 		if (rested) r.rested = true
-		this.resource.push()
+		this.resource.push(r)
 		await render()
 		await sleep(500)
+		log("Placed EX resource")
 		await publish("When you place an EX Resource, ", this.battle.concat(this.base))
 	}
 
@@ -4128,7 +4130,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		if (t === " from an enemy, place 1 EX Resource.") {
 			let rule = " when one of your other (Academy) Units receives damage from an enemy, place 1 EX Resource."
 			if (ctx.active_target.owner !== p || !ctx.active_target.traits.includes("Academy")) return false
-			log(`⚡${card} ${rule}`)
+			log(`DEBUGGG⚡${card} ${rule}`)
 			await p.placeEXResource()
 			return true
 		}
