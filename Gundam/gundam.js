@@ -4,7 +4,7 @@ const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
 let zoomed = ""
-let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-11"
+let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-18"
 document.title = title
 
 function dict2str(d) {
@@ -387,7 +387,7 @@ async function mutateDeck() {
 		let ratio = 0.0
 		// sample and verify
 		ngames.value = 25
-		let batches = 17500 / ngames.value
+		let batches = 17900 / ngames.value
 		for (let i = batches; i > 0; --i) {
 			await playGames()
 			p1w += player_wins[0]
@@ -591,11 +591,11 @@ function zoom(e) {
 	}
 }
 
-function log(s = "", escape = true, con = false, status = false) {
+function log(s = "", escape = true, con = false, status = false, scroll = true) {
 	s = "" + s
 	if (delay > 0) {
 		dlog.innerHTML += (escape ? escapeHTML(s) : s) + "<br>"
-		dlog.scrollTop = dlog.scrollHeight
+		if (scroll) dlog.scrollTop = dlog.scrollHeight
 	}
 	if (con || status) {
 		dstatus.innerText = s
@@ -727,7 +727,7 @@ class Card {
 			if (t === "During a turn where your opponent has discarded due to one of your effects, this card in your hand gets cost -2." && en.kw_eot.includes("discard_by_effect_of_p" + this.owner.pid)) rv -= 2
 			if (inStr(t, "While an enemy player has 7 or more cards in their trash, this card in your hand gets Lv. -3 and cost -3.") && en.trash.lenth >= 7) rv -= 3
 			if (this.text === "Reduce the cost of this card in your hand by an amount equal to the number of (UN)/(Superpower Bloc) Command cards in your trash.") {
-				rv -= this.owner.trash.filter(c => c.type === "COMMAND" && c.hasTrait("UN") || c.hasTrait("Superpower Bloc")).length
+				rv -= this.owner.trash.filter(c => c.type === "COMMAND" && (c.hasTrait("UN") || c.hasTrait("Superpower Bloc"))).length
 			}
 			if (this.text === "While you have a (CB) Link Unit in play, this card in your hand gets cost -1." && this.owner.battle.some(c => c.hasTrait("CB") && c.linked())) {
 				rv -= 1
@@ -2926,7 +2926,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			target = targets[0]
 			if (!target) return false
 			if (myturn && mo[1] === "Blocker") return false
-			if (!myturn && mo[1] === "High-Maneuver" || mo[1] === "Suppression") return false
+			if (!myturn && (mo[1] === "High-Maneuver" || mo[1] === "Suppression")) return false
 			eotKw(target, mo[1])
 			return true
 		}
@@ -3302,7 +3302,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	}
 	if (t === "During this turn, reduce the next damage it receives by 2. If you use an EX Resource to play this card, reduce by 4 instead.") {
 		if (!defender) return false
-		target = targets.filter(c => c === attacker || c === defender || (myturn && !c.rested || !c.sick) || (!myturn && c.rested))[0]
+		target = targets.filter(c => c === attacker || c === defender || (myturn && !c.rested && !c.sick) || (!myturn && c.rested))[0]
 		if (!target || !target.owner.battle.includes(target)) return false
 		eotHP(target, spent.length > 0 ? 4 : 2)
 		return true
@@ -4061,7 +4061,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	// When Linked
 	if (t === "Place the top card of your deck into your trash. If you placed a (Zeon)/(Clan) card with this effect, choose 1 enemy Unit. Deal 1 damage to it.") {
 		target = p.mill()[0]
-		if (target && target.hasTrait("Zeon") || target.hasTrait("Clan")) {
+		if (target && (target.hasTrait("Zeon") || target.hasTrait("Clan"))) {
 			target = chooseDmgTarget(u, eu)
 			if (!target) return false
 			await dealDamage(u, target)
@@ -4161,7 +4161,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		return true
 	}
 	if (t === "If you have another (UN)/(Superpower Bloc) Unit in play, deploy 1 rested [Alvaaron]((UN)･AP4･HP1) Unit token.") {
-		if (!fu.some(c => c !== u && c.hasTrait("UN") || c.hasTrait("Superpower Bloc"))) return false
+		if (!fu.some(c => c !== u && (c.hasTrait("UN") || c.hasTrait("Superpower Bloc")))) return false
 		await p.deployToken(ctx, "Alvaaron", true)
 		return true
 	}
@@ -4761,6 +4761,14 @@ function valUnit(u) {
 	return 2 * u.AP() + u.HP()
 }
 
+function best(units) {
+	return mySort(units, valUnit).reverse()
+}
+
+function worst(units) {
+	return mySort(units, valUnit)
+}
+
 async function playGame() {
 	// prevent lag and make game start easier to find
 	// FIXMEs stay in the browser console
@@ -5192,7 +5200,7 @@ function showStats() {
 		const [name, s] = stats[i]
 		msg += `<br>\n${1 + i}. <a href="#" onclick='showDeck(\"${escapeHTML(name)}\"); event.preventDefault()'>${name}</a>: ${Math.floor(s[0] / (s[0] + s[1] + s[2]) * 100)}% ${s}${!deck_winturns[name] ? "" : " " + Math.ceil(deck_winturns[name].reduce((tot, a) => tot + a, 0) / (deck_winturns[name].length) / 2)}`
 	}
-	log(msg, false)
+	log(msg, false, false, false, false)
 	setSpeed()
 }
 
