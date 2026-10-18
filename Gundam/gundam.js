@@ -3,9 +3,9 @@ onbeforeunload = () => false
 const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
+const TITLE = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-18"
+document.title = TITLE
 let zoomed = ""
-let title = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-18"
-document.title = title
 
 function dict2str(d) {
 	const keys = []
@@ -34,7 +34,7 @@ let attacker = null
 let defender = null
 let once_per_turn = []
 
-let CARDS = {}
+window.CARDS = {}
 let DEBUG_ID = "FOO"
 let DEBUG_ACT = "Main"
 // Why doesn't upstream list EXR promos like other promos?
@@ -1206,10 +1206,10 @@ class Player {
 		await this.deploy(ctx, card)
 	}
 
-	async deployFromTrash(ctx, card) {
+	async deployFromTrash(ctx, card, rested = false) {
 		this.trash = this.trash.filter(c => c !== card)
 		card.from_trash = true
-		await this.deploy(ctx, card)
+		await this.deploy(ctx, card, rested)
 		card.from_trash = false
 	}
 
@@ -1273,8 +1273,9 @@ class Player {
 		return this.battle.filter(c => !c.pilot && !inStr(c.text, "This Unit can't be paired with a Pilot."))
 	}
 
+	/** Get attack targets. */
 	getProne(att) {
-		let prone = this.battle.filter(bc => bc.rested)
+		let prone = this.battle.filter(bc => bc.rested && !bc.hasKw("cant_be_attacked"))
 		if (att.kw_eot.includes("canAttack active.unit.Blocker")) {
 			const extra = this.battle.filter(bc => !bc.rested && bc.hasKw("Blocker"))
 			if (extra) prone = extra.concat(prone)
@@ -1361,7 +1362,6 @@ class Player {
 	}
 
 	async placeEXResource(rested = false) {
-		log("Placing EX resource")
 		// 5 max; replace EX resource
 		while (true) {
 			let ex = mySort(this.resource.filter(c => inStr(c.name, "EX")), c => c.rested)
@@ -1373,7 +1373,7 @@ class Player {
 		this.resource.push(r)
 		await render()
 		await sleep(500)
-		log("Placed EX resource")
+		log("💲Placed 1 EX resource")
 		await publish("When you place an EX Resource, ", this.battle.concat(this.base))
 	}
 
@@ -1399,9 +1399,14 @@ async function loadCards() {
 	}
 }
 
-/** 937 cards with GD05 on 2026-07-26 */
+/** 937 cards on 2026-07-24 with GD05: Freedom Ascension
+ * 1050+ cards on 2026-10-30 with GD06: Stardust Trails
+*/
 async function loadNewCards() {
-	localStorage.clear()
+	if (confirm("Clear localStorage?")) {
+		log("Clearing localStorage")
+		localStorage.clear()
+	}
 	let gameInfo = JSON.parse(localStorage.getItem("gameInfo"))
 	if (!gameInfo) {
 		log("Fetching game info")
@@ -1415,6 +1420,7 @@ async function loadNewCards() {
 	let page = 0
 	let data = JSON.parse(localStorage.getItem("data")) || []
 	if (!data.length > 0) {
+		log("Fetching card data")
 		do {
 			++page
 			const link = `${gameInfo.allCardsUrl}&page=${page}`
@@ -1423,10 +1429,12 @@ async function loadNewCards() {
 			const json = await response.json()
 			pages = json.meta.page_count
 			data = data.concat(json.data)
-			await sleep(500)  // rate limit to be nice to server
+			await sleep(1000)  // rate limit to be nice to server
 		} while (page < pages)
 		localStorage.setItem("data", JSON.stringify(data))
+		log("localStorage data updated")
 	}
+	log(`Processing data of ${data.length} cards...`)
 	for (const card of data) {
 		const id = card.card_number
 		CARDS[id] = new Card(
@@ -1436,15 +1444,17 @@ async function loadNewCards() {
 			card.card_hp || card.card_hp_boost,
 			card.card_level,
 			card.card_cost,
-			card.card_text_unstyled.replaceAll("\\\\", "\\").replaceAll(/[\[<]br ?\/?[\]>]/g, "\n").replaceAll(/\[(Blocker|Breach|First Strike|High-Maneuver|Repair|Support|Suppression)\]/g, "<$1>").replaceAll(/\[(\w+) (\d)\]/g, "<$1 $2>").replace(/\n$/, "").replaceAll("white Base Team", "White Base Team"), // DeckPlanet bug workarounds.
-			card.card_zones.filter(z => z !== "-"),
+			(card.card_text_unstyled || "").replaceAll("\\\\", "\\").replaceAll(/[\[<]br ?\/?[\]>]/g, "\n").replaceAll(/\[(Blocker|Breach|First Strike|High-Maneuver|Repair|Support|Suppression)\]/g, "<$1>").replaceAll(/\[(\w+) (\d)\]/g, "<$1 $2>").replaceAll(/(Deploy|Link|Turn)\] ([A-Z])/, "$1]$2").replace(/\n$/, ""), // DeckPlanet bug workarounds.
+			card.card_zones ? card.card_zones.filter(z => z !== "-") : [],
 			card.card_traits,
-			["", "-"].includes(card.card_link_requirement) ? "" : card.card_link_requirement.replaceAll(" / ", "/"),
+			[null, "", "-"].includes(card.card_link_requirement) ? "" : card.card_link_requirement.replaceAll(" / ", "/"),
 			id,
 			card.card_color).toDict()
 	}
-	log("Cards: " + Object.keys(CARDS).length)
-	localStorage.setItem("cards", JSON.stringify(CARDS))
+	localStorage.setItem("cards", JSON.stringify(CARDS).replaceAll("white Base Team", "White Base Team"))
+	log("Fixed data, loaded cards, and saved cards in localStorage. Confirm in console.")
+	console.log("Cards: " + Object.keys(CARDS).length)
+	console.log(localStorage.getItem("cards"))
 }
 
 async function render() {
@@ -2195,6 +2205,10 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	}
 
 	// trim ifs
+	if (mo = t.match(/^If it is your opponent's turn and a friendly \(.+\) Unit is in play, /)) {
+		if (myturn || !fu.some(c => c.hasTrait(mo[1]))) return false
+		t = t.slice(mo[0].length)
+	}
 	if (mo = t.match(/^[Ii]f an enemy player has (\d+) or more cards in their hand, /)) {
 		if (en.hand.length < mo[1]) return false
 		t = t.slice(mo[0].length)
@@ -2396,12 +2410,6 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			target = targets[0].pilot
 			t = t.slice(mo[0].length)
 		}
-		// if (t === "1 enemy Pilot. Return it to its owner's hand.") {
-		// 	target = eu.filter(c => c.pilot)[0]
-		// 	if (!target) return false
-		// 	bounce(target.pilot)
-		// 	return true
-		// }
 		// player
 		if (mo = t.match(/^1 enemy player\.? /)) {
 			t = t.slice(mo[0].length)
@@ -2779,6 +2787,13 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			bounce(target)
 			return true
 		}
+		else if (t === "Return it to its owner's hand. If you do, draw 1.") {
+			if (p.deck.length < 1) return false
+			if (ai) target = mySort(targets, c => -c.COST())[0]
+			bounce(target)
+			p.draw()
+			return true
+		}
 		if (t === "Return them to their owners' hands.") {
 			for (let c of targets) bounce(c)
 			return true
@@ -2909,6 +2924,12 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			t = t.slice(mo[0].length)
 			if (t === "") return true
 		}
+		if (t === "Return it to the bottom of its owner's deck.") {
+			target.owner.battle = target.owner.battle.filter(c => c !== target)
+			clear(target)
+			target.owner.deck = [target] + target.owner.deck
+			return true
+		}
 		if (mo = t.match(/^Set it as active. ?/)) {
 			target = targets.filter(c => c.rested)[0]
 			if (!target) return false
@@ -2957,7 +2978,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			eotKw(u, `canAttack active.unit.ap${mo[1]}min`)
 			return true
 		}
-		if (t === "During this turn, when it receives enemy battle damage, reduce it by 2.") {
+		if (t === "During this turn, when it receives enemy battle damage, reduce it by 2." || t === "During this turn, when it receives battle damage from an enemy Unit, reduce it by 2.") {
 			eotHP(target, 2)
 			return true
 		}
@@ -3164,6 +3185,12 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		if (!target) return false
 		await target.recover(2)
 		eotAP(target, 2)
+		return true
+	}
+	if (t === "Enemy Units can't choose it as their attack target this turn.") {
+		target = targets.filter(c => c.rested)[0]
+		if (!target) return false
+		eotKw(target, "cant_be_attacked")
 		return true
 	}
 	if (t === "Destroy it. If you do, set this Unit as active. It can't choose the enemy player as its attack target during this turn.") {
@@ -3608,6 +3635,10 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		fu.filter(async c => c.hasTrait("G Generation") && await c.recover())
 		return true
 	}
+	if (t === "All friendly (Marine) Units get AP+1 during this turn.") {
+		fu.forEach(c => c.hasTrait("Marine") && eotHP(c))
+		return true
+	}
 	if (t === "All friendly Units that are Lv.4 or lower recover 2 HP.") {
 		targets = fu.filter(async c => c.LEVEL() <= 4 && c.damage > 0 && c.getRepair() < c.damage)
 		if (targets.length < 1) return false
@@ -3898,6 +3929,11 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		u.sick = true
 		return true
 	}
+	if (t === "Deploy it rested.") {
+		// Only ST11-015
+		p.deployFromTrash(ctx, target, true)
+		return target
+	}
 	if (t === "Pay its cost to deploy it.") {
 		if (p.battle.length > 5) return false
 		targets = targets.filter(c => c.LEVEL() < p.resource.length && c.COST() < p.resource.filter(c => !c.rested).length)
@@ -4109,29 +4145,33 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		await dealDamage(u, attacker)
 		return true
 	}
-	if (clause === "receives damage") {
+	if (clause === "receives damage" || clause === "receives battle damage") {
 		if (ctx.active_damage < 1) {
-			log("FIXME: no damage to receive", false, true, true)
+			// log("FIXME: no damage to receive", false, true, true)
 			return false
 		}
-		if (inStr(t, " from an enemy, ") && ctx.active_card.owner === p) return false
-		if (t === " from an enemy, reduce it by 1.") {
+		if (mo = t.match(/^ from an enemy( Unit)?, /) && ctx.active_card.owner === p) return false
+		if (mo = t.match(/^ from an enemy( Unit)?, reduce it by (\d+)/)) {
 			log(`⚡${card} ${card.text}`)
-			ctx.active_damage -= 1
+			ctx.active_damage -= parseInt(mo[2])
 			return true
 		}
-		if (inStr(card.text, "If you have a (CB) Pilot in play, when this Unit receives damage from an enemy, reduce it by 1.")) {
-			if (!fu.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) return false
-			log(`⚡${card} ${card.text}`)
-			ctx.active_damage -= 1
-			return true
-		}
+
 		// TODO: Check if reduced to zero damage still counts.
 		if (t === " from an enemy, place 1 EX Resource.") {
 			let rule = " when one of your other (Academy) Units receives damage from an enemy, place 1 EX Resource."
 			if (ctx.active_target.owner !== p || !ctx.active_target.traits.includes("Academy")) return false
 			log(`DEBUGGG⚡${card} ${rule}`)
 			await p.placeEXResource()
+			return true
+		}
+
+		if (clause === "receives battle damage") return false  // already handled by "receives damage"
+
+		if (inStr(card.text, "If you have a (CB) Pilot in play, when this Unit receives damage from an enemy, reduce it by 1.")) {
+			if (!fu.battle.some(c => c.pilot && c.pilot.hasTrait("CB"))) return false
+			log(`⚡${card} ${card.text}`)
+			ctx.active_damage -= 1
 			return true
 		}
 	}
@@ -5310,6 +5350,8 @@ window.clamp = clamp
 window.compareDecks = compareDecks
 window.findCards = findCards
 window.honeDeck = honeDeck
+window.loadCards = loadCards
+window.loadNewCards = loadNewCards
 window.log = log
 window.playGames = playGames
 window.setGameOver = setGameOver

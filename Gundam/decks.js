@@ -1,5 +1,5 @@
 const DECKS = [
-	`# ST01 Heroic Beginnings (UW)
+	`# ST01 Heroic Beginnings (BW)
 2 ST01-001 Gundam
 4 ST01-002 Gundam (MA Form)
 4 ST01-003 Guncannon
@@ -16,7 +16,7 @@ const DECKS = [
 2 ST01-014 Unforeseen Incident
 3 ST01-015 White Base
 3 ST01-016 Asticassia School of Technology, Earth House`,
-	`# ST02 Wings of Advance (GU)
+	`# ST02 Wings of Advance (BG)
 2 ST02-001 Wing Gundam
 4 ST02-002 Wing Gundam (Bird Mode)
 4 ST02-003 Gundam Heavyarms
@@ -33,7 +33,7 @@ const DECKS = [
 2 ST02-014 Siege Ploy
 3 ST02-015 Saint Gabriel Institute
 3 ST02-016 Corsica Base`,
-	`# Fixed Wings of Advance (GU)
+	`# Fixed Wings of Advance (BG)
 4 ST02-001 Wing Gundam
 4 ST02-002 Wing Gundam (Bird Mode)
 4 ST02-003 Gundam Heavyarms
@@ -152,7 +152,7 @@ const DECKS = [
 4 ST07-014 Tactical Visionary
 4 ST07-015 Ptolemaios
 2 ST05-014 Fatal Strike`,
-	`# ST08 Flash of Radiance (RU)
+	`# ST08 Flash of Radiance (BR)
 January 16, 2026. ＄15.99
 2 ST08-001 Ξ Gundam
 4 ST08-002 Ξ Gundam
@@ -207,7 +207,7 @@ March 27, 2026. $39.99; 28P+22W+22R & 5 purple D6. EXR-002 R-030 EXB-002
 2 ST09-009 Giant Killing
 4 ST09-010 Minerva
 2 GD02-110 Awakened Power`,
-	`# ST10 Generation Pulse (UW)
+	`# ST10 Generation Pulse (BW)
 Released 2026-06-26
 4 ST10-016 Luna Mana & Carry Base
 2 ST10-015 Diffuse Beam Cannon
@@ -225,7 +225,25 @@ Released 2026-06-26
 3 ST10-002 Zeta Gundam
 3 ST10-007 Gundam Barbatos 4th Form
 2 ST10-001 Zeta Gundam (EX)`,
-	`# Blurple winner of nats (PU)
+/*	`# ST11 Aquatic Assault (BP)
+Released 2026-09-25
+2 ST11-001 Char's Z'Gok
+3 ST11-002
+3 ST11-003 Zock
+4 ST11-004 ZnO
+3 ST11-005 ASH
+2 ST11-006 Shamblo
+3 ST11-007 Gundam Leopard
+4 ST11-008 Daughseat
+4 ST11-009 Kapool
+3 ST11-010 Abyss Gundam
+4 ST11-011 Char Aznable
+4 ST11-012 Loni Garvey
+2 ST11-013 Poorly Planned Offensive
+3 ST11-014 The Orca of Red Sea
+2 ST11-015 A Twinkle from the Abyss
+4 ST11-016 Mad Angler`, */
+	`# Blurple winner of nats (BP)
 https://exburst.dev/gundam/deck/152946
 4 ST02-016 Corsica Base
 4 ST05-014 Fatal Strike
@@ -241,7 +259,7 @@ https://exburst.dev/gundam/deck/152946
 4 ST01-001 Gundam
 2 GD02-055 Gundam Gusion Rebake
 2 GD03-001 Gundam NT-1`,
-	`# Some top (UW)
+	`# Some top (BW)
 4 GD04-121 Reineforce Jr.
 3 GD01-118 Overflowing Affection
 2 GD01-100 A Show of Resolve
@@ -5155,7 +5173,7 @@ https://exburst.dev/gundam/deck/152946
 4 GD04-019 GN Armor Type-D (Trans-Am)
 0 GD03-029 Gundam Heavyarms Custom
 1 GD04-037 Gundam Kyrios (Trans-Am)`,
-	`# Cees's GD05 prerelease (UGPRW)
+	`# Cees's GD05 prerelease (BGPRW)
 1 GD05-130 Presidential Office
 1 GD05-124 White Ark
 1 GD05-125 Ra Cailum
@@ -5249,7 +5267,7 @@ https://exburst.dev/gundam/deck/152946
 2 ST07-001 Gundam Exia
 2 GD04-036 Gundam Throne Eins
 0 GD04-054 Gundam Virtue (Trans-Am)`,
-	`# Cees's Titans (U)
+	`# Cees's Titans (B)
 3 GD03-123 Jupitris
 1 GD04-122 Jaburo
 4 GD03-104 Reccoa's Shadow
