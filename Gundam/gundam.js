@@ -2791,7 +2791,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			if (p.deck.length < 1) return false
 			if (ai) target = mySort(targets, c => -c.COST())[0]
 			bounce(target)
-			p.draw()
+			await p.draw()
 			return true
 		}
 		if (t === "Return them to their owners' hands.") {
@@ -3931,7 +3931,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	}
 	if (t === "Deploy it rested.") {
 		// Only ST11-015
-		p.deployFromTrash(ctx, target, true)
+		await p.deployFromTrash(ctx, target, true)
 		return target
 	}
 	if (t === "Pay its cost to deploy it.") {
@@ -4668,13 +4668,13 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			target = targets.filter(c => inStr(c.nme, "AGE Device") || (c.type === "UNIT" && c.color === "GREEN" && c.hasTrait("Earth Federation")))[0]
 		}
 		else if (inStr(t, "You may reveal 1 (Zeon)/(Neo Zeon) Unit card among them and add it to your hand.")) {
-			target = targets.filter(c => c.hasTrait("Zeon") || c.hasTrait("Neo Zeon"))[0]
+			target = targets.filter(c => c.type === "UNIT" && (c.hasTrait("Zeon") || c.hasTrait("Neo Zeon")))[0]
 		}
 		else if (inStr(t, "You may reveal 1 (Clan) Unit card/Pilot card among them and add it to your hand.")) {
 			target = targets.filter(c => c.hasTrait("Clan") && (c.type === "UNIT" || c.type === "PILOT"))[0]
 		}
 		else if (t === "You may reveal 1 (G Generation) Unit card among them and return it to the top of your deck.") {
-			target = targets.filter(c => c.hasTrait("G Generation"))[0]
+			target = targets.filter(c => c.type === "UNIT" && c.hasTrait("G Generation"))[0]
 		}
 		else if (inStr(t, "You may reveal 1 (Operation Meteor)/(G Team) Unit card/Pilot card among them and add it to your hand.")) {
 			target = targets.filter(c => (c.hasTrait("Operation Meteor") || c.hasTrait("G Team")) && (c.type === "UNIT" || c.type === "PILOT"))[0]
