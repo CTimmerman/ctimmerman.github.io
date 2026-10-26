@@ -3,7 +3,7 @@ onbeforeunload = () => false
 const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
-const TITLE = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-18"
+const TITLE = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-24"
 document.title = TITLE
 let zoomed = ""
 
@@ -296,7 +296,7 @@ function compareDecks() {
 			++i2
 			continue
 		}
-		if (L1 !== L2) log(`${L1} !== ${L2}`)
+		if (L1.trim() !== L2.trim()) log(`${L1} !== ${L2}`)
 		++i1
 		++i2
 	}
@@ -378,7 +378,7 @@ async function mutateDeck() {
 		addCustomDeck()
 		// log(`🧪Mutated ${lines[0]} in ${tries} cycles:\n${lines.slice(1).join("\n")}\n${alerts}`)
 		// Test mutant
-		p2deck.value = [...p2deck.options].filter(o => o.innerText === "Mutant deck")[0].value
+		p2deck.value = [...p2deck.options].find(o => o.innerHTML === "Mutant deck").value
 		nspeed.value = 100
 		volume.value = 0
 		// Mirrormatch standard deviation sqrt(games) / 2 = 13 wins more or less than 350 (700 games / 2 players).
@@ -428,7 +428,29 @@ async function honeDeck() {
 		const mspent = (new Date() - hone_start) / 60000
 		if (!better) {
 			log(`✅${deckname} seems optimal after ${i - 1} upgrades in ${mspent.toFixed(2)}m. Try adding 0-count cards to consider.`, true, true, true)
-			break
+			if (!window.autoexpandcolor.checked) break
+			let [decklist, decki] = decklist_get(p1deck.options[p1deck.selectedIndex].text)
+			let [fulldeck, alerts, _] = parseDecklist(decklist)
+			let colors = new Set()
+			fulldeck.forEach(c => colors.add(c.color))
+			let added = 0
+			for (let color of colors) {
+				let colorcards = findCards("color:" + color)
+				log(`Adding up to ${colorcards.length} ${color} cards`, true, true, true)
+				for (let [id, card] of colorcards) {
+					if (!inStr(decklist, id)) {
+						decklist += "\n0 " + id
+						added += 1
+					}
+				}
+			}
+			if (added === 0) {
+				log("No new cards found. Deck seems optimal.", true, true, true)
+				break
+			}
+			log(`Added ${added} cards`, true, true, true)
+			decks[decki] = decklist
+			continue
 		}
 		upgrades = parseInt(nhone.value)
 		let mleft = mspent / i * (upgrades - i)
@@ -486,16 +508,23 @@ function parseDecklist(decklist, strict = false, p = p1) {
 	return [fulldeck, alerts, deckname]
 }
 
-function showDeck(name) {
-	window.pause = (window.pause || 0) + 1
-	let html = `<div onclick="overlay.style.display = 'none'; window.pause = 0" style="width:100%; height:100%; background-color: #08080888">`
-	overlay.style.display = "block"
+function decklist_get(name) {
 	let decklist = ""
+	let index = -1
 	for (decklist of decks) {
+		++index
 		if (inStr(decklist.split("\n")[0], name)) {
 			break
 		}
 	}
+	return [decklist, index]
+}
+
+function showDeck(name) {
+	window.pause = (window.pause || 0) + 1
+	let html = `<div onclick="overlay.style.display = 'none'; window.pause = 0" style="width:100%; height:100%; background-color: #08080888">`
+	overlay.style.display = "block"
+	let [decklist, _] = decklist_get(name)
 	let oldcid = cid
 	let [fulldeck, alerts, deckname] = parseDecklist(decklist, true)
 	html += deckname
@@ -1592,7 +1621,7 @@ async function attackStep(att, def = null) {
 	}
 
 	// Action Step
-	await actionStep()  // Peacful Timbre etc.
+	await actionStep()  // Peaceful Timbre etc.
 
 	// Player or shield
 	if (!defender || defender.facedown) {
@@ -1675,9 +1704,11 @@ async function actionStep() {
 			let cost = c.COST()
 			let refund = false
 			let old_spent = spent
+			let we_spent = 0
 			if (c.type === "COMMAND") {
 				if (c.LEVEL() > level || cost > level) continue
 				if (await p.pay(cost, c, false)) {
+					we_spent = spent
 					p.hand = p.hand.filter(item => item !== c)
 					if (inStr(t, "Action") && (ai || confirm(`Action ${c}?`)) && await run(c, "Action")) {
 						ran = true
@@ -1715,7 +1746,9 @@ async function actionStep() {
 					for (let i = 0; i < cost; ++i) {
 						r = p.resource[i]
 						if (!r) {
-							throw Error(`spent: ${spent.length} cost: ${cost} i: ${i} does not exist?!`)
+							log(`FIXME: While refunding ${c.id} cost ${cost} spent ${spent} we spent ${we_spent} r/res ${p.resource.filter(c => c.rested).length}/${p.resource.length}`, false, true, true)
+							debugger
+							throw Error(`spent: ${spent.length} on ${c.id} cost: ${cost} i: ${i} does not exist?!`)
 						}
 						await activate(r)
 					}
@@ -1898,8 +1931,8 @@ function getSectionText(card, act = "Main", clause = "", limit = true) {
 		}
 	}
 	if (!mo) return ""
-	if (!CARDS[card.id].covered_lines) CARDS[card.id].covered_lines = {}
-	CARDS[card.id].covered_lines[i] = (CARDS[card.id].covered_lines[i] || 0) + 1
+	// if (!CARDS[card.id].covered_lines) CARDS[card.id].covered_lines = {}
+	// CARDS[card.id].covered_lines[i] = (CARDS[card.id].covered_lines[i] || 0) + 1
 	const limits = mo[1]
 	if (limits && limits[0] === "(") return ""  // No reminder text.
 	if (inStr(limits, "During your turn") && active_player !== card.owner) return ""
@@ -4250,6 +4283,10 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		return true
 	}
 	// Attack trigger
+	if (t === "Reduce its AP during this battle by an amount equal to the number of rested enemy Units.") {
+		eobAP(target, -eu.filter(c => c.rested).length)
+		return true
+	}
 	if (t === "If this Unit is attacking the enemy player, reveal 1 (Earth Federation) Unit card from your hand. Return it to the bottom of your deck. If you do, draw 2.") {
 		if (eu.includes(defender)) return false
 		target = p.hand.filter(c => c.hasTrait("Earth Federation"))[0]
@@ -5272,15 +5309,15 @@ async function playGames() {
 			setSpeed()
 		}
 	}
-	for (const card of Object.keys(CARDS)) {
-		if (card.covered_lines) {
-			let covered = Object.keys(card.covered_lines).length
-			let expected = card.text.split("\n")
-			if (covered !== expected) {
-				log(`🚩🚩FIXME cov: ${card.id} only covered ${covered}/${expected}: ${Object.keys(card.covered_lines)}`, true, true, true)
-			}
-		}
-	}
+	// for (const card of Object.keys(CARDS)) {
+	// 	if (card.covered_lines) {
+	// 		let covered = Object.keys(card.covered_lines).length
+	// 		let expected = card.text.split("\n")
+	// 		if (covered !== expected) {
+	// 			log(`🚩🚩FIXME cov: ${card.id} only covered ${covered}/${expected}: ${Object.keys(card.covered_lines)}`, true, true, true)
+	// 		}
+	// 	}
+	// }
 }
 
 function toggleSearch() {
@@ -5332,7 +5369,7 @@ function findCards(query) {
 	else {
 		count = 0
 		cid = oldcid
-		html = `${results.length} results: <input type="text" value="${results.map(o => o[0])}"/><br>`
+		html = `${results.length} results: <input id="resultids" type="text" value="${results.map(o => o[0])}"/><br>`
 		for (const entry of results) {
 			let left = 5 + (count % 10) * 11
 			let top = 10 + Math.floor(count / 10) * 15
