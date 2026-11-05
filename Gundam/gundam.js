@@ -2975,7 +2975,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		if (t === "Return it to the bottom of its owner's deck.") {
 			target.owner.battle = target.owner.battle.filter(c => c !== target)
 			clear(target)
-			target.owner.deck = [target] + target.owner.deck
+			target.owner.deck = [target].concat(target.owner.deck) // + silently turns it into a string. Stupid dynamic language.
 			return true
 		}
 		if (mo = t.match(/^Set it as active. ?/)) {
@@ -3863,7 +3863,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		target = targets[0]
 		let discarded = await p.discard(ctx, 1, [target])
 		for (let c of discarded) {
-			if (targets.includes(c)) {
+			if (c.hasTrait("Special Move")) {
 				if (ai || await chooseCard([c], "Activate Main?")) await runCard(c, "Main")
 			}
 		}
