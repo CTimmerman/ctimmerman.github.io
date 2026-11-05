@@ -3,7 +3,7 @@ onbeforeunload = () => false
 const BANLIST = ["GD01-020"]
 const BANNED_PAIRS = [["ST01-010", "ST05-010"], ["GD01-008", "GD05-015"]]
 const RESTRICTED = { "ST02-016": 2 }
-const TITLE = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 10-24"
+const TITLE = "Gundam Card Game implementation by Cees Timmerman, 2026-05-11 - 11-04"
 document.title = TITLE
 let zoomed = ""
 
@@ -18,7 +18,7 @@ function dict2str(d) {
 
 function clamp(e) {
 	let v = parseInt(e.value)
-	e.value = parseInt(v > e.max ? e.max : e.value < e.min ? e.min : e.value)
+	e.value = parseInt(v > e.max ? e.max : v < e.min ? e.min : v)
 }
 
 function setVolume() {
@@ -387,7 +387,8 @@ async function mutateDeck() {
 		let ratio = 0.0
 		// sample and verify
 		ngames.value = 25
-		let batches = 17900 / ngames.value
+		// AI (B) is unstable at 17900
+		let batches = 17950 / ngames.value
 		for (let i = batches; i > 0; --i) {
 			await playGames()
 			p1w += player_wins[0]
@@ -1146,8 +1147,19 @@ class Player {
 		// Opening hand
 		// await this.draw(5, false) doesn't work so just DIY
 		let cards = this.deck.slice(-5)
-		this.hand = this.hand.concat(cards)
+		// Mulligan if no turn 3 play. +1% winrate.
+		let mulligan = !cards.some(c => c.level <= 3 && c.cost <= 3)
+		if (mulligan) {
+			log(`🎴${this.name} mulligans`)
+			// Bad hand to bottom.
+			this.deck = cards.concat(this.deck.slice(0, -5))
+			// New hand
+			cards = this.deck.slice(-5)
+		}
+		this.hand = cards
 		this.deck = this.deck.slice(0, -5)
+		if (mulligan) shuffle(this.deck)
+
 		// Shields
 		for (let i = 0; i < 6; ++i) {
 			const c = this.deck.pop()
@@ -1934,10 +1946,13 @@ function getSectionText(card, act = "Main", clause = "", limit = true) {
 	// if (!CARDS[card.id].covered_lines) CARDS[card.id].covered_lines = {}
 	// CARDS[card.id].covered_lines[i] = (CARDS[card.id].covered_lines[i] || 0) + 1
 	const limits = mo[1]
-	if (limits && limits[0] === "(") return ""  // No reminder text.
-	if (inStr(limits, "During your turn") && active_player !== card.owner) return ""
-	if (inStr(limits, "During Pair") && !(card.pilot || card.unit)) return ""
-	if (inStr(limits, "During Link") && !card.linked()) return ""
+	if (limits) {
+		if (limits[0] === "(") return ""  // No reminder text.
+		if (inStr(limits, "During Link") && !card.linked()) return ""
+		if (inStr(limits, "During Pair") && !(card.pilot || card.unit)) return ""
+		if (inStr(limits, "During your turn") && active_player !== card.owner) return ""
+		if (limits.slice(0, 4) === "When") return ""
+	}
 	const limits2 = mo[2]
 	const limits3 = mo[3]
 	let text = mo.length === 3 ? mo[2] : mo[4]
@@ -2516,7 +2531,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			return true
 		}
 		// Choose regex
-		if (mo = t.match(/^(?<num>1 to 2|\d)? (?<mine>of your)? ?(?<other>other)? ?(?<state>active|rested)? ?(?<damaged>damaged|undamaged)? ?(?<flag>enemy|friendly)? ?(?<color>blue|green|purple|red|white)? ?(?<traits>\(.+?\))? ?(?<linked>Linke?d? )?(?<type>Unit|Command|Pilot)?( card)?(?<token> token)?s?\.? /)) {
+		if (mo = t.match(/^(?<num>1 to \d|\d)? (?<mine>of your)? ?(?<other>other)? ?(?<state>active|rested)? ?(?<damaged>damaged|undamaged)? ?(?<flag>enemy|friendly)? ?(?<color>blue|green|purple|red|white)? ?(?<traits>\(.+?\))? ?(?<linked>Linke?d? )?(?<type>Unit|Command|Pilot)?( card)?(?<token> token)?s?\.? /)) {
 			if (t.match(/^[^.]*from your trash/)) targets = p.trash
 			else if (mo.groups.flag === "enemy") targets = mySort(eu, c => -c.AP())
 			else if (!mo.groups.mine && !mo.groups.flag) targets = eu.concat(fu)
@@ -2539,7 +2554,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			}
 			if (mo.groups.linked) targets = targets.filter(c => c.linked())
 			targets = mySort(targets, c => myturn ? c.rested + c.sick : !c.rested)
-			if (mo.groups.num === "1 to 2") targets = targets.slice(0, 2)
+			if (mo.groups.num.length > 5) targets = targets.slice(0, mo.groups.num[5])
 			else if (mo.groups.num > 1) {
 				// TODO, maybe let user select
 				targets = targets.slice(0, mo.groups.num)
@@ -3085,9 +3100,10 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		return true
 	}
 	if (mo = t.match(/^You may pair 1 Pilot card with \"(.*?)\" in its card name from your hand with this Unit.$/)) {
-		targets = p.hand.filter(c => inStr(c.name, mo[1]))
-		if (u.pilot || targets.length < 1) return false
-		await pair(targets[0], u)
+		target = p.hand.filter(c => inStr(c.name, mo[1]))[0]
+		if (u.pilot || !target) return false
+		p.hand = p.hand.filter(c => c !== target)
+		await pair(target, u)
 		return true
 	}
 	if (mo = t.match(/^It gets AP-(\d+) during this battle./)) {
@@ -3740,7 +3756,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 			target = p.hand.filter(c => c.type === "UNIT" && c.hasTrait("Neo Zeon") && c.LEVEL() <= 3)[0]
 			if (!target) return false
 			rest(card)
-			await p.deploy(ctx, target)
+			await p.deployFromHand(ctx, target)
 			return true
 		}
 	}
@@ -3813,7 +3829,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	}
 	if (mo = t.match(/^[Dd]raw (\d). Then, discard (\d).$/)) {
 		// Attack/Deploy/Destroyed is not optional?! TODO: Maybe don't attack/deploy if low on cards.
-		if (act === "Main" && (mo[1] >= p.deck.length || p.hand.length + mo[1] - mo[2] <= 0) && !card.hasTrait("Special Move")) return false
+		if (act === "Main" && (mo[1] >= p.deck.length || (p.hand.length + mo[1] - mo[2] <= 0)) && !card.hasTrait("Special Move")) return false
 		await p.draw(mo[1])
 		await p.discard(ctx, mo[2])
 		return true
@@ -3881,8 +3897,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 	if (t === "You may deploy 1 (Neo Zeon)/(Zeon) Unit card that is Lv.4 or lower from your hand.") {
 		target = mySort(p.hand.filter(item => item.level <= 4 && item.type === "UNIT" && (item.hasTrait("Neo Zeon") || item.hasTrait("Zeon"))), item => -item.COST())[0]
 		if (!target || fu.length >= 6) return false
-		await p.deploy(ctx, target)
-		p.hand = p.hand.filter(item => item !== target)
+		await p.deployFromHand(ctx, target)
 		return true
 	}
 	if (mo = t.match(/^During this battle, your shield area cards can't receive damage from enemy Units that are Lv.(\d+) or lower.$/)) {
@@ -4009,6 +4024,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		targets = p.hand.filter(c => c.type === "PILOT" && c.hasTrait(mo[1]))
 		target = targets[0]
 		if (!target) return false
+		p.hand = p.hand.filter(c => c !== target)
 		await pair(u, target)
 		return true
 	}
@@ -4346,7 +4362,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		if (fu.length > 5) return false
 		target = p.hand.filter(c => c.isUnit() && c.hasTrait(mo[1]) && (mo[2] ? c.LEVEL() <= 4 : true))[0]
 		if (!target) return false
-		await p.deploy(ctx, target)
+		await p.deployFromHand(ctx, target)
 		return true
 	}
 	if (t === "you may destroy this Unit. If you do, deploy 3 [Gundam Exia]((G Generation)･AP2･HP2) Unit tokens.") {
@@ -4765,7 +4781,7 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		target = p.hand.filter(c => c.type === "BASE" && inStr(c.name, "Presidential Office"))[0]
 		if (!target || p.base) return false
 		exile([card])
-		await p.deploy(ctx, target)
+		await p.deployFromHand(ctx, target)
 		return true
 	}
 	if (t === "If you have an (Orb) Pilot in play, draw 1.") {
@@ -4785,8 +4801,12 @@ async function runCard2(card, act, clause = "", t = "", ctx = {}) {
 		u.pilot = null
 		return true
 	}
+	// Destroyed
 	if (t === "All players draw 1.") {
-		if (p1.deck.length < 1 && p2.deck.length < 1) throw Error("Draw by empty decks.")
+		if (p1.deck.length < 1 && p2.deck.length < 1) {
+			endGame()
+			throw Error("💀Game draw by empty decks.")
+		}
 		await p1.draw()
 		await p2.draw()
 		return true
@@ -5385,6 +5405,7 @@ playGames()
 
 window.clamp = clamp
 window.compareDecks = compareDecks
+window.deck_stats = deck_stats
 window.findCards = findCards
 window.honeDeck = honeDeck
 window.loadCards = loadCards
